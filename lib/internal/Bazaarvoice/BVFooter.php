@@ -1,4 +1,5 @@
 <?php
+namespace Bazaarvoice;
 
 /**
  * BV PHP SEO SDK Footer

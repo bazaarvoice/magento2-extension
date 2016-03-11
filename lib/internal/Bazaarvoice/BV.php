@@ -1,5 +1,5 @@
 <?php
-
+namespace Bazaarvoice;
 /**
  * BV PHP SEO SDK
  *
@@ -29,8 +29,8 @@
  * ));
  *
  */
-require_once 'BVUtility.php';
-require_once 'BVFooter.php';
+//require_once 'BVUtility.php';
+//require_once 'BVFooter.php';
 
 // Should be declared in file where execTimer will be used.
 // If declared in the another file it does not affect the current file.
