@@ -12,8 +12,7 @@ namespace Bazaarvoice\Connector\Block;
  * @package	    Bazaarvoice_Connector
  * @author		Dennis Rogers <dennis@storefrontconsulting.com>
  */
-
-
+ 
 class Product extends \Magento\Framework\View\Element\Template
 {
     /**
@@ -65,6 +64,16 @@ class Product extends \Magento\Framework\View\Element\Template
         if($this->getProductId())
             return $this->helper->getProductId($this->getProductId());
         return '';
+    }
+    
+    public function getProduct()
+    {
+        if(is_numeric($this->getProductId())) {
+            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+            $product = $objectManager->get('Magento\Catalog\Model\Product')->load($this->getProductId());
+            return $product;
+        }
+        return;
     }
 
 }

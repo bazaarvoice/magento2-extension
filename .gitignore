@@ -54,7 +54,9 @@ atlassian*
 
 /dev/*.*
 
-/lib
+/lib/*.*
+/lib/*
+!/lib/internal/Bazaarvoice/
 
 /pub
 

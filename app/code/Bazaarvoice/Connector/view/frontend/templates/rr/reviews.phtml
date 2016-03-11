@@ -1,7 +1,7 @@
 <?php if($this->isEnabled()): ?>
 <?php
 $doShowContentJs = $this->getConfig('rr/do_show_content_js');
-$seoContent = '';//$this->getSEOContent();
+$seoContent = $this->getSEOContent();
 ?>
 <div id="BVRRContainer">
     <?php echo $seoContent ?>
