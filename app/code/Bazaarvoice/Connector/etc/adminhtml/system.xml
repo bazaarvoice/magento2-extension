@@ -62,7 +62,7 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Turn on Purchase Feed generation. This will enable generation of a purchase feed to be sent to the BV SFTP server to be used to send post-interaction emails to your customers in order to solicit review submission.  See documentation for additional steps to setup a scheduled job for this feature to take effect.]]></comment>
                 </field>
-            </group>                    
+            </group>
         </section>
     </system>
 </config>
