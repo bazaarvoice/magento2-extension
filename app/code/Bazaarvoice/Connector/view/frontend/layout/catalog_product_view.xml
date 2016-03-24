@@ -25,6 +25,11 @@
                     <argument translate="true" name="title" xsi:type="string">Reviews</argument>
                 </arguments>
             </block>
+            <block class="Bazaarvoice\Connector\Block\Questions" name="bazaarvoice.questions.tab" as="bv_questions" template="Bazaarvoice_Connector::qa/questions.phtml" group="detailed_info" after="bv_reviews">
+                <arguments>
+                    <argument translate="true" name="title" xsi:type="string">Questions</argument>
+                </arguments>
+            </block>
         </referenceBlock>
     </body>
 </page>

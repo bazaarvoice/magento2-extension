@@ -50,7 +50,19 @@
                     <comment><![CDATA[Turn on the BV ROI beacon tag on the purchase transaction (checkout) page.  See documentation for additional steps that must be completed for this feature to take effect.]]></comment>
                 </field>
             </group>
-            
+            <group id="feeds" translate="label" type="text" sortOrder="500" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Feeds</label>
+                <field id="enable_product_feed" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Product Feed</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Turn on Product Feed generation. This will enable generation of a product feed to be sent to the BV SFTP server.  See documentation for additional steps to setup a scheduled job in Magento for this feature to take effect.]]></comment>
+                </field>
+                <field id="enable_purchase_feed" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Product Feed</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Turn on Purchase Feed generation. This will enable generation of a purchase feed to be sent to the BV SFTP server to be used to send post-interaction emails to your customers in order to solicit review submission.  See documentation for additional steps to setup a scheduled job for this feature to take effect.]]></comment>
+                </field>
+            </group>                    
         </section>
     </system>
 </config>

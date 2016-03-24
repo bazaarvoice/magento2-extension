@@ -99,7 +99,7 @@ class BV {
       'proxy_port' => '',
       'charset' => 'UTF-8',
       'seo_sdk_enabled' => TRUE,
-      'execution_timeout' => 500,
+      'execution_timeout' => 1000,
       'execution_timeout_bot' => 2000,
       'bvreveal' => isset($params['bvreveal']) ? $params['bvreveal'] : '',
       'page' => 1,
