@@ -13,6 +13,7 @@ namespace Bazaarvoice\Connector\Model\Feed;
  */
  
 use \Magento\Store\Model\Store;
+use \Magento\Framework\Exception;
 
 
 class ProductFeed extends Feed
@@ -25,14 +26,15 @@ class ProductFeed extends Feed
         $this->exportFeedByStore();  
         $this->logger->info('End Bazaarvoice Product Feed Generation');
     }
-    
+
     public function exportFeedByStore()
     {
         $this->logger->info('Exporting product feed file for each store / store view');
-        
-        $stores = \Magento\Framework\App\ObjectManager::getInstance()->get('Magento\Store\Model\StoreManagerInterface')->getStores();
+
+        $stores = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStores();
         
         foreach ($stores as $store) {
+            /* @var \Magento\Store\Model\Store $store */
             try {
                 if ($this->helper->getConfig('feeds/enable_product_feed', $store->getId()) === '1'
                     && $this->helper->getConfig('general/enable_bv', $store->getId()) === '1'
@@ -45,20 +47,18 @@ class ProductFeed extends Feed
                 }
             }
             catch (Exception $e) {
-                $this->logger->error('Failed to export daily product feed for store: ' . $store->getCode(), Zend_Log::ERR, Bazaarvoice_Connector_Helper_Data::LOG_FILE);
+                $this->logger->error('Failed to export daily product feed for store: ' . $store->getCode());
                 $this->logger->error('Error message: ' . $e->getMessage());
             }
         }
         
     }
-    
+
+    /**
+     * @param Store $store
+     */
     public function exportFeedForStore(Store $store)
     {
-        $manager = \Magento\Framework\App\ObjectManager::getInstance();
-        //$categoryModel = Mage::getModel('bazaarvoice/productFeed_category');
-        $productModel = $manager->get('Bazaarvoice\Connector\Model\Feed\Product\Product');
-        //$brandModel = Mage::getModel('bazaarvoice/productFeed_brand');
-
         // Build local file name / path
         $productFeedFilePath = BP . '/var/export/bvfeeds';
         $productFeedFileName =
@@ -68,11 +68,15 @@ class ProductFeed extends Feed
 
         // Create varien io object and write local feed file
         $writer = $this->openFile('http://www.bazaarvoice.com/xs/PRR/ProductFeed/5.2', $clientName);
-        
-        //$brandModel->processBrandsForStore($ioObject, $store);
-        //$categoryModel->processCategoriesForStore($ioObject, $store);
+
+        $this->objectManager->get('Bazaarvoice\Connector\Model\Feed\Product\Brand')
+            ->processBrandsForStore($writer, $store);
+        $this->objectManager->get('Bazaarvoice\Connector\Model\Feed\Product\Category')
+            ->processCategoriesForStore($writer, $store);
         //$productModel->setCategoryIdList($categoryModel->getCategoryIdList());
-        $productModel->processProductsForStore($writer, $store);
+        $this->objectManager->get('Bazaarvoice\Connector\Model\Feed\Product\Product')
+            ->processProductsForStore($writer, $store);
+
         $this->closeFile($writer, $productFeedFileName);
 
         // Upload feed

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../vendor/magento/module-config/etc/system_file.xsd">
     <system>
         <section id="bazaarvoice" translate="label" type="text" sortOrder="300" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Bazaarvoice Connector</label>
@@ -38,7 +38,6 @@
                     <label>Enable Cloud SEO</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Turn on the BV SEO solution.  This will include SEO-friendly content (located in the BV SEO cloud) in your product pages.  See documentation for additional steps that must be completed for this feature to take effect.]]></comment>
-                    
                 </field>
                 <field id="cloud_seo_key" translate="label" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">    
                     <label>Cloud SEO Key</label>
@@ -50,6 +49,40 @@
                     <comment><![CDATA[Turn on the BV ROI beacon tag on the purchase transaction (checkout) page.  See documentation for additional steps that must be completed for this feature to take effect.]]></comment>
                 </field>
             </group>
+            <group id="rr" translate="label" type="text" sortOrder="200" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Ratings and Reviews</label>
+                <field id="enable_rr" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Ratings &amp; Reviews</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Turn on BV Ratings &amp; Reviews. This will enable display of R&amp;R content on your product pages.  See documentation for additional steps that must be completed for this feature to take effect.]]></comment>
+                </field>
+                <field id="do_show_content_js" translate="label" type="textarea" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>JS Callback function to display R&amp;R content (doShowContent)</label>
+                    <comment><![CDATA[The Bazaarvoice doShowContent javascript callback is triggered when the "read all reviews" link in the review summary is clicked.
+                        You may provide code here that you wish to execute on said click event.  For example, you may want to activate a specific tab on the page.  This
+                    code will be wrapped in a javascript function(){...} block. See your Bazaarvoice Implementation manual for further information.]]></comment>
+                </field>
+                <field id="enable_inline_ratings" translate="label" type="select" sortOrder="30" showInDefault="1" showInStore="1" showInWebsite="1">
+                    <label>Enable Hosted Inline Ratings</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Turn on BV Hosted inline ratings. This will enable display of product rating statistics on your category and search results pages.  See documentation for additional steps that must be completed for this feature to take effect.]]></comment>
+                </field>
+            </group>
+            <group id="qa" translate="label" type="text" sortOrder="300" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Questions and Answers</label>
+                <field id="enable_qa" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Questions &amp; Answers</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Turn on BV Questions &amp; Answers. This will enable display of Q&amp;A content on your product pages.  See documentation for additional steps that must be completed for this feature to take effect.]]></comment>
+                </field>
+                <field id="do_show_content_js" translate="label" type="textarea" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>JS Callback function to display Q&amp;A content (doShowContent)</label>
+                    <comment><![CDATA[The Bazaarvoice doShowContent javascript callback is triggered when the "read all Q&amp;A" link in the question/answer summary is clicked.
+                        You may provide code here that you wish to execute on said click event.  For example, you may want to activate a specific tab on the page.  This
+                    code will be wrapped in a javascript function(){...} block. See your Bazaarvoice Implementation manual for further information.]]></comment>
+                </field>
+            </group>
+
             <group id="feeds" translate="label" type="text" sortOrder="500" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Feeds</label>
                 <field id="enable_product_feed" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">

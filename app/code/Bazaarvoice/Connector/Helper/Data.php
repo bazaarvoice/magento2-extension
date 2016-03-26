@@ -1,7 +1,9 @@
 <?php
 namespace Bazaarvoice\Connector\Helper;
 
-class Data extends \Magento\Framework\App\Helper\AbstractHelper
+use \Magento\Framework\App\Helper\AbstractHelper;
+
+class Data extends AbstractHelper
 {
     public function getConfig($config_path, $store = null)
     {
@@ -64,9 +66,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * the SKU ID, as we do not collect separate Ratings & Reviews for different
      * styles of product - i.e. the 'Blue' vs. 'Red Widget'.
      *
-     * @static
-     * @param  $product a reference to a catalog product object
-     * @return The unique product ID to be used with Bazaarvoice
+     * @param  mixed $product a reference to a catalog product object
+     * @return string The unique product ID to be used with Bazaarvoice
      */
     public function getProductId($product)
     {
@@ -92,7 +93,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      * any customer facing purpose.
      *
      * @static
-     * @param  $rawId
+     * @param string $rawId
      * @return mixed
      */
     public function replaceIllegalCharacters($rawId)

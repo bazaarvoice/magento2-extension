@@ -12,26 +12,39 @@ namespace Bazaarvoice\Connector\Model\Feed;
  * @author		Dennis Rogers <dennis@storefrontconsulting.com>
  */
 
-use XMLWriter;
+use Bazaarvoice\Connector\Logger\Logger;
+use Bazaarvoice\Connector\Helper\Data;
+use Magento\Framework\ObjectManagerInterface;
 
 class Feed
 {
+    protected $objectManager;
+
     /**
      * Constructor
      * @param \Bazaarvoice\Connector\Logger\Logger $logger
+     * @param \Bazaarvoice\Connector\Helper\Data $helper
+     * @param \Magento\Framework\ObjectManagerInterface $objectManager
      */
     public function __construct(
-        \Bazaarvoice\Connector\Logger\Logger $logger,
-        \Bazaarvoice\Connector\Helper\Data $helper
+        Logger $logger,
+        Data $helper,
+        ObjectManagerInterface $objectManager
     ) {
         $this->helper = $helper;
         $this->logger = $logger;
+        $this->objectManager = $objectManager;
     }
-    
 
+
+    /**
+     * @param String $xmlns Bazaarvoice Feed xsd reference
+     * @param String $clientName Bazaarvoice Client name
+     * @return \Bazaarvoice\Connector\Model\XMLWriter
+     */
     protected function openFile($xmlns, $clientName)
     {   
-        $writer = new XMLWriter();
+        $writer = $this->objectManager->create('\Bazaarvoice\Connector\Model\XMLWriter');
         $writer->openMemory();
         $writer->setIndent(true);
         $writer->setIndentString(str_repeat(' ', 4));
@@ -45,14 +58,18 @@ class Feed
         
         return $writer;
     }
-    
+
+    /**
+     * @param \Bazaarvoice\Connector\Model\XMLWriter $writer
+     * @param String $filename
+     */
     protected function closeFile($writer, $filename)
     {   
         echo "$filename\n";
         $writer->endElement();
         $writer->endDocument();
                 
-        $ioObject = \Magento\Framework\App\ObjectManager::getInstance()->get('Magento\Framework\Filesystem\Io\File');
+        $ioObject = $this->objectManager->get('Magento\Framework\Filesystem\Io\File');
         
         $ioObject->setAllowCreateFolders(true);
         $ioObject->open(array('path' => dirname($filename)));

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../vendor/magento/module-store/etc/config.xsd">
+    <default>
+        <bazaarvoice>
+            <rr>
+                <enable_rr>1</enable_rr>
+            </rr>
+            <qa>
+                <enable_qa>1</enable_qa>
+            </qa>
+        </bazaarvoice>
+    </default>
+</config>
