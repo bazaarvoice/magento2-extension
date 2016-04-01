@@ -37,7 +37,7 @@ class Item extends \Bazaarvoice\Connector\Block\Product
         if($this->isEnabled()) {
             $productIdentifier = $this->helper->getProductId($this->product);
             $this->productIds[$productIdentifier] = array('url' => $this->product->getProductUrl());
-            $result .= '<div id="BVRRInlineRating-' . $productIdentifier . '"></div>';
+            $result = '<div id="BVRRInlineRating_' . $this->type . '-' . $productIdentifier . '"></div>' . $result;
         }
         return $result;
     }
@@ -49,7 +49,7 @@ class Item extends \Bazaarvoice\Connector\Block\Product
             <script type="text/javascript">
             $BV.ui("rr", "inline_ratings", {
                 productIds: ' . json_encode($this->productIds) . ',
-                containerPrefix : "BVRRInlineRating"
+                containerPrefix : "BVRRInlineRating_' . $this->type .'" 
             });
             </script>';
         }
