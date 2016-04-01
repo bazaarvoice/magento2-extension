@@ -9,6 +9,10 @@
             <qa>
                 <enable_qa>1</enable_qa>
             </qa>
+            <feeds>
+                <triggering_event>purchase</triggering_event>
+                <generation_scope>website</generation_scope>
+            </feeds>
         </bazaarvoice>
     </default>
 </config>

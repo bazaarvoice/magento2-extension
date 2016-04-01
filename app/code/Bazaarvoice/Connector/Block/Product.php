@@ -15,20 +15,26 @@ namespace Bazaarvoice\Connector\Block;
  
 class Product extends \Magento\Framework\View\Element\Template
 {
-    /**
-     * Core registry
-     *
-     * @var \Magento\Framework\Registry
-     */
+    /* @var \Magento\Framework\Registry */
     protected $_coreRegistry;
+
+    /* @var \Bazaarvoice\Connector\Helper\Data */
+    public $helper;
+
+    /* @var \Bazaarvoice\Connector\Logger\Logger */
+    public $logger;
+
+
     
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
         \Magento\Framework\Registry $registry,
         \Bazaarvoice\Connector\Helper\Data $helper,
+        \Bazaarvoice\Connector\Logger\Logger $logger,
         array $data = []
     ) {
         $this->helper = $helper;
+        $this->logger = $logger;
         $this->_coreRegistry = $registry;
         parent::__construct($context, $data);
     }

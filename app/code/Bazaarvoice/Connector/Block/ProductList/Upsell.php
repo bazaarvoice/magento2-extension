@@ -11,14 +11,7 @@ namespace Bazaarvoice\Connector\Block\ProductList;
  * @author		Dennis Rogers <dennis@storefrontconsulting.com>
  */
 
-class Upsell
+class Upsell extends Item
 {
-
-    public function afterGetProductPrice($subject, $result)
-    {
-        $result .= "HEY IT'S WORKING";
-        
-        return $result;
-    }
-
+    protected $type = \Bazaarvoice\Connector\Model\Source\ProductList::UPSELL;
 }
