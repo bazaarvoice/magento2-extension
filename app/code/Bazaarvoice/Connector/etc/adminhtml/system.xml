@@ -105,6 +105,10 @@
                     <source_model>Bazaarvoice\Connector\Model\Source\Scope</source_model>
                     <comment><![CDATA[This determines whether separate feed files will be generated and sent to BV for each website, store or store view.]]></comment>
                 </field>
+                <field id="sftp_username" translate="label" type="text" sortOrder="65" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>SFTP Username</label>
+                    <comment><![CDATA[SFTP Connection Username. If this is left blank, the above Client Name will be used.]]></comment>
+                </field>
                 <field id="sftp_password" translate="label" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>SFTP Password</label>
                     <comment><![CDATA[Password used to access the BV SFTP server for feed upload/download processes.]]></comment>
