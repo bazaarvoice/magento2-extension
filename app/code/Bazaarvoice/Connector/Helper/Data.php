@@ -34,7 +34,7 @@ class Data extends AbstractHelper
         // Build hostname based on environment setting
         $environment = $this->getConfig('general/environment', $store);
         if ($environment == 'staging') {
-            $apiHostname =  'display-stg.ugc.bazaarvoice.com';
+            $apiHostname =  'display.ugc.bazaarvoice.com/bvstaging';
         }
         else {
             $apiHostname =  'display.ugc.bazaarvoice.com';

@@ -3,24 +3,17 @@
     
     <!-- block injection -->
     <!-- inline ratings -->
+    <type name="Magento\Catalog\Block\Product\ListProduct">
+        <plugin name="bazaarvoice-category" type="Bazaarvoice\Connector\Block\ProductList\Category" sortOrder="100"/>
+    </type>
+    <type name="Magento\CatalogSearch\Block\SearchResult\ListProduct">
+        <plugin name="bazaarvoice-search" type="Bazaarvoice\Connector\Block\ProductList\Search" sortOrder="100"/>
+    </type>
     <type name="Magento\Catalog\Block\Product\ProductList\Upsell">
         <plugin name="bazaarvoice-upsell" type="Bazaarvoice\Connector\Block\ProductList\Upsell" sortOrder="100"/>
     </type>
     <type name="Magento\Catalog\Block\Product\ProductList\Related">
         <plugin name="bazaarvoice-related" type="Bazaarvoice\Connector\Block\ProductList\Related" sortOrder="100"/>
-    </type>
-    <type name="Magento\Catalog\Block\Product\ListProduct">
-        <plugin name="bazaarvoice-category" type="Bazaarvoice\Connector\Block\ProductList\Category" sortOrder="1"/>
-    </type>
-    <type name="Magento\CatalogSearch\Block\SearchResult\ListProduct">
-        <plugin name="bazaarvoice-search" type="Bazaarvoice\Connector\Block\ProductList\Search" sortOrder="1"/>
-    </type>
-    <type name="Magento\Checkout\Block\Cart\Crosssell">
-        <plugin name="bazaarvoice-crosssell" type="Bazaarvoice\Connector\Block\ProductList\Crosssell" sortOrder="100"/>
-        <plugin name="bazaarvoice-category" type="Bazaarvoice\Connector\Block\ProductList\Category" sortOrder="1"/>
-    </type>
-    <type name="Magento\CatalogSearch\Block\SearchResult\ListProduct">
-        <plugin name="bazaarvoice-search" type="Bazaarvoice\Connector\Block\ProductList\Search" sortOrder="1"/>
     </type>
     <type name="Magento\Checkout\Block\Cart\Crosssell">
         <plugin name="bazaarvoice-crosssell" type="Bazaarvoice\Connector\Block\ProductList\Crosssell" sortOrder="100"/>

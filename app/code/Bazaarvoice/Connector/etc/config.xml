@@ -5,6 +5,7 @@
         <bazaarvoice>
             <rr>
                 <enable_rr>1</enable_rr>
+                <inline_ratings>category,search</inline_ratings>
             </rr>
             <qa>
                 <enable_qa>1</enable_qa>
