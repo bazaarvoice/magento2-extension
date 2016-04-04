@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../vendor/magento/module-config/etc/system_file.xsd">
     <system>
-        <section id="bazaarvoice" translate="label" type="text" sortOrder="300" showInDefault="1" showInWebsite="1" showInStore="1">
+        <section id="bazaarvoice" translate="label" type="text" sortOrder="1800" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Bazaarvoice Connector</label>
-            <tab>catalog</tab>
+            <tab>general</tab>
             <!-- resource tag name which we have to defined in the acl.xml -->
             <resource>Bazaarvoice_Connector::config_bazaarvoice</resource>
             
