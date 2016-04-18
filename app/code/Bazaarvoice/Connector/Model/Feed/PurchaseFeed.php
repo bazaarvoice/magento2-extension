@@ -12,12 +12,15 @@ namespace Bazaarvoice\Connector\Model\Feed;
  * @author		Dennis Rogers <dennis@storefrontconsulting.com>
  */
  
+use \Bazaarvoice\Connector\Model\Source\Scope;
 use \Magento\Catalog\Model\Product;
 use \Magento\ConfigurableProduct\Model\Product\Type;
 use \Magento\Sales\Model\Order;
+use \Magento\Store\Model\Group;
 use \Magento\Store\Model\Store;
 use \Magento\Framework\Exception;
 use \Bazaarvoice\Connector\Model\XMLWriter;
+use \Magento\Store\Model\Website;
 
 
 class PurchaseFeed extends Feed
@@ -52,7 +55,17 @@ class PurchaseFeed extends Feed
     {
         $this->logger->info('Start Bazaarvoice Purchase Feed Generation');
         // TODO: Scopes
-        $this->exportFeedByStore();  
+        switch($this->helper->getConfig('feeds/generation_scope')) {
+            case Scope::STORE_GROUP:
+                $this->exportFeedByStoreGroup();
+                break;
+            case Scope::STORE_VIEW:
+                $this->exportFeedByStore();
+                break;
+            case Scope::WEBSITE:
+                $this->exportFeedByWebsite();
+                break;
+        }
         $this->logger->info('End Bazaarvoice Purchase Feed Generation');
     }
 
@@ -61,7 +74,7 @@ class PurchaseFeed extends Feed
         $this->logger->info('Exporting purchase feed file for each store / store view');
 
         $stores = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStores();
-        
+
         foreach ($stores as $store) {
             /* @var \Magento\Store\Model\Store $store */
             try {
@@ -80,7 +93,60 @@ class PurchaseFeed extends Feed
                 $this->logger->error('Error message: ' . $e->getMessage());
             }
         }
-        
+    }
+
+    public function exportFeedByStoreGroup()
+    {
+        $this->logger->info('Exporting purchase feed file for each store group');
+
+        $storeGroups = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface')->getGroups();
+
+        foreach ($storeGroups as $storeGroup) {
+            /* @var \Magento\Store\Model\Group $storeGroup */
+            // Default store, for config and product data
+            $store = $storeGroup->getDefaultStore();
+            try {
+                if ($this->helper->getConfig('feeds/enable_purchase_feed', $store->getId()) === '1'
+                    && $this->helper->getConfig('general/enable_bv', $store->getId()) === '1'
+                ) {
+                    $this->logger->info('Exporting purchase feed for store group: ' . $storeGroup->getName());
+                    $this->exportFeedForStoreGroup($storeGroup);
+                }
+                else {
+                    $this->logger->info('Purchase feed disabled for store group: ' . $storeGroup->getName());
+                }
+            }
+            catch (Exception $e) {
+                $this->logger->error('Failed to export daily purchase feed for store group: ' . $storeGroup->getName());
+                $this->logger->error('Error message: ' . $e->getMessage());
+            }
+        }
+    }
+
+    public function exportFeedByWebsite()
+    {
+        $this->logger->info('Exporting purchase feed file for each website');
+
+        $websites = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface')->getWebsites();
+
+        foreach ($websites as $website) {
+            /* @var \Magento\Store\Model\Website $website */
+            try {
+                if ($this->helper->getConfig('feeds/enable_purchase_feed', $website->getId(), \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE) === '1'
+                    && $this->helper->getConfig('general/enable_bv', $website->getId(), \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE) === '1'
+                ) {
+                    $this->logger->info('Exporting purchase feed for website: ' . $website->getName());
+                    $this->exportFeedForWebsite($website);
+                }
+                else {
+                    $this->logger->info('Purchase feed disabled for website: ' . $website->getName());
+                }
+            }
+            catch (Exception $e) {
+                $this->logger->error('Failed to export daily purchase feed for website: ' . $website->getName());
+                $this->logger->error('Error message: ' . $e->getMessage());
+            }
+        }
     }
 
     /**
@@ -116,20 +182,115 @@ class PurchaseFeed extends Feed
         );
         $this->logger->info('Found ' . $orders->count() . ' orders to send.');
 
+        // Build local file name / path
+        $purchaseFeedFilePath = BP . '/var/export/bvfeeds';
+        // !TODO Put this date back in the filename
+        $purchaseFeedFileName = $purchaseFeedFilePath . '/purchaseFeed-store-' . $store->getId() . /* '-' . date('U') . */ '.xml';
         // Write orders to file
-        $this->sendOrders($orders, $store);
+        if($orders->count())
+            $this->sendOrders($orders, $store, $purchaseFeedFileName);
+    }
+
+    /**
+     * @param Group $storeGroup
+     */
+    public function exportFeedForStoreGroup(Group $storeGroup)
+    {
+        /** @var \Magento\Sales\Model\OrderFactory $orderFactory */
+        $orderFactory = $this->objectManager->get('\Magento\Sales\Model\OrderFactory');
+        /* @var \Magento\Sales\Model\ResourceModel\Order\Collection $orders */
+        $orders = $orderFactory->create()->getCollection();
+
+        // Add filter to limit orders to this store group
+        $orders->getSelect()
+            ->joinLeft('store', 'main_table.store_id = store.store_id', 'store.group_id')
+            ->where('store.group_id = ' . $storeGroup->getId());
+        // Status is 'complete' or 'closed'
+        // !TODO Uncomment this
+//        $orders->addFieldToFilter('status', array(
+//            'in' => array(
+//                'complete',
+//                'closed'
+//            )
+//        ));
+
+        // Only orders created within our look-back window
+        $orders->addFieldToFilter('created_at', array('gteq' => $this->getNumDaysLookbackStartDate()));
+        // Include only orders that have not been sent or have errored out
+        $orders->addFieldToFilter(
+            array(self::ALREADY_SENT_IN_FEED_FLAG, self::ALREADY_SENT_IN_FEED_FLAG),
+            array(
+                array('neq' => 1),
+                array('null' => 'null')
+            )
+        );
+        $this->logger->info('Found ' . $orders->count() . ' orders to send.');
+
+        // Build local file name / path
+        $purchaseFeedFilePath = BP . '/var/export/bvfeeds';
+        // !TODO Put this date back in the filename
+        $purchaseFeedFileName = $purchaseFeedFilePath . '/purchaseFeed-group-' . $storeGroup->getId() . /* '-' . date('U') . */ '.xml';
+        // Using default store for now
+        $store = $storeGroup->getDefaultStore();
+        // Write orders to file
+        if($orders->count())
+            $this->sendOrders($orders, $store, $purchaseFeedFileName);
+    }
+
+
+    /**
+     * @param Website $website
+     */
+    public function exportFeedForWebsite(Website $website)
+    {
+        /** @var \Magento\Sales\Model\OrderFactory $orderFactory */
+        $orderFactory = $this->objectManager->get('\Magento\Sales\Model\OrderFactory');
+        /* @var \Magento\Sales\Model\ResourceModel\Order\Collection $orders */
+        $orders = $orderFactory->create()->getCollection();
+
+        // Add filter to limit orders to this store group
+        $orders->getSelect()
+            ->joinLeft('store', 'main_table.store_id = store.store_id', 'store.website_id')
+            ->where('store.website_id = ' . $website->getId());
+        // Status is 'complete' or 'closed'
+        // !TODO Uncomment this
+//        $orders->addFieldToFilter('status', array(
+//            'in' => array(
+//                'complete',
+//                'closed'
+//            )
+//        ));
+
+        // Only orders created within our look-back window
+        $orders->addFieldToFilter('created_at', array('gteq' => $this->getNumDaysLookbackStartDate()));
+        // Include only orders that have not been sent or have errored out
+        $orders->addFieldToFilter(
+            array(self::ALREADY_SENT_IN_FEED_FLAG, self::ALREADY_SENT_IN_FEED_FLAG),
+            array(
+                array('neq' => 1),
+                array('null' => 'null')
+            )
+        );
+        $this->logger->info('Found ' . $orders->count() . ' orders to send.');
+
+        // Build local file name / path
+        $purchaseFeedFilePath = BP . '/var/export/bvfeeds';
+        // !TODO Put this date back in the filename
+        $purchaseFeedFileName = $purchaseFeedFilePath . '/purchaseFeed-website-' . $website->getId() . /* '-' . date('U') . */ '.xml';
+        // Using default store for now
+        $store = $website->getDefaultStore();
+        // Write orders to file
+        if($orders->count())
+            $this->sendOrders($orders, $store, $purchaseFeedFileName);
     }
 
     /**
      * @param \Magento\Sales\Model\ResourceModel\Order\Collection $orders
      * @param Store $store
+     * @param String $purchaseFeedFileName
      */
-    public function sendOrders($orders, $store)
+    public function sendOrders($orders, $store, $purchaseFeedFileName)
     {
-        // Build local file name / path
-        $purchaseFeedFilePath = BP . '/var/export/bvfeeds';
-        $purchaseFeedFileName =
-            $purchaseFeedFilePath . '/purchaseFeed-store-' . $store->getId() . /* '-' . date('U') . */ '.xml';
         // Get client name for the scope
         $clientName = $this->helper->getConfig('general/client_name', $store->getId());
 
@@ -147,7 +308,7 @@ class PurchaseFeed extends Feed
 
             $writer->writeElement('TransactionDate', $this->getTriggeringEventDate($order));
             $writer->writeElement('EmailAddress', $order->getCustomerEmail());
-            $writer->writeElement('Locale', $this->helper->getConfig('general/locale'));
+            $writer->writeElement('Locale', $this->helper->getConfig('general/locale', $order->getStoreId()));
             $writer->writeElement('UserName', $order->getCustomerFirstname());
 
             if($order->getCustomerId()) {
@@ -174,6 +335,9 @@ class PurchaseFeed extends Feed
                 
                 /** @var Product $product */
                 $product = $item->getProduct();
+                // Using store on the order, to handle website/group data
+                $product->setStoreId($order->getStoreId());
+                $product->load($product->getId());
                 
                 $writer->writeElement('ExternalId', $this->helper->getProductId($product));
                 $writer->writeElement('Name', $product->getName());
@@ -191,7 +355,7 @@ class PurchaseFeed extends Feed
                     if($this->families) {
                         /** @var Product $parent */
                         $parent = $parentItem->getProduct();
-                        
+
                         if($product->getImage() == 'no_selection'){
                             // if product families are enabled and product has no image, use configurable image
                             $imageUrl = $productHelper->getImageUrl($parent);
@@ -208,13 +372,13 @@ class PurchaseFeed extends Feed
             $writer->endElement(); // Products
 
             $writer->endElement(); // Interaction
-
         }
 
         $this->closeFile($writer, $purchaseFeedFileName);
 
         // Upload feed
-        //$this->uploadFeed($purchaseFeedFileName, $store);
+        $destinationFile = '/ppe/inbox/bv_ppe_tag_feed-magento-' . date('U') . '.xml';
+        $this->uploadFeed($purchaseFeedFileName, $destinationFile, $store);
     }
 
     /**

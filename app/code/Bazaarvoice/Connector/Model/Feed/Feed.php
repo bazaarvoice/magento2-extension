@@ -14,7 +14,10 @@ namespace Bazaarvoice\Connector\Model\Feed;
 
 use Bazaarvoice\Connector\Logger\Logger;
 use Bazaarvoice\Connector\Helper\Data;
+use Bazaarvoice\Connector\Model\Source\Environment;
 use Magento\Framework\ObjectManagerInterface;
+use Magento\Framework\Filesystem\Io\Sftp;
+use Magento\Store\Model\Store;
 
 class Feed
 {
@@ -64,8 +67,7 @@ class Feed
      * @param String $filename
      */
     protected function closeFile($writer, $filename)
-    {   
-        echo "$filename\n";
+    {
         $writer->endElement();
         $writer->endDocument();
                 
@@ -74,7 +76,55 @@ class Feed
         $ioObject->setAllowCreateFolders(true);
         $ioObject->open(array('path' => dirname($filename)));
         $ioObject->write($filename, $writer->outputMemory());
+    }
+
+    /**
+     * @param $sourceFile
+     * @param $destinationFile
+     * @param Store $store
+     */
+    protected function uploadFeed($sourceFile, $destinationFile, $store = null)
+    {
+        return;
+        $this->logger->info("Uploading file $sourceFile to SFTP server.");
+
+        $params = array(
+            'host'      => $this->getSFTPHost($store),
+            'username'  => $this->helper->getConfig('feeds/sftp_username', $store),
+            'password'  => $this->helper->getConfig('feeds/sftp_password', $store)
+        );
+
+        /** @var Sftp $sftp */
+        $sftp = new Sftp();
+        $sftp->open($params);
+
+        $result = $sftp->write($destinationFile, $sourceFile);
+        $this->logger->info('result ' . $result);
 
     }
+
+    /**
+     * @param Store $store
+     * @return string
+     * If sftp host is set in config, use that.
+     * Else use preset hosts based on staging or production mode.
+     */
+    private function getSFTPHost($store = null)
+    {
+        $environment = $this->helper->getConfig('general/environment', $store);
+        $sftpHostOverride = trim($this->helper->getConfig('feeds/sftp_host_name', $store));
+        if(strlen($sftpHostOverride)) {
+            $sftpHost = $sftpHostOverride;
+        }
+        else if ($environment == Environment::STAGING) {
+            $sftpHost = 'sftp-stg.bazaarvoice.com';
+        }
+        else {
+            $sftpHost = 'sftp.bazaarvoice.com';
+        }
+        return $sftpHost;
+    }
+    
+    
 
 }

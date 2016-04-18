@@ -5,11 +5,11 @@ use \Magento\Framework\App\Helper\AbstractHelper;
 
 class Data extends AbstractHelper
 {
-    public function getConfig($config_path, $store = null)
+    public function getConfig($config_path, $store = null, $scope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE)
     {
         return $this->scopeConfig->getValue(
             'bazaarvoice/'.$config_path,
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+            $scope,
             $store
         );
     }
