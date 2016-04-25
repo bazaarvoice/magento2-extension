@@ -54,7 +54,6 @@ class PurchaseFeed extends Feed
     public function generateFeed()
     {
         $this->logger->info('Start Bazaarvoice Purchase Feed Generation');
-        // TODO: Scopes
         switch($this->helper->getConfig('feeds/generation_scope')) {
             case Scope::STORE_GROUP:
                 $this->exportFeedByStoreGroup();
@@ -64,6 +63,9 @@ class PurchaseFeed extends Feed
                 break;
             case Scope::WEBSITE:
                 $this->exportFeedByWebsite();
+                break;
+            case Scope::SCOPE_GLOBAL:
+                $this->exportFeedGlobal();
                 break;
         }
         $this->logger->info('End Bazaarvoice Purchase Feed Generation');
@@ -149,6 +151,26 @@ class PurchaseFeed extends Feed
         }
     }
 
+    public function exportFeedGlobal()
+    {
+        $this->logger->info('Exporting purchase feed file for entire Magento instance');
+
+        try {
+            if ($this->helper->getConfig('feeds/enable_purchase_feed') === '1'
+                && $this->helper->getConfig('general/enable_bv') === '1'
+            ) {
+                $this->exportFeedForGlobal();
+            }
+            else {
+                $this->logger->info('Purchase feed disabled.');
+            }
+        }
+        catch (Exception $e) {
+            $this->logger->error('Failed to export daily purchase feed.');
+            $this->logger->error('Error message: ' . $e->getMessage());
+        }
+    }
+
     /**
      * @param Store $store
      */
@@ -162,13 +184,12 @@ class PurchaseFeed extends Feed
         // Add filter to limit orders to this store
         $orders->addFieldToFilter('store_id', $store->getId());
         // Status is 'complete' or 'closed'
-        // !TODO Uncomment this
-//        $orders->addFieldToFilter('status', array(
-//            'in' => array(
-//                'complete',
-//                'closed'
-//            )
-//        ));
+        $orders->addFieldToFilter('status', array(
+            'in' => array(
+                'complete',
+                'closed'
+            )
+        ));
 
         // Only orders created within our look-back window
         $orders->addFieldToFilter('created_at', array('gteq' => $this->getNumDaysLookbackStartDate()));
@@ -184,8 +205,7 @@ class PurchaseFeed extends Feed
 
         // Build local file name / path
         $purchaseFeedFilePath = BP . '/var/export/bvfeeds';
-        // !TODO Put this date back in the filename
-        $purchaseFeedFileName = $purchaseFeedFilePath . '/purchaseFeed-store-' . $store->getId() . /* '-' . date('U') . */ '.xml';
+        $purchaseFeedFileName = $purchaseFeedFilePath . '/purchaseFeed-store-' . $store->getId() . '-' . date('U') . '.xml';
         // Write orders to file
         if($orders->count())
             $this->sendOrders($orders, $store, $purchaseFeedFileName);
@@ -206,13 +226,12 @@ class PurchaseFeed extends Feed
             ->joinLeft('store', 'main_table.store_id = store.store_id', 'store.group_id')
             ->where('store.group_id = ' . $storeGroup->getId());
         // Status is 'complete' or 'closed'
-        // !TODO Uncomment this
-//        $orders->addFieldToFilter('status', array(
-//            'in' => array(
-//                'complete',
-//                'closed'
-//            )
-//        ));
+        $orders->addFieldToFilter('status', array(
+            'in' => array(
+                'complete',
+                'closed'
+            )
+        ));
 
         // Only orders created within our look-back window
         $orders->addFieldToFilter('created_at', array('gteq' => $this->getNumDaysLookbackStartDate()));
@@ -228,8 +247,7 @@ class PurchaseFeed extends Feed
 
         // Build local file name / path
         $purchaseFeedFilePath = BP . '/var/export/bvfeeds';
-        // !TODO Put this date back in the filename
-        $purchaseFeedFileName = $purchaseFeedFilePath . '/purchaseFeed-group-' . $storeGroup->getId() . /* '-' . date('U') . */ '.xml';
+        $purchaseFeedFileName = $purchaseFeedFilePath . '/purchaseFeed-group-' . $storeGroup->getId() . '-' . date('U') . '.xml';
         // Using default store for now
         $store = $storeGroup->getDefaultStore();
         // Write orders to file
@@ -253,13 +271,12 @@ class PurchaseFeed extends Feed
             ->joinLeft('store', 'main_table.store_id = store.store_id', 'store.website_id')
             ->where('store.website_id = ' . $website->getId());
         // Status is 'complete' or 'closed'
-        // !TODO Uncomment this
-//        $orders->addFieldToFilter('status', array(
-//            'in' => array(
-//                'complete',
-//                'closed'
-//            )
-//        ));
+        $orders->addFieldToFilter('status', array(
+            'in' => array(
+                'complete',
+                'closed'
+            )
+        ));
 
         // Only orders created within our look-back window
         $orders->addFieldToFilter('created_at', array('gteq' => $this->getNumDaysLookbackStartDate()));
@@ -275,14 +292,62 @@ class PurchaseFeed extends Feed
 
         // Build local file name / path
         $purchaseFeedFilePath = BP . '/var/export/bvfeeds';
-        // !TODO Put this date back in the filename
-        $purchaseFeedFileName = $purchaseFeedFilePath . '/purchaseFeed-website-' . $website->getId() . /* '-' . date('U') . */ '.xml';
+        $purchaseFeedFileName = $purchaseFeedFilePath . '/purchaseFeed-website-' . $website->getId() . '-' . date('U') . '.xml';
         // Using default store for now
         $store = $website->getDefaultStore();
         // Write orders to file
         if($orders->count())
             $this->sendOrders($orders, $store, $purchaseFeedFileName);
     }
+
+
+
+
+    /**
+     */
+    public function exportFeedForGlobal()
+    {
+        /** @var \Magento\Sales\Model\OrderFactory $orderFactory */
+        $orderFactory = $this->objectManager->get('\Magento\Sales\Model\OrderFactory');
+        /* @var \Magento\Sales\Model\ResourceModel\Order\Collection $orders */
+        $orders = $orderFactory->create()->getCollection();
+
+        // Add filter to limit orders to this store group
+        $orders->getSelect()
+            ->joinLeft('store', 'main_table.store_id = store.store_id', 'store.website_id');
+        // Status is 'complete' or 'closed'
+        $orders->addFieldToFilter('status', array(
+            'in' => array(
+                'complete',
+                'closed'
+            )
+        ));
+
+        // Only orders created within our look-back window
+        $orders->addFieldToFilter('created_at', array('gteq' => $this->getNumDaysLookbackStartDate()));
+        // Include only orders that have not been sent or have errored out
+        $orders->addFieldToFilter(
+            array(self::ALREADY_SENT_IN_FEED_FLAG, self::ALREADY_SENT_IN_FEED_FLAG),
+            array(
+                array('neq' => 1),
+                array('null' => 'null')
+            )
+        );
+        $this->logger->info('Found ' . $orders->count() . ' orders to send.');
+
+        // Build local file name / path
+        $purchaseFeedFilePath = BP . '/var/export/bvfeeds';
+        $purchaseFeedFileName = $purchaseFeedFilePath . '/purchaseFeed-' . date('U') . '.xml';
+
+        // Using admin store for now
+        /** @var StoreManagerInterface $storeManager */
+        $storeManager = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface');
+        $store = $storeManager->getStore(0);
+        
+        // Write orders to file
+        if($orders->count())
+            $this->sendOrders($orders, $store, $purchaseFeedFileName);
+    }    
 
     /**
      * @param \Magento\Sales\Model\ResourceModel\Order\Collection $orders
@@ -372,6 +437,9 @@ class PurchaseFeed extends Feed
             $writer->endElement(); // Products
 
             $writer->endElement(); // Interaction
+            
+            // Mark order as sent
+            $order->setData(self::ALREADY_SENT_IN_FEED_FLAG, true)->save();
         }
 
         $this->closeFile($writer, $purchaseFeedFileName);

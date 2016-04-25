@@ -14,6 +14,7 @@ namespace Bazaarvoice\Connector\Model\Source;
 
 class Scope
 {
+    const SCOPE_GLOBAL = 'global';
     const WEBSITE = 'website';
     const STORE_GROUP = 'group';
     const STORE_VIEW = 'view';
@@ -21,6 +22,10 @@ class Scope
     public function toOptionArray()
     {
         return array(
+            array(
+                'value' => self::SCOPE_GLOBAL,
+                'label' => __('Global')
+            ),
             array(
                 'value' => self::WEBSITE,
                 'label' => __('Magento Website')
