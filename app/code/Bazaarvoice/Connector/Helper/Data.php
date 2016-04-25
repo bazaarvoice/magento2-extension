@@ -5,11 +5,11 @@ use \Magento\Framework\App\Helper\AbstractHelper;
 
 class Data extends AbstractHelper
 {
-    public function getConfig($config_path, $store = null)
+    public function getConfig($config_path, $store = null, $scope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE)
     {
         return $this->scopeConfig->getValue(
             'bazaarvoice/'.$config_path,
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+            $scope,
             $store
         );
     }
@@ -34,7 +34,7 @@ class Data extends AbstractHelper
         // Build hostname based on environment setting
         $environment = $this->getConfig('general/environment', $store);
         if ($environment == 'staging') {
-            $apiHostname =  'display-stg.ugc.bazaarvoice.com';
+            $apiHostname =  'display.ugc.bazaarvoice.com/bvstaging';
         }
         else {
             $apiHostname =  'display.ugc.bazaarvoice.com';
@@ -141,9 +141,9 @@ class Data extends AbstractHelper
     public function getExtensionVersion()
     {
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        /** @var \Magento\NewRelicReporting\Model\Module\Collect $modules */
-        $modules = $objectManager->get('\Magento\NewRelicReporting\Model\Module\Collect');
-        $data = $modules->getModuleData('Bazaarvoice_Connector');
+        /** @var \Magento\Framework\Module\ModuleResource $module */
+        $module = $objectManager->get('\Magento\Framework\Module\ModuleResource');
+        $data = $module->getDataVersion('Bazaarvoice_Connector');
         return print_r($data, 1);
     }
     

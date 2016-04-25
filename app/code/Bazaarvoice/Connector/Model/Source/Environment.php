@@ -3,15 +3,18 @@ namespace Bazaarvoice\Connector\Model\Source;
 
 class Environment
 {
+    const STAGING = 'staging';
+    const PRODUCTION = 'production';
+
     public function toOptionArray()
     {
         return array(
             array(
-                'value' => 'staging',
+                'value' => self::STAGING,
                 'label' => __('Staging')
             ),
             array(
-                'value' => 'production',
+                'value' => self::PRODUCTION,
                 'label' => __('Production')
             ),
         );

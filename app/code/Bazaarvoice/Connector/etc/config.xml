@@ -5,13 +5,17 @@
         <bazaarvoice>
             <rr>
                 <enable_rr>1</enable_rr>
+                <inline_ratings>category,search</inline_ratings>
             </rr>
             <qa>
                 <enable_qa>1</enable_qa>
             </qa>
             <feeds>
                 <triggering_event>purchase</triggering_event>
+                <lookback>30</lookback>
                 <generation_scope>website</generation_scope>
+                <product_filename>productfeed.xml</product_filename>
+                <product_path>/import-inbox</product_path>
             </feeds>
         </bazaarvoice>
     </default>

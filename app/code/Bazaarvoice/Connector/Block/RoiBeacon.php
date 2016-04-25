@@ -104,7 +104,10 @@ class RoiBeacon
         // Add partnerSource field
         $orderDetails['partnerSource'] = 'Magento Extension r' . $this->helper->getExtensionVersion();
 
-        $result .= '<pre>'.print_r($orderDetails, 1).'</pre>';
+        $result .= '
+        <script type="text/javascript">
+        $BV.SI.trackTransactionPageView(' . json_encode( $orderDetails, JSON_UNESCAPED_UNICODE ) . '); 
+        </script>';
 
         return $result;
     }
