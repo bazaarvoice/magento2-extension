@@ -29,6 +29,7 @@
     		<argument name="commands" xsi:type="array">
     			<item name="product" xsi:type="object">Bazaarvoice\Connector\Console\Command\Product</item>
                 <item name="purchase" xsi:type="object">Bazaarvoice\Connector\Console\Command\Purchase</item>
+                <item name="purchasetest" xsi:type="object">Bazaarvoice\Connector\Console\Command\PurchaseTest</item>
             </argument>
     	</arguments>
     </type>

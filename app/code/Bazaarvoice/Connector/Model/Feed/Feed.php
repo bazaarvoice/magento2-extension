@@ -85,7 +85,6 @@ class Feed
      */
     protected function uploadFeed($sourceFile, $destinationFile, $store = null)
     {
-        return;
         $this->logger->info("Uploading file $sourceFile to SFTP server.");
 
         $params = array(
@@ -100,7 +99,6 @@ class Feed
 
         $result = $sftp->write($destinationFile, $sourceFile);
         $this->logger->info('result ' . $result);
-
     }
 
     /**

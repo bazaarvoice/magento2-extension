@@ -32,6 +32,7 @@ class PurchaseFeed extends Feed
     protected $num_days_lookback;
     protected $triggering_event;
     protected $families;
+    protected $test;
 
     /**
      * Constructor
@@ -51,9 +52,15 @@ class PurchaseFeed extends Feed
         $this->families = $helper->getConfig('feeds/families');
     }
 
-    public function generateFeed()
+    public function generateFeed($test = false)
     {
         $this->logger->info('Start Bazaarvoice Purchase Feed Generation');
+
+        $this->test = $test;
+        if($test) {
+            $this->logger->info('TEST MODE');
+        }
+
         switch($this->helper->getConfig('feeds/generation_scope')) {
             case Scope::STORE_GROUP:
                 $this->exportFeedByStoreGroup();
@@ -184,23 +191,27 @@ class PurchaseFeed extends Feed
         // Add filter to limit orders to this store
         $orders->addFieldToFilter('store_id', $store->getId());
         // Status is 'complete' or 'closed'
-        $orders->addFieldToFilter('status', array(
-            'in' => array(
-                'complete',
-                'closed'
-            )
-        ));
+        if($this->test == false) {
+            $orders->addFieldToFilter('status', array(
+                'in' => array(
+                    'complete',
+                    'closed'
+                )
+            ));
+        }
 
         // Only orders created within our look-back window
         $orders->addFieldToFilter('created_at', array('gteq' => $this->getNumDaysLookbackStartDate()));
         // Include only orders that have not been sent or have errored out
-        $orders->addFieldToFilter(
-            array(self::ALREADY_SENT_IN_FEED_FLAG, self::ALREADY_SENT_IN_FEED_FLAG),
-            array(
-                array('neq' => 1),
-                array('null' => 'null')
-            )
-        );
+        if($this->test == false) {
+            $orders->addFieldToFilter(
+                array(self::ALREADY_SENT_IN_FEED_FLAG, self::ALREADY_SENT_IN_FEED_FLAG),
+                array(
+                    array('neq' => 1),
+                    array('null' => 'null')
+                )
+            );
+        }
         $this->logger->info('Found ' . $orders->count() . ' orders to send.');
 
         // Build local file name / path
@@ -226,23 +237,27 @@ class PurchaseFeed extends Feed
             ->joinLeft('store', 'main_table.store_id = store.store_id', 'store.group_id')
             ->where('store.group_id = ' . $storeGroup->getId());
         // Status is 'complete' or 'closed'
-        $orders->addFieldToFilter('status', array(
-            'in' => array(
-                'complete',
-                'closed'
-            )
-        ));
+        if($this->test == false) {
+            $orders->addFieldToFilter('status', array(
+                'in' => array(
+                    'complete',
+                    'closed'
+                )
+            ));
+        }
 
         // Only orders created within our look-back window
         $orders->addFieldToFilter('created_at', array('gteq' => $this->getNumDaysLookbackStartDate()));
         // Include only orders that have not been sent or have errored out
-        $orders->addFieldToFilter(
-            array(self::ALREADY_SENT_IN_FEED_FLAG, self::ALREADY_SENT_IN_FEED_FLAG),
-            array(
-                array('neq' => 1),
-                array('null' => 'null')
-            )
-        );
+        if($this->test == false) {
+            $orders->addFieldToFilter(
+                array(self::ALREADY_SENT_IN_FEED_FLAG, self::ALREADY_SENT_IN_FEED_FLAG),
+                array(
+                    array('neq' => 1),
+                    array('null' => 'null')
+                )
+            );
+        }
         $this->logger->info('Found ' . $orders->count() . ' orders to send.');
 
         // Build local file name / path
@@ -271,23 +286,27 @@ class PurchaseFeed extends Feed
             ->joinLeft('store', 'main_table.store_id = store.store_id', 'store.website_id')
             ->where('store.website_id = ' . $website->getId());
         // Status is 'complete' or 'closed'
-        $orders->addFieldToFilter('status', array(
-            'in' => array(
-                'complete',
-                'closed'
-            )
-        ));
+        if($this->test == false) {
+            $orders->addFieldToFilter('status', array(
+                'in' => array(
+                    'complete',
+                    'closed'
+                )
+            ));
+        }
 
         // Only orders created within our look-back window
         $orders->addFieldToFilter('created_at', array('gteq' => $this->getNumDaysLookbackStartDate()));
         // Include only orders that have not been sent or have errored out
-        $orders->addFieldToFilter(
-            array(self::ALREADY_SENT_IN_FEED_FLAG, self::ALREADY_SENT_IN_FEED_FLAG),
-            array(
-                array('neq' => 1),
-                array('null' => 'null')
-            )
-        );
+        if($this->test == false) {
+            $orders->addFieldToFilter(
+                array(self::ALREADY_SENT_IN_FEED_FLAG, self::ALREADY_SENT_IN_FEED_FLAG),
+                array(
+                    array('neq' => 1),
+                    array('null' => 'null')
+                )
+            );
+        }
         $this->logger->info('Found ' . $orders->count() . ' orders to send.');
 
         // Build local file name / path
@@ -299,9 +318,6 @@ class PurchaseFeed extends Feed
         if($orders->count())
             $this->sendOrders($orders, $store, $purchaseFeedFileName);
     }
-
-
-
 
     /**
      */
@@ -316,23 +332,27 @@ class PurchaseFeed extends Feed
         $orders->getSelect()
             ->joinLeft('store', 'main_table.store_id = store.store_id', 'store.website_id');
         // Status is 'complete' or 'closed'
-        $orders->addFieldToFilter('status', array(
-            'in' => array(
-                'complete',
-                'closed'
-            )
-        ));
+        if($this->test == false) {
+            $orders->addFieldToFilter('status', array(
+                'in' => array(
+                    'complete',
+                    'closed'
+                )
+            ));
+        }
 
         // Only orders created within our look-back window
         $orders->addFieldToFilter('created_at', array('gteq' => $this->getNumDaysLookbackStartDate()));
         // Include only orders that have not been sent or have errored out
-        $orders->addFieldToFilter(
-            array(self::ALREADY_SENT_IN_FEED_FLAG, self::ALREADY_SENT_IN_FEED_FLAG),
-            array(
-                array('neq' => 1),
-                array('null' => 'null')
-            )
-        );
+        if($this->test == false) {
+            $orders->addFieldToFilter(
+                array(self::ALREADY_SENT_IN_FEED_FLAG, self::ALREADY_SENT_IN_FEED_FLAG),
+                array(
+                    array('neq' => 1),
+                    array('null' => 'null')
+                )
+            );
+        }
         $this->logger->info('Found ' . $orders->count() . ' orders to send.');
 
         // Build local file name / path
@@ -356,6 +376,9 @@ class PurchaseFeed extends Feed
      */
     public function sendOrders($orders, $store, $purchaseFeedFileName)
     {
+        if($this->test)
+            $purchaseFeedFileName = dirname($purchaseFeedFileName) . '/test-' . basename($purchaseFeedFileName);
+
         // Get client name for the scope
         $clientName = $this->helper->getConfig('general/client_name', $store->getId());
 
@@ -439,14 +462,19 @@ class PurchaseFeed extends Feed
             $writer->endElement(); // Interaction
             
             // Mark order as sent
-            $order->setData(self::ALREADY_SENT_IN_FEED_FLAG, true)->save();
+            if($this->test == false)
+                $order->setData(self::ALREADY_SENT_IN_FEED_FLAG, true)->save();
+            else
+                break;
         }
 
         $this->closeFile($writer, $purchaseFeedFileName);
+        $this->logger->info("Wrote file $purchaseFeedFileName");
 
         // Upload feed
         $destinationFile = '/ppe/inbox/bv_ppe_tag_feed-magento-' . date('U') . '.xml';
-        $this->uploadFeed($purchaseFeedFileName, $destinationFile, $store);
+        if($this->test == false)
+            $this->uploadFeed($purchaseFeedFileName, $destinationFile, $store);
     }
 
     /**
