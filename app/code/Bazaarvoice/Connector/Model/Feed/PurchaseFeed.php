@@ -11,8 +11,7 @@ namespace Bazaarvoice\Connector\Model\Feed;
  * @package		Bazaarvoice_Connector
  * @author		Dennis Rogers <dennis@storefrontconsulting.com>
  */
- 
-use \Bazaarvoice\Connector\Model\Source\Scope;
+
 use \Magento\Catalog\Model\Product;
 use \Magento\ConfigurableProduct\Model\Product\Type;
 use \Magento\Sales\Model\Order;
@@ -29,10 +28,10 @@ class PurchaseFeed extends Feed
     const TRIGGER_EVENT_PURCHASE = 'purchase';
     const TRIGGER_EVENT_SHIP = 'ship';
 
+    protected $type_id = 'purchase';
     protected $num_days_lookback;
     protected $triggering_event;
     protected $families;
-    protected $test;
 
     /**
      * Constructor
@@ -50,132 +49,6 @@ class PurchaseFeed extends Feed
         $this->triggering_event = $helper->getConfig('feeds/triggering_event') === \Bazaarvoice\Connector\Model\Source\Trigger::SHIPPING ? self::TRIGGER_EVENT_SHIP : self::TRIGGER_EVENT_PURCHASE;
         $this->num_days_lookback = $helper->getConfig('feeds/lookback');
         $this->families = $helper->getConfig('feeds/families');
-    }
-
-    public function generateFeed($test = false)
-    {
-        $this->logger->info('Start Bazaarvoice Purchase Feed Generation');
-
-        $this->test = $test;
-        if($test) {
-            $this->logger->info('TEST MODE');
-        }
-
-        switch($this->helper->getConfig('feeds/generation_scope')) {
-            case Scope::STORE_GROUP:
-                $this->exportFeedByStoreGroup();
-                break;
-            case Scope::STORE_VIEW:
-                $this->exportFeedByStore();
-                break;
-            case Scope::WEBSITE:
-                $this->exportFeedByWebsite();
-                break;
-            case Scope::SCOPE_GLOBAL:
-                $this->exportFeedGlobal();
-                break;
-        }
-        $this->logger->info('End Bazaarvoice Purchase Feed Generation');
-    }
-
-    public function exportFeedByStore()
-    {
-        $this->logger->info('Exporting purchase feed file for each store / store view');
-
-        $stores = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStores();
-
-        foreach ($stores as $store) {
-            /* @var \Magento\Store\Model\Store $store */
-            try {
-                if ($this->helper->getConfig('feeds/enable_purchase_feed', $store->getId()) === '1'
-                    && $this->helper->getConfig('general/enable_bv', $store->getId()) === '1'
-                ) {
-                    $this->logger->info('Exporting purchase feed for store: ' . $store->getCode());
-                    $this->exportFeedForStore($store);
-                }
-                else {
-                    $this->logger->info('Purchase feed disabled for store: ' . $store->getCode());
-                }
-            }
-            catch (Exception $e) {
-                $this->logger->error('Failed to export daily purchase feed for store: ' . $store->getCode());
-                $this->logger->error('Error message: ' . $e->getMessage());
-            }
-        }
-    }
-
-    public function exportFeedByStoreGroup()
-    {
-        $this->logger->info('Exporting purchase feed file for each store group');
-
-        $storeGroups = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface')->getGroups();
-
-        foreach ($storeGroups as $storeGroup) {
-            /* @var \Magento\Store\Model\Group $storeGroup */
-            // Default store, for config and product data
-            $store = $storeGroup->getDefaultStore();
-            try {
-                if ($this->helper->getConfig('feeds/enable_purchase_feed', $store->getId()) === '1'
-                    && $this->helper->getConfig('general/enable_bv', $store->getId()) === '1'
-                ) {
-                    $this->logger->info('Exporting purchase feed for store group: ' . $storeGroup->getName());
-                    $this->exportFeedForStoreGroup($storeGroup);
-                }
-                else {
-                    $this->logger->info('Purchase feed disabled for store group: ' . $storeGroup->getName());
-                }
-            }
-            catch (Exception $e) {
-                $this->logger->error('Failed to export daily purchase feed for store group: ' . $storeGroup->getName());
-                $this->logger->error('Error message: ' . $e->getMessage());
-            }
-        }
-    }
-
-    public function exportFeedByWebsite()
-    {
-        $this->logger->info('Exporting purchase feed file for each website');
-
-        $websites = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface')->getWebsites();
-
-        foreach ($websites as $website) {
-            /* @var \Magento\Store\Model\Website $website */
-            try {
-                if ($this->helper->getConfig('feeds/enable_purchase_feed', $website->getId(), \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE) === '1'
-                    && $this->helper->getConfig('general/enable_bv', $website->getId(), \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE) === '1'
-                ) {
-                    $this->logger->info('Exporting purchase feed for website: ' . $website->getName());
-                    $this->exportFeedForWebsite($website);
-                }
-                else {
-                    $this->logger->info('Purchase feed disabled for website: ' . $website->getName());
-                }
-            }
-            catch (Exception $e) {
-                $this->logger->error('Failed to export daily purchase feed for website: ' . $website->getName());
-                $this->logger->error('Error message: ' . $e->getMessage());
-            }
-        }
-    }
-
-    public function exportFeedGlobal()
-    {
-        $this->logger->info('Exporting purchase feed file for entire Magento instance');
-
-        try {
-            if ($this->helper->getConfig('feeds/enable_purchase_feed') === '1'
-                && $this->helper->getConfig('general/enable_bv') === '1'
-            ) {
-                $this->exportFeedForGlobal();
-            }
-            else {
-                $this->logger->info('Purchase feed disabled.');
-            }
-        }
-        catch (Exception $e) {
-            $this->logger->error('Failed to export daily purchase feed.');
-            $this->logger->error('Error message: ' . $e->getMessage());
-        }
     }
 
     /**

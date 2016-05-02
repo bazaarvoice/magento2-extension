@@ -91,6 +91,25 @@ class InstallData implements Setup\InstallDataInterface
             ]
         );
 
+        $groupName = 'Autosettings';
+        $entityTypeId = $eavSetup->getEntityTypeId(\Magento\Catalog\Model\Product::ENTITY);
+        $attributeSetId = $eavSetup->getAttributeSetId($entityTypeId, 'Default');
+
+        $attribute = $eavSetup->getAttribute($entityTypeId, Connector\Model\Feed\ProductFeed::INCLUDE_IN_FEED_FLAG);
+        if ($attribute) {
+            $eavSetup->addAttributeToGroup(
+                $entityTypeId,
+                $attributeSetId,
+                $groupName,
+                $attribute['attribute_id'],
+                60
+            );
+        }
+
+        if (!$eavSetup->getAttributesNumberInGroup($entityTypeId, $attributeSetId, 'Product Details')) {
+            $eavSetup->removeAttributeGroup($entityTypeId, $attributeSetId, 'Product Details');
+        }
+
     }
 
 }

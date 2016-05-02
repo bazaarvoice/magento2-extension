@@ -12,6 +12,7 @@ namespace Bazaarvoice\Connector\Model\Feed\Product;
  */
 
 use Bazaarvoice\Connector\Model\Feed\Feed;
+use Bazaarvoice\Connector\Model\Feed\ProductFeed;
 use Bazaarvoice\Connector\Model\XMLWriter;
 use Magento\Store\Model\Store;
 
@@ -44,21 +45,12 @@ class Product extends Feed
     public function processProductsForStore(XMLWriter $writer, Store $store)
     {
         $writer->startElement('Products');
-        $productFactory = $this->objectManager->get('\Magento\Catalog\Model\ProductFactory');
+        $productCollection = $this->_getProductCollection();
 
-        /* @var \Magento\Catalog\Model\ResourceModel\Product\Collection $productCollection */
-        $productCollection = $productFactory->create()->getCollection();
-        $productCollection
-            ->setStore($store)
-            ->addAttributeToSelect('name')
-            ->addAttributeToSelect('description')
-            ->addAttributeToSelect('brand')
-            ->addAttributeToSelect('category_ids')
-            ->addAttributeToSelect('image');
+        $productCollection->setStore($store);
+        $this->logger->info($productCollection->count() . ' products found to export.');
 
-        $i = 0;
         foreach($productCollection as $product) {
-            if($i++ > 10) break;
             /* @var $product \Magento\Catalog\Model\Product */
             
             $writer->startElement('Product');
@@ -95,6 +87,29 @@ class Product extends Feed
         
         $writer->endElement(); // Products
         
+    }
+
+    /**
+     * @return \Magento\Catalog\Model\ResourceModel\Product\Collection
+     */
+    protected function _getProductCollection()
+    {
+        $productFactory = $this->objectManager->get('\Magento\Catalog\Model\ProductFactory');
+
+        /* @var \Magento\Catalog\Model\ResourceModel\Product\Collection $productCollection */
+        $productCollection = $productFactory->create()->getCollection();
+
+        $productCollection->addAttributeToFilter(ProductFeed::INCLUDE_IN_FEED_FLAG, \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED);
+
+        $productCollection
+            ->addAttributeToSelect('name')
+            ->addAttributeToSelect('description')
+            ->addAttributeToSelect('brand')
+            ->addAttributeToSelect('category_ids')
+            ->addAttributeToSelect('image');
+
+        $this->logger->info($productCollection->getSelect()->__toString());
+        return $productCollection;
     }
 
 

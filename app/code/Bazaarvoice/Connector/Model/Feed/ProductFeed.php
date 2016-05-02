@@ -18,41 +18,10 @@ use \Magento\Framework\Exception;
 
 class ProductFeed extends Feed
 {
+    
+    const INCLUDE_IN_FEED_FLAG = 'bv_feed_exclude';
 
-    public function generateFeed()
-    {
-        $this->logger->info('Start Bazaarvoice Product Feed Generation');
-        // TODO: Scopes
-        $this->exportFeedByStore();  
-        $this->logger->info('End Bazaarvoice Product Feed Generation');
-    }
-
-    public function exportFeedByStore()
-    {
-        $this->logger->info('Exporting product feed file for each store / store view');
-
-        $stores = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStores();
-        
-        foreach ($stores as $store) {
-            /* @var \Magento\Store\Model\Store $store */
-            try {
-                if ($this->helper->getConfig('feeds/enable_product_feed', $store->getId()) === '1'
-                    && $this->helper->getConfig('general/enable_bv', $store->getId()) === '1'
-                ) {
-                    $this->logger->info('Exporting product feed for store: ' . $store->getCode());
-                    $this->exportFeedForStore($store);
-                }
-                else {
-                    $this->logger->info('Product feed disabled for store: ' . $store->getCode());
-                }
-            }
-            catch (Exception $e) {
-                $this->logger->error('Failed to export daily product feed for store: ' . $store->getCode());
-                $this->logger->error('Error message: ' . $e->getMessage());
-            }
-        }
-        
-    }
+    protected $type_id = 'product';
 
     /**
      * @param Store $store
@@ -63,6 +32,8 @@ class ProductFeed extends Feed
         $productFeedFilePath = BP . '/var/export/bvfeeds';
         $productFeedFileName =
             $productFeedFilePath . '/productFeed-store-' . $store->getId() . /* '-' . date('U') . */ '.xml';
+        $this->logger->info('Creating file ' . $productFeedFileName);
+        
         // Get client name for the scope
         $clientName = $this->helper->getConfig('general/client_name', $store->getId());
 
