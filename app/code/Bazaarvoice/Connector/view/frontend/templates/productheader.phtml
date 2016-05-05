@@ -1,25 +1,41 @@
-
 <?php if($this->isEnabled()): ?>
+    <script type="text/javascript">
+        var bvConfigData = {};
+<?php if($this->getProductId()) : ?>
+        bvConfigData.productId = "<?php echo $this->getProductSku() ?>";
+<?php endif; ?>
+<?php if($this->getConfig('rr/container')): ?>
+        bvConfigData.submissionContainerUrl = "<?php echo $this->getContainerUrl() ?>";
+<?php endif; ?>
+        $BV.configure("global", bvConfigData);
+    </script>
+<?php if($this->isConfigurable()): ?>
+    <script type="text/javascript">
+        var bvChildren = <?php echo $this->getChildrenJson(); ?>;
+        var bvSelected = "<?php echo $this->getProductSku() ?>";
+        require(["jquery", "jquery/ui", "swatchRenderer"], function ($) {
 
-    <?php if($this->getProductId()) : ?>
-
-        <script type="text/javascript">
-        $BV.configure('global', { productId : "<?php echo $this->getProductSku() ?>" });
-        </script>
-
-    <?php else: ?>
-    
-        <script type="text/javascript" language="javascript">
-        <?php // Comment out extra features until we know we need them ?>
-        <?php //var profileDisplayContainerPageName = "bazaarvoice/profile/display"; ?>
-        var configData = {};
-        <?php /* if (false) { //!empty($submissionContainerUrl)) {
-                    echo "    configData.submissionContainerUrl = \"".$submissionContainerUrl."\";\n";
+            jQuery('.swatch-option').live("mouseout", function(){
+                var bvCurrent = '';
+                jQuery('.swatch-attribute').each(function(){
+                    bvCurrent = bvCurrent + jQuery(this).attr('attribute-id') + '_' + jQuery(this).attr('option-selected') + '_';
+                });
+                console.log(bvCurrent);
+                if(bvChildren[bvCurrent] != undefined && bvChildren[bvCurrent] != bvSelected) {
+                    console.log("switching to " + bvChildren[bvCurrent]);
+                    bvConfigData.productId = bvChildren[bvCurrent];
+                    $BV.configure("global", bvConfigData);
+                    $BV.ui( 'rr', 'show_reviews', {
+                        doShowContent : function () {
+                            <?php echo $this->getConfig('rr/do_show_content_js'); ?>
+                        }
+                    });
+                    bvSelected = bvChildren[bvCurrent];
                 }
-        */ ?>
-        $BV.configure("global", configData);
-        </script>
-    
-    <?php endif; ?>
+            });
 
+        });
+    </script>
+<?php endif; ?>
+    
 <?php endif; ?>

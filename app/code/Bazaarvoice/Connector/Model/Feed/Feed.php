@@ -15,13 +15,20 @@ namespace Bazaarvoice\Connector\Model\Feed;
 use Bazaarvoice\Connector\Logger\Logger;
 use Bazaarvoice\Connector\Helper\Data;
 use Bazaarvoice\Connector\Model\Source\Environment;
+use Bazaarvoice\Connector\Model\Source\Scope;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Filesystem\Io\Sftp;
+use Magento\Store\Model\Group;
 use Magento\Store\Model\Store;
+use Magento\Framework\Exception;
+use Magento\Store\Model\Website;
 
 class Feed
-{
+{    
     protected $objectManager;
+    protected $test;
+    protected $type_id;
+    protected $families;
 
     /**
      * Constructor
@@ -37,8 +44,142 @@ class Feed
         $this->helper = $helper;
         $this->logger = $logger;
         $this->objectManager = $objectManager;
+        $this->families = $helper->getConfig('general/families');
     }
 
+    public function generateFeed($test = false)
+    {
+        $this->logger->info('Start Bazaarvoice ' . $this->type_id . ' Feed Generation');
+
+        $this->test = $test;
+        if($test) {
+            $this->logger->info('TEST MODE');
+        }
+
+        switch($this->helper->getConfig('feeds/generation_scope')) {
+            case Scope::STORE_GROUP:
+                $this->exportFeedByStoreGroup();
+                break;
+            case Scope::STORE_VIEW:
+                $this->exportFeedByStore();
+                break;
+            case Scope::WEBSITE:
+                $this->exportFeedByWebsite();
+                break;
+            case Scope::SCOPE_GLOBAL:
+                $this->exportFeedByGlobal();
+                break;
+        }
+        $this->logger->info('End Bazaarvoice ' . $this->type_id . ' Feed Generation');
+    }
+
+    public function exportFeedByStore()
+    {
+        $this->logger->info('Exporting ' . $this->type_id . ' feed file for each store / store view');
+
+        $stores = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStores();
+
+        foreach ($stores as $store) {
+            /* @var \Magento\Store\Model\Store $store */
+            try {
+                if ($this->helper->getConfig('feeds/enable_' . $this->type_id . '_feed', $store->getId()) === '1'
+                    && $this->helper->getConfig('general/enable_bv', $store->getId()) === '1'
+                ) {
+                    $this->logger->info('Exporting ' . $this->type_id . ' feed for store: ' . $store->getCode());
+                    $this->exportFeedForStore($store);
+                }
+                else {
+                    $this->logger->info(ucwords($this->type_id) . ' feed disabled for store: ' . $store->getCode());
+                }
+            }
+            catch (Exception $e) {
+                $this->logger->error('Failed to export daily ' . $this->type_id . ' feed for store: ' . $store->getCode());
+                $this->logger->error('Error message: ' . $e->getMessage());
+            }
+        }
+    }
+
+    public function exportFeedByStoreGroup()
+    {
+        $this->logger->info('Exporting ' . $this->type_id . ' feed file for each store group');
+
+        $storeGroups = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface')->getGroups();
+
+        foreach ($storeGroups as $storeGroup) {
+            /* @var \Magento\Store\Model\Group $storeGroup */
+            // Default store, for config and product data
+            $store = $storeGroup->getDefaultStore();
+            try {
+                if ($this->helper->getConfig('feeds/enable_' . $this->type_id . '_feed', $store->getId()) === '1'
+                    && $this->helper->getConfig('general/enable_bv', $store->getId()) === '1'
+                ) {
+                    $this->logger->info('Exporting ' . $this->type_id . ' feed for store group: ' . $storeGroup->getName());
+                    $this->exportFeedForStoreGroup($storeGroup);
+                }
+                else {
+                    $this->logger->info(ucwords($this->type_id) . ' feed disabled for store group: ' . $storeGroup->getName());
+                }
+            }
+            catch (Exception $e) {
+                $this->logger->error('Failed to export daily ' . $this->type_id . ' feed for store group: ' . $storeGroup->getName());
+                $this->logger->error('Error message: ' . $e->getMessage());
+            }
+        }
+    }
+
+    public function exportFeedByWebsite()
+    {
+        $this->logger->info('Exporting ' . $this->type_id . ' feed file for each website');
+
+        $websites = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface')->getWebsites();
+
+        foreach ($websites as $website) {
+            /* @var \Magento\Store\Model\Website $website */
+            try {
+                if ($this->helper->getConfig('feeds/enable_' . $this->type_id . '_feed', $website->getId(), \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE) === '1'
+                    && $this->helper->getConfig('general/enable_bv', $website->getId(), \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE) === '1'
+                ) {
+                    $this->logger->info('Exporting ' . $this->type_id . ' feed for website: ' . $website->getName());
+                    $this->exportFeedForWebsite($website);
+                }
+                else {
+                    $this->logger->info(ucwords($this->type_id) . ' feed disabled for website: ' . $website->getName());
+                }
+            }
+            catch (Exception $e) {
+                $this->logger->error('Failed to export daily ' . $this->type_id . ' feed for website: ' . $website->getName());
+                $this->logger->error('Error message: ' . $e->getMessage());
+            }
+        }
+    }
+
+    public function exportFeedByGlobal()
+    {
+        $this->logger->info('Exporting ' . $this->type_id . ' feed file for entire Magento instance');
+
+        try {
+            if ($this->helper->getConfig('feeds/enable_' . $this->type_id . '_feed') === '1'
+                && $this->helper->getConfig('general/enable_bv') === '1'
+            ) {
+                $this->exportFeedForGlobal();
+            }
+            else {
+                $this->logger->info(ucwords($this->type_id) . ' feed disabled.');
+            }
+        }
+        catch (Exception $e) {
+            $this->logger->error('Failed to export daily ' . $this->type_id . ' feed.');
+            $this->logger->error('Error message: ' . $e->getMessage());
+        }
+    }
+
+    public function exportFeedForStore(Store $store) {}
+
+    public function exportFeedForStoreGroup(Group $storeGroup) {}
+
+    public function exportFeedForWebsite(Website $website) {}
+
+    public function exportFeedForGlobal() {}
 
     /**
      * @param String $xmlns Bazaarvoice Feed xsd reference
@@ -85,6 +226,7 @@ class Feed
      */
     protected function uploadFeed($sourceFile, $destinationFile, $store = null)
     {
+        return true;
         $this->logger->info("Uploading file $sourceFile to SFTP server.");
 
         $params = array(
@@ -110,19 +252,15 @@ class Feed
     private function getSFTPHost($store = null)
     {
         $environment = $this->helper->getConfig('general/environment', $store);
-        $sftpHostOverride = trim($this->helper->getConfig('feeds/sftp_host_name', $store));
-        if(strlen($sftpHostOverride)) {
-            $sftpHost = $sftpHostOverride;
-        }
-        else if ($environment == Environment::STAGING) {
-            $sftpHost = 'sftp-stg.bazaarvoice.com';
+        $hostSelection = trim($this->helper->getConfig('feeds/sftp_host_name', $store));
+
+        if ($environment == Environment::STAGING) {
+            $sftpHost = $hostSelection . '-stg.bazaarvoice.com';
         }
         else {
-            $sftpHost = 'sftp.bazaarvoice.com';
+            $sftpHost = $hostSelection . '.bazaarvoice.com';
         }
         return $sftpHost;
     }
-    
-    
 
 }

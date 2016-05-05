@@ -30,7 +30,7 @@ class BVUtility {
    * @param bool ($is_bot) - shows the mode in which script was run
    */
   public static function execTimer($exec_time_ms, $is_bot = false, $start = 0) {
-    $exec_time = $exec_time_ms / 1000;
+    $exec_time = $exec_time_ms / 2000;
     declare(ticks = 1); // or more if 1 takes too much time
     if (empty($start)) {
       $start = microtime(1);

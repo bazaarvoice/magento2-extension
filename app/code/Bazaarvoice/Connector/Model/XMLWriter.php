@@ -26,5 +26,14 @@ class XMLWriter extends \XMLWriter
         }
     }
 
+    public function writeRaw($content = null, $cdata = false)
+    {
+        if($cdata) {
+            $this->writeCdata($content);
+        } else {
+            parent::writeRaw($content);
+        }
+    }
+
 
 }

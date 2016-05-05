@@ -28,7 +28,11 @@ class Product extends Command
     {
 	    echo "\n" . 'Memory usage: ' . memory_get_usage() . "\n";
         $productFeed = \Magento\Framework\App\ObjectManager::getInstance()->get('Bazaarvoice\Connector\Model\Feed\ProductFeed');
-        $productFeed->generateFeed();
+        try {
+            $productFeed->generateFeed();
+        } Catch (\Exception $e) {
+            echo $e->getMessage() . "\n" . $e->getTraceAsString();
+        }
         echo "\n" . 'Memory usage: ' . memory_get_usage() . "\n";
     }
 
