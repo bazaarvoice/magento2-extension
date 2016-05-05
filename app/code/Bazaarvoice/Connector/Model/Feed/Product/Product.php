@@ -14,9 +14,11 @@ namespace Bazaarvoice\Connector\Model\Feed\Product;
 use Bazaarvoice\Connector\Model\Feed;
 use Bazaarvoice\Connector\Model\XMLWriter;
 use Magento\Framework\UrlFactory;
+use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\Group;
 use Magento\Store\Model\Store;
 use Magento\Catalog\Model\ResourceModel\Product\Collection;
+use Magento\Store\Model\StoreManagerInterface;
 use Magento\Store\Model\Website;
 
 class Product extends Feed\ProductFeed
@@ -84,6 +86,7 @@ class Product extends Feed\ProductFeed
     {
         $writer->startElement('Products');
         $productCollection = $this->_getProductCollection();
+        $productCollection->setStore($storeGroup->getDefaultStore())->load();
 
         $this->logger->info($productCollection->count() . ' products found to export.');
 
@@ -104,11 +107,14 @@ class Product extends Feed\ProductFeed
     {
         $writer->startElement('Products');
         $productCollection = $this->_getProductCollection();
+        $productCollection->setStore($website->getDefaultStore())->load();
 
         $this->logger->info($productCollection->count() . ' products found to export.');
 
+        $localeData = $this->getLocaleData($website->getStoreIds());
+
         foreach($productCollection as $product) {
-            $this->writeProduct($writer, $product);
+            $this->writeProduct($writer, $product, $website->getDefaultStore(), $localeData);
         }
 
         $writer->endElement(); // Products
@@ -124,8 +130,21 @@ class Product extends Feed\ProductFeed
 
         $this->logger->info($productCollection->count() . ' products found to export.');
 
+        $storesList = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStores();
+        $stores = [];
+        /** @var StoreInterface $store */
+        foreach($storesList as $store) {
+            $stores[] = $store->getId();
+        }
+        $localeData = $this->getLocaleData($stores);
+
+        // Using admin store for now
+        /** @var StoreManagerInterface $storeManager */
+        $storeManager = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface');
+        $store = $storeManager->getStore(0);
+
         foreach($productCollection as $product) {
-            $this->writeProduct($writer, $product);
+            $this->writeProduct($writer, $product, $store, $localeData);
         }
 
         $writer->endElement(); // Products

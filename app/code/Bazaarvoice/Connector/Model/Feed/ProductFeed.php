@@ -41,10 +41,10 @@ class ProductFeed extends Feed
         // Create varien io object and write local feed file
         $writer = $this->openFile('http://www.bazaarvoice.com/xs/PRR/ProductFeed/5.2', $clientName);
 
-//        $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Brand')
-//            ->processBrandsForStore($writer, $store);
-//        $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Category')
-//            ->processCategoriesForStore($writer, $store);
+        $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Brand')
+            ->processBrandsForStore($writer, $store);
+        $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Category')
+            ->processCategoriesForStore($writer, $store);
         $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Product')
             ->processProductsForStore($writer, $store);
 
