@@ -13,6 +13,8 @@ namespace Bazaarvoice\Connector\Model\Feed\Product;
 
 use Bazaarvoice\Connector\Model\Feed;
 use Bazaarvoice\Connector\Model\XMLWriter;
+use Magento\Catalog\Model\Product\Visibility;
+use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Framework\UrlFactory;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\Group;
@@ -66,7 +68,7 @@ class Product extends Feed\ProductFeed
     public function processProductsForStore(XMLWriter $writer, Store $store)
     {
         $writer->startElement('Products');
-        $productCollection = $this->_getProductCollection();
+        $productCollection = $this->getProductCollection();
 
         $productCollection->setStore($store);
         $this->logger->info($productCollection->count() . ' products found to export.');
@@ -85,7 +87,7 @@ class Product extends Feed\ProductFeed
     public function processProductsForStoreGroup(XMLWriter $writer, Group $storeGroup)
     {
         $writer->startElement('Products');
-        $productCollection = $this->_getProductCollection();
+        $productCollection = $this->getProductCollection();
         $productCollection->setStore($storeGroup->getDefaultStore())->load();
 
         $this->logger->info($productCollection->count() . ' products found to export.');
@@ -106,7 +108,7 @@ class Product extends Feed\ProductFeed
     public function processProductsForWebsite(XMLWriter $writer, Website $website)
     {
         $writer->startElement('Products');
-        $productCollection = $this->_getProductCollection();
+        $productCollection = $this->getProductCollection();
         $productCollection->setStore($website->getDefaultStore())->load();
 
         $this->logger->info($productCollection->count() . ' products found to export.');
@@ -126,7 +128,7 @@ class Product extends Feed\ProductFeed
     public function processProductsForGlobal(XMLWriter $writer)
     {
         $writer->startElement('Products');
-        $productCollection = $this->_getProductCollection();
+        $productCollection = $this->getProductCollection();
 
         $this->logger->info($productCollection->count() . ' products found to export.');
 
@@ -159,13 +161,33 @@ class Product extends Feed\ProductFeed
     protected function writeProduct(XMLWriter $writer, \Magento\Catalog\Model\Product $product, Store $store, &$localeData = null)
     {
         // Families
-        $masterProduct = $product;
+        $families = false;
         if($this->helper->getConfig('general/families')) {
+            $families = $this->getProductFamilies($product);
+        }
 
+        // Parent values
+        $masterProduct = false;
+        if($product->getVisibility() == Visibility::VISIBILITY_NOT_VISIBLE) {
+            $this->logger->info('Product ' . $product->getSku() . ' not visible');
+            if($product->getTypeId() == Configurable::TYPE_CODE) {
+                $this->logger->info('Skipping not visible configurable product ' . $product->getSku());
+                return;
+            }
+            if($families && count($families)) {
+                $masterProduct = $this->getProductCollection()->getItemById($families[0]);
+                if($masterProduct instanceof \Magento\Catalog\Model\Product) {
+                    $this->logger->info('Using parent data for not visible child product ' . $product->getSku());
+                } else {
+                    $this->logger->info('Skipping not visible child product ' . $product->getSku() . ' no parent found.');
+                    return;
+                }
+            }
         }
 
         // Localization
         $localeProducts = [];
+        $localeMasterProducts = [];
         $localeStores = [];
         if(count($localeData)) {
             /** @var Collection $collection */
@@ -174,11 +196,20 @@ class Product extends Feed\ProductFeed
                     $localeProduct = $locale['collection']->getItemById($product->getId());
                     if($localeProduct instanceof \Magento\Catalog\Model\Product && $localeProduct->getId())
                         $localeProducts[$localeCode] = $localeProduct;
+                    if($masterProduct) {
+                        $localeMasterProduct = $locale['collection']->getItemById($masterProduct->getId());
+                        if($localeMasterProduct instanceof \Magento\Catalog\Model\Product && $localeMasterProduct->getId())
+                            $localeMasterProducts[$localeCode] = $localeMasterProduct;
+                    }
                 }
 
                 if(isset($locale['store']) && $locale['store'] instanceof Store)
                     $localeStores[$localeCode] = $locale['store'];
             }
+        }
+        if(!$masterProduct) {
+            $masterProduct = $product;
+            $localeMasterProducts = $localeProducts;
         }
 
         $writer->startElement('Product');
@@ -213,10 +244,10 @@ class Product extends Feed\ProductFeed
         $category = $categories->getFirstItem();
         $writer->writeElement('CategoryExternalId', $this->getCategoryId($category));
 
-        $writer->writeElement('ProductPageUrl', $this->productHelper->getProductUrl($product), true);
-        if(count($localeProducts)){
+        $writer->writeElement('ProductPageUrl', $this->productHelper->getProductUrl($masterProduct), true);
+        if(count($localeMasterProducts)){
             $writer->startElement('ProductPageUrls');
-            foreach($localeProducts as $locale => $localeProduct) {
+            foreach($localeMasterProducts as $locale => $localeProduct) {
                 if(!isset($localeStores[$locale]) || empty($localeStores[$locale])) continue;
                 $writer->startElement('ProductPageUrl');
                 $writer->writeAttribute('locale', $locale);
@@ -226,13 +257,21 @@ class Product extends Feed\ProductFeed
             $writer->endElement(); // ProductPageUrls
         }
 
-        $writer->writeElement('ImageUrl', $this->productHelper->getImageUrl($masterProduct), true);
+        $imageUrl = $this->productHelper->getImageUrl($product);
+        if(preg_match("#no_selection#", $imageUrl)) {
+            $imageUrl = $this->productHelper->getImageUrl($masterProduct);
+        }
+        $writer->writeElement('ImageUrl', $imageUrl, true);
         if(count($localeProducts)){
             $writer->startElement('ImageUrls');
             foreach($localeProducts as $locale => $localeProduct) {
                 $writer->startElement('ImageUrl');
                 $writer->writeAttribute('locale', $locale);
-                $writer->writeRaw($this->productHelper->getImageUrl($localeProduct), true);
+                $localizedImage = $this->productHelper->getImageUrl($localeProduct);
+                if(preg_match("#no_selection#", $localizedImage) && isset($localeMasterProducts[$locale]) && $localeMasterProducts[$locale] instanceof \Magento\Catalog\Model\Product) {
+                    $localizedImage = $this->productHelper->getImageUrl($localeMasterProducts[$locale]);
+                }
+                $writer->writeRaw($localizedImage, true);
                 $writer->endElement(); // ImageUrl
             }
             $writer->endElement(); // ImageUrls
@@ -248,7 +287,29 @@ class Product extends Feed\ProductFeed
             }
         }
 
-        // !TODO Families
+        if($families && count($families)) {
+            $writer->startElement('Attributes');
+
+            foreach($families as $familyId) {
+                $family = $this->getProductCollection()->getItemById($familyId);
+                $familyExternalId = $this->helper->getProductId($family);
+                if($familyExternalId) {
+                    $writer->startElement('Attribute');
+                    $writer->writeAttribute('id', 'BV_FE_FAMILY');
+                    $writer->writeElement('Value', $familyExternalId);
+                    $writer->endElement(); // Attribute
+
+                    if($this->helper->getConfig('feeds/bvfamilies_expand')) {
+                        $writer->startElement('Attribute');
+                        $writer->writeAttribute('id', 'BV_FE_EXPAND');
+                        $writer->writeElement('Value', 'BV_FE_FAMILY:' . $familyExternalId);
+                        $writer->endElement(); // Attribute
+                    }
+                }
+            }
+
+            $writer->endElement(); // Attributes
+        }
 
         $writer->endElement(); // Product
     }
@@ -306,7 +367,7 @@ class Product extends Feed\ProductFeed
         foreach($locales as $locale => $storeId)
         {
             $store = $storeInterface->getStore($storeId);
-            $collection = $this->_getProductCollection(true);
+            $collection = $this->getProductCollection(true);
             $collection->setStore($store)->load();
             $localeData[$locale] = [
                 'store' => $store,
@@ -317,11 +378,30 @@ class Product extends Feed\ProductFeed
         return $localeData;
     }
 
+    protected function getProductFamilies(\Magento\Catalog\Model\Product $product)
+    {
+        $families = array();
+        if($product->getTypeId() == Configurable::TYPE_CODE){
+            $families[] = $product->getId();
+        } else {
+            /** @var Configurable $resource */
+            $resource = $this->objectManager->get('\Magento\ConfigurableProduct\Model\Product\Type\Configurable');
+            $parentIds = $resource->getParentIdsByChild($product->getId());
+            foreach($parentIds as $parentId){
+                /** @var \Magento\Catalog\Model\Product $parent */
+                $parent = $this->getProductCollection()->getItemById($parentId);
+                if($parent->getId())
+                    $families[] = $parentId;
+            }
+        }
+        return $families;
+    }    
+
     /**
      * @param bool $new Get new collection
      * @return \Magento\Catalog\Model\ResourceModel\Product\Collection
      */
-    protected function _getProductCollection($new = false)
+    protected function getProductCollection($new = false)
     {
         if($new || !$this->productCollection) {
             $productFactory = $this->objectManager->get('\Magento\Catalog\Model\ProductFactory');
@@ -338,7 +418,9 @@ class Product extends Feed\ProductFeed
                 ->addAttributeToSelect('description')
                 ->addAttributeToSelect('image')
                 ->addAttributeToSelect('url_path')
-                ->addAttributeToSelect(Feed\ProductFeed::INCLUDE_IN_FEED_FLAG);
+                ->addAttributeToSelect('visibility')
+                ->addAttributeToSelect(Feed\ProductFeed::INCLUDE_IN_FEED_FLAG)
+                ->addAttributeToFilter('status', \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED);
 
             $productCollection->addAttributeToFilter(Feed\ProductFeed::INCLUDE_IN_FEED_FLAG, \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED);
 
