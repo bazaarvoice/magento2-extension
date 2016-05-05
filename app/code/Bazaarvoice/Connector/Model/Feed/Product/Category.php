@@ -176,28 +176,28 @@ class Category extends Feed\ProductFeed
             $writer->endElement(); // Names
         }
 
-        $writer->writeElement('CategoryPageUrl', $category->getUrl());
+        $writer->writeElement('CategoryPageUrl', $category->getUrl(), true);
         if(count($localizedData)) {
             $writer->startElement('CategoryPageUrls');
             foreach($localizedData as $locale => $data) {
                 if(isset($data['CategoryPageUrl']) && !empty($data['CategoryPageUrl'])) {
                     $writer->startElement('CategoryPageUrl');
                     $writer->writeAttribute('locale', $locale);
-                    $writer->writeRaw($data['CategoryPageUrl']);
+                    $writer->writeRaw($data['CategoryPageUrl'], true);
                     $writer->endElement();
                 }
             }
             $writer->endElement(); // CategoryPageUrls
         }
 
-        $writer->writeElement('ImageUrl', $category->getImageUrl());
+        $writer->writeElement('ImageUrl', $category->getImageUrl(), true);
         if(count($localizedData)) {
             $writer->startElement('ImageUrls');
             foreach($localizedData as $locale => $data) {
                 if(isset($data['ImageUrl']) && !empty($data['ImageUrl'])) {
                     $writer->startElement('ImageUrl');
                     $writer->writeAttribute('locale', $locale);
-                    $writer->writeRaw($data['ImageUrl']);
+                    $writer->writeRaw($data['ImageUrl'], true);
                     $writer->endElement();
                 }
             }
@@ -228,37 +228,6 @@ class Category extends Feed\ProductFeed
             ->getUrl($originalUrl);
 
         return $url;
-    }
-
-    /**
-     * Get the uniquely identifying category ID for a catalog category.
-     *
-     * This is the unique, category or subcategory ID (duplicates are unacceptable).
-     * This ID should be stable: it should not change for the same logical category even
-     * if the category's name changes.
-     *
-     * @static
-     * @param  \Magento\Catalog\Model\Category $category a reference to a catalog category object
-     * @param int $storeId
-     * @return string The unique category ID to be used with Bazaarvoice
-     */
-    protected function getCategoryId($category, $storeId = null)
-    {
-        // Check config setting to see if we should use Magento category id
-        $useUrlPath = $this->helper->getConfig('feeds/category_id_use_url_path', $storeId);
-        $useUrlPath = (strtoupper($useUrlPath) == 'TRUE' || $useUrlPath == '1');
-        if(!$useUrlPath) {
-            return $category->getId();
-        }
-        else {
-            // Generate a unique id based on category path
-            // Start with url path
-            $rawCategoryId = $category->getUrlPath();
-            // Replace slashes with dashes in url path
-            $rawCategoryId = str_replace('/', '-', $rawCategoryId);
-            // Replace any illegal characters
-            return $this->helper->replaceIllegalCharacters($rawCategoryId);
-        }
     }
 
     /**
