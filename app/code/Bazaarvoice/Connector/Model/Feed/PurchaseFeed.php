@@ -31,7 +31,6 @@ class PurchaseFeed extends Feed
     protected $type_id = 'purchase';
     protected $num_days_lookback;
     protected $triggering_event;
-    protected $families;
 
     /**
      * Constructor
@@ -48,7 +47,6 @@ class PurchaseFeed extends Feed
 
         $this->triggering_event = $helper->getConfig('feeds/triggering_event') === \Bazaarvoice\Connector\Model\Source\Trigger::SHIPPING ? self::TRIGGER_EVENT_SHIP : self::TRIGGER_EVENT_PURCHASE;
         $this->num_days_lookback = $helper->getConfig('feeds/lookback');
-        $this->families = $helper->getConfig('feeds/families');
     }
 
     /**
@@ -154,7 +152,7 @@ class PurchaseFeed extends Feed
         /* @var \Magento\Sales\Model\ResourceModel\Order\Collection $orders */
         $orders = $orderFactory->create()->getCollection();
 
-        // Add filter to limit orders to this store group
+        // Add filter to limit orders to this website
         $orders->getSelect()
             ->joinLeft('store', 'main_table.store_id = store.store_id', 'store.website_id')
             ->where('store.website_id = ' . $website->getId());
@@ -201,9 +199,7 @@ class PurchaseFeed extends Feed
         /* @var \Magento\Sales\Model\ResourceModel\Order\Collection $orders */
         $orders = $orderFactory->create()->getCollection();
 
-        // Add filter to limit orders to this store group
-        $orders->getSelect()
-            ->joinLeft('store', 'main_table.store_id = store.store_id', 'store.website_id');
+        $orders->getSelect();
         // Status is 'complete' or 'closed'
         if($this->test == false) {
             $orders->addFieldToFilter('status', array(

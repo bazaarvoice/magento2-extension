@@ -44,6 +44,11 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Turn on the BV ROI beacon tag on the purchase transaction (checkout) page.  See documentation for additional steps that must be completed for this feature to take effect.]]></comment>
                 </field>
+                <field id="families" translate="label" type="select" sortOrder="35" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Enable BV Product Families</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[BV Product Families will be defined for visible Configurable and Simple product combinations]]></comment>
+                </field>
             </group>
             <group id="rr" translate="label" type="text" sortOrder="200" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Ratings and Reviews</label>
@@ -86,23 +91,15 @@
 
             <group id="feeds" translate="label" type="text" sortOrder="500" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Feeds</label>
-                <field id="lookback" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Purchase Feed Lookback</label>
-                    <comment><![CDATA[Number of days back to begin looking for orders.]]></comment>
-                </field>
-                <field id="admin_email" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Administrator Email</label>
-                    <comment><![CDATA[All notifications for BV-related Magento job schedules will be sent to this email address.]]></comment>
+                <field id="enable_product_feed" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Product Feed</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Turn on Product Feed generation. This will enable generation of a product feed to be sent to the BV SFTP server.  See documentation for additional steps to setup a scheduled job in Magento for this feature to take effect.]]></comment>
                 </field>
                 <field id="generation_scope" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Feed Generation Scope</label>
                     <source_model>Bazaarvoice\Connector\Model\Source\Scope</source_model>
                     <comment><![CDATA[This determines whether separate feed files will be generated and sent to BV for each website, store or store view.]]></comment>
-                </field>
-                <field id="families" translate="label" type="select" sortOrder="35" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Enable BV Product Families</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment><![CDATA[BV Product Families will be defined for visible Configurable and Simple product combinations]]></comment>
                 </field>
                 <field id="sftp_username" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>SFTP Username</label>
@@ -117,42 +114,41 @@
                     <source_model>Bazaarvoice\Connector\Model\Source\SftpHost</source_model>
                     <comment><![CDATA[SFTP Connection Host. ]]></comment>
                 </field>
-
-                <field id="enable_product_feed" translate="label" type="select" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Enable Product Feed</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment><![CDATA[Turn on Product Feed generation. This will enable generation of a product feed to be sent to the BV SFTP server.  See documentation for additional steps to setup a scheduled job in Magento for this feature to take effect.]]></comment>
-                </field>
                 <field id="product_filename" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Product Feed Filename</label>
                 </field>
                 <field id="product_path" translate="label" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Product Feed Export Path</label>
                 </field>
-                <field id="brand_code" translate="label" type="select" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Product Feed Brand Attribute</label>
+                <field id="brand_code" translate="label" type="select" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Brand Attribute</label>
                     <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
                     <comment><![CDATA[This attribute code will be used to locate the brand of products which are sent in the product feed.]]></comment>
                 </field>
-                <field id="upc_code" translate="label" type="select" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
-                <label>Product Feed UPC Attribute</label>
-                <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
-                <comment><![CDATA[This attribute code will be used to locate the UPC of products which are sent in the product feed.]]></comment>
+                <field id="upc_code" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>UPC Attribute</label>
+                    <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
+                    <comment><![CDATA[This attribute code will be used to locate the UPC of products which are sent in the product feed.]]></comment>
                 </field>
-                <field id="ean_code" translate="label" type="select" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="1">
-                <label>Product Feed EAN Attribute</label>
-                <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
-                <comment><![CDATA[This attribute code will be used to locate the EAN of products which are sent in the product feed.]]></comment>
+                <field id="ean_code" translate="label" type="select" sortOrder="150" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>EAN Attribute</label>
+                    <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
+                    <comment><![CDATA[This attribute code will be used to locate the EAN of products which are sent in the product feed.]]></comment>
                 </field>
-                <field id="bvfamilies_expand" translate="label" type="select" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
-                <label>Expand Families in Product Feed</label>
-                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                <comment><![CDATA[Setting to determine whether simple products show reviews and ratings for their entire product family.]]></comment>
+                <field id="mpn_code" translate="label" type="select" sortOrder="160" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Manufacturer Part Number Attribute</label>
+                    <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
+                    <comment><![CDATA[This attribute code will be used to locate the Manufacturer Part Number of products which are sent in the product feed.]]></comment>
                 </field>
-                <field id="category_id_use_url_path" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="1">
-                <label>Use category URL path as category id</label>
-                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                <comment><![CDATA[If true, use Magento category URL path as category id, otherwise use Mage category entity primary key.]]></comment>
+                <field id="bvfamilies_expand" translate="label" type="select" sortOrder="170" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Expand Families in Product Feed</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Setting to determine whether simple products show reviews and ratings for their entire product family.]]></comment>
+                </field>
+                <field id="category_id_use_url_path" translate="label" type="select" sortOrder="180" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Use category URL path as category id</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[If true, use Magento category URL path as category id, otherwise use Mage category entity primary key.]]></comment>
                 </field>
 
                 <field id="enable_purchase_feed" translate="label" type="select" sortOrder="200" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -160,7 +156,11 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Turn on Purchase Feed generation. This will enable generation of a purchase feed to be sent to the BV SFTP server to be used to send post-interaction emails to your customers in order to solicit review submission.  See documentation for additional steps to setup a scheduled job for this feature to take effect.]]></comment>
                 </field>
-                <field id="triggering_event" translate="label" type="select" sortOrder="210" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="lookback" translate="label" type="text" sortOrder="210" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Purchase Feed Lookback</label>
+                    <comment><![CDATA[Number of days back to begin looking for orders.]]></comment>
+                </field>
+                <field id="triggering_event" translate="label" type="select" sortOrder="220" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Purchase Feed Triggering Event</label>
                     <source_model>Bazaarvoice\Connector\Model\Source\Trigger</source_model>
                     <comment><![CDATA[This determines whether to use the purchase date or ship date when calculating which purchases to include in the purchase feed.]]></comment>

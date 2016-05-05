@@ -28,6 +28,7 @@ class Feed
     protected $objectManager;
     protected $test;
     protected $type_id;
+    protected $families;
 
     /**
      * Constructor
@@ -43,6 +44,7 @@ class Feed
         $this->helper = $helper;
         $this->logger = $logger;
         $this->objectManager = $objectManager;
+        $this->families = $helper->getConfig('general/families');
     }
 
     public function generateFeed($test = false)
@@ -224,6 +226,7 @@ class Feed
      */
     protected function uploadFeed($sourceFile, $destinationFile, $store = null)
     {
+        return true;
         $this->logger->info("Uploading file $sourceFile to SFTP server.");
 
         $params = array(
@@ -259,7 +262,5 @@ class Feed
         }
         return $sftpHost;
     }
-    
-    
 
 }

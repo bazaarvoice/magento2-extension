@@ -11,14 +11,26 @@ namespace Bazaarvoice\Connector\Model\Feed\Product;
  * @author		Dennis Rogers <dennis@storefrontconsulting.com>
  */
 
-use Bazaarvoice\Connector\Model\Feed\Feed;
-use Bazaarvoice\Connector\Model\Feed\ProductFeed;
+use Bazaarvoice\Connector\Model\Feed;
 use Bazaarvoice\Connector\Model\XMLWriter;
+use Magento\Store\Model\Group;
 use Magento\Store\Model\Store;
+use Magento\Catalog\Model\ResourceModel\Product\Collection;
+use Magento\Store\Model\Website;
 
-class Product extends Feed
+class Product extends Feed\ProductFeed
 {
+    /** @var \Magento\Catalog\Helper\Product $productHelper */
     protected $productHelper;
+    /** @var Collection $productCollection */
+    protected $productCollection;
+
+    protected $attributeCodes = array(
+        'brand',
+        'upc',
+        'ean',
+        'mpn'
+    );
     
     /**
      * Constructor
@@ -37,7 +49,6 @@ class Product extends Feed
         $this->productHelper = $catalogProductHelper;
     }
 
-
     /**
      * @param XMLWriter $writer
      * @param $store
@@ -51,42 +62,97 @@ class Product extends Feed
         $this->logger->info($productCollection->count() . ' products found to export.');
 
         foreach($productCollection as $product) {
-            /* @var $product \Magento\Catalog\Model\Product */
-            
-            $writer->startElement('Product');
-            
-            $writer->writeElement('ExternalId', $this->helper->getProductId($product));
-            $writer->writeElement('Name', $product->getName(), true);
-            $writer->writeElement('Description', $product->getData('description'), true);
-
-            // !TODO Brands
-            $writer->writeElement('BrandExternalId', $product->getData('brand'));
-
-            // !TODO Categories
-            $writer->writeElement('CategoryExternalId', $product->getData('category_ids'));
-
-            $writer->writeElement('ProductPageUrl', $this->productHelper->getProductUrl($product), true);
-
-            // !TODO Localized Image Url
-            $writer->writeElement('ImageUrl',
-                $store->getUrl() .
-                'pub/media/catalog/product' .
-                $product->getImage());
-
-            // !TODO extra attributes
-            foreach(array('ManufacturerPartNumber', 'EAN', 'UPC') as $code) {
-                $writer->startElement($code.'s');
-                $writer->writeElement($code, $product->getData($code));
-                $writer->endElement();
-            }
-
-            // !TODO Families
-
-            $writer->endElement(); // Product    
+            $this->writeProduct($writer, $product);
         }
         
         $writer->endElement(); // Products
-        
+    }
+
+    /**
+     * @param XMLWriter $writer
+     * @param Group $storeGroup
+     */
+    public function processProductsForStoreGroup(XMLWriter $writer, Group $storeGroup)
+    {
+        $writer->startElement('Products');
+        $productCollection = $this->_getProductCollection();
+
+        $this->logger->info($productCollection->count() . ' products found to export.');
+
+        foreach($productCollection as $product) {
+            $this->writeProduct($writer, $product);
+        }
+
+        $writer->endElement(); // Products
+    }
+
+    /**
+     * @param XMLWriter $writer
+     * @param Website $website
+     */
+    public function processProductsForWebsite(XMLWriter $writer, Website $website)
+    {
+        $writer->startElement('Products');
+        $productCollection = $this->_getProductCollection();
+
+        $this->logger->info($productCollection->count() . ' products found to export.');
+
+        foreach($productCollection as $product) {
+            $this->writeProduct($writer, $product);
+        }
+
+        $writer->endElement(); // Products
+    }
+    
+    /**
+     * @param XMLWriter $writer
+     */
+    public function processProductsForGlobal(XMLWriter $writer)
+    {
+        $writer->startElement('Products');
+        $productCollection = $this->_getProductCollection();
+
+        $this->logger->info($productCollection->count() . ' products found to export.');
+
+        foreach($productCollection as $product) {
+            $this->writeProduct($writer, $product);
+        }
+
+        $writer->endElement(); // Products
+    }
+
+    /**
+     * @param XMLWriter $writer
+     * @param \Magento\Catalog\Model\Product $product
+     */
+    protected function writeProduct(XMLWriter $writer, \Magento\Catalog\Model\Product $product)
+    {
+        $writer->startElement('Product');
+
+        $writer->writeElement('ExternalId', $this->helper->getProductId($product));
+        $writer->writeElement('Name', $product->getName(), true);
+        $writer->writeElement('Description', $product->getData('description'), true);
+
+        $writer->writeElement('BrandExternalId', $product->getData('brand'));
+
+        // !TODO Categories
+        $writer->writeElement('CategoryExternalId', $product->getData('category_ids'));
+
+        $writer->writeElement('ProductPageUrl', $this->productHelper->getProductUrl($product), true);
+
+        // !TODO Localized Image Url
+        $writer->writeElement('ImageUrl', $product->getImageUrl());
+
+        // !TODO extra attributes
+        foreach(array('ManufacturerPartNumber', 'EAN', 'UPC') as $code) {
+            $writer->startElement($code.'s');
+            $writer->writeElement($code, $product->getData($code));
+            $writer->endElement();
+        }
+
+        // !TODO Families
+
+        $writer->endElement(); // Product
     }
 
     /**
@@ -94,22 +160,25 @@ class Product extends Feed
      */
     protected function _getProductCollection()
     {
-        $productFactory = $this->objectManager->get('\Magento\Catalog\Model\ProductFactory');
+        if(!$this->productCollection) {
+            $productFactory = $this->objectManager->get('\Magento\Catalog\Model\ProductFactory');
 
-        /* @var \Magento\Catalog\Model\ResourceModel\Product\Collection $productCollection */
-        $productCollection = $productFactory->create()->getCollection();
+            /* @var Collection $productCollection */
+            $productCollection = $productFactory->create()->getCollection();
 
-        $productCollection->addAttributeToFilter(ProductFeed::INCLUDE_IN_FEED_FLAG, \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED);
+            $productCollection
+                ->addAttributeToSelect('name')
+                ->addAttributeToSelect('description')
+                ->addAttributeToSelect('brand')
+                ->addAttributeToSelect('category_ids')
+                ->addAttributeToSelect('image')
+                ->addAttributeToSelect(Feed\ProductFeed::INCLUDE_IN_FEED_FLAG);
 
-        $productCollection
-            ->addAttributeToSelect('name')
-            ->addAttributeToSelect('description')
-            ->addAttributeToSelect('brand')
-            ->addAttributeToSelect('category_ids')
-            ->addAttributeToSelect('image');
+            $productCollection->addAttributeToFilter(Feed\ProductFeed::INCLUDE_IN_FEED_FLAG, \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED);
 
-        $this->logger->info($productCollection->getSelect()->__toString());
-        return $productCollection;
+            $this->productCollection = $productCollection;
+        }
+        return $this->productCollection;
     }
 
 

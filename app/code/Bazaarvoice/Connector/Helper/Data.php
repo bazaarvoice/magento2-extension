@@ -7,11 +7,12 @@ class Data extends AbstractHelper
 {
     public function getConfig($config_path, $store = null, $scope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE)
     {
-        return $this->scopeConfig->getValue(
-            'bazaarvoice/'.$config_path,
-            $scope,
-            $store
-        );
+        return $this->getDefaultConfig('bazaarvoice/'.$config_path, $store, $scope);
+    }
+
+    public function getDefaultConfig($config_path, $store = null, $scope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE)
+    {
+        return $this->scopeConfig->getValue($config_path, $scope, $store);
     }
 
     /**
@@ -48,12 +49,12 @@ class Data extends AbstractHelper
         }
         // Lookup other config settings
         $clientName = $this->getConfig('general/client_name', $store);
-        $deploymnetZoneName = $this->getConfig('general/deployment_zone', $store);
+        $deploymentZoneName = $this->getConfig('general/deployment_zone', $store);
         // Get locale code from BV config, 
         // Note that this doesn't use Magento's locale, this will allow clients to override this and map it as they see fit
         $localeCode = $this->getConfig('general/locale', $store);
         // Build url string
-        $url = $protocol . '://' . $apiHostname . '/' . $static . $clientName . '/' . urlencode($deploymnetZoneName) . '/' . $localeCode;
+        $url = $protocol . '://' . $apiHostname . '/' . $static . $clientName . '/' . urlencode($deploymentZoneName) . '/' . $localeCode;
         // Return final url
         return $url;
     }

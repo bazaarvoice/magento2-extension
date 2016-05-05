@@ -13,11 +13,12 @@
 namespace Bazaarvoice\Connector\Setup;
 
 use Magento\Framework\Setup;
+use Magento\Framework\ObjectManagerInterface;
 use Bazaarvoice\Connector;
 use Magento\Sales\Setup\SalesSetup;
 use Magento\Sales\Setup\SalesSetupFactory;
-use Magento\Eav\Setup\EavSetup;
-use Magento\Eav\Setup\EavSetupFactory;
+use Magento\Catalog\Setup\CategorySetup;
+use Magento\Catalog\Setup\CategorySetupFactory;
 use Magento\Sales\Model\Order;
 use Magento\Catalog\Model\Product;
 
@@ -27,21 +28,30 @@ class InstallData implements Setup\InstallDataInterface
     /** @var SalesSetupFactory */
     protected $salesSetupFactory;
 
-    /** @var EavSetup */
-    protected $eavSetupFactory;
+    /** @var CategorySetupFactory */
+    protected $categorySetupFactory;
+
+    /** @var ObjectManagerInterface */
+    protected $objectManager;
 
     /**
      * Init
      *
      * @param SalesSetupFactory $salesSetupFactory
-     * @param EavSetupFactory $eavSetupFactory
+     * @param CategorySetupFactory $categorySetupFactory
+     * @param ObjectManagerInterface $objectManger
+     * @param \Magento\Framework\App\State $state
      */
     public function __construct(
         SalesSetupFactory $salesSetupFactory,
-        EavSetupFactory $eavSetupFactory
+        CategorySetupFactory $categorySetupFactory,
+        ObjectManagerInterface $objectManger,
+        \Magento\Framework\App\State $state
     ) {
         $this->salesSetupFactory = $salesSetupFactory;
-        $this->eavSetupFactory = $eavSetupFactory;
+        $this->categorySetupFactory = $categorySetupFactory;
+        $this->objectManager = $objectManger;
+        $state->setAreaCode('frontend');
     }
 
 
@@ -64,8 +74,8 @@ class InstallData implements Setup\InstallDataInterface
             ]
         );
 
-        /** @var EavSetup $eavSetup */
-        $eavSetup = $this->eavSetupFactory->create(['setup' => $setup]);
+        /** @var CategorySetup $eavSetup */
+        $eavSetup = $this->categorySetupFactory->create(['setup' => $setup]);
 
         $eavSetup->addAttribute(
             Product::ENTITY,
@@ -81,7 +91,7 @@ class InstallData implements Setup\InstallDataInterface
                 'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_STORE,
                 'visible' => true,
                 'required' => false,
-                'user_defined' => true,
+                'user_defined' => false,
                 'default' => \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED,
                 'apply_to' => '',
                 'visible_on_front' => false,
@@ -109,6 +119,22 @@ class InstallData implements Setup\InstallDataInterface
         if (!$eavSetup->getAttributesNumberInGroup($entityTypeId, $attributeSetId, 'Product Details')) {
             $eavSetup->removeAttributeGroup($entityTypeId, $attributeSetId, 'Product Details');
         }
+
+        $attrData = array(
+            Connector\Model\Feed\ProductFeed::INCLUDE_IN_FEED_FLAG => \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED,
+        );
+
+        $storeId = 0;
+
+        /** @var \Magento\Catalog\Model\ProductFactory $productFactory */
+        $productFactory = $this->objectManager->get('\Magento\Catalog\Model\ProductFactory');
+        $productIds = $productFactory->create()->getCollection()->getAllIds();
+        /** @var \Magento\Catalog\Model\Product\Action $action */
+        $this->objectManager->get('\Magento\Catalog\Model\Product\Action')->updateAttributes(
+            $productIds,
+            $attrData,
+            $storeId
+        );
 
     }
 
