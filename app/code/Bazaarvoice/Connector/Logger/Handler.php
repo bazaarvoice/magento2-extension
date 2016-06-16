@@ -11,15 +11,13 @@ namespace Bazaarvoice\Connector\Logger;
  * @author		Dennis Rogers <dennis@storefrontconsulting.com>
  */
  
-use Monolog\Logger;
-
 class Handler extends \Magento\Framework\Logger\Handler\Base
 {
     /**
      * Logging level
      * @var int
      */
-    protected $loggerType = Logger::INFO;
+    protected $loggerType = \Monolog\Logger::INFO;
 
     /**
      * File name
