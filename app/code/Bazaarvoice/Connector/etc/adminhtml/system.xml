@@ -105,7 +105,7 @@
                     <label>SFTP Username</label>
                     <comment><![CDATA[SFTP Connection Username. If this is left blank, the above Client Name will be used.]]></comment>
                 </field>
-                <field id="sftp_password" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="sftp_password" translate="label" type="password" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>SFTP Password</label>
                     <comment><![CDATA[Password used to access the BV SFTP server for feed upload/download processes.]]></comment>
                 </field>
@@ -139,6 +139,11 @@
                     <label>Manufacturer Part Number Attribute</label>
                     <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
                     <comment><![CDATA[This attribute code will be used to locate the Manufacturer Part Number of products which are sent in the product feed.]]></comment>
+                </field>
+                <field id="isbn_code" translate="label" type="select" sortOrder="165" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>ISBN Attribute</label>
+                    <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
+                    <comment><![CDATA[This attribute code will be used to locate the ISBN of products which are sent in the product feed.]]></comment>
                 </field>
                 <field id="bvfamilies_expand" translate="label" type="select" sortOrder="170" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Expand Families in Product Feed</label>
