@@ -36,7 +36,8 @@ class Product extends Feed\ProductFeed
         'BrandExternalId' => 'brand',
         'UPC' => 'upc',
         'EAN' => 'ean',
-        'ManufacturerPartNumber' => 'mpn'
+        'ManufacturerPartNumber' => 'mpn',
+        'ISBN' => 'isbn'
     );
 
     protected $customAttributes;
