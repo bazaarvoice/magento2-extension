@@ -32,8 +32,8 @@ class ProductFeed extends Feed
         // Build local file name / path
         $productFeedFilePath = BP . '/var/export/bvfeeds';
         $productFeedFileName =
-            $productFeedFilePath . '/productFeed-store-' . $store->getId() . /* '-' . date('U') . */ '.xml';
-        $this->logger->info('Creating file ' . $productFeedFileName);
+            $productFeedFilePath . '/productFeed-store-' . $store->getId() . '-' . date('U') . '.xml';
+        $this->log('Creating file ' . $productFeedFileName);
         
         // Get client name for the scope
         $clientName = $this->helper->getConfig('general/client_name', $store->getId());
@@ -65,8 +65,8 @@ class ProductFeed extends Feed
         // Build local file name / path
         $productFeedFilePath = BP . '/var/export/bvfeeds';
         $productFeedFileName =
-            $productFeedFilePath . '/productFeed-group-' . $storeGroup->getId() . /* '-' . date('U') . */ '.xml';
-        $this->logger->info('Creating file ' . $productFeedFileName);
+            $productFeedFilePath . '/productFeed-group-' . $storeGroup->getId() . '-' . date('U') . '.xml';
+        $this->log('Creating file ' . $productFeedFileName);
 
         // Get client name for the scope
         $clientName = $this->helper->getConfig('general/client_name', $store);
@@ -98,8 +98,8 @@ class ProductFeed extends Feed
         // Build local file name / path
         $productFeedFilePath = BP . '/var/export/bvfeeds';
         $productFeedFileName =
-            $productFeedFilePath . '/productFeed-website-' . $website->getId() . /* '-' . date('U') . */ '.xml';
-        $this->logger->info('Creating file ' . $productFeedFileName);
+            $productFeedFilePath . '/productFeed-website-' . $website->getId() . '-' . date('U') . '.xml';
+        $this->log('Creating file ' . $productFeedFileName);
 
         // Get client name for the scope
         $clientName = $this->helper->getConfig('general/client_name', $store);
@@ -129,8 +129,8 @@ class ProductFeed extends Feed
         // Build local file name / path
         $productFeedFilePath = BP . '/var/export/bvfeeds';
         $productFeedFileName =
-            $productFeedFilePath . '/productFeed-' . /* date('U') . */ '.xml';
-        $this->logger->info('Creating file ' . $productFeedFileName);
+            $productFeedFilePath . '/productFeed-global-' . date('U') . '.xml';
+        $this->log('Creating file ' . $productFeedFileName);
 
         // Get client name for the scope
         $clientName = $this->helper->getConfig('general/client_name');
