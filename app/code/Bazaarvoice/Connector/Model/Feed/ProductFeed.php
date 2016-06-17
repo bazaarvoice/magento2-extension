@@ -32,8 +32,8 @@ class ProductFeed extends Feed
         // Build local file name / path
         $productFeedFilePath = BP . '/var/export/bvfeeds';
         $productFeedFileName =
-            $productFeedFilePath . '/productFeed-store-' . $store->getId() . /* '-' . date('U') . */ '.xml';
-        $this->logger->info('Creating file ' . $productFeedFileName);
+            $productFeedFilePath . '/productFeed-store-' . $store->getId() . '-' . date('U') . '.xml';
+        $this->log('Creating file ' . $productFeedFileName);
         
         // Get client name for the scope
         $clientName = $this->helper->getConfig('general/client_name', $store->getId());
@@ -45,7 +45,6 @@ class ProductFeed extends Feed
             ->processBrandsForStore($writer, $store);
         $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Category')
             ->processCategoriesForStore($writer, $store);
-        //$productModel->setCategoryIdList($categoryModel->getCategoryIdList());
         $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Product')
             ->processProductsForStore($writer, $store);
 
@@ -66,8 +65,8 @@ class ProductFeed extends Feed
         // Build local file name / path
         $productFeedFilePath = BP . '/var/export/bvfeeds';
         $productFeedFileName =
-            $productFeedFilePath . '/productFeed-group-' . $storeGroup->getId() . /* '-' . date('U') . */ '.xml';
-        $this->logger->info('Creating file ' . $productFeedFileName);
+            $productFeedFilePath . '/productFeed-group-' . $storeGroup->getId() . '-' . date('U') . '.xml';
+        $this->log('Creating file ' . $productFeedFileName);
 
         // Get client name for the scope
         $clientName = $this->helper->getConfig('general/client_name', $store);
@@ -79,7 +78,6 @@ class ProductFeed extends Feed
             ->processBrandsForStoreGroup($writer, $storeGroup);
         $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Category')
             ->processCategoriesForStoreGroup($writer, $storeGroup);
-        //$productModel->setCategoryIdList($categoryModel->getCategoryIdList());
         $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Product')
             ->processProductsForStoreGroup($writer, $storeGroup);
 
@@ -100,8 +98,8 @@ class ProductFeed extends Feed
         // Build local file name / path
         $productFeedFilePath = BP . '/var/export/bvfeeds';
         $productFeedFileName =
-            $productFeedFilePath . '/productFeed-website-' . $website->getId() . /* '-' . date('U') . */ '.xml';
-        $this->logger->info('Creating file ' . $productFeedFileName);
+            $productFeedFilePath . '/productFeed-website-' . $website->getId() . '-' . date('U') . '.xml';
+        $this->log('Creating file ' . $productFeedFileName);
 
         // Get client name for the scope
         $clientName = $this->helper->getConfig('general/client_name', $store);
@@ -113,7 +111,6 @@ class ProductFeed extends Feed
             ->processBrandsForWebsite($writer, $website);
         $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Category')
             ->processCategoriesForWebsite($writer, $website);
-        //$productModel->setCategoryIdList($categoryModel->getCategoryIdList());
         $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Product')
             ->processProductsForWebsite($writer, $website);
 
@@ -132,8 +129,8 @@ class ProductFeed extends Feed
         // Build local file name / path
         $productFeedFilePath = BP . '/var/export/bvfeeds';
         $productFeedFileName =
-            $productFeedFilePath . '/productFeed-' . /* date('U') . */ '.xml';
-        $this->logger->info('Creating file ' . $productFeedFileName);
+            $productFeedFilePath . '/productFeed-global-' . date('U') . '.xml';
+        $this->log('Creating file ' . $productFeedFileName);
 
         // Get client name for the scope
         $clientName = $this->helper->getConfig('general/client_name');
@@ -145,7 +142,6 @@ class ProductFeed extends Feed
             ->processBrandsForGlobal($writer);
         $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Category')
             ->processCategoriesForGlobal($writer);
-        //$productModel->setCategoryIdList($categoryModel->getCategoryIdList());
         $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Product')
             ->processProductsForGlobal($writer);
 
@@ -169,11 +165,36 @@ class ProductFeed extends Feed
     protected function getLocales($storeIds)
     {
         $locales = array();
-        foreach($storeIds as $storeId) {
+        foreach ($storeIds as $storeId) {
             $localeCode = $this->helper->getConfig('general/locale', $storeId);
             $locales[$localeCode] = $storeId;
         }
         return $locales;
+    }
+
+    /**
+     * Get the uniquely identifying category ID for a catalog category.
+     *
+     * This is the unique, category or subcategory ID (duplicates are unacceptable).
+     * This ID should be stable: it should not change for the same logical category even
+     * if the category's name changes.
+     *
+     * @static
+     * @param  \Magento\Catalog\Model\Category $category a reference to a catalog category object
+     * @param int $storeId
+     * @return string The unique category ID to be used with Bazaarvoice
+     */
+    protected function getCategoryId($category, $storeId = null)
+    {
+        if($this->helper->getConfig('feeds/category_id_use_url_path', $storeId) == false) {
+            return $category->getId();
+        }
+        else {
+            $rawCategoryId = $category->getUrlPath();
+
+            $rawCategoryId = str_replace('/', '-', $rawCategoryId);
+            return $this->helper->replaceIllegalCharacters($rawCategoryId);
+        }
     }
     
     /**

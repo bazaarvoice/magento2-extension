@@ -105,7 +105,7 @@
                     <label>SFTP Username</label>
                     <comment><![CDATA[SFTP Connection Username. If this is left blank, the above Client Name will be used.]]></comment>
                 </field>
-                <field id="sftp_password" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="sftp_password" translate="label" type="password" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>SFTP Password</label>
                     <comment><![CDATA[Password used to access the BV SFTP server for feed upload/download processes.]]></comment>
                 </field>
@@ -116,9 +116,11 @@
                 </field>
                 <field id="product_filename" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Product Feed Filename</label>
+                    <comment><![CDATA[If blank 'productfeed.xml' will be used.]]></comment>
                 </field>
                 <field id="product_path" translate="label" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Product Feed Export Path</label>
+                    <comment><![CDATA[If blank '/import-inbox' will be used.]]></comment>
                 </field>
                 <field id="brand_code" translate="label" type="select" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Brand Attribute</label>
@@ -139,6 +141,11 @@
                     <label>Manufacturer Part Number Attribute</label>
                     <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
                     <comment><![CDATA[This attribute code will be used to locate the Manufacturer Part Number of products which are sent in the product feed.]]></comment>
+                </field>
+                <field id="isbn_code" translate="label" type="select" sortOrder="165" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>ISBN Attribute</label>
+                    <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
+                    <comment><![CDATA[This attribute code will be used to locate the ISBN of products which are sent in the product feed.]]></comment>
                 </field>
                 <field id="bvfamilies_expand" translate="label" type="select" sortOrder="170" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Expand Families in Product Feed</label>
@@ -164,6 +171,11 @@
                     <label>Purchase Feed Triggering Event</label>
                     <source_model>Bazaarvoice\Connector\Model\Source\Trigger</source_model>
                     <comment><![CDATA[This determines whether to use the purchase date or ship date when calculating which purchases to include in the purchase feed.]]></comment>
+                </field>
+                <field id="run_pie" translate="button_label" type="button"  sortOrder="290" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label/>
+                    <button_label><![CDATA[Run Bazaarvoice Purchase Feed]]></button_label>
+                    <frontend_model>Bazaarvoice\Connector\Block\System\Config\Button</frontend_model>
                 </field>
             </group>
         </section>
