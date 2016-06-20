@@ -1,3 +1,5 @@
+<?php /** @var Bazaarvoice\Connector\Block\Product $this */ ?>
+
 <?php if($this->isEnabled()): ?>
     <script type="text/javascript">
         var bvConfigData = {};
@@ -6,6 +8,7 @@
 <?php endif; ?>
 <?php if($this->getConfig('rr/container')): ?>
         bvConfigData.submissionContainerUrl = "<?php echo $this->getContainerUrl() ?>";
+        bvConfigData.submissionReturnUrl = "<?php echo $this->getProduct()->getProductUrl() ?>";
 <?php endif; ?>
         $BV.configure("global", bvConfigData);
     </script>
