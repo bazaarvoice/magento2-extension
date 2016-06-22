@@ -262,7 +262,8 @@ class Product extends Feed\ProductFeed
         if(preg_match("#no_selection#", $imageUrl)) {
             $imageUrl = $this->productHelper->getImageUrl($masterProduct);
         }
-        $writer->writeElement('ImageUrl', $imageUrl, true);
+        if(strlen($imageUrl))
+            $writer->writeElement('ImageUrl', $imageUrl, true);
         if(count($localeProducts)){
             $writer->startElement('ImageUrls');
             foreach($localeProducts as $locale => $localeProduct) {
