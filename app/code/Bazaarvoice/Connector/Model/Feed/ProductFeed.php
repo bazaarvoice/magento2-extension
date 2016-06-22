@@ -133,7 +133,7 @@ class ProductFeed extends Feed
         $this->log('Creating file ' . $productFeedFileName);
 
         // Get client name for the scope
-        $clientName = $this->helper->getConfig('general/client_name');
+        $clientName = $this->helper->getConfig('general/client_name', 0);
 
         // Create varien io object and write local feed file
         $writer = $this->openFile('http://www.bazaarvoice.com/xs/PRR/ProductFeed/5.2', $clientName);
@@ -153,8 +153,8 @@ class ProductFeed extends Feed
         $store = $storeManager->getStore(0);
 
         // Upload feed
-        $destinationFile = $this->helper->getConfig('feeds/product_path', $store) . '/' .
-            $this->helper->getConfig('feeds/product_filename', $store);
+        $destinationFile = $this->helper->getConfig('feeds/product_path', 0) . '/' .
+            $this->helper->getConfig('feeds/product_filename', 0, 'default');
         $this->uploadFeed($productFeedFileName, $destinationFile, $store);
     }
 

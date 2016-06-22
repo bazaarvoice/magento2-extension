@@ -158,8 +158,8 @@ class Feed
         $this->log('Exporting ' . $this->type_id . ' feed file for entire Magento instance');
 
         try {
-            if ($this->helper->getConfig('feeds/enable_' . $this->type_id . '_feed') === '1'
-                && $this->helper->getConfig('general/enable_bv') === '1'
+            if ($this->helper->getConfig('feeds/enable_' . $this->type_id . '_feed', 0) === '1'
+                && $this->helper->getConfig('general/enable_bv', 0) === '1'
             ) {
                 $this->exportFeedForGlobal();
             }

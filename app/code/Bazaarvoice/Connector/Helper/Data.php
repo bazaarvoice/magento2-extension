@@ -83,8 +83,11 @@ class Data extends AbstractHelper
             $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
             $product = $objectManager->get('Magento\Catalog\Model\Product')->load($product);    
         }
-        
-        $rawProductId = $product->getSku();
+
+        if(is_object($product))
+            $rawProductId = $product->getSku();
+        else
+            $rawProductId = $product;
 
         // >> Customizations go here
         $rawProductId = preg_replace_callback('/\./s', create_function('$match','return "_bv".ord($match[0])."_";'), $rawProductId);        

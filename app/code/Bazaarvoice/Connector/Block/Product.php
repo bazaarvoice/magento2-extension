@@ -71,7 +71,7 @@ class Product extends \Magento\Framework\View\Element\Template
 
     public function getContainerUrl()
     {
-        return $this->_storeManager->getStore()->getBaseUrl() . 'bazaarvoice';
+        return $this->_storeManager->getStore()->getBaseUrl() . 'bazaarvoice/submission/container';
     }
     
     public function getProductSku()
