@@ -13,12 +13,6 @@ class Data extends AbstractHelper
     public function getDefaultConfig($config_path, $store = null, $scope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE)
     {
         $value = $this->scopeConfig->getValue($config_path, $scope, $store);
-        if($value == '') {
-            if($config_path == 'bazaarvoice/feeds/product_filename')
-                $value = 'productfeed.xml';
-            elseif($config_path == 'bazaarvoice/feeds/product_path')
-                $value = '/import-inbox';
-        }
         return $value;
     }
 
