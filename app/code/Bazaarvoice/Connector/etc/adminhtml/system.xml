@@ -174,7 +174,7 @@
                 </field>
                 <field id="run_pie" translate="button_label" type="button"  sortOrder="290" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label/>
-                    <button_label><![CDATA[Run Bazaarvoice Purchase Feed]]></button_label>
+                    <button_label><![CDATA[Run Bazaarvoice Purchase Feed Now]]></button_label>
                     <frontend_model>Bazaarvoice\Connector\Block\System\Config\Button</frontend_model>
                 </field>
             </group>

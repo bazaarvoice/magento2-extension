@@ -190,7 +190,8 @@ class Category extends Feed\ProductFeed
             $writer->endElement(); // CategoryPageUrls
         }
 
-        $writer->writeElement('ImageUrl', $category->getImageUrl(), true);
+        if($category->getImageUrl())
+            $writer->writeElement('ImageUrl', $category->getImageUrl(), true);
         if(count($localizedData)) {
             $writer->startElement('ImageUrls');
             foreach($localizedData as $locale => $data) {

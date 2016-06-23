@@ -27,6 +27,7 @@ class Feed
 {    
     protected $objectManager;
     protected $test;
+    protected $force;
     protected $type_id;
     protected $families;
 
@@ -47,7 +48,7 @@ class Feed
         $this->families = $helper->getConfig('general/families');
     }
 
-    public function generateFeed($test = false)
+    public function generateFeed($test = false, $force = false)
     {
         $this->log('Start Bazaarvoice ' . $this->type_id . ' Feed Generation');
 
@@ -55,6 +56,8 @@ class Feed
         if($test) {
             $this->log('TEST MODE');
         }
+
+        $this->force = $force;
 
         switch($this->helper->getConfig('feeds/generation_scope')) {
             case Scope::STORE_GROUP:
@@ -82,7 +85,7 @@ class Feed
         foreach ($stores as $store) {
             /* @var \Magento\Store\Model\Store $store */
             try {
-                if ($this->helper->getConfig('feeds/enable_' . $this->type_id . '_feed', $store->getId()) === '1'
+                if ($this->force || $this->helper->getConfig('feeds/enable_' . $this->type_id . '_feed', $store->getId()) === '1'
                     && $this->helper->getConfig('general/enable_bv', $store->getId()) === '1'
                 ) {
                     $this->log('Exporting ' . $this->type_id . ' feed for store: ' . $store->getCode());
@@ -110,7 +113,7 @@ class Feed
             // Default store, for config and product data
             $store = $storeGroup->getDefaultStore();
             try {
-                if ($this->helper->getConfig('feeds/enable_' . $this->type_id . '_feed', $store->getId()) === '1'
+                if ($this->force || $this->helper->getConfig('feeds/enable_' . $this->type_id . '_feed', $store->getId()) === '1'
                     && $this->helper->getConfig('general/enable_bv', $store->getId()) === '1'
                 ) {
                     $this->log('Exporting ' . $this->type_id . ' feed for store group: ' . $storeGroup->getName());
@@ -136,7 +139,7 @@ class Feed
         foreach ($websites as $website) {
             /* @var \Magento\Store\Model\Website $website */
             try {
-                if ($this->helper->getConfig('feeds/enable_' . $this->type_id . '_feed', $website->getId(), \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE) === '1'
+                if ($this->force || $this->helper->getConfig('feeds/enable_' . $this->type_id . '_feed', $website->getId(), \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE) === '1'
                     && $this->helper->getConfig('general/enable_bv', $website->getId(), \Magento\Store\Model\ScopeInterface::SCOPE_WEBSITE) === '1'
                 ) {
                     $this->log('Exporting ' . $this->type_id . ' feed for website: ' . $website->getName());
@@ -158,7 +161,7 @@ class Feed
         $this->log('Exporting ' . $this->type_id . ' feed file for entire Magento instance');
 
         try {
-            if ($this->helper->getConfig('feeds/enable_' . $this->type_id . '_feed', 0) === '1'
+            if ($this->force || $this->helper->getConfig('feeds/enable_' . $this->type_id . '_feed', 0) === '1'
                 && $this->helper->getConfig('general/enable_bv', 0) === '1'
             ) {
                 $this->exportFeedForGlobal();
