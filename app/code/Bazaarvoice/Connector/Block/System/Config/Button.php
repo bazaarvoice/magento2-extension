@@ -18,11 +18,16 @@ class Button extends \Magento\Config\Block\System\Config\Form\Field
         /** @var \Magento\Backend\Block\Widget\Button $buttonBlock  */
         $buttonBlock = $this->getForm()->getLayout()->createBlock('Magento\Backend\Block\Widget\Button');
 
-        $url = $this->getUrl("*/bvfeed/run");
-        
+        $originalData = $element->getOriginalData();
+
+        $buttonLabel = !empty($originalData['button_label']) ? $originalData['button_label'] : __('Run Feed');
+        $buttonId = !empty($originalData['id']) ? $originalData['id'] : 'bv_export';
+        $url = !empty($originalData['button_url']) ? $originalData['button_url'] : "*/bvfeed/runpurchase";
+        $url = $this->getUrl($url);
+
         $data = [
-            'id' => 'bv_pie_export' . $this->getVarnishVersion(),
-            'label' => __('Run Bazaarvoice Purchase Feed'),
+            'id' => $buttonId,
+            'label' => $buttonLabel,
             'onclick' => "window.open('" . $url . "')",
         ];
 
