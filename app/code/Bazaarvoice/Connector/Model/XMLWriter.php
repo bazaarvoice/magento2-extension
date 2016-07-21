@@ -35,5 +35,4 @@ class XMLWriter extends \XMLWriter
         }
     }
 
-
 }

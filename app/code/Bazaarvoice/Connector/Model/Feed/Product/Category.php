@@ -140,17 +140,21 @@ class Category extends Feed\ProductFeed
      */
     protected function writeCategory(XMLWriter $writer, \Magento\Catalog\Model\Category $category, $storeId = 0, $locales = false)
     {
-        $localizedData = [];
+        $localizedData = [
+            'names' => [],
+            'urls' => [],
+            'images' => []
+        ];
         if(is_array($locales) && count($locales)) {
             foreach($locales as $locale => $localeStoreId) {
                 $category->setStoreId($localeStoreId)->load($category->getId());
-                $url = $this->getStoreUrl($category, $localeStoreId);
 
-                $localizedData[$locale] = [
-                    'Name' => $category->getName(),
-                    'CategoryPageUrl' => $url,
-                    'ImageUrl' => $category->getImageUrl()
-                ];
+                if($name = $category->getName())
+                    $localizedData['names'][$locale] = $name;
+                if($url = $this->getStoreUrl($category, $localeStoreId))
+                    $localizedData['urls'][$locale] = $url;
+                if($image = $category->getImageUrl())
+                    $localizedData['images'][$locale] = $image;
             }
         }
 
@@ -162,45 +166,40 @@ class Category extends Feed\ProductFeed
         $writer->startElement('Category');
 
         $writer->writeElement('ExternalId', $categoryId);
+
         $writer->writeElement('Name', $category->getName(), true);
-        if(count($localizedData)) {
+        if(count($localizedData['names'])) {
             $writer->startElement('Names');
-            foreach($localizedData as $locale => $data) {
-                if(isset($data['Name']) && !empty($data['Name'])) {
-                    $writer->startElement('Name');
-                    $writer->writeAttribute('locale', $locale);
-                    $writer->writeRaw($data['Name'], true);
-                    $writer->endElement();
-                }
+            foreach($localizedData['names'] as $locale => $name) {
+                $writer->startElement('Name');
+                $writer->writeAttribute('locale', $locale);
+                $writer->writeRaw($name, true);
+                $writer->endElement();
             }
             $writer->endElement(); // Names
         }
 
         $writer->writeElement('CategoryPageUrl', $category->getUrl(), true);
-        if(count($localizedData)) {
+        if(count($localizedData['urls'])) {
             $writer->startElement('CategoryPageUrls');
-            foreach($localizedData as $locale => $data) {
-                if(isset($data['CategoryPageUrl']) && !empty($data['CategoryPageUrl'])) {
-                    $writer->startElement('CategoryPageUrl');
-                    $writer->writeAttribute('locale', $locale);
-                    $writer->writeRaw($data['CategoryPageUrl'], true);
-                    $writer->endElement();
-                }
+            foreach($localizedData['urls'] as $locale => $url) {
+                $writer->startElement('CategoryPageUrl');
+                $writer->writeAttribute('locale', $locale);
+                $writer->writeRaw($url, true);
+                $writer->endElement();
             }
             $writer->endElement(); // CategoryPageUrls
         }
 
-        if($category->getImageUrl())
+        if(strlen($category->getImageUrl()))
             $writer->writeElement('ImageUrl', $category->getImageUrl(), true);
-        if(count($localizedData)) {
+        if(count($localizedData['images'])) {
             $writer->startElement('ImageUrls');
-            foreach($localizedData as $locale => $data) {
-                if(isset($data['ImageUrl']) && !empty($data['ImageUrl'])) {
-                    $writer->startElement('ImageUrl');
-                    $writer->writeAttribute('locale', $locale);
-                    $writer->writeRaw($data['ImageUrl'], true);
-                    $writer->endElement();
-                }
+            foreach($localizedData['images'] as $locale => $image) {
+                $writer->startElement('ImageUrl');
+                $writer->writeAttribute('locale', $locale);
+                $writer->writeRaw($image, true);
+                $writer->endElement();
             }
             $writer->endElement(); // ImageUrls
         }

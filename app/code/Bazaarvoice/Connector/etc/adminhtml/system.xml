@@ -159,6 +159,12 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[If true, use Magento category URL path as category id, otherwise use Mage category entity primary key.]]></comment>
                 </field>
+                <field id="run_product" translate="button_label" type="button"  sortOrder="190" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label/>
+                    <button_label><![CDATA[Run Bazaarvoice Product Feed Now]]></button_label>
+                    <button_url>*/bvfeed/runproduct</button_url>
+                    <frontend_model>Bazaarvoice\Connector\Block\System\Config\Button</frontend_model>
+                </field>
 
                 <field id="enable_purchase_feed" translate="label" type="select" sortOrder="200" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enable Purchase Feed</label>
@@ -174,10 +180,10 @@
                     <source_model>Bazaarvoice\Connector\Model\Source\Trigger</source_model>
                     <comment><![CDATA[This determines whether to use the purchase date or ship date when calculating which purchases to include in the purchase feed.]]></comment>
                 </field>
-
                 <field id="run_pie" translate="button_label" type="button"  sortOrder="290" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label/>
                     <button_label><![CDATA[Run Bazaarvoice Purchase Feed Now]]></button_label>
+                    <button_url>*/bvfeed/runpurchase</button_url>
                     <frontend_model>Bazaarvoice\Connector\Block\System\Config\Button</frontend_model>
                 </field>
             </group>

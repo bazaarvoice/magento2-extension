@@ -229,7 +229,7 @@ class Feed
      */
     protected function uploadFeed($sourceFile, $destinationFile, $store = null)
     {
-        $this->log("Uploading file $sourceFile to SFTP server ($destinationFile).");
+        $this->log("Uploading file ".basename($sourceFile)." to SFTP server (".$this->getSFTPHost($store).$destinationFile.')');
 
         $params = array(
             'host'      => $this->getSFTPHost($store),
