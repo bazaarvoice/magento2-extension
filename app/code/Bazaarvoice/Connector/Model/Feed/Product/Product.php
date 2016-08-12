@@ -96,7 +96,7 @@ class Product extends Feed\ProductFeed
         $localeData = $this->getLocaleData($storeGroup->getStoreIds());
 
         foreach($productCollection as $product) {
-            $this->writeProduct($writer, $product, $storeGroup->getDefaultStore(), $localeData);
+            $this->writeProduct($writer, $product, $localeData);
         }
 
         $writer->endElement(); // Products
@@ -117,7 +117,7 @@ class Product extends Feed\ProductFeed
         $localeData = $this->getLocaleData($website->getStoreIds());
 
         foreach($productCollection as $product) {
-            $this->writeProduct($writer, $product, $website->getDefaultStore(), $localeData);
+            $this->writeProduct($writer, $product, $localeData);
         }
 
         $writer->endElement(); // Products
@@ -141,13 +141,8 @@ class Product extends Feed\ProductFeed
         }
         $localeData = $this->getLocaleData($stores);
 
-        // Using admin store for now
-        /** @var StoreManagerInterface $storeManager */
-        $storeManager = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface');
-        $store = $storeManager->getStore(0);
-
         foreach($productCollection as $product) {
-            $this->writeProduct($writer, $product, $store, $localeData);
+            $this->writeProduct($writer, $product, $localeData);
         }
 
         $writer->endElement(); // Products
@@ -156,10 +151,9 @@ class Product extends Feed\ProductFeed
     /**
      * @param XMLWriter $writer
      * @param \Magento\Catalog\Model\Product $product
-     * @param Store $store
      * @param null|array $localeData
      */
-    protected function writeProduct(XMLWriter $writer, \Magento\Catalog\Model\Product $product, Store $store, &$localeData = null)
+    protected function writeProduct(XMLWriter $writer, \Magento\Catalog\Model\Product $product, &$localeData = null)
     {
         // Families
         $families = false;
@@ -280,12 +274,14 @@ class Product extends Feed\ProductFeed
         }
 
         foreach($this->getCustomAttributes() as $code => $attributeCode) {
-            if($code == 'brand') {
-                $writer->writeElement('BrandExternalId', $product->getData($attributeCode));
-            } else if($product->getData($attributeCode)) {
-                $writer->startElement($code . 's');
-                $writer->writeElement($code, $product->getData($attributeCode));
-                $writer->endElement();
+            if($product->getData($attributeCode)) {
+                if($code == 'BrandExternalId') {
+                    $writer->writeElement('BrandExternalId', $product->getData($attributeCode));
+                } else {
+                    $writer->startElement($code . 's');
+                    $writer->writeElement($code, $product->getData($attributeCode));
+                    $writer->endElement();
+                }
             }
         }
 

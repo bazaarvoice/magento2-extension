@@ -20,7 +20,6 @@ use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Filesystem\Io\Sftp;
 use Magento\Store\Model\Group;
 use Magento\Store\Model\Store;
-use Magento\Framework\Exception;
 use Magento\Store\Model\Website;
 
 class Feed
@@ -95,7 +94,7 @@ class Feed
                     $this->log(ucwords($this->type_id) . ' feed disabled for store: ' . $store->getCode());
                 }
             }
-            catch (Exception $e) {
+            catch (\Exception $e) {
                 $this->logger->error('Failed to export daily ' . $this->type_id . ' feed for store: ' . $store->getCode());
                 $this->logger->error('Error message: ' . $e->getMessage());
             }
@@ -123,7 +122,7 @@ class Feed
                     $this->log(ucwords($this->type_id) . ' feed disabled for store group: ' . $storeGroup->getName());
                 }
             }
-            catch (Exception $e) {
+            catch (\Exception $e) {
                 $this->logger->error('Failed to export daily ' . $this->type_id . ' feed for store group: ' . $storeGroup->getName());
                 $this->logger->error('Error message: ' . $e->getMessage());
             }
@@ -149,7 +148,7 @@ class Feed
                     $this->log(ucwords($this->type_id) . ' feed disabled for website: ' . $website->getName());
                 }
             }
-            catch (Exception $e) {
+            catch (\Exception $e) {
                 $this->logger->error('Failed to export daily ' . $this->type_id . ' feed for website: ' . $website->getName());
                 $this->logger->error('Error message: ' . $e->getMessage());
             }
@@ -170,7 +169,7 @@ class Feed
                 $this->log(ucwords($this->type_id) . ' feed disabled.');
             }
         }
-        catch (Exception $e) {
+        catch (\Exception $e) {
             $this->logger->error('Failed to export daily ' . $this->type_id . ' feed.');
             $this->logger->error('Error message: ' . $e->getMessage());
         }
@@ -229,13 +228,16 @@ class Feed
      */
     protected function uploadFeed($sourceFile, $destinationFile, $store = null)
     {
-        $this->log("Uploading file ".basename($sourceFile)." to SFTP server (".$this->getSFTPHost($store).$destinationFile.')');
+        $this->log("Uploading file");
+        $this->log("Local file " . basename($sourceFile));
+        $this->log("Remote file " . $this->getSFTPHost($store).$destinationFile);
 
         $params = array(
             'host'      => $this->getSFTPHost($store),
             'username'  => $this->helper->getConfig('feeds/sftp_username', $store),
             'password'  => $this->helper->getConfig('feeds/sftp_password', $store)
         );
+        $this->log("Username " . $params['username']);
 
         /** @var Sftp $sftp */
         $sftp = new Sftp();
