@@ -1,3 +1,5 @@
+<?php /** @var \Bazaarvoice\Connector\Block\Reviews $this */ ?>
 <?php if($this->isEnabled()): ?>
-<div id="BVRRSummaryContainer" style="display:table-row"></div>
+    <!-- foo -->
+<div id="BVRRSummaryContainer" style="display:table-row"><?php echo $this->getAggregateSEOContent() ?></div>
 <?php endif; ?>

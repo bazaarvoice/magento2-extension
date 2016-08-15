@@ -1,3 +1,4 @@
+<?php /** @var \Bazaarvoice\Connector\Block\Reviews $this */ ?>
 <?php if($this->isEnabled()): ?>
 <?php
 $doShowContentJs = $this->getConfig('rr/do_show_content_js');
@@ -7,10 +8,10 @@ $seoContent = $this->getSEOContent();
     <?php echo $seoContent ?>
 </div>
 <script type="text/javascript">
-  $BV.ui( 'rr', 'show_reviews', {
-    doShowContent : function () {
-      <?php echo $doShowContentJs ?>
-    }
-  });    
+    $BV.ui( 'rr', 'show_reviews', {
+        doShowContent : function () {
+            <?php echo $doShowContentJs ?>
+        }
+    });
 </script>
 <?php endif; ?>
