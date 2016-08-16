@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Indexer/etc/indexer.xsd">
+    <indexer id="bazaarvoice_product" view_id="bazaarvoice_product" class="\Bazaarvoice\Connector\Model\Indexer\Flat">
+        <title translate="true">Bazaarvoice Product Feed Index</title>
+        <description translate="true">Indexed data for Bazaarvoice Product Feed</description>
+    </indexer>
+</config>

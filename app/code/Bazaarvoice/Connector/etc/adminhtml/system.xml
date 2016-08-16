@@ -49,6 +49,11 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[BV Product Families will be defined for visible Configurable and Simple product combinations]]></comment>
                 </field>
+                <field id="debug" translate="label" type="select" sortOrder="500" showInStore="0" showInWebsite="0" showInDefault="1">
+                    <label>Debug</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Enable additional logging.]]></comment>
+                </field>
             </group>
             <group id="rr" translate="label" type="text" sortOrder="200" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Ratings and Reviews</label>
@@ -95,6 +100,10 @@
                     <label>Enable Product Feed</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Turn on Product Feed generation. This will enable generation of a product feed to be sent to the BV SFTP server.  See documentation for additional steps to setup a scheduled job in Magento for this feature to take effect.]]></comment>
+                </field>
+                <field id="limit" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Cronjob Frequency (Minutes)</label>
+                    <comment><![CDATA[Product feed index will only process products for this amount of time, to prevent overlapping data updates.]]></comment>
                 </field>
                 <field id="generation_scope" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Feed Generation Scope</label>

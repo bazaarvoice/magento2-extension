@@ -3,6 +3,9 @@
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
     <default>
         <bazaarvoice>
+            <general>
+                <debug>0</debug>
+            </general>
             <rr>
                 <enable_rr>1</enable_rr>
                 <inline_ratings>category,search</inline_ratings>
@@ -11,6 +14,7 @@
                 <enable_qa>1</enable_qa>
             </qa>
             <feeds>
+                <limit>5</limit>
                 <triggering_event>purchase</triggering_event>
                 <lookback>30</lookback>
                 <generation_scope>website</generation_scope>

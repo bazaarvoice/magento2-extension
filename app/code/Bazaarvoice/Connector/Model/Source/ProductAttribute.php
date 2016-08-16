@@ -18,20 +18,15 @@ class ProductAttribute
 {
     /** @var ObjectManagerInterface $objectManager */
     protected $objectManager;
-    /** @var \Bazaarvoice\Connector\Logger\Logger $logger */
-    protected $logger;
 
     /**
      * ProductAttribute constructor.
      * @param ObjectManagerInterface $interface
-     * @param \Bazaarvoice\Connector\Logger\Logger $logger
      */
     public function __construct(
-        ObjectManagerInterface $interface,
-        \Bazaarvoice\Connector\Logger\Logger $logger
+        ObjectManagerInterface $interface
     ) {
         $this->objectManager = $interface;
-        $this->logger = $logger;
     }
 
     /**

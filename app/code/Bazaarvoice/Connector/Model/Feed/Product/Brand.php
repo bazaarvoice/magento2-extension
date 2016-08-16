@@ -12,14 +12,13 @@
 
 namespace Bazaarvoice\Connector\Model\Feed\Product;
 
-use Bazaarvoice\Connector\Model\Feed;
-use Bazaarvoice\Connector\Model\XMLWriter;
-use Magento\Catalog\Model\Product;
-use Magento\Store\Api\Data\StoreInterface;
-use Magento\Store\Model\Group;
-use Magento\Store\Model\Store;
-use Magento\Store\Model\StoreManagerInterface;
-use Magento\Store\Model\Website;
+use \Bazaarvoice\Connector\Model\Feed;
+use \Bazaarvoice\Connector\Model\XMLWriter;
+use \Magento\Store\Api\Data\StoreInterface;
+use \Magento\Store\Model\Group;
+use \Magento\Store\Model\Store;
+use \Magento\Store\Model\StoreManagerInterface;
+use \Magento\Store\Model\Website;
 
 class Brand extends Feed\ProductFeed
 {
@@ -191,7 +190,7 @@ class Brand extends Feed\ProductFeed
         // Lookup the attribute options for this store
         /** @var \Magento\Catalog\Model\ResourceModel\Eav\Attribute $attribute */
         $attribute = $this->objectManager->get('\Magento\Catalog\Model\ResourceModel\Eav\Attribute');
-        $attribute->loadByCode(Product::ENTITY, $code);
+        $attribute->loadByCode(\Magento\Catalog\Model\Product::ENTITY, $code);
         $attribute->setStoreId($storeId);
         $attributeOptions = $attribute->getSource()->getAllOptions();
         // Reformat array

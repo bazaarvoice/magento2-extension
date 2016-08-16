@@ -151,5 +151,27 @@ class Data extends AbstractHelper
         $data = $module->getDataVersion('Bazaarvoice_Connector');
         return print_r($data, 1);
     }
+
+    /**
+     * @param $value
+     * @return string
+     */
+    public function jsonEncode($value)
+    {
+        return json_encode($value, JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * json decode, sends original data if error
+     * @param $value
+     * @return mixed
+     */
+    public function jsonDecode($value)
+    {
+        $result = json_decode($value, true);
+        if(json_last_error() != JSON_ERROR_NONE)
+            return $value;
+        return $result;
+    }
     
 }
