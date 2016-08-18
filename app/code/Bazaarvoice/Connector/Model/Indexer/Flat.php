@@ -19,6 +19,7 @@ use Bazaarvoice\Connector\Model\Source\Scope;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\DB\Select;
 use Magento\Framework\Indexer\IndexerInterface;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Store\Model\Store;
@@ -97,13 +98,18 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
             /** @var Collection $incompleteIndex */
             $incompleteIndex = $this->collectionFactory->create()->addFieldToFilter('version_id', 0);
 
-            if($incompleteIndex->count() == 0)
+            if($incompleteIndex->count() == 0) {
+                $msg = __('Bazaarvoice Product Feed Index has been flushed for rebuild.');
                 $this->flushIndex();
+            } else {
+                $msg = $this->execute(array());
+            }
 
-            $this->execute(array());
+            $this->logger->info($msg);
+            echo "$msg\n";
 
         } Catch (\Exception $e) {
-        	$this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+        	$this->logger->err($e->getMessage()."\n".$e->getTraceAsString());
         }
             
     }
@@ -116,34 +122,45 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
      */
     public function execute($ids = array())
     {
-        $this->logger->info('Partial Product Feed Index');
+        try {
+            $this->logger->info('Partial Product Feed Index');
 
-        if(empty($ids))
-            $ids = $this->collectionFactory->create()->addFieldToFilter('version_id', 0)->getColumnValues('product_id');
+            if(empty($ids))
+                $ids = $this->collectionFactory->create()->addFieldToFilter('version_id', 0)->getColumnValues('product_id');
 
-        $this->logger->info('Found '.count($ids).' products to update.');
+            $this->logger->info('Found '.count($ids).' products to update.');
 
-        // Break ids into pages
-        $productIdSets = array_chunk($ids, 50);
+            // Break ids into pages
+            $productIdSets = array_chunk($ids, 50);
 
-        // Time throttling
-        $limit = ($this->helper->getConfig('feeds/limit') * 60) - 10;
-        $stop = time() + $limit;
-        $counter = 0;
-        do {
-            if (time() > $stop) break;
+            // Time throttling
+            $limit = ($this->helper->getConfig('feeds/limit') * 60) - 10;
+            $stop = time() + $limit;
+            $counter = 0;
+            do {
+                if (time() > $stop) break;
 
-            $productIds = array_pop($productIdSets);
-            if(count($productIds) == 0) break;
+                $productIds = array_pop($productIdSets);
+                if(count($productIds) == 0) break;
 
-            $this->logger->debug('Updating product ids '.implode(',', $productIds));
+                $this->logger->debug('Updating product ids '.implode(',', $productIds));
 
-            $this->reindexProducts($productIds);
-            $counter += count($productIds);
-        } while(1);
+                $this->reindexProducts($productIds);
+                $counter += count($productIds);
+            } while(1);
 
-        if($counter)
-            $this->logger->debug("Processed $counter products");
+            if($counter) {
+                if($counter < count($ids)) {
+                    $changelogTable = $this->resourceConnection->getTableName('bazaarvoice_product_cl');
+                    $indexTable = $this->resourceConnection->getTableName('bazaarvoice_index_product');
+                    $this->resourceConnection->getConnection('core_write')->query("INSERT INTO `$changelogTable` (`entity_id`) SELECT `product_id` FROM `$indexTable` WHERE `version_id` = 0;");
+
+                }
+                $this->logStats();
+            }
+        } Catch (\Exception $e) {
+            $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+        }
 
     }
 
@@ -209,14 +226,26 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         /** Set indexer to use mview */
         $this->indexer->setScheduled(true);
 
+        $writeAdapter = $this->resourceConnection->getConnection('core_write');
+
         /** Flush all old data */
         $indexTable = $this->resourceConnection->getTableName('bazaarvoice_index_product');
-        $writeAdapter = $this->resourceConnection->getConnection('core_write');
         $writeAdapter->truncateTable($indexTable);
+        $changelogTable = $this->resourceConnection->getTableName('bazaarvoice_product_cl');
+        $writeAdapter->truncateTable($changelogTable);
 
         /** Setup dummy rows */
         $productTable = $this->resourceConnection->getTableName('catalog_product_entity');
         $writeAdapter->query("INSERT INTO `$indexTable` (`product_id`, `version_id`) SELECT `entity_id`, '0' FROM `$productTable`;");
+        $writeAdapter->query("INSERT INTO `$changelogTable` (`entity_id`) SELECT `entity_id` FROM `$productTable`;");
+
+        /** Reset mview version */
+        $mviewTable = $this->resourceConnection->getTableName('mview_state');
+        $writeAdapter->query("UPDATE `$mviewTable` SET `version_id` = NULL WHERE `view_id` = 'bazaarvoice_product';");
+        $indexCheck = $writeAdapter->query("SELECT COUNT(1) IndexIsThere FROM INFORMATION_SCHEMA.STATISTICS WHERE table_schema=DATABASE() AND table_name='{$changelogTable}' AND index_name='entity_id';");
+        $indexCheck = $indexCheck->fetchObject();
+        if($indexCheck->IndexIsThere == 0)
+            $writeAdapter->query("ALTER TABLE `{$changelogTable}` ADD INDEX (`entity_id`);");
 
     }
 
@@ -249,19 +278,29 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 'external_id' => 'p.sku',
                 'image_url' => 'p.small_image',
                 'visibility' => 'p.visibility'
-            ))->joinLeft(array('pp' => $res->getTableName('catalog_product_super_link')), 'pp.product_id = p.entity_id', '')
+            ));
+
+        /** parents */
+        $select->joinLeft(array('pp' => $res->getTableName('catalog_product_super_link')), 'pp.product_id = p.entity_id', '')
             ->joinLeft(array('parent' => $res->getTableName('catalog_product_flat') . '_' . $storeId), 'pp.parent_id = parent.entity_id', array(
                 'family' => 'GROUP_CONCAT(DISTINCT parent.sku SEPARATOR "|")',
                 'parent_image' => 'small_image'
             ))
             ->joinLeft(array('cp' => $res->getTableName('catalog_category_product')), 'cp.product_id = p.entity_id OR cp.product_id = parent.entity_id', '');
 
+        /** urls */
+        $urlCondition = 'url.entity_type = "product" AND url.metadata IS NULL AND ';
+        $select
+            ->joinLeft(array('url' => $res->getTableName('url_rewrite')), $urlCondition."url.entity_id = p.entity_id AND url.store_id = {$storeId}", array('product_page_url' => 'request_path'))
+            ->joinLeft(array('parent_url' => $res->getTableName('url_rewrite')), $urlCondition."parent_url.entity_id = parent.entity_id AND parent_url.store_id = {$storeId}", array('parent_url' => 'request_path'));
+
+        /** category */
         if($this->helper->getConfig('feeds/category_id_use_url_path', $storeId)){
-            $select->columns(array('category_external_id' => 'cp.category_id'));
-        } else {
             $select->joinLeft(array('cat' => $res->getTableName('catalog_category_flat').'_store_'.$storeId), 'cat.entity_id = cp.category_id', array(
                 'category_external_id' => 'max(cat.url_path)'
             ));
+        } else {
+            $select->columns(array('category_external_id' => 'cp.category_id'));
         }
 
         /** Locale Data */
@@ -273,8 +312,8 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                     $columns = array();
                     foreach($localeColumns as $dest => $source)
                         $columns["{$locale}|{$dest}"] = 'p.' . $source;
-//                    $columns["{$locale}|product_page_url"] = "url.request_path";
-//                    $columns["{$locale}|parent_url"] = "parent_url.request_path";
+                    $columns["{$locale}|product_page_url"] = "url.request_path";
+                    $columns["{$locale}|parent_url"] = "parent_url.request_path";
                     $columns["{$locale}|parent_image"] = "parent.small_image";
                     $select->columns($columns);
                 } else {
@@ -284,9 +323,9 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
                     $select
                         ->joinLeft(array($locale => $res->getTableName('catalog_product_flat') . '_' . $localeStore->getId()), $locale . '.entity_id = p.entity_id', $columns)
-                        ->joinLeft(array("{$locale}_parent" => $res->getTableName('catalog_product_flat') . '_' . $localeStore->getId()), "pp.parent_id = {$locale}_parent.entity_id", array(
-                            "{$locale}|parent_image" => 'small_image'
-                        ));
+                        ->joinLeft(array("{$locale}_parent" => $res->getTableName('catalog_product_flat') . '_' . $localeStore->getId()), "pp.parent_id = {$locale}_parent.entity_id", array("{$locale}|parent_image" => 'small_image'))
+                        ->joinLeft(array("{$locale}_url" => $res->getTableName('url_rewrite')), $urlCondition."{$locale}_url.entity_id = p.entity_id AND {$locale}_url.store_id = {$localeStore->getId()}", array("{$locale}|product_page_url" => 'request_path'))
+                        ->joinLeft(array("{$locale}_parent_url" => $res->getTableName('url_rewrite')), $urlCondition."{$locale}_parent_url.entity_id = {$locale}_parent.entity_id AND {$locale}_parent_url.store_id = {$localeStore->getId()}", array("{$locale}|parent_url" => 'request_path'));
                 }
             }
         }
@@ -322,13 +361,19 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
         //$this->logger->debug($select->__toString());
 
-        $rows = $select->query();
+        try {
+            $rows = $select->query();
+        } Catch (\Exception $e) {
+        	$this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+            return true;
+        }
 
+        /** @var \Magento\Framework\Url $urlModel */
         $urlModel = $this->objectManger->get('\Magento\Framework\Url');
-        /** @var \Magento\Catalog\Helper\Data $eHelper */
-        $eHelper = $this->objectManger->get('\Magento\Catalog\Helper\Data');
         /** Iterate through results, clean up values, and write index. */
         while(($indexData = $rows->fetch()) !== false) {
+
+            $this->logger->debug('Processing product '.$indexData['product_id']);
 
             foreach ($indexData as $key => $value) {
                 if (strpos($key, '|') !== false) {
@@ -341,16 +386,18 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 }
             }
 
-            if ($this->helper->getConfig('/feeds/category_id_use_url_path', $storeId) == false) {
+            if ($this->helper->getConfig('feeds/category_id_use_url_path', $storeId)) {
                 $indexData['category_external_id'] = str_replace('/', '-', $indexData['category_external_id']);
                 $indexData['category_external_id'] = $this->helper->replaceIllegalCharacters($indexData['category_external_id']);
             }
+            $this->logger->debug("Category '{$indexData['category_external_id']}'");
 
             /** Use parent URLs if appropriate */
             if ($indexData['visibility'] == Visibility::VISIBILITY_NOT_VISIBLE) {
+                $this->logger->debug('Not visible');
                 if (!empty($indexData['parent_url'])) {
                     $indexData['product_page_url'] = $indexData['parent_url'];
-                    $this->logger->debug("Product Using Parent URL");
+                    $this->logger->debug("Using Parent URL");
                     if (is_array($indexData['locale_product_page_url']) && count($indexData['locale_product_page_url'])) {
                         foreach ($indexData['locale_product_page_url'] as $locale => $localeUrl) {
                             if (!empty($indexData["locale_parent_url"][$locale])) {
@@ -359,7 +406,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                         }
                     }
                 } else {
-                    $this->logger->debug("Not visible Product marked disabled because no parent found");
+                    $this->logger->debug("Product marked disabled because no parent found");
                     $indexData['status'] = Status::STATUS_DISABLED;
                 }
             }
@@ -368,7 +415,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
             if ($indexData['image_url'] == '' || $indexData['image_url'] == 'no_selection') {
                 if (!empty($indexData['parent_image'])) {
                     $indexData['image_url'] = $indexData['parent_image'];
-                    $this->logger->debug("Product Using Parent image");
+                    $this->logger->debug("Using Parent image");
                     if (is_array($indexData['locale_image_url']) && count($indexData['locale_image_url'])) {
                         foreach ($indexData['locale_image_url'] as $locale => $localeUrl) {
                             if (!empty($indexData["locale_parent_image"][$locale]))
@@ -383,14 +430,15 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
             }
 
             /** Add Store base to URLs */
-//            $indexData['product_page_url'] = $urlModel->getDirectUrl($eHelper->getProductRequestPath($indexData['product_page_url'], $storeId), array('_store' => $storeId));
-//            if (is_array($indexData['locale_product_page_url']) && count($indexData['locale_product_page_url'])) {
-//                /** @var Store $storeLocale */
-//                foreach ($this->storeLocales[$storeId] as $locale => $storeLocale) {
-//                    if (isset($indexData['locale_product_page_url'][$locale]))
-//                        $indexData['locale_product_page_url'][$locale] = $urlModel->getDirectUrl($eHelper->getProductRequestPath($indexData['locale_product_page_url'][$locale], $storeLocale->getId()), array('_store' => $storeLocale->getId()));
-//                }
-//            }
+            $indexData['product_page_url'] = $urlModel->getDirectUrl($indexData['product_page_url'], array('_store' => $storeId));
+            if (is_array($indexData['locale_product_page_url']) && count($indexData['locale_product_page_url'])) {
+                /** @var Store $storeLocale */
+                foreach ($this->storeLocales[$storeId] as $locale => $storeLocale) {
+                    if (isset($indexData['locale_product_page_url'][$locale]))
+                        $indexData['locale_product_page_url'][$locale] = $urlModel->getDirectUrl($indexData['locale_product_page_url'][$locale], array('_store' => $storeLocale->getId()));
+                }
+            }
+            $this->logger->debug("URL {$indexData['product_page_url']}");
 
             /** Add Store base to images */
             $indexData['image_url'] = $store->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog_product' . $indexData['image_url'];
@@ -401,6 +449,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                         $indexData['locale_image_url'][$locale] = $storeLocale->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog_product' . $indexData['locale_image_url'][$locale];
                 }
             }
+            $this->logger->debug("Image {$indexData['image_url']}");
 
             $indexData['external_id'] = $this->helper->getProductId($indexData['external_id']);
             $indexData['scope'] = $this->generationScope;
@@ -422,10 +471,12 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 $index->setData($indexData);
                 $index->save();
             }
+            $this->logger->debug("Product Indexed");
 
             $index->clearInstance();
             unset($indexData);
         }
+        return true;
     }
 
     /**
@@ -440,6 +491,23 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
         $delete = $write->deleteFromSelect($write->select()->from($indexTable)->where('product_id IN(?)', $productIds)->where('store_id = 0'), $indexTable);
         $write->query($delete);
+    }
+
+    protected function logStats()
+    {
+        /** @var Select $select */
+        $select = $this->resourceConnection->getConnection('core_read')->select()->from(array('source' => $this->resourceConnection->getTableName('bazaarvoice_index_product')));
+
+        $select->columns(array('store_id', 'total' => 'count(*)'));
+        $select->group('store_id');
+        $result = $select->query();
+
+        while($row = $result->fetch()) {
+            if($row['store_id'] == 0)
+                $this->logger->debug("{$row['total']} Products left to Index");
+            else
+                $this->logger->debug("{$row['total']} Products Indexed for Store {$row['store_id']}");
+        }
     }
 
     /**

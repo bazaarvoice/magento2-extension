@@ -158,7 +158,12 @@
                     <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
                     <comment><![CDATA[This attribute code will be used to locate the ISBN of products which are sent in the product feed.]]></comment>
                 </field>
-                <field id="bvfamilies_expand" translate="label" type="select" sortOrder="170" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="modelnumber_code" translate="label" type="select" sortOrder="170" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Model Number Attribute</label>
+                    <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
+                    <comment><![CDATA[This attribute code will be used to locate the Model Number of products which are sent in the product feed.]]></comment>
+                </field>
+                <field id="bvfamilies_expand" translate="label" type="select" sortOrder="175" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Expand Families in Product Feed</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Setting to determine whether simple products show reviews and ratings for their entire product family.]]></comment>

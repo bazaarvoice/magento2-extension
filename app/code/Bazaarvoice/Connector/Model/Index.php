@@ -28,7 +28,6 @@ class Index extends \Magento\Framework\Model\AbstractModel implements \Bazaarvoi
      * @param \Magento\Framework\Registry $registry
      * @param \Bazaarvoice\Connector\Model\ResourceModel\Index $resource
      * @param Collection $resourceCollection
-     * @param array $data
      * @param Data $helper
      */
     public function __construct(

@@ -30,20 +30,16 @@ class Logger extends \Monolog\Logger
     }
 
     /**
-     * @param int $level
      * @param string $message
      * @param array $context
      * @return bool
      */
-    public function addRecord($level, $message, array $context = array())
+    public function debug($message, array $context = array())
     {
-        if($level >= self::DEBUG && $this->helper->getConfig('general/debug') != true)
-            return true;
+        if($this->helper->getConfig('general/debug') == true)
+            return $this->addRecord(static::DEBUG, $message, $context);
 
-        if(is_string($message) == false)
-            $message = print_r($message, true);
-
-        return parent::addRecord($level, $message, $context);
+        return true;
     }
 
 
