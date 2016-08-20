@@ -14,8 +14,10 @@ namespace Bazaarvoice\Connector\Model\Indexer;
 
 use Bazaarvoice\Connector\Helper\Data;
 use Bazaarvoice\Connector\Logger\Logger;
+use Bazaarvoice\Connector\Model\Feed\ProductFeed;
 use Bazaarvoice\Connector\Model\ResourceModel\Index\Collection;
 use Bazaarvoice\Connector\Model\Source\Scope;
+use Magento\Catalog\Helper\Image;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\Framework\App\ResourceConnection;
@@ -63,29 +65,33 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 $websites = $this->objectManger->get('Magento\Store\Model\StoreManagerInterface')->getWebsites();
                 /** @var Website $website */
                 foreach($websites as $website) {
-                    $defaultStore = $website->getDefaultStore()->getId();
-                    $this->storeLocales[$defaultStore] = array();
+                    $defaultStore = $website->getDefaultStore();
+                    $this->storeLocales[$defaultStore->getId()] = array();
                     /** @var Store $localeStore */
                     foreach($website->getStores() as $localeStore) {
                         $localeCode = $this->helper->getConfig('general/locale', $localeStore->getId());
-                        $this->storeLocales[$defaultStore][$localeCode] = $localeStore;
+                        $this->storeLocales[$defaultStore->getId()][$localeCode] = $localeStore;
                     }
+                    $defaultLocale = $this->helper->getConfig('general/locale', $defaultStore);
+                    $this->storeLocales[$defaultStore->getId()][$defaultLocale] = $defaultStore;
                 }
                 break;
             case Scope::STORE_GROUP:
                 $groups = $this->objectManger->get('Magento\Store\Model\StoreManagerInterface')->getGroups();
                 /** @var Group $group */
                 foreach($groups as $group) {
-                    $defaultStore = $group->getDefaultStore()->getId();
-                    $this->storeLocales[$defaultStore] = array();
+                    $defaultStore = $group->getDefaultStore();
+                    $this->storeLocales[$defaultStore->getId()] = array();
                     /** @var Store $localeStore */
                     foreach($group->getStores() as $localeStore) {
                         $localeCode = $this->helper->getConfig('general/locale', $localeStore->getId());
-                        $this->storeLocales[$defaultStore][$localeCode] = $localeStore;
+                        $this->storeLocales[$defaultStore->getId()][$localeCode] = $localeStore;
                     }
+                    $defaultLocale = $this->helper->getConfig('general/locale', $defaultStore);
+                    $this->storeLocales[$defaultStore->getId()][$defaultLocale] = $defaultStore;
                 }
                 break;
-        }        
+        }
     }
 
     /**
@@ -111,7 +117,6 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         } Catch (\Exception $e) {
         	$this->logger->err($e->getMessage()."\n".$e->getTraceAsString());
         }
-            
     }
 
     /**
@@ -255,6 +260,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
      *
      * @param array $productIds
      * @param int|Store $store
+     * @return bool
      * @throws \Exception
      */
     public function reindexProductsForStore($productIds, $store)
@@ -277,7 +283,8 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 'description' => 'p.short_description',
                 'external_id' => 'p.sku',
                 'image_url' => 'p.small_image',
-                'visibility' => 'p.visibility'
+                'visibility' => 'p.visibility',
+                'bv_feed_exclude' => 'bv_feed_exclude'
             ));
 
         /** parents */
@@ -286,17 +293,16 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 'family' => 'GROUP_CONCAT(DISTINCT parent.sku SEPARATOR "|")',
                 'parent_image' => 'small_image'
             ))
-            ->joinLeft(array('cp' => $res->getTableName('catalog_category_product')), 'cp.product_id = p.entity_id OR cp.product_id = parent.entity_id', '');
+            ->joinLeft(array('cp' => $res->getTableName('catalog_category_product_index')), "(cp.product_id = p.entity_id OR cp.product_id = parent.entity_id) AND cp.store_id = {$storeId}", '');
 
         /** urls */
-        $urlCondition = 'url.entity_type = "product" AND url.metadata IS NULL AND ';
         $select
-            ->joinLeft(array('url' => $res->getTableName('url_rewrite')), $urlCondition."url.entity_id = p.entity_id AND url.store_id = {$storeId}", array('product_page_url' => 'request_path'))
-            ->joinLeft(array('parent_url' => $res->getTableName('url_rewrite')), $urlCondition."parent_url.entity_id = parent.entity_id AND parent_url.store_id = {$storeId}", array('parent_url' => 'request_path'));
+            ->joinLeft(array('url' => $res->getTableName('url_rewrite')), "url.entity_type = 'product' AND url.metadata IS NULL AND url.entity_id = p.entity_id AND url.store_id = {$storeId}", array('product_page_url' => 'request_path'))
+            ->joinLeft(array('parent_url' => $res->getTableName('url_rewrite')), "parent_url.entity_type = 'product' AND parent_url.metadata IS NULL AND parent_url.entity_id = parent.entity_id AND parent_url.store_id = {$storeId}", array('parent_url' => 'request_path'));
 
         /** category */
         if($this->helper->getConfig('feeds/category_id_use_url_path', $storeId)){
-            $select->joinLeft(array('cat' => $res->getTableName('catalog_category_flat').'_store_'.$storeId), 'cat.entity_id = cp.category_id', array(
+            $select->joinLeft(array('cat' => $res->getTableName('catalog_category_flat').'_store_'.$storeId), 'cat.entity_id = cp.category_id AND cat.level >= 2', array(
                 'category_external_id' => 'max(cat.url_path)'
             ));
         } else {
@@ -324,8 +330,8 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                     $select
                         ->joinLeft(array($locale => $res->getTableName('catalog_product_flat') . '_' . $localeStore->getId()), $locale . '.entity_id = p.entity_id', $columns)
                         ->joinLeft(array("{$locale}_parent" => $res->getTableName('catalog_product_flat') . '_' . $localeStore->getId()), "pp.parent_id = {$locale}_parent.entity_id", array("{$locale}|parent_image" => 'small_image'))
-                        ->joinLeft(array("{$locale}_url" => $res->getTableName('url_rewrite')), $urlCondition."{$locale}_url.entity_id = p.entity_id AND {$locale}_url.store_id = {$localeStore->getId()}", array("{$locale}|product_page_url" => 'request_path'))
-                        ->joinLeft(array("{$locale}_parent_url" => $res->getTableName('url_rewrite')), $urlCondition."{$locale}_parent_url.entity_id = {$locale}_parent.entity_id AND {$locale}_parent_url.store_id = {$localeStore->getId()}", array("{$locale}|parent_url" => 'request_path'));
+                        ->joinLeft(array("{$locale}_url" => $res->getTableName('url_rewrite')), "{$locale}_url.entity_type = 'product' AND {$locale}_url.metadata IS NULL AND {$locale}_url.entity_id = p.entity_id AND {$locale}_url.store_id = {$localeStore->getId()}", array("{$locale}|product_page_url" => 'request_path'))
+                        ->joinLeft(array("{$locale}_parent_url" => $res->getTableName('url_rewrite')), "{$locale}_parent_url.entity_type = 'product' AND {$locale}_parent_url.metadata IS NULL AND {$locale}_parent_url.entity_id = {$locale}_parent.entity_id AND {$locale}_parent_url.store_id = {$localeStore->getId()}", array("{$locale}|parent_url" => 'request_path'));
                 }
             }
         }
@@ -368,8 +374,9 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
             return true;
         }
 
-        /** @var \Magento\Framework\Url $urlModel */
-        $urlModel = $this->objectManger->get('\Magento\Framework\Url');
+        /** Get placeholders */
+        $placeholders = $this->getPlaceholderUrls($storeId);
+
         /** Iterate through results, clean up values, and write index. */
         while(($indexData = $rows->fetch()) !== false) {
 
@@ -385,6 +392,11 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                     $indexData[$key] = $this->helper->jsonEncode(explode('|', $value));
                 }
             }
+
+            $indexData['status'] = $indexData[ProductFeed::INCLUDE_IN_FEED_FLAG] ? Status::STATUS_ENABLED : Status::STATUS_DISABLED;
+
+            if(!empty($indexData['family']) && !is_array($indexData['family']))
+                $indexData['family'] = array($indexData['family']);
 
             if ($this->helper->getConfig('feeds/category_id_use_url_path', $storeId)) {
                 $indexData['category_external_id'] = str_replace('/', '-', $indexData['category_external_id']);
@@ -426,27 +438,36 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                     }
                 } else {
                     $this->logger->debug("Product has no parent and no image");
+                    if(isset($placeholders['default']))
+                        $indexData['image_url'] = $placeholders['default'];
+                    foreach($this->storeLocales[$storeId] as $locale => $storeLocale) {
+                        if (isset($placeholders[$locale]))
+                            $indexData['locale_image_url'][$locale] = $placeholders[$locale];
+                    }
                 }
             }
 
             /** Add Store base to URLs */
-            $indexData['product_page_url'] = $urlModel->getDirectUrl($indexData['product_page_url'], array('_store' => $storeId));
+            $indexData['product_page_url'] = $store->getBaseUrl().$indexData['product_page_url'];
             if (is_array($indexData['locale_product_page_url']) && count($indexData['locale_product_page_url'])) {
                 /** @var Store $storeLocale */
                 foreach ($this->storeLocales[$storeId] as $locale => $storeLocale) {
                     if (isset($indexData['locale_product_page_url'][$locale]))
-                        $indexData['locale_product_page_url'][$locale] = $urlModel->getDirectUrl($indexData['locale_product_page_url'][$locale], array('_store' => $storeLocale->getId()));
+                        $indexData['locale_product_page_url'][$locale] = $storeLocale->getBaseUrl().$indexData['locale_product_page_url'][$locale];
                 }
             }
             $this->logger->debug("URL {$indexData['product_page_url']}");
+            $this->logger->debug($indexData['locale_product_page_url']);
 
             /** Add Store base to images */
-            $indexData['image_url'] = $store->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog_product' . $indexData['image_url'];
-            if (is_array($indexData['locale_image_url']) && count($indexData['locale_image_url'])) {
-                /** @var Store $storeLocale */
-                foreach ($this->storeLocales[$storeId] as $locale => $storeLocale) {
-                    if (isset($indexData['locale_image_url'][$locale]))
-                        $indexData['locale_image_url'][$locale] = $storeLocale->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog_product' . $indexData['locale_image_url'][$locale];
+            if(substr($indexData['image_url'], 0, 4) != 'http') {
+                $indexData['image_url'] = $store->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog/product' . $indexData['image_url'];
+                if (is_array($indexData['locale_image_url']) && count($indexData['locale_image_url'])) {
+                    /** @var Store $storeLocale */
+                    foreach ($this->storeLocales[$storeId] as $locale => $storeLocale) {
+                        if (isset($indexData['locale_image_url'][$locale]))
+                            $indexData['locale_image_url'][$locale] = $storeLocale->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog/product' . $indexData['locale_image_url'][$locale];
+                    }
                 }
             }
             $this->logger->debug("Image {$indexData['image_url']}");
@@ -524,5 +545,41 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
      */
     public function executeRow($id){}
 
+    /**
+     * @param int $storeId
+     * @return array
+     */
+    private function getPlaceholderUrls($storeId)
+    {
+        /** @var Image $imageHelper */
+        $imageHelper = $this->objectManger->get('\Magento\Catalog\Helper\Image');
+        /** @var \Magento\Framework\View\Asset\Repository $assetRepo */
+        $assetRepo = $this->objectManger->get('\Magento\Framework\View\Asset\Repository');
+        /** @var \Magento\Framework\View\DesignInterface $design */
+        $design = $this->objectManger->create('\Magento\Framework\View\DesignInterface');
+
+        $placeholders = array();
+        /**
+         * @var string $locale
+         * @var Store $localeStore
+         */
+        foreach($this->storeLocales[$storeId] as $locale => $localeStore) {
+            $themeId = $design->getConfigurationDesignTheme('frontend', ['store' => $localeStore->getId()]);
+            /** @var \Magento\Theme\Model\Theme $theme */
+            $theme = $this->objectManger->create('\Magento\Theme\Model\Theme')->load($themeId);
+            $assetParams = array(
+                'area' => 'frontend',
+                'theme' => $theme->getThemePath(),
+                'locale' => $locale
+            );
+            if($localeStore->getId() == $storeId) {
+                $placeholders['default'] = $assetRepo->createAsset($imageHelper->getPlaceholder('image'), $assetParams)->getUrl();
+            } else {
+                $placeholders[$locale] = $assetRepo->createAsset($imageHelper->getPlaceholder('image'), $assetParams)->getUrl();
+            }
+
+        }
+        return $placeholders;
+    }
 
 }

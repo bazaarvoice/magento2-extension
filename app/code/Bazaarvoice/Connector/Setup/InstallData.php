@@ -85,19 +85,20 @@ class InstallData implements Setup\InstallDataInterface
                 'type' =>  'int',
                 'frontend' => '',
                 'label' => 'Send in Bazaarvoice Product Feed',
-                'input' => 'select',
+                'input' => 'boolean',
                 'class' => '',
-                'source' => 'Magento\Catalog\Model\Product\Attribute\Source\Status',
+                'source' => 'Magento\Eav\Model\Entity\Attribute\Source\Boolean',
                 'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_STORE,
                 'visible' => true,
                 'required' => false,
                 'user_defined' => false,
-                'default' => \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED,
+                'default' => \Magento\Eav\Model\Entity\Attribute\Source\Boolean::VALUE_YES,
                 'apply_to' => '',
                 'visible_on_front' => false,
                 'is_used_in_grid' => true,
                 'is_visible_in_grid' => false,
                 'is_filterable_in_grid' => false,
+                'used_in_product_listing' => true
             ]
         );
 

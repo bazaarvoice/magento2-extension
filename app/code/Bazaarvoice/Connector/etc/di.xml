@@ -30,7 +30,7 @@
     			<item name="product" xsi:type="object">Bazaarvoice\Connector\Console\Command\Product</item>
                 <item name="export" xsi:type="object">Bazaarvoice\Connector\Console\Command\Export</item>
                 <item name="purchase" xsi:type="object">Bazaarvoice\Connector\Console\Command\Purchase</item>
-                <item name="purchasetest" xsi:type="object">Bazaarvoice\Connector\Console\Command\PurchaseTest</item>
+                <item name="index" xsi:type="object">Bazaarvoice\Connector\Console\Command\Index</item>
             </argument>
     	</arguments>
     </type>

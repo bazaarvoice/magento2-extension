@@ -13,53 +13,29 @@ namespace Bazaarvoice\Connector\Model\Feed\Product;
 
 use Bazaarvoice\Connector\Model\Feed;
 use Bazaarvoice\Connector\Model\XMLWriter;
-use Magento\Catalog\Model\Product\Visibility;
-use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
-use Magento\Framework\UrlFactory;
-use Magento\Store\Api\Data\StoreInterface;
+use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Store\Model\Group;
 use Magento\Store\Model\Store;
-use Magento\Catalog\Model\ResourceModel\Product\Collection;
-use Magento\Store\Model\StoreManagerInterface;
+use Bazaarvoice\Connector\Model\ResourceModel\Index\Collection;
 use Magento\Store\Model\Website;
 
 class Product extends Feed\ProductFeed
 {
-    /** @var \Magento\Catalog\Helper\Product $productHelper */
-    protected $productHelper;
     /** @var Collection $productCollection */
     protected $productCollection;
-    /** @var  UrlFactory $urlFactory */
-    protected $urlFactory;
-
-    protected $attributeCodes = array(
-        'BrandExternalId' => 'brand',
-        'UPC' => 'upc',
-        'EAN' => 'ean',
-        'ManufacturerPartNumber' => 'mpn',
-        'ISBN' => 'isbn'
-    );
-
-    protected $customAttributes;
 
     /**
      * Product constructor.
      * @param \Bazaarvoice\Connector\Logger\Logger $logger
      * @param \Bazaarvoice\Connector\Helper\Data $helper
      * @param \Magento\Framework\ObjectManagerInterface $objectManager
-     * @param \Magento\Catalog\Helper\Product $catalogProductHelper
-     * @param UrlFactory $urlFactory
      */
     public function __construct(
         \Bazaarvoice\Connector\Logger\Logger $logger,
         \Bazaarvoice\Connector\Helper\Data $helper,
-        \Magento\Framework\ObjectManagerInterface $objectManager,
-        \Magento\Catalog\Helper\Product $catalogProductHelper,
-        UrlFactory $urlFactory
+        \Magento\Framework\ObjectManagerInterface $objectManager
     ) {
         parent::__construct($logger, $helper, $objectManager);
-        $this->productHelper = $catalogProductHelper;
-        $this->urlFactory = $urlFactory;
     }
 
     /**
@@ -75,7 +51,7 @@ class Product extends Feed\ProductFeed
         $this->logger->info($productCollection->count() . ' products found to export.');
 
         foreach($productCollection as $product) {
-            $this->writeProduct($writer, $product, $store);
+            $this->writeProduct($writer, $product);
         }
         
         $writer->endElement(); // Products
@@ -89,14 +65,12 @@ class Product extends Feed\ProductFeed
     {
         $writer->startElement('Products');
         $productCollection = $this->getProductCollection();
-        $productCollection->setStore($storeGroup->getDefaultStore())->load();
+        $productCollection->setStore($storeGroup->getDefaultStore());
 
         $this->logger->info($productCollection->count() . ' products found to export.');
 
-        $localeData = $this->getLocaleData($storeGroup->getStoreIds());
-
         foreach($productCollection as $product) {
-            $this->writeProduct($writer, $product, $localeData);
+            $this->writeProduct($writer, $product);
         }
 
         $writer->endElement(); // Products
@@ -110,14 +84,12 @@ class Product extends Feed\ProductFeed
     {
         $writer->startElement('Products');
         $productCollection = $this->getProductCollection();
-        $productCollection->setStore($website->getDefaultStore())->load();
+        $productCollection->setStore($website->getDefaultStore());
 
         $this->logger->info($productCollection->count() . ' products found to export.');
 
-        $localeData = $this->getLocaleData($website->getStoreIds());
-
         foreach($productCollection as $product) {
-            $this->writeProduct($writer, $product, $localeData);
+            $this->writeProduct($writer, $product);
         }
 
         $writer->endElement(); // Products
@@ -133,16 +105,12 @@ class Product extends Feed\ProductFeed
 
         $this->logger->info($productCollection->count() . ' products found to export.');
 
-        $storesList = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStores();
-        $stores = [];
-        /** @var StoreInterface $store */
-        foreach($storesList as $store) {
-            $stores[] = $store->getId();
-        }
-        $localeData = $this->getLocaleData($stores);
-
         foreach($productCollection as $product) {
-            $this->writeProduct($writer, $product, $localeData);
+            try {
+                $this->writeProduct($writer, $product);
+            } Catch (\Exception $e) {
+            	$this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+            }
         }
 
         $writer->endElement(); // Products
@@ -150,157 +118,101 @@ class Product extends Feed\ProductFeed
 
     /**
      * @param XMLWriter $writer
-     * @param \Magento\Catalog\Model\Product $product
-     * @param null|array $localeData
+     * @param \Bazaarvoice\Connector\Model\Index
      */
-    protected function writeProduct(XMLWriter $writer, \Magento\Catalog\Model\Product $product, &$localeData = null)
+    protected function writeProduct(XMLWriter $writer, \Bazaarvoice\Connector\Model\Index $product)
     {
-        // Families
-        $families = false;
-        if($this->helper->getConfig('general/families')) {
-            $families = $this->getProductFamilies($product);
-        }
+        $this->logger->debug('Write product '.$product->getData('product_id'));
 
-        // Parent values
-        $masterProduct = false;
-        if($product->getVisibility() == Visibility::VISIBILITY_NOT_VISIBLE) {
-            $this->logger->info('Product ' . $product->getSku() . ' not visible');
-            if($product->getTypeId() == Configurable::TYPE_CODE) {
-                $this->logger->info('Skipping not visible configurable product ' . $product->getSku());
-                return;
-            }
-            if($families && count($families)) {
-                $masterProduct = $this->getProductCollection()->getItemById($families[0]);
-                if($masterProduct instanceof \Magento\Catalog\Model\Product) {
-                    $this->logger->info('Using parent data for not visible child product ' . $product->getSku());
-                } else {
-                    $this->logger->info('Skipping not visible child product ' . $product->getSku() . ' no parent found.');
-                    return;
-                }
-            }
-        }
-
-        // Localization
-        $localeProducts = [];
-        $localeMasterProducts = [];
-        $localeStores = [];
-        if(count($localeData)) {
-            /** @var Collection $collection */
-            foreach($localeData as $localeCode => $locale) {
-                if(isset($locale['collection']) && $locale['collection'] instanceof Collection) {
-                    $localeProduct = $locale['collection']->getItemById($product->getId());
-                    if($localeProduct instanceof \Magento\Catalog\Model\Product && $localeProduct->getId())
-                        $localeProducts[$localeCode] = $localeProduct;
-                    if($masterProduct) {
-                        $localeMasterProduct = $locale['collection']->getItemById($masterProduct->getId());
-                        if($localeMasterProduct instanceof \Magento\Catalog\Model\Product && $localeMasterProduct->getId())
-                            $localeMasterProducts[$localeCode] = $localeMasterProduct;
-                    }
-                }
-
-                if(isset($locale['store']) && $locale['store'] instanceof Store)
-                    $localeStores[$localeCode] = $locale['store'];
-            }
-        }
-        if(!$masterProduct) {
-            $masterProduct = $product;
-            $localeMasterProducts = $localeProducts;
+        foreach($product->getData() as $key => $value) {
+            if(is_string($value) && (substr($value, 0, 1) == "[" || substr($value, 0, 1) == "{"))
+                $product->setData($key, $this->helper->jsonDecode($value));
         }
 
         $writer->startElement('Product');
 
-        $writer->writeElement('ExternalId', $this->helper->getProductId($product));
-        $writer->writeElement('Name', $product->getName(), true);
-        if(count($localeProducts)){
+        $writer->writeElement('ExternalId', $product->getData('external_id'));
+        $writer->writeElement('Name', $product->getData('name'), true);
+        $localeName = $product->getData('locale_name');
+        if(is_array($localeName) && count($localeName)){
             $writer->startElement('Names');
-            foreach($localeProducts as $locale => $localeProduct) {
+            foreach($localeName as $locale => $name) {
                 $writer->startElement('Name');
                 $writer->writeAttribute('locale', $locale);
-                $writer->writeRaw($localeProduct->getName(), true);
+                $writer->writeRaw($name, true);
                 $writer->endElement(); // Name
             }
             $writer->endElement(); // Names
         }
 
         $writer->writeElement('Description', $product->getData('description'), true);
-        if(count($localeProducts)){
+        $localeDescription = $product->getData('locale_description');
+        if(is_array($localeDescription) && count($localeDescription)){
             $writer->startElement('Descriptions');
-            foreach($localeProducts as $locale => $localeProduct) {
+            foreach($localeDescription as $locale => $description) {
                 $writer->startElement('Description');
                 $writer->writeAttribute('locale', $locale);
-                $writer->writeRaw($localeProduct->getDescription(), true);
+                $writer->writeRaw($description, true);
                 $writer->endElement(); // Description
             }
             $writer->endElement(); // Descriptions
         }
 
-        $categories = $masterProduct->getCategoryCollection()->addAttributeToSelect('url_path')->setOrder('level', 'decs');
-        /** @var \Magento\Catalog\Model\Category\Interceptor $category */
-        $category = $categories->getFirstItem();
-        $writer->writeElement('CategoryExternalId', $this->getCategoryId($category));
+        $writer->writeElement('CategoryExternalId', $product->getData('category_external_id'));
 
-        $writer->writeElement('ProductPageUrl', $this->productHelper->getProductUrl($masterProduct), true);
-        if(count($localeMasterProducts)){
+        $writer->writeElement('ProductPageUrl', $product->getData('product_page_url'), true);
+        $localeUrls = $product->getData('locale_product_page_url');
+        if(is_array($localeUrls) && count($localeUrls)){
             $writer->startElement('ProductPageUrls');
-            foreach($localeMasterProducts as $locale => $localeProduct) {
-                if(!isset($localeStores[$locale]) || empty($localeStores[$locale])) continue;
+            foreach($localeUrls as $locale => $url) {
                 $writer->startElement('ProductPageUrl');
                 $writer->writeAttribute('locale', $locale);
-                $writer->writeRaw($this->getStoreUrl($localeProduct, $localeStores[$locale]->getId()), true);
+                $writer->writeRaw($url, true);
                 $writer->endElement(); // ProductPageUrl
             }
             $writer->endElement(); // ProductPageUrls
         }
 
-        $imageUrl = $this->productHelper->getImageUrl($product);
-        if(preg_match("#no_selection#", $imageUrl)) {
-            $imageUrl = $this->productHelper->getImageUrl($masterProduct);
-        }
-        if(strlen($imageUrl))
-            $writer->writeElement('ImageUrl', $imageUrl, true);
-        if(count($localeProducts)){
+        $writer->writeElement('ImageUrl', $product->getData('image_url'), true);
+        $localeImage = $product->getData('locale_image_url');
+        if(is_array($localeImage) && count($localeImage)){
             $writer->startElement('ImageUrls');
-            foreach($localeProducts as $locale => $localeProduct) {
+            foreach($localeImage as $locale => $image) {
                 $writer->startElement('ImageUrl');
                 $writer->writeAttribute('locale', $locale);
-                $localizedImage = $this->productHelper->getImageUrl($localeProduct);
-                if(preg_match("#no_selection#", $localizedImage) && isset($localeMasterProducts[$locale]) && $localeMasterProducts[$locale] instanceof \Magento\Catalog\Model\Product) {
-                    $localizedImage = $this->productHelper->getImageUrl($localeMasterProducts[$locale]);
-                }
-                $writer->writeRaw($localizedImage, true);
+                $writer->writeRaw($image, true);
                 $writer->endElement(); // ImageUrl
             }
             $writer->endElement(); // ImageUrls
         }
 
-        foreach($this->getCustomAttributes() as $code => $attributeCode) {
-            if($product->getData($attributeCode)) {
-                if($code == 'BrandExternalId') {
-                    $writer->writeElement('BrandExternalId', $product->getData($attributeCode));
-                } else {
-                    $writer->startElement($code . 's');
-                    $writer->writeElement($code, $product->getData($attributeCode));
-                    $writer->endElement();
-                }
+        if($product->getData('brand_external_id'))
+            $writer->writeElement('BrandExternalId', $product->getData('brand_external_id'));
+
+        foreach($product->customAttributes as $code) {
+            $values = $product->getData(strtolower($code) . 's');
+            if(is_array($values) && !empty($values)) {
+                $writer->startElement($code . 's');
+                foreach ($values as $value)
+                    $writer->writeElement($code, $value);
+                $writer->endElement();
             }
         }
 
-        if($families && count($families)) {
+        if($product->getData('family') && count($product->getData('family'))) {
             $writer->startElement('Attributes');
 
-            foreach($families as $familyId) {
-                $family = $this->getProductCollection()->getItemById($familyId);
-                $familyExternalId = $this->helper->getProductId($family);
-                if($familyExternalId) {
+            foreach($product->getData('family') as $familyId) {
+                if($familyId) {
                     $writer->startElement('Attribute');
                     $writer->writeAttribute('id', 'BV_FE_FAMILY');
-                    $writer->writeElement('Value', $familyExternalId);
+                    $writer->writeElement('Value', $familyId);
                     $writer->endElement(); // Attribute
 
                     if($this->helper->getConfig('feeds/bvfamilies_expand')) {
                         $writer->startElement('Attribute');
                         $writer->writeAttribute('id', 'BV_FE_EXPAND');
-                        $writer->writeElement('Value', 'BV_FE_FAMILY:' . $familyExternalId);
+                        $writer->writeElement('Value', 'BV_FE_FAMILY:' . $familyId);
                         $writer->endElement(); // Attribute
                     }
                 }
@@ -313,121 +225,18 @@ class Product extends Feed\ProductFeed
     }
 
     /**
-     * @return array
-     */
-    protected function getCustomAttributes()
-    {
-        if(!$this->customAttributes) {
-            $customAttributes = [];
-            foreach ($this->attributeCodes as $label => $code) {
-                $attributeCode = $this->helper->getConfig('feeds/' . $code . '_code');
-                if ($attributeCode)
-                    $customAttributes[$label] = $attributeCode;
-            }
-            $this->customAttributes = $customAttributes;
-        }
-        return $this->customAttributes;
-    }
-
-    /**
-     * @param \Magento\Catalog\Model\Product $product
-     * @param mixed $storeId
-     * @return string
-     */
-    protected function getStoreUrl(\Magento\Catalog\Model\Product $product, $storeId)
-    {
-        $storeCode = $this->objectManager->get('\Magento\Store\Model\StoreManagerInterface')->getStore($storeId)->getCode();
-
-        $urlInstance = $this->urlFactory->create();
-
-        $originalUrl = $product->getProductUrl();
-        $originalUrl = str_replace($urlInstance->getBaseUrl(), '', $originalUrl);
-
-        $url = $urlInstance
-            ->setScope($storeId)
-            ->addQueryParams(['___store' => $storeCode])
-            ->getUrl($originalUrl);
-
-        return $url;
-    }
-
-    /**
-     * Get localized data for relevant products
-     * @param array $storeIds
-     * @return array
-     */
-    protected function getLocaleData($storeIds)
-    {
-        /** @var \Magento\Store\Model\StoreManagerInterface $storeInterface */
-        $storeInterface = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface');
-        $localeData = [];
-        $locales = $this->getLocales($storeIds);
-        foreach($locales as $locale => $storeId)
-        {
-            $store = $storeInterface->getStore($storeId);
-            $collection = $this->getProductCollection(true);
-            $collection->setStore($store)->load();
-            $localeData[$locale] = [
-                'store' => $store,
-                'collection' => $collection
-            ];
-        }
-
-        return $localeData;
-    }
-
-    protected function getProductFamilies(\Magento\Catalog\Model\Product $product)
-    {
-        $families = array();
-        if($product->getTypeId() == Configurable::TYPE_CODE){
-            $families[] = $product->getId();
-        } else {
-            /** @var Configurable $resource */
-            $resource = $this->objectManager->get('\Magento\ConfigurableProduct\Model\Product\Type\Configurable');
-            $parentIds = $resource->getParentIdsByChild($product->getId());
-            foreach($parentIds as $parentId){
-                /** @var \Magento\Catalog\Model\Product $parent */
-                $parent = $this->getProductCollection()->getItemById($parentId);
-                if($parent->getId())
-                    $families[] = $parentId;
-            }
-        }
-        return $families;
-    }    
-
-    /**
      * @param bool $new Get new collection
-     * @return \Magento\Catalog\Model\ResourceModel\Product\Collection
+     * @return Collection
      */
     protected function getProductCollection($new = false)
     {
         if($new || !$this->productCollection) {
-            $productFactory = $this->objectManager->get('\Magento\Catalog\Model\ProductFactory');
+            /** @var Collection\Factory $indexFactory */
+            $indexFactory = $this->objectManager->get('\Bazaarvoice\Connector\Model\ResourceModel\Index\Collection\Factory');
+            $collection = $indexFactory->create();
+            $collection->addFieldToFilter('status', Status::STATUS_ENABLED);
+            $this->productCollection = $collection;
 
-            /* @var Collection $productCollection */
-            $productCollection = $productFactory->create()->getCollection();
-
-            foreach($this->getCustomAttributes() as $code => $attributeCode) {
-                $productCollection->addAttributeToSelect($attributeCode);
-            }
-
-            $productCollection
-                ->addAttributeToSelect('name')
-                ->addAttributeToSelect('description')
-                ->addAttributeToSelect('image')
-                ->addAttributeToSelect('url_path')
-                ->addAttributeToSelect('visibility')
-                ->addAttributeToSelect(Feed\ProductFeed::INCLUDE_IN_FEED_FLAG)
-                ->addAttributeToFilter('status', \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED);
-
-            $productCollection->addAttributeToFilter(Feed\ProductFeed::INCLUDE_IN_FEED_FLAG, \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED);
-
-            if(!$new) {
-                $productCollection->load();
-                $this->productCollection = $productCollection;
-            } else {
-                return $productCollection;
-            }
         }
         return $this->productCollection;
     }

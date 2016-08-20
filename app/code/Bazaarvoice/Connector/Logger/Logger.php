@@ -42,5 +42,19 @@ class Logger extends \Monolog\Logger
         return true;
     }
 
+    /**
+     * @param int $level
+     * @param string $message
+     * @param array $context
+     * @return bool
+     */
+    public function addRecord($level, $message, array $context = array())
+    {
+        if(is_array($message))
+            $message = print_r($message, 1);
+
+        return parent::addRecord($level, $message, $context);
+    }
+
 
 }
