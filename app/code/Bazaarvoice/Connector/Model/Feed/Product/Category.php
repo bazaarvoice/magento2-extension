@@ -17,7 +17,7 @@ use Bazaarvoice\Connector\Model\XMLWriter;
 use Bazaarvoice\Connector\Logger\Logger;
 use Bazaarvoice\Connector\Helper\Data;
 use Magento\Catalog\Model\CategoryFactory;
-use Magento\Framework\UrlFactory;
+use Magento\Framework\App\ResourceConnection;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\Group;
 use Magento\Store\Model\Store;
@@ -26,11 +26,10 @@ use Magento\Framework\ObjectManagerInterface;
 
 class Category extends Feed\ProductFeed
 {
-    /** @var CategoryFactory $categoryFactory */
     protected $categoryFactory;
-
-    /** @var  UrlFactory $urlFactory */
     protected $urlFactory;
+    protected $resourceConnection;
+    protected $rootCategoryPath;
 
     /**
      * Category constructor.
@@ -38,33 +37,23 @@ class Category extends Feed\ProductFeed
      * @param Data $helper
      * @param ObjectManagerInterface $objectManager
      * @param CategoryFactory $categoryFactory
-     * @param UrlFactory $urlFactory
+     * @param ResourceConnection $resourceConnection
      */
     public function __construct(
         Logger $logger,
         Data $helper,
         ObjectManagerInterface $objectManager,
         CategoryFactory $categoryFactory,
-        UrlFactory $urlFactory
+        ResourceConnection $resourceConnection
     ) {
         $this->categoryFactory = $categoryFactory;
-        $this->urlFactory = $urlFactory;
+        $this->resourceConnection = $resourceConnection;
         parent::__construct($logger, $helper, $objectManager);
     }
 
     public function processCategoriesForStore(XMLWriter $writer, Store $store)
     {
-        $writer->startElement('Categories');
-
-        $categories = $this->getCategoryCollection();
-        $categories->setStore($store);
-
-        /** @var \Magento\Catalog\Model\Category $category */
-        foreach($categories as $category) {
-            $this->writeCategory($writer, $category);
-        }
-
-        $writer->endElement(); // Categories
+        $this->processCategories($writer, $store);
     }
 
     /** 
@@ -73,18 +62,8 @@ class Category extends Feed\ProductFeed
      */
     public function processCategoriesForStoreGroup(XMLWriter $writer, Group $storeGroup)
     {
-        $writer->startElement('Categories');
-
-        $categories = $this->getCategoryCollection();
-
         $locales = $this->getLocales($storeGroup->getStoreIds());
-
-        /** @var \Magento\Catalog\Model\Category $category */
-        foreach($categories as $category) {
-            $this->writeCategory($writer, $category, $storeGroup->getDefaultStoreId(), $locales);
-        }
-
-        $writer->endElement(); // Categories        
+        $this->processCategories($writer, $storeGroup->getDefaultStore(), $locales);
     }
 
     /** 
@@ -93,18 +72,9 @@ class Category extends Feed\ProductFeed
      */
     public function processCategoriesForWebsite(XMLWriter $writer, Website $website)
     {
-        $writer->startElement('Categories');
-
-        $categories = $this->getCategoryCollection();
-
         $locales = $this->getLocales($website->getStoreIds());
 
-        /** @var \Magento\Catalog\Model\Category $category */
-        foreach($categories as $category) {
-            $this->writeCategory($writer, $category, $website->getDefaultStore()->getId(), $locales);
-        }
-
-        $writer->endElement(); // Categories
+        $this->processCategories($writer, $website->getDefaultStore(), $locales);
     }
 
     /** 
@@ -112,10 +82,6 @@ class Category extends Feed\ProductFeed
      */
     public function processCategoriesForGlobal(XMLWriter $writer)
     {
-        $writer->startElement('Categories');
-
-        $categories = $this->getCategoryCollection();
-
         $storesList = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStores();
         $stores = [];
         /** @var StoreInterface $store */
@@ -124,126 +90,176 @@ class Category extends Feed\ProductFeed
         }
         $locales = $this->getLocales($stores);
 
-        /** @var \Magento\Catalog\Model\Category $category */
-        foreach($categories as $category) {
-            $this->writeCategory($writer, $category, 0, $locales);
-        }
+        $defaultStore = $this->objectManager->create('\Magento\Store\Model\Store')->load(0);
 
-        $writer->endElement(); // Categories
+        $this->processCategories($writer, $defaultStore, $locales);
     }
 
     /**
      * @param XMLWriter $writer
-     * @param \Magento\Catalog\Model\Category $category
-     * @param int $storeId
-     * @param mixed $locales
+     * @param Store $defaultStore
+     * @param array $localeStores
+     * @throws \Exception
      */
-    protected function writeCategory(XMLWriter $writer, \Magento\Catalog\Model\Category $category, $storeId = 0, $locales = false)
+    protected function processCategories(XMLWriter $writer, $defaultStore, $localeStores = array())
     {
-        $localizedData = [
-            'names' => [],
-            'urls' => [],
-            'images' => []
-        ];
-        if(is_array($locales) && count($locales)) {
-            foreach($locales as $locale => $localeStoreId) {
-                $category->setStoreId($localeStoreId)->load($category->getId());
+        $defaultCollection = $this->getProductCollection($defaultStore);
 
-                if($name = $category->getName())
-                    $localizedData['names'][$locale] = $name;
-                if($url = $this->getStoreUrl($category, $localeStoreId))
-                    $localizedData['urls'][$locale] = $url;
-                if($image = $category->getImageUrl())
-                    $localizedData['images'][$locale] = $image;
+        $baseUrl = $defaultStore->getBaseUrl();
+        $categories = array();
+        /** @var \Magento\Catalog\Model\Category $category */
+        foreach($defaultCollection as $category) {
+            $categories[$category->getId()] = array(
+                'url' => $this->getStoreUrl($baseUrl, $category->getUrlPath()),
+                'name' =>  $category->getName(),
+                'externalId' => $this->getCategoryId($category),
+                'parent_id' => $category->getParentId(),
+                'names' => array(),
+                'urls' => array()
+            );
+        }
+        unset($defaultCollection);
+
+        // get localized data
+        foreach($localeStores as $localeCode => $localeStore) {
+            /** @var Store $localeStore */
+            $localeStore = $this->objectManager->create('\Magento\Store\Model\Store')->load($localeStore);
+            $localeBaseUrl = $localeStore->getBaseUrl();
+            $localeStoreCode = $localeStore->getCode();
+
+            $localeCollection = $this->getProductCollection($localeStore);
+
+            // Get store locale
+            $localeCode = $this->helper->getConfig('general/locale', $localeStore->getId());
+
+            foreach($localeCollection as $category) {
+                /** Skip categories not in main store */
+                if(!isset($categories[$category->getId()])) continue;
+                $categories[$category->getId()]['names'][$localeCode] = $category->getName();
+                $categories[$category->getId()]['urls'][$localeCode] =
+                    $this->getStoreUrl($localeBaseUrl, $category->getUrlPath(), $localeStoreCode, $baseUrl);
             }
+            unset($localeCollection);
         }
 
-        $category->setStoreId($storeId)->load($category->getId());
-        /** If not using entity_id for categories, return if no valid url path found */
-        $categoryId = $this->getCategoryId($category, $storeId);
-        if($categoryId == '') return;
-
-        $writer->startElement('Category');
-
-        $writer->writeElement('ExternalId', $categoryId);
-
-        $writer->writeElement('Name', $category->getName(), true);
-        if(count($localizedData['names'])) {
-            $writer->startElement('Names');
-            foreach($localizedData['names'] as $locale => $name) {
-                $writer->startElement('Name');
-                $writer->writeAttribute('locale', $locale);
-                $writer->writeRaw($name, true);
-                $writer->endElement();
-            }
-            $writer->endElement(); // Names
+        // Check count of categories
+        if (count($categories) > 0) {
+            $writer->startElement("Categories");
         }
-
-        $writer->writeElement('CategoryPageUrl', $category->getUrl(), true);
-        if(count($localizedData['urls'])) {
-            $writer->startElement('CategoryPageUrls');
-            foreach($localizedData['urls'] as $locale => $url) {
-                $writer->startElement('CategoryPageUrl');
-                $writer->writeAttribute('locale', $locale);
-                $writer->writeRaw($url, true);
-                $writer->endElement();
+        /** @var array $category */
+        foreach ($categories as $category) {
+            if(
+                !empty($category['parent_id']) &&
+                $category['parent_id'] != $defaultStore->getRootCategoryId() &&
+                isset($categories[$category['parent_id']]) &&
+                is_array($categories[$category['parent_id']]) &&
+                !empty($categories[$category['parent_id']]['externalId'])
+            ){
+                $category['parent'] = $categories[$category['parent_id']]['externalId'];
             }
-            $writer->endElement(); // CategoryPageUrls
+            $this->writeCategory($writer, $category);
         }
-
-        if(strlen($category->getImageUrl()))
-            $writer->writeElement('ImageUrl', $category->getImageUrl(), true);
-        if(count($localizedData['images'])) {
-            $writer->startElement('ImageUrls');
-            foreach($localizedData['images'] as $locale => $image) {
-                $writer->startElement('ImageUrl');
-                $writer->writeAttribute('locale', $locale);
-                $writer->writeRaw($image, true);
-                $writer->endElement();
-            }
-            $writer->endElement(); // ImageUrls
+        if (count($categories) > 0) {
+            $writer->endElement(); // Categories
         }
-
-
-        $writer->endElement(); // Category
-
     }
 
     /**
-     * @param \Magento\Catalog\Model\Category $category
-     * @param mixed $storeId
-     * @return string
+     * @param XMLWriter $writer
+     * @param array|\Magento\Catalog\Model\Category $category
      */
-    protected function getStoreUrl(\Magento\Catalog\Model\Category $category, $storeId)
+    protected function writeCategory(XMLWriter $writer, $category)
     {
-        $storeCode = $this->objectManager->get('\Magento\Store\Model\StoreManagerInterface')->getStore($storeId)->getCode();
+        $writer->startElement('Category');
+        $writer->writeElement('ExternalId', $category['externalId']);
 
-        $urlInstance = $this->urlFactory->create();
+        // If parent category is the root category, then ignore it
+        if (isset($category['parent'])) {
+            $writer->writeElement('ParentExternalId', $category['parent']);
+        }
 
-        $originalUrl = $category->getUrlPath();
+        $writer->writeElement('Name', htmlspecialchars($category['name'], ENT_QUOTES, 'UTF-8', false), true);
+        $writer->writeElement('CategoryPageUrl', htmlspecialchars($category['url'], ENT_QUOTES, 'UTF-8', false), true);
 
-        $url = $urlInstance
-            ->setScope($storeId)
-            ->addQueryParams(['___store' => $storeCode])
-            ->getUrl($originalUrl);
+        // Write out localized <Names>
+        $writer->startElement('Names');
+        /* @var $curCategory \Magento\Catalog\Model\Category */
+        foreach ($category['names'] as $locale => $name) {
+            $writer->startElement('Name');
+            $writer->writeAttribute('locale', $locale);
+            $writer->writeRaw(htmlspecialchars($name, ENT_QUOTES, 'UTF-8', false), true);
+            $writer->endElement(); // Name
+        }
+        $writer->endElement(); // Names
+
+        // Write out localized <CategoryPageUrls>
+        $writer->startElement('CategoryPageUrls');
+        /* @var $curCategory \Magento\Catalog\Model\Category */
+        foreach ($category['urls'] as $locale => $url) {
+            $writer->startElement('CategoryPageUrl');
+            $writer->writeAttribute('locale', $locale);
+            $writer->writeRaw(htmlspecialchars($url, ENT_QUOTES, 'UTF-8', false), true);
+            $writer->endElement(); // CategoryPageUrl
+        }
+        $writer->endElement(); //CategoryPageUrls
+
+        $writer->endElement(); // Category
+    }
+
+    /**
+     * @param string $storeUrl
+     * @param string $categoryUrlPath
+     * @param string|null $storeCode
+     * @param string|null $defaultUrl
+     * @return string string
+     */
+    protected function getStoreUrl($storeUrl, $categoryUrlPath, $storeCode = null, $defaultUrl = null)
+    {
+        $url = $storeUrl . $categoryUrlPath;
+
+        if($defaultUrl && $storeUrl == $defaultUrl) {
+            $url .= '?___store=' . $storeCode;
+        }
 
         return $url;
     }
 
     /**
+     * @param Store $store
      * @return \Magento\Catalog\Model\ResourceModel\Category\Collection
      */
-    protected function getCategoryCollection()
+    protected function getProductCollection($store)
     {
-        $factory = $this->categoryFactory->create();
+        $rootCategoryId = $store->getRootCategoryId();
+        /* @var $rootCategory \Magento\Catalog\Model\Category */
+        $rootCategory = $this->categoryFactory->create()->load($rootCategoryId);
+        $rootCategoryPath = $rootCategory->getData('path');
 
-        /** @var \Magento\Catalog\Model\ResourceModel\Category\Collection $categories */
-        $categories = $factory->getCollection();
-        $categories
+        /** @var \Magento\Catalog\Model\ResourceModel\Category\Collection $collection */
+        $collection = $this->categoryFactory->create()->getCollection();
+
+        /**
+         * Filter category collection based on Magento store
+         * Do this by filtering on 'path' attribute, based on root category path found above
+         * Include the root category itself in the feed
+         */
+        $collection
+            ->setStore($store)
+            ->addAttributeToFilter('level', array('gt' => 1))
+            ->addAttributeToFilter('is_active', 1)
+            ->addAttributeToFilter('path', array('like' => $rootCategoryPath . '/%'))
             ->addAttributeToSelect('name')
-            ->addAttributeToSelect('image');
+            ->addAttributeToSelect('parent_id');
 
-        return $categories;
+        $collection->getSelect()
+            ->joinLeft(array('url' => $this->resourceConnection->getTableName('url_rewrite')),
+                "entity_type = 'category' AND url.entity_id = e.entity_id AND url.store_id = {$store->getId()} AND metadata IS NULL",
+                array('url_path' => 'request_path'));
+
+        $this->logger->debug($collection->getSelectSql(1));
+
+        return $collection;
     }
+
 
 }

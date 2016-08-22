@@ -49,6 +49,7 @@ class Feed
 
     public function generateFeed($test = false, $force = false)
     {
+        $this->log('===============================');
         $this->log('Start Bazaarvoice ' . $this->type_id . ' Feed Generation');
 
         $this->test = $test;
@@ -58,19 +59,23 @@ class Feed
 
         $this->force = $force;
 
-        switch($this->helper->getConfig('feeds/generation_scope')) {
-            case Scope::STORE_GROUP:
-                $this->exportFeedByStoreGroup();
-                break;
-            case Scope::STORE_VIEW:
-                $this->exportFeedByStore();
-                break;
-            case Scope::WEBSITE:
-                $this->exportFeedByWebsite();
-                break;
-            case Scope::SCOPE_GLOBAL:
-                $this->exportFeedByGlobal();
-                break;
+        try {
+            switch($this->helper->getConfig('feeds/generation_scope')) {
+                case Scope::STORE_GROUP:
+                    $this->exportFeedByStoreGroup();
+                    break;
+                case Scope::STORE_VIEW:
+                    $this->exportFeedByStore();
+                    break;
+                case Scope::WEBSITE:
+                    $this->exportFeedByWebsite();
+                    break;
+                case Scope::SCOPE_GLOBAL:
+                    $this->exportFeedByGlobal();
+                    break;
+            }
+        } Catch (\Exception $e) {
+            $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
         }
         $this->log('End Bazaarvoice ' . $this->type_id . ' Feed Generation');
     }
@@ -96,7 +101,7 @@ class Feed
             }
             catch (\Exception $e) {
                 $this->logger->error('Failed to export daily ' . $this->type_id . ' feed for store: ' . $store->getCode());
-                $this->logger->error('Error message: ' . $e->getMessage());
+                $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
             }
         }
     }
@@ -124,7 +129,7 @@ class Feed
             }
             catch (\Exception $e) {
                 $this->logger->error('Failed to export daily ' . $this->type_id . ' feed for store group: ' . $storeGroup->getName());
-                $this->logger->error('Error message: ' . $e->getMessage());
+                $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
             }
         }
     }
@@ -150,7 +155,7 @@ class Feed
             }
             catch (\Exception $e) {
                 $this->logger->error('Failed to export daily ' . $this->type_id . ' feed for website: ' . $website->getName());
-                $this->logger->error('Error message: ' . $e->getMessage());
+                $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
             }
         }
     }
@@ -171,7 +176,7 @@ class Feed
         }
         catch (\Exception $e) {
             $this->logger->error('Failed to export daily ' . $this->type_id . ' feed.');
-            $this->logger->error('Error message: ' . $e->getMessage());
+            $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
         }
     }
 
