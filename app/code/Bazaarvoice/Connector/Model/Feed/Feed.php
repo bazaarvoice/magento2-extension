@@ -201,6 +201,7 @@ class Feed
         $writer->writeAttribute('name', $clientName);
         $writer->writeAttribute('incremental', 'false');
         $writer->writeAttribute('extractDate', date('Y-m-d\Th:i:s.u'));
+        $writer->writeAttribute('generator', "Magento Extension r" . $this->helper->getExtensionVersion());
         
         return $writer;
     }
