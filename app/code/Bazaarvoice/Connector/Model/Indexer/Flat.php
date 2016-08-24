@@ -91,6 +91,21 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                     $this->storeLocales[$defaultStore->getId()][$defaultLocale] = $defaultStore;
                 }
                 break;
+            case Scope::SCOPE_GLOBAL:
+                $stores = $this->objectManger->get('Magento\Store\Model\StoreManagerInterface')->getStores();
+                $defaultStore = null;
+                /** @var Store $store */
+                foreach($stores as $store) {
+                    if(isset($defaultStore) == false) {
+                        $defaultStore = $store;
+                        $this->storeLocales[$defaultStore->getId()] = array();
+                    }
+                    $localeCode = $this->helper->getConfig('general/locale', $store->getId());
+                    $this->storeLocales[$defaultStore->getId()][$localeCode] = $store;
+                }
+                $defaultLocale = $this->helper->getConfig('general/locale', $defaultStore);
+                $this->storeLocales[$defaultStore->getId()][$defaultLocale] = $defaultStore;
+                break;
         }
     }
 
@@ -179,9 +194,9 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
         switch ($this->generationScope) {
             case Scope::SCOPE_GLOBAL:
+                $stores = $this->objectManger->get('\Magento\Store\Model\StoreManagerInterface')->getStores();
                 /** @var Store $store */
-                $store = $this->objectManger->get('Magento\Store\Model\Store')->load(0);
-                // !TODO Figure out Global
+                $store = array_shift($stores);
                 $this->reindexProductsForStore($productIds, $store);
                 break;
             case Scope::WEBSITE:

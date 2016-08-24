@@ -24,7 +24,7 @@ use Magento\Store\Model\Store;
 use Magento\Store\Model\Website;
 use Magento\Framework\ObjectManagerInterface;
 
-class Category extends Feed\ProductFeed
+class Category extends Generic
 {
     protected $categoryFactory;
     protected $urlFactory;
@@ -255,8 +255,6 @@ class Category extends Feed\ProductFeed
             ->joinLeft(array('url' => $this->resourceConnection->getTableName('url_rewrite')),
                 "entity_type = 'category' AND url.entity_id = e.entity_id AND url.store_id = {$store->getId()} AND metadata IS NULL",
                 array('url_path' => 'request_path'));
-
-        $this->logger->debug($collection->getSelectSql(1));
 
         return $collection;
     }

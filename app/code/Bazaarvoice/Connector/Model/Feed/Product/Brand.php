@@ -20,7 +20,7 @@ use \Magento\Store\Model\Store;
 use \Magento\Store\Model\StoreManagerInterface;
 use \Magento\Store\Model\Website;
 
-class Brand extends Feed\ProductFeed
+class Brand extends Generic
 {
     /**
      * @param XMLWriter $writer

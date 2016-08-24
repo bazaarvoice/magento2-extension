@@ -43,7 +43,7 @@ class Reviews extends Product
         if($this->getIsEnabled()){
             $params = $this->_getParams();
             $bv = new BV($params);
-            $seoContent = $bv->reviews->getContent();
+            $seoContent = $bv->reviews->getReviews();
             $seoContent .= '
 <!-- BV Reviews SEO Parameters: ' . print_r($params, 1) . '-->';
             return $seoContent;

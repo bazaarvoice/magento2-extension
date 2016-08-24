@@ -12,10 +12,15 @@ namespace Bazaarvoice\Connector\Model\Feed;
  * @author		Dennis Rogers <dennis@storefrontconsulting.com>
  */
  
+use Bazaarvoice\Connector\Helper\Data;
+use Bazaarvoice\Connector\Logger\Logger;
+use Bazaarvoice\Connector\Model\Feed\Product\Brand;
+use Bazaarvoice\Connector\Model\Feed\Product\Category;
+use Bazaarvoice\Connector\Model\Feed\Product\Product;
 use Bazaarvoice\Connector\Model\XMLWriter;
+use Magento\Framework\ObjectManagerInterface;
 use Magento\Store\Model\Group;
 use \Magento\Store\Model\Store;
-use \Magento\Framework\Exception;
 use Magento\Store\Model\Website;
 
 class ProductFeed extends Feed
@@ -26,6 +31,29 @@ class ProductFeed extends Feed
 
     protected $type_id = 'product';
 
+    protected $_brand;
+    protected $_category;
+    protected $_product;
+
+    /**
+     * ProductFeed constructor.
+     * @param Logger $logger
+     * @param Data $helper
+     * @param ObjectManagerInterface $objectManager
+     * @param Brand $brand
+     * @param Category $category
+     * @param Product $product
+     */
+    public function __construct(Logger $logger, Data $helper, ObjectManagerInterface $objectManager, Brand $brand, Category $category, Product $product)
+    {
+        $this->_brand = $brand;
+        $this->_category = $category;
+        $this->_product = $product;
+
+        parent::__construct($logger, $helper, $objectManager);
+    }
+
+
     /**
      * @param Store $store
      */
@@ -33,12 +61,12 @@ class ProductFeed extends Feed
     {
         $writer = $this->openProductFile($store);
 
-        $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Brand')
+        $this->_brand
             ->processBrandsForStore($writer, $store);
-        $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Category')
+        $this->_category
             ->processCategoriesForStore($writer, $store);
-        $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Product')
-            ->processProductsForStore($writer, $store);
+        $this->_product
+            ->processProducts($writer, $store);
 
         $this->closeAndUploadFile($writer, $store->getId(), $store);
     }
@@ -52,12 +80,12 @@ class ProductFeed extends Feed
         // Create varien io object and write local feed file
         $writer = $this->openProductFile($store);
 
-        $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Brand')
+        $this->_brand
             ->processBrandsForStoreGroup($writer, $storeGroup);
-        $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Category')
+        $this->_category
             ->processCategoriesForStoreGroup($writer, $storeGroup);
-        $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Product')
-            ->processProductsForStoreGroup($writer, $storeGroup);
+        $this->_product
+            ->processProducts($writer, $store);
 
         $this->closeAndUploadFile($writer, $storeGroup->getId(), $store);
     }
@@ -71,12 +99,12 @@ class ProductFeed extends Feed
         // Create varien io object and write local feed file
         $writer = $this->openProductFile($store);
 
-        $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Brand')
+        $this->_brand
             ->processBrandsForWebsite($writer, $website);
-        $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Category')
+        $this->_category
             ->processCategoriesForWebsite($writer, $website);
-        $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Product')
-            ->processProductsForWebsite($writer, $website);
+        $this->_product
+            ->processProducts($writer, $store);
 
         $this->closeAndUploadFile($writer, $website->getId(), $store);
     }
@@ -94,56 +122,17 @@ class ProductFeed extends Feed
         // Create varien io object and write local feed file
         $writer = $this->openProductFile($store);
 
-        $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Brand')
+        $this->_brand
             ->processBrandsForGlobal($writer);
-        $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Category')
+        $this->_category
             ->processCategoriesForGlobal($writer);
-        $this->objectManager->get('\Bazaarvoice\Connector\Model\Feed\Product\Product')
-            ->processProductsForGlobal($writer);
+        $this->_product
+            ->processProducts($writer, $store);
 
 
         $this->closeAndUploadFile($writer, 0, $store);
     }
 
-    /**
-     * @param $storeIds
-     * @return array
-     */
-    protected function getLocales($storeIds)
-    {
-        $locales = array();
-        foreach ($storeIds as $storeId) {
-            $localeCode = $this->helper->getConfig('general/locale', $storeId);
-            $locales[$localeCode] = $storeId;
-        }
-        return $locales;
-    }
-
-    /**
-     * Get the uniquely identifying category ID for a catalog category.
-     *
-     * This is the unique, category or subcategory ID (duplicates are unacceptable).
-     * This ID should be stable: it should not change for the same logical category even
-     * if the category's name changes.
-     *
-     * @static
-     * @param  \Magento\Catalog\Model\Category $category a reference to a catalog category object
-     * @param int $storeId
-     * @return string The unique category ID to be used with Bazaarvoice
-     */
-    protected function getCategoryId($category, $storeId = null)
-    {
-        if($this->helper->getConfig('feeds/category_id_use_url_path', $storeId) == false) {
-            return $category->getId();
-        }
-        else {
-            $rawCategoryId = $category->getUrlPath();
-
-            $rawCategoryId = str_replace('/', '-', $rawCategoryId);
-            return $this->helper->replaceIllegalCharacters($rawCategoryId);
-        }
-    }
-    
     /**
      * Get custom configured attributes
      * @param string $type
