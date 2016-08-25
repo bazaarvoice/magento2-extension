@@ -12,6 +12,9 @@
                     </resource>
                 </resource>
             </resource>
+            <resource id="Magento_Catalog::index" title="Catalog" sortOrder="40">
+                <resource id="Bazaarvoice_Connector::index" title="Bazaarvoice Product Feed" sortOrder="10" />
+            </resource>
         </resources>
     </acl>
 </config>

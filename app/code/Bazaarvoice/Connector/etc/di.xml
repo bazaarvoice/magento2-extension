@@ -23,6 +23,20 @@
         <plugin name="bazaarvoice-roibeacon" type="Bazaarvoice\Connector\Block\RoiBeacon" sortOrder="100"/>
     </type>
 
+    <!-- Admin Grid -->
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="bv_index_data_source" xsi:type="string">Bazaarvoice\Connector\Model\ResourceModel\Index\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="BvIndexGridDataProvider" type="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
+        <arguments>
+            <argument name="collection" xsi:type="object" shared="false">Bazaarvoice\Connector\Model\ResourceModel\Index\Collection</argument>
+        </arguments>
+    </virtualType>
+
     <!-- Console commands -->
     <type name="Magento\Framework\Console\CommandList">
     	<arguments>
