@@ -43,6 +43,11 @@ class Notification implements MessageInterface
      */
     public function isDisplayed()
     {
+        /**
+         * TODO: Cron schedule doesn't keep long enough records
+         * for this to be reliable. Find another way to track it.
+         */
+        return false;
         /** @var \Magento\Cron\Model\ResourceModel\Schedule\Collection $schedule */
         $schedule = $this->scheduleFactory->create()->getCollection();
         $schedule->addFieldToFilter('job_code', Cron::JOB_CODE)->setOrder('executed_at', 'desc');
