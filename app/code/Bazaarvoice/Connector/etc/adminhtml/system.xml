@@ -148,7 +148,7 @@
                     <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
                     <comment><![CDATA[This attribute code will be used to locate the EAN of products which are sent in the product feed.]]></comment>
                 </field>
-                <field id="mpn_code" translate="label" type="select" sortOrder="160" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="manufacturerpartnumber_code" translate="label" type="select" sortOrder="160" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Manufacturer Part Number Attribute</label>
                     <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
                     <comment><![CDATA[This attribute code will be used to locate the Manufacturer Part Number of products which are sent in the product feed.]]></comment>

@@ -132,6 +132,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         } Catch (\Exception $e) {
         	$this->logger->err($e->getMessage()."\n".$e->getTraceAsString());
         }
+        return true;
     }
 
     /**
@@ -181,7 +182,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         } Catch (\Exception $e) {
             $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
         }
-
+        return true;
     }
 
     /**
@@ -357,7 +358,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         while($row = $columnResults->fetch()) {
             $flatColumns[] = $row['Field'];
         }
-        $brandAttr = $this->helper->getConfig("/bv_config/product_feed_brand_attribute_code", $storeId);
+        $brandAttr = $this->helper->getConfig("feeds/brand_code", $storeId);
         if($brandAttr) {
             if(in_array($brandAttr, $flatColumns)) {
                 $select->columns(array('brand_external_id' => 'brand'));
@@ -365,11 +366,13 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         }
         foreach($index->customAttributes as $label) {
             $code = strtolower($label);
-            $attr = $this->helper->getConfig("/bv_config/product_feed_{$code}_attribute_code", $storeId);
+            $attr = $this->helper->getConfig("feeds/{$code}_code", $storeId);
             if($attr) {
                 if(in_array("{$attr}_value", $flatColumns)) {
+                    $this->logger->debug("using {$attr}_value for {$code}");
                     $select->columns(array("{$code}s" => "{$attr}_value"));
                 } else if(in_array($attr, $flatColumns)) {
+                    $this->logger->debug("using {$attr} for {$code}");
                     $select->columns(array("{$code}s" => $attr));
                 }
             }
@@ -551,14 +554,18 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
      * @param array|\int[] $ids
      * @return mixed
      */
-    public function executeList(array $ids){}
+    public function executeList(array $ids){
+        return true;
+    }
 
     /**
      * Required by interface but never called as far as I can tell
      * @param int $id
      * @return mixed
      */
-    public function executeRow($id){}
+    public function executeRow($id){
+        return true;
+    }
 
     /**
      * @param int $storeId
