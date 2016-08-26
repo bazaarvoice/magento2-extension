@@ -262,7 +262,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
         /** Reset mview version */
         $mviewTable = $this->resourceConnection->getTableName('mview_state');
-        $writeAdapter->query("UPDATE `$mviewTable` SET `version_id` = NULL WHERE `view_id` = 'bazaarvoice_product';");
+        $writeAdapter->query("UPDATE `$mviewTable` SET `version_id` = NULL, `status` = 'idle' WHERE `view_id` = 'bazaarvoice_product';");
         $indexCheck = $writeAdapter->query("SELECT COUNT(1) IndexIsThere FROM INFORMATION_SCHEMA.STATISTICS WHERE table_schema=DATABASE() AND table_name='{$changelogTable}' AND index_name='entity_id';");
         $indexCheck = $indexCheck->fetchObject();
         if($indexCheck->IndexIsThere == 0)
@@ -281,6 +281,13 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
      */
     public function reindexProductsForStore($productIds, $store)
     {
+        /** Check for scope change */
+        if($this->hasBadScopeIndex()){
+            $this->logger->info('Index entries found with wrong scope. This usually means scope has changed in admin. Flagging entire index for rebuild.');
+            $this->executeFull();
+            return false;
+        }
+
         /** @var \Bazaarvoice\Connector\Model\Index $index */
         $index = $this->objectManger->get('\Bazaarvoice\Connector\Model\Index');
         if(is_int($store))
@@ -403,7 +410,8 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
             foreach ($indexData as $key => $value) {
                 if (strpos($key, '|') !== false) {
                     $newKey = explode('|', $key);
-                    $indexData['locale_' . $newKey[1]][$newKey[0]] = $value;
+                    if(strlen($value))
+                        $indexData['locale_' . $newKey[1]][$newKey[0]] = $value;
                     unset($indexData[$key]);
                 }
                 if (strpos($value, '|') !== false) {
@@ -602,6 +610,20 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
         }
         return $placeholders;
+    }
+
+    protected function hasBadScopeIndex()
+    {
+        /** @var Select $select */
+        $select = $this->resourceConnection->getConnection('core_read')->select()->from(array('source' => $this->resourceConnection->getTableName('bazaarvoice_index_product')));
+
+        $select->columns(array('total' => 'count(*)'));
+        $select->where("scope IS NOT NULL AND scope != '{$this->generationScope}'");
+        $result = $select->query();
+
+        while($row = $result->fetch()) {
+            return $row['total'] > 0;
+        }
     }
 
 }

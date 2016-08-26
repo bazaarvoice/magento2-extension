@@ -44,7 +44,11 @@ class ProductAttribute
         ));
 
         foreach($attributes as $attribute){
-            if($attribute->getIsUserDefined() == 0) continue;
+            if(
+                $attribute->getIsUserDefined() == 0
+                || $attribute->getUsedInProductListing() == 0
+            )
+                continue;
             $attributeOptions[] = array(
                 'label' => $attribute->getFrontendLabel(),
                 'value' => $attribute->getAttributeCode()

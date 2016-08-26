@@ -136,7 +136,7 @@
                 <field id="brand_code" translate="label" type="select" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Brand Attribute</label>
                     <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
-                    <comment><![CDATA[This attribute code will be used to locate the brand of products which are sent in the product feed.]]></comment>
+                    <comment><![CDATA[This attribute code will be used to locate the brand of products which are sent in the product feed. NOTE: These attributes must be set to 'Used in Product Listing.']]></comment>
                 </field>
                 <field id="upc_code" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>UPC Attribute</label>

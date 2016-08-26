@@ -6,6 +6,18 @@
             <item name="deps" xsi:type="string">bv_product_index.bv_product_index_data_source</item>
         </item>
         <item name="spinner" xsi:type="string">bv_product_index_columns</item>
+        <item name="buttons" xsi:type="array">
+            <item name="rebuild" xsi:type="array">
+                <item name="name" xsi:type="string">rebuild</item>
+                <item name="label" xsi:type="string" translate="true">Rebuild Index</item>
+                <item name="url" xsi:type="string">*/bvfeed/rebuildproduct</item>
+                <item name="class" xsi:type="string">primary</item>
+                <item name="confirm" xsi:type="array">
+                    <item name="title" xsi:type="string" translate="true">Rebuild Index</item>
+                    <item name="message" xsi:type="string" translate="true">Are you you want to rebuild the product feed index?</item>
+                </item>
+            </item>
+        </item>
     </argument>
     <dataSource name="bv_product_index_data_source">
         <argument name="dataProvider" xsi:type="configurableObject">
@@ -73,9 +85,10 @@
                 </item>
             </argument>
         </column>
-        <column name="family">
+        <column name="family" class="Bazaarvoice\Connector\Ui\Component\Listing\Column\Json">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="bodyTmpl" xsi:type="string">ui/grid/cells/html</item>
                     <item name="label" xsi:type="string" translate="true">Family</item>
                 </item>
             </argument>
@@ -90,6 +103,7 @@
         <column name="locale_name" class="Bazaarvoice\Connector\Ui\Component\Listing\Column\Json">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="bodyTmpl" xsi:type="string">ui/grid/cells/html</item>
                     <item name="label" xsi:type="string" translate="true">Locale Name</item>
                 </item>
             </argument>
@@ -101,9 +115,10 @@
                 </item>
             </argument>
         </column>
-        <column name="locale_description">
+        <column name="locale_description" class="Bazaarvoice\Connector\Ui\Component\Listing\Column\Json">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="bodyTmpl" xsi:type="string">ui/grid/cells/html</item>
                     <item name="label" xsi:type="string" translate="true">Locale Description</item>
                 </item>
             </argument>
@@ -115,21 +130,26 @@
                 </item>
             </argument>
         </column>
-        <column name="locale_product_page_url">
+        <column name="locale_product_page_url" class="Bazaarvoice\Connector\Ui\Component\Listing\Column\Json">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="bodyTmpl" xsi:type="string">ui/grid/cells/html</item>
                     <item name="label" xsi:type="string" translate="true">Locale URL</item>
                 </item>
             </argument>
         </column>
-        <column name="image_url">
+        <column name="image_url" class="Bazaarvoice\Connector\Ui\Component\Listing\Column\Thumbnail">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="component" xsi:type="string">Magento_Ui/js/grid/columns/thumbnail</item>
+                    <item name="sortable" xsi:type="boolean">false</item>
+                    <item name="altField" xsi:type="string">name</item>
+                    <item name="has_preview" xsi:type="string">1</item>
                     <item name="label" xsi:type="string" translate="true">Image</item>
                 </item>
             </argument>
         </column>
-        <column name="locale_image_url">
+        <column name="locale_image_url" class="Bazaarvoice\Connector\Ui\Component\Listing\Column\Json">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="label" xsi:type="string" translate="true">Locale Image</item>
@@ -187,15 +207,22 @@
         </column>
         <column name="status">
             <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="label" xsi:type="string" translate="true">Status</item>
+                <item name="options" xsi:type="array">
+                    <item name="disable" xsi:type="array">
+                        <item name="value" xsi:type="string">2</item>
+                        <item name="label" xsi:type="string" translate="true">Disabled</item>
+                    </item>
+                    <item name="enable" xsi:type="array">
+                        <item name="value" xsi:type="string">1</item>
+                        <item name="label" xsi:type="string" translate="true">Enabled</item>
+                    </item>
                 </item>
-            </argument>
-        </column>
-        <column name="version_id">
-            <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
-                    <item name="label" xsi:type="string" translate="true">Version</item>
+                    <item name="filter" xsi:type="string">select</item>
+                    <item name="component" xsi:type="string">Magento_Ui/js/grid/columns/select</item>
+                    <item name="editor" xsi:type="string">select</item>
+                    <item name="dataType" xsi:type="string">select</item>
+                    <item name="label" xsi:type="string" translate="true">Status</item>
                 </item>
             </argument>
         </column>

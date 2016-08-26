@@ -52,15 +52,16 @@ class Json extends \Magento\Ui\Component\Listing\Columns\Column
         if (isset($dataSource['data']['items'])) {
             $fieldName = $this->getData('name');
             foreach ($dataSource['data']['items'] as & $item) {
+                if(empty($item[$fieldName])) continue;
                 $valueData = $this->helper->jsonDecode($item[$fieldName]);
                 if (is_object($valueData) == true ||
                     is_array($valueData) == true) {
                     $html = '';
                     foreach ($valueData as $key => $value) {
                         if (!is_numeric($key)) {
-                            $html .= "$key: ";
+                            $html .= "<strong>$key:</strong> ";
                         }
-                        $html .= $this->truncate($value) . "\n";
+                        $html .= $this->truncate($value) . "<br/>";
                     }
                     $item[$fieldName] = $html;
                 }
