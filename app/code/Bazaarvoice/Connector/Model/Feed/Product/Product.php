@@ -145,26 +145,27 @@ class Product extends Generic
             }
         }
 
-        if($product->getData('family') && count($product->getData('family'))) {
-            $this->_writer->startElement('Attributes');
+        if($this->helper->getConfig('feeds/families')) {
+            if($product->getData('family') && count($product->getData('family'))) {
+                $this->_writer->startElement('Attributes');
 
-            foreach($product->getData('family') as $familyId) {
-                if($familyId) {
-                    $this->_writer->startElement('Attribute');
-                    $this->_writer->writeAttribute('id', 'BV_FE_FAMILY');
-                    $this->_writer->writeElement('Value', $familyId);
-                    $this->_writer->endElement(); // Attribute
-
-                    if($this->helper->getConfig('feeds/bvfamilies_expand')) {
+                foreach ($product->getData('family') as $familyId) {
+                    if ($familyId) {
                         $this->_writer->startElement('Attribute');
-                        $this->_writer->writeAttribute('id', 'BV_FE_EXPAND');
-                        $this->_writer->writeElement('Value', 'BV_FE_FAMILY:' . $familyId);
+                        $this->_writer->writeAttribute('id', 'BV_FE_FAMILY');
+                        $this->_writer->writeElement('Value', $familyId);
                         $this->_writer->endElement(); // Attribute
+
+                        if ($this->helper->getConfig('feeds/bvfamilies_expand')) {
+                            $this->_writer->startElement('Attribute');
+                            $this->_writer->writeAttribute('id', 'BV_FE_EXPAND');
+                            $this->_writer->writeElement('Value', 'BV_FE_FAMILY:' . $familyId);
+                            $this->_writer->endElement(); // Attribute
+                        }
                     }
                 }
+                $this->_writer->endElement(); // Attributes
             }
-
-            $this->_writer->endElement(); // Attributes
         }
 
         $this->_writer->endElement(); // Product

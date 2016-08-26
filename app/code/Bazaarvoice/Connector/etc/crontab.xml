@@ -10,5 +10,8 @@
         <job name="bazaarvoice_send_orders" instance="Bazaarvoice\Connector\Model\Cron" method="sendPurchaseFeed">
             <schedule>30 2 * * 6</schedule><!-- Every Saturday at 2:30 AM -->
         </job>
+        <job name="bazaarvoice_send_products" instance="Bazaarvoice\Connector\Model\Cron" method="sendProductFeed">
+            <schedule>0 1 * * *</schedule><!-- Every day at 1:00 AM -->
+        </job>
     </group>
 </config>

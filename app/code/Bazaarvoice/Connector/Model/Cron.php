@@ -14,7 +14,7 @@ namespace Bazaarvoice\Connector\Model;
 
 use Bazaarvoice\Connector\Helper\Data;
 use Bazaarvoice\Connector\Logger\Logger;
-use Bazaarvoice\Connector\Model\Feed\PurchaseFeed;
+use Magento\Framework\ObjectManagerInterface;
 
 class Cron
 {
@@ -22,8 +22,8 @@ class Cron
     protected $helper;
     /** @var Logger $logger */
     protected $logger;
-    /** @var  PurchaseFeed $purchaseFeed */
-    protected $purchaseFeed;
+    /** @var  ObjectManagerInterface $objectManager */
+    protected $objectManager;
 
     CONST JOB_CODE = 'bazaarvoice_send_orders';
 
@@ -31,22 +31,31 @@ class Cron
      * Cron constructor.
      * @param Logger $logger
      * @param Data $helper
-     * @param PurchaseFeed $purchaseFeed
+     * @param ObjectManagerInterface $objectManager
      */
-    public function __construct(Logger $logger, Data $helper, PurchaseFeed $purchaseFeed)
+    public function __construct(Logger $logger, Data $helper, ObjectManagerInterface $objectManager)
     {
         $this->logger = $logger;
         $this->helper = $helper;
-        $this->purchaseFeed = $purchaseFeed;
+        $this->objectManager = $objectManager;
     }
 
     public function sendPurchaseFeed()
     {
         $this->logger->info('Begin Purchase Feed Cron');
 
-        $this->purchaseFeed->generateFeed();
+        $this->objectManager->create('\Bazaarvoice\Connector\Model\Feed\PurchaseFeed')->generateFeed();
 
         $this->logger->info('End Purchase Feed Cron');
+    }
+
+    public function sendProductFeed()
+    {
+        $this->logger->info('Begin Product Feed Cron');
+
+        $this->objectManager->create('\Bazaarvoice\Connector\Model\Feed\ProductFeed')->generateFeed();
+
+        $this->logger->info('End Product Feed Cron');
     }
 
 }
