@@ -44,7 +44,7 @@ class Item extends \Bazaarvoice\Connector\Block\Product
 
     public function afterToHtml($subject, $result)
     {
-        if($this->isEnabled()) {
+        if($this->isEnabled() && count($this->productIds)) {
             $result .= '
             <script type="text/javascript">
             $BV.ui("rr", "inline_ratings", {
