@@ -152,6 +152,7 @@
         <column name="locale_image_url" class="Bazaarvoice\Connector\Ui\Component\Listing\Column\Json">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="bodyTmpl" xsi:type="string">ui/grid/cells/html</item>
                     <item name="label" xsi:type="string" translate="true">Locale Image</item>
                 </item>
             </argument>

@@ -136,32 +136,32 @@
                 <field id="brand_code" translate="label" type="select" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Brand Attribute</label>
                     <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
-                    <comment><![CDATA[This attribute code will be used to locate the brand of products which are sent in the product feed. NOTE: These attributes must be set to 'Used in Product Listing.']]></comment>
+                    <comment><![CDATA[This attribute code will be used to locate the brand of products which are sent in the product feed. <strong>Attribute must be set to 'Use in Product Listing.'</strong>]]></comment>
                 </field>
                 <field id="upc_code" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>UPC Attribute</label>
                     <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
-                    <comment><![CDATA[This attribute code will be used to locate the UPC of products which are sent in the product feed.]]></comment>
+                    <comment><![CDATA[This attribute code will be used to locate the UPC of products which are sent in the product feed. <strong>Attribute must be set to 'Use in Product Listing.'</strong>]]></comment>
                 </field>
                 <field id="ean_code" translate="label" type="select" sortOrder="150" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>EAN Attribute</label>
                     <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
-                    <comment><![CDATA[This attribute code will be used to locate the EAN of products which are sent in the product feed.]]></comment>
+                    <comment><![CDATA[This attribute code will be used to locate the EAN of products which are sent in the product feed. <strong>Attribute must be set to 'Use in Product Listing.'</strong>]]></comment>
                 </field>
                 <field id="manufacturerpartnumber_code" translate="label" type="select" sortOrder="160" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Manufacturer Part Number Attribute</label>
                     <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
-                    <comment><![CDATA[This attribute code will be used to locate the Manufacturer Part Number of products which are sent in the product feed.]]></comment>
+                    <comment><![CDATA[This attribute code will be used to locate the Manufacturer Part Number of products which are sent in the product feed. <strong>Attribute must be set to 'Use in Product Listing.'</strong>]]></comment>
                 </field>
                 <field id="isbn_code" translate="label" type="select" sortOrder="165" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>ISBN Attribute</label>
                     <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
-                    <comment><![CDATA[This attribute code will be used to locate the ISBN of products which are sent in the product feed.]]></comment>
+                    <comment><![CDATA[This attribute code will be used to locate the ISBN of products which are sent in the product feed. <strong>Attribute must be set to 'Use in Product Listing.'</strong>]]></comment>
                 </field>
                 <field id="modelnumber_code" translate="label" type="select" sortOrder="170" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Model Number Attribute</label>
                     <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
-                    <comment><![CDATA[This attribute code will be used to locate the Model Number of products which are sent in the product feed.]]></comment>
+                    <comment><![CDATA[This attribute code will be used to locate the Model Number of products which are sent in the product feed. <strong>Attribute must be set to 'Use in Product Listing.'</strong>]]></comment>
                 </field>
                 <field id="bvfamilies_expand" translate="label" type="select" sortOrder="175" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Expand Families in Product Feed</label>

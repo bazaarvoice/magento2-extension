@@ -61,6 +61,15 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
         /** @var Store $store */
         switch ($this->generationScope) {
+            case Scope::STORE_VIEW:
+                $stores = $this->objectManger->get('Magento\Store\Model\StoreManagerInterface')->getStores();
+                $defaultStore = null;
+                /** @var Store $store */
+                foreach($stores as $store) {
+                    $localeCode = $this->helper->getConfig('general/locale', $store->getId());
+                    $this->storeLocales[$store->getId()][$localeCode] = $store;
+                }
+                break;
             case Scope::WEBSITE:
                 $websites = $this->objectManger->get('Magento\Store\Model\StoreManagerInterface')->getWebsites();
                 /** @var Website $website */
@@ -624,6 +633,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         while($row = $result->fetch()) {
             return $row['total'] > 0;
         }
+        return true;
     }
 
 }
