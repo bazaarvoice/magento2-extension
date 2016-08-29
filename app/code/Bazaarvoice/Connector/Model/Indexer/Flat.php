@@ -588,7 +588,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
      * @param int $storeId
      * @return array
      */
-    private function getPlaceholderUrls($storeId)
+    public function getPlaceholderUrls($storeId)
     {
         /** @var Image $imageHelper */
         $imageHelper = $this->objectManger->get('\Magento\Catalog\Helper\Image');

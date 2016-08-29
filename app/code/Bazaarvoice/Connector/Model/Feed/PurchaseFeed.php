@@ -251,22 +251,21 @@ class PurchaseFeed extends Feed
         // Get client name for the scope
         $clientName = $this->helper->getConfig('general/client_name', $store->getId());
 
-        /** @var \Magento\Catalog\Helper\Product $productHelper */
-        $productHelper = $this->objectManager->get('\Magento\Catalog\Helper\Product');
+        $baseMediaUrl = $store->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog/product';
 
         // Create varien io object and write local feed file
         /** @var XMLWriter $writer */
         $writer = $this->openFile('http://www.bazaarvoice.com/xs/PRR/PurchaseFeed/5.6', $clientName);
 
+        /** @var \Magento\Sales\Model\Order $order */
         foreach($orders as $order) {
-            /** @var \Magento\Sales\Model\Order $order */
 
             $writer->startElement('Interaction');
 
             $writer->writeElement('TransactionDate', $this->getTriggeringEventDate($order));
             $writer->writeElement('EmailAddress', $order->getCustomerEmail());
             $writer->writeElement('Locale', $this->helper->getConfig('general/locale', $order->getStoreId()));
-            $writer->writeElement('UserName', $order->getCustomerFirstname());
+            $writer->writeElement('UserName', $order->getBillingAddress()->getFirstname());
 
             if($order->getCustomerId()) {
                 $userId = $order->getCustomerId();
@@ -299,7 +298,7 @@ class PurchaseFeed extends Feed
                 $writer->writeElement('ExternalId', $this->helper->getProductId($product));
                 $writer->writeElement('Name', $product->getName());
 
-                $imageUrl = $productHelper->getImageUrl($product);
+                $imageUrl = $product->getImage();
                 $originalPrice = $item->getOriginalPrice();
 
                 if($item->getParentItem()) {
@@ -315,9 +314,16 @@ class PurchaseFeed extends Feed
 
                         if($product->getImage() == 'no_selection'){
                             // if product families are enabled and product has no image, use configurable image
-                            $imageUrl = $productHelper->getImageUrl($parent);
+                            $imageUrl = $parent->getImage();
                         }
                     }
+                }
+
+                if($imageUrl == '' || $imageUrl == 'no_selection') {
+                    $placeholders = $this->objectManager->create('\Bazaarvoice\Connector\Model\Indexer\Flat')->getPlaceholderUrls($store->getId());
+                    $imageUrl = $placeholders['default'];
+                } else {
+                    $imageUrl = $baseMediaUrl . $imageUrl;
                 }
 
                 $writer->writeElement('ImageUrl', $imageUrl);
