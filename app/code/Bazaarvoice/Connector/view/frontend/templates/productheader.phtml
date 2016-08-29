@@ -5,11 +5,7 @@
         var bvConfigData = {};
 <?php if($this->getProductId()) : ?>
         bvConfigData.productId = "<?php echo $this->getProductSku() ?>";
-<?php endif; ?>
-<?php if($this->getConfig('rr/container')): ?>
-        bvConfigData.submissionContainerUrl = "<?php echo $this->getContainerUrl() ?>";
-        bvConfigData.submissionReturnUrl = "<?php echo $this->getProduct()->getProductUrl() ?>";
-<?php endif; ?>
+<?php endif; ?>å
         $BV.configure("global", bvConfigData);
     </script>
 <?php if($this->isConfigurable()): ?>
