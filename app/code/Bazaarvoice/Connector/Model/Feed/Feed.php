@@ -251,6 +251,16 @@ class Feed
 
         $result = $sftp->write($destinationFile, $sourceFile);
         $this->log('result ' . $result);
+        if($result) {
+            /** @var \Magento\Framework\Filesystem\Io\File $ioObject */
+            $ioObject = $this->objectManager->get('Magento\Framework\Filesystem\Io\File');
+
+            $sentFile = dirname($sourceFile) . '/sent/' . basename($sourceFile);
+
+            $ioObject->setAllowCreateFolders(true);
+            $ioObject->open(array('path' => dirname($sentFile)));
+            $ioObject->mv($sourceFile, $sentFile);
+        }
     }
 
     /**

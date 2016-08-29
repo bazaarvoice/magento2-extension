@@ -437,7 +437,12 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 $indexData['category_external_id'] = str_replace('/', '-', $indexData['category_external_id']);
                 $indexData['category_external_id'] = $this->helper->replaceIllegalCharacters($indexData['category_external_id']);
             }
-            $this->logger->debug("Category '{$indexData['category_external_id']}'");
+            if($indexData['category_external_id'] == '') {
+                $indexData['status'] = Status::STATUS_DISABLED;
+                $this->logger->info('Product marked disabled because not category found.');
+            } else {
+                $this->logger->debug("Category '{$indexData['category_external_id']}'");
+            }
 
             /** Use parent URLs if appropriate */
             if ($indexData['visibility'] == Visibility::VISIBILITY_NOT_VISIBLE) {
