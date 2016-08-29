@@ -19,8 +19,6 @@ use Bazaarvoice\Connector\Model\ResourceModel\Index\Collection;
 
 class Product extends Generic
 {
-    /** @var Collection $productCollection */
-    protected $productCollection;
     /** @var  XMLWriter $_writer */
     protected $_writer;
 
@@ -178,20 +176,16 @@ class Product extends Generic
     }
 
     /**
-     * @param bool $new Get new collection
      * @return Collection
      */
-    protected function getProductCollection($new = false)
+    protected function getProductCollection()
     {
-        if($new || !$this->productCollection) {
-            /** @var Collection\Factory $indexFactory */
-            $indexFactory = $this->objectManager->get('\Bazaarvoice\Connector\Model\ResourceModel\Index\Collection\Factory');
-            $collection = $indexFactory->create();
-            $collection->addFieldToFilter('status', Status::STATUS_ENABLED);
-            $this->productCollection = $collection;
+        /** @var Collection\Factory $indexFactory */
+        $indexFactory = $this->objectManager->get('\Bazaarvoice\Connector\Model\ResourceModel\Index\Collection\Factory');
+        $collection = $indexFactory->create();
+        $collection->addFieldToFilter('status', Status::STATUS_ENABLED);
 
-        }
-        return $this->productCollection;
+        return $collection;
     }
 
 
