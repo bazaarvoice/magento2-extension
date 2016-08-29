@@ -23,7 +23,10 @@ class Rebuildproduct extends \Magento\Backend\App\Action
 
     public function execute()
     {
-        echo "<pre>";
-        $this->indexer->executeFull();
+        $result = $this->indexer->executeFull();
+        if($result)
+            $this->messageManager->addSuccess(__('Product Feed Index has been flagged for rebuild.'));
+
+        $this->_redirect('adminhtml/bvindex/index');
     }
 }

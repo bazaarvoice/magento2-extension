@@ -34,7 +34,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
     protected $logger;
     protected $indexer;
     protected $generationScope;
-    protected $objectManger;
+    protected $objectManager;
     protected $collectionFactory;
     protected $resourceConnection;
     protected $storeLocales;
@@ -52,7 +52,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
     {
         $this->logger = $logger;
         $this->helper = $helper;
-        $this->objectManger = $objectManager;
+        $this->objectManager = $objectManager;
         $this->indexer = $indexerInterface->load('bazaarvoice_product');
         $this->collectionFactory = $collectionFactory;
         $this->resourceConnection = $resourceConnection;
@@ -62,7 +62,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         /** @var Store $store */
         switch ($this->generationScope) {
             case Scope::STORE_VIEW:
-                $stores = $this->objectManger->get('Magento\Store\Model\StoreManagerInterface')->getStores();
+                $stores = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStores();
                 $defaultStore = null;
                 /** @var Store $store */
                 foreach($stores as $store) {
@@ -71,7 +71,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 }
                 break;
             case Scope::WEBSITE:
-                $websites = $this->objectManger->get('Magento\Store\Model\StoreManagerInterface')->getWebsites();
+                $websites = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface')->getWebsites();
                 /** @var Website $website */
                 foreach($websites as $website) {
                     $defaultStore = $website->getDefaultStore();
@@ -86,7 +86,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 }
                 break;
             case Scope::STORE_GROUP:
-                $groups = $this->objectManger->get('Magento\Store\Model\StoreManagerInterface')->getGroups();
+                $groups = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface')->getGroups();
                 /** @var Group $group */
                 foreach($groups as $group) {
                     $defaultStore = $group->getDefaultStore();
@@ -101,7 +101,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 }
                 break;
             case Scope::SCOPE_GLOBAL:
-                $stores = $this->objectManger->get('Magento\Store\Model\StoreManagerInterface')->getStores();
+                $stores = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStores();
                 $defaultStore = null;
                 /** @var Store $store */
                 foreach($stores as $store) {
@@ -184,7 +184,6 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                     $changelogTable = $this->resourceConnection->getTableName('bazaarvoice_product_cl');
                     $indexTable = $this->resourceConnection->getTableName('bazaarvoice_index_product');
                     $this->resourceConnection->getConnection('core_write')->query("INSERT INTO `$changelogTable` (`entity_id`) SELECT `product_id` FROM `$indexTable` WHERE `version_id` = 0;");
-
                 }
                 $this->logStats();
             }
@@ -204,13 +203,13 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
         switch ($this->generationScope) {
             case Scope::SCOPE_GLOBAL:
-                $stores = $this->objectManger->get('\Magento\Store\Model\StoreManagerInterface')->getStores();
+                $stores = $this->objectManager->get('\Magento\Store\Model\StoreManagerInterface')->getStores();
                 /** @var Store $store */
                 $store = array_shift($stores);
                 $this->reindexProductsForStore($productIds, $store);
                 break;
             case Scope::WEBSITE:
-                $websites = $this->objectManger->get('Magento\Store\Model\StoreManagerInterface')->getWebsites();
+                $websites = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface')->getWebsites();
                 /** @var \Magento\Store\Model\Website $website */
                 foreach($websites as $website) {
                     $defaultStore = $website->getDefaultStore();
@@ -222,7 +221,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 }
                 break;
             case Scope::STORE_GROUP:
-                $groups = $this->objectManger->get('Magento\Store\Model\StoreManagerInterface')->getGroups();
+                $groups = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface')->getGroups();
                 /** @var \Magento\Store\Model\Group $group */
                 foreach($groups as $group) {
                     $defaultStore = $group->getDefaultStore();
@@ -234,7 +233,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 }
                 break;
             case Scope::STORE_VIEW:
-                $stores = $this->objectManger->get('Magento\Store\Model\StoreManagerInterface')->getStores();
+                $stores = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStores();
                 /** @var \Magento\Store\Model\Store $store */
                 foreach($stores as $store) {
                     if($store->getId()){
@@ -298,9 +297,9 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         }
 
         /** @var \Bazaarvoice\Connector\Model\Index $index */
-        $index = $this->objectManger->get('\Bazaarvoice\Connector\Model\Index');
+        $index = $this->objectManager->get('\Bazaarvoice\Connector\Model\Index');
         if(is_int($store))
-            $store = $this->objectManger->get('\Magento\Store\Model\Store')->load($store);
+            $store = $this->objectManager->get('\Magento\Store\Model\Store')->load($store);
         $storeId = $store->getId();
 
         /** Database Resources */
@@ -488,12 +487,16 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
             }
 
             /** Add Store base to URLs */
-            $indexData['product_page_url'] = $store->getBaseUrl().$indexData['product_page_url'];
+            $indexData['product_page_url'] = $this->getStoreUrl($store->getBaseUrl(), $indexData['product_page_url']);
             if (is_array($indexData['locale_product_page_url']) && count($indexData['locale_product_page_url'])) {
                 /** @var Store $storeLocale */
                 foreach ($this->storeLocales[$storeId] as $locale => $storeLocale) {
                     if (isset($indexData['locale_product_page_url'][$locale]))
-                        $indexData['locale_product_page_url'][$locale] = $storeLocale->getBaseUrl().$indexData['locale_product_page_url'][$locale];
+                        $indexData['locale_product_page_url'][$locale] = $this->getStoreUrl(
+                            $storeLocale->getBaseUrl(),
+                            $indexData['locale_product_page_url'][$locale],
+                            $storeLocale->getCode(),
+                            $store->getBaseUrl());
                 }
             }
             $this->logger->debug("URL {$indexData['product_page_url']}");
@@ -521,7 +524,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                     $indexData[$key] = $this->helper->jsonEncode($value);
             }
 
-            $index = $this->objectManger->create('\Bazaarvoice\Connector\Model\Index')->loadByStore($indexData['product_id'], $indexData['store_id']);
+            $index = $this->objectManager->create('\Bazaarvoice\Connector\Model\Index')->loadByStore($indexData['product_id'], $indexData['store_id']);
 
             if ($index->getId())
                 $indexData['entity_id'] = $index->getId();
@@ -538,6 +541,24 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
             unset($indexData);
         }
         return true;
+    }
+
+    /**
+     * @param string $storeUrl
+     * @param string $urlPath
+     * @param string|null $storeCode
+     * @param string|null $defaultUrl
+     * @return string string
+     */
+    protected function getStoreUrl($storeUrl, $urlPath, $storeCode = null, $defaultUrl = null)
+    {
+        $url = $storeUrl . $urlPath;
+
+        if($defaultUrl && $storeUrl == $defaultUrl) {
+            $url .= '?___store=' . $storeCode;
+        }
+
+        return $url;
     }
 
     /**
@@ -596,11 +617,11 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
     public function getPlaceholderUrls($storeId)
     {
         /** @var Image $imageHelper */
-        $imageHelper = $this->objectManger->get('\Magento\Catalog\Helper\Image');
+        $imageHelper = $this->objectManager->get('\Magento\Catalog\Helper\Image');
         /** @var \Magento\Framework\View\Asset\Repository $assetRepo */
-        $assetRepo = $this->objectManger->get('\Magento\Framework\View\Asset\Repository');
+        $assetRepo = $this->objectManager->get('\Magento\Framework\View\Asset\Repository');
         /** @var \Magento\Framework\View\DesignInterface $design */
-        $design = $this->objectManger->create('\Magento\Framework\View\DesignInterface');
+        $design = $this->objectManager->create('\Magento\Framework\View\DesignInterface');
 
         $placeholders = array();
         /**
@@ -610,7 +631,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         foreach($this->storeLocales[$storeId] as $locale => $localeStore) {
             $themeId = $design->getConfigurationDesignTheme('frontend', ['store' => $localeStore->getId()]);
             /** @var \Magento\Theme\Model\Theme $theme */
-            $theme = $this->objectManger->create('\Magento\Theme\Model\Theme')->load($themeId);
+            $theme = $this->objectManager->create('\Magento\Theme\Model\Theme')->load($themeId);
             $assetParams = array(
                 'area' => 'frontend',
                 'theme' => $theme->getThemePath(),

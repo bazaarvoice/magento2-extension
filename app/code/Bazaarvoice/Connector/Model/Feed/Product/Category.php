@@ -90,7 +90,9 @@ class Category extends Generic
         }
         $locales = $this->getLocales($stores);
 
-        $defaultStore = $this->objectManager->create('\Magento\Store\Model\Store')->load(0);
+        $stores = $this->objectManager->get('\Magento\Store\Model\StoreManagerInterface')->getStores();
+        /** @var Store $store */
+        $defaultStore = array_shift($stores);
 
         $this->processCategories($writer, $defaultStore, $locales);
     }

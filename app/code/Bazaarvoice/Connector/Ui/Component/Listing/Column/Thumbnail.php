@@ -27,10 +27,12 @@ class Thumbnail extends \Magento\Ui\Component\Listing\Columns\Column
             $fieldName = $this->getData('name');
             foreach ($dataSource['data']['items'] as & $item) {
                 $value = $item[$fieldName];
-                $item[$fieldName . '_src'] = $value;
-                $item[$fieldName . '_alt'] = $fieldName;
-                $item[$fieldName . '_link'] = $value;
-                $item[$fieldName . '_orig_src'] = $value;
+                if(strlen($value)) {
+                    $item[$fieldName . '_src'] = $value;
+                    $item[$fieldName . '_alt'] = $fieldName;
+                    $item[$fieldName . '_link'] = $value;
+                    $item[$fieldName . '_orig_src'] = $value;
+                }
             }
         }
 
