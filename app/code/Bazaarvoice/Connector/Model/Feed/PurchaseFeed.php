@@ -17,7 +17,6 @@ use \Magento\ConfigurableProduct\Model\Product\Type;
 use \Magento\Sales\Model\Order;
 use \Magento\Store\Model\Group;
 use \Magento\Store\Model\Store;
-use \Magento\Framework\Exception;
 use \Bazaarvoice\Connector\Model\XMLWriter;
 use \Magento\Store\Model\Website;
 
@@ -229,7 +228,7 @@ class PurchaseFeed extends Feed
         $purchaseFeedFileName = $purchaseFeedFilePath . '/purchaseFeed-' . date('U') . '.xml';
 
         // Using admin store for now
-        /** @var StoreManagerInterface $storeManager */
+        /** @var \Magento\Store\Model\StoreManagerInterface $storeManager */
         $storeManager = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface');
         $store = $storeManager->getStore(0);
         

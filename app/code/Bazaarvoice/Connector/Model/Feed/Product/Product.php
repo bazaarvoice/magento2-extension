@@ -135,12 +135,18 @@ class Product extends Generic
         if($product->getData('brand_external_id'))
             $this->_writer->writeElement('BrandExternalId', $product->getData('brand_external_id'));
 
-        foreach($product->customAttributes as $code) {
-            $values = $product->getData(strtolower($code) . 's');
-            if(is_array($values) && !empty($values)) {
-                $this->_writer->startElement($code . 's');
-                foreach ($values as $value)
-                    $this->_writer->writeElement($code, $value);
+        foreach($product->customAttributes as $label) {
+            $code = strtolower($label) . 's';
+            $values = $product->getData($code);
+            if(!empty($values)) {
+                $this->_writer->startElement($label . 's');
+                if(is_array($values)) {
+                    foreach ($values as $value) {
+                        $this->_writer->writeElement($label, $value);
+                    }
+                } else {
+                    $this->_writer->writeElement($label, $values);
+                }
                 $this->_writer->endElement();
             }
         }
