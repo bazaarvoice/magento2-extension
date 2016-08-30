@@ -1,13 +1,18 @@
 <?php
 /**
- * NOTICE OF LICENSE
+ * StoreFront Bazaarvoice Extension for Magento
  *
- * This source file is subject to commercial source code license
+ * PHP Version 5
+ *
+ * LICENSE: This source file is subject to commercial source code license
  * of StoreFront Consulting, Inc.
  *
- * @copyright   (C)Copyright 2016 StoreFront Consulting, Inc (http://www.StoreFrontConsulting.com/)
- * @package     Bazaarvoice_Connector
- * @author      Dennis Rogers <dennis@storefrontconsulting.com>
+ * @category  SFC
+ * @package   Bazaarvoice_Ext
+ * @author    Dennis Rogers <dennis@storefrontconsulting.com>
+ * @copyright 2016 StoreFront Consulting, Inc
+ * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
+ * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
  */
 
 namespace Bazaarvoice\Connector\Model;
@@ -15,13 +20,15 @@ namespace Bazaarvoice\Connector\Model;
 use Bazaarvoice\Connector\Helper\Data;
 use Bazaarvoice\Connector\Model\ResourceModel\Index\Collection;
 
-class Index extends \Magento\Framework\Model\AbstractModel implements \Bazaarvoice\Connector\Model\IndexInterface, \Magento\Framework\DataObject\IdentityInterface
+class Index
+    extends \Magento\Framework\Model\AbstractModel
+    implements \Bazaarvoice\Connector\Model\IndexInterface, \Magento\Framework\DataObject\IdentityInterface
 {
     const CACHE_TAG = 'bazaarvoice_product_index';
 
     /** Custom Attributes */
     public $customAttributes = array('UPC', 'ManufacturerPartNumber', 'EAN', 'ISBN', 'ModelNumber');
-    protected $generationScope;
+    protected $_generationScope;
 
     /**
      * @param \Magento\Framework\Model\Context $context
@@ -30,6 +37,7 @@ class Index extends \Magento\Framework\Model\AbstractModel implements \Bazaarvoi
      * @param Collection $resourceCollection
      * @param Data $helper
      */
+    // @codingStandardsIgnoreStart
     public function __construct(
         \Magento\Framework\Model\Context $context,
         \Magento\Framework\Registry $registry,
@@ -38,8 +46,9 @@ class Index extends \Magento\Framework\Model\AbstractModel implements \Bazaarvoi
         Data $helper
     )
     {
+        // @codingStandardsIgnoreEnd
         $this->_init('Bazaarvoice\Connector\Model\ResourceModel\Index');
-        $this->generationScope = $helper->getConfig('feeds/generation_scope');
+        $this->_generationScope = $helper->getConfig('feeds/generation_scope');
         parent::__construct($context, $registry, $resource, $resourceCollection);
     }
 
@@ -54,15 +63,15 @@ class Index extends \Magento\Framework\Model\AbstractModel implements \Bazaarvoi
      * @param $scope
      * @return Index
      */
-    public function loadByStore($productId, $storeId, $scope = null) {
-
-        if(is_object($productId))
+    public function loadByStore($productId, $storeId, $scope = null)
+    {
+        if (is_object($productId))
             $productId = $productId->getId();
 
-        if(is_object($storeId))
+        if (is_object($storeId))
             $storeId = $storeId->getId();
 
-        $scope = $scope ? $scope : $this->generationScope;
+        $scope = $scope ? $scope : $this->_generationScope;
 
         /** @var ResourceModel\Index $resource */
         $resource = $this->getResource();
@@ -71,7 +80,7 @@ class Index extends \Magento\Framework\Model\AbstractModel implements \Bazaarvoi
             'scope' => $scope,
             'store_id' => $storeId));
 
-        if($index)
+        if ($index)
             $this->setData($index);
 
         return $this;

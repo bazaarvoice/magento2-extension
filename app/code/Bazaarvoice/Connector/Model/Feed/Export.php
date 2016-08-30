@@ -1,13 +1,18 @@
 <?php
 /**
- * NOTICE OF LICENSE
+ * StoreFront Bazaarvoice Extension for Magento
  *
- * This source file is subject to commercial source code license
+ * PHP Version 5
+ *
+ * LICENSE: This source file is subject to commercial source code license
  * of StoreFront Consulting, Inc.
  *
- * @copyright    (C)Copyright 2016 StoreFront Consulting, Inc (http://www.StoreFrontConsulting.com/)
- * @package      Bazaarvoice_Connector
- * @author       Dennis Rogers <dennis@storefrontconsulting.com>
+ * @category  SFC
+ * @package   Bazaarvoice_Ext
+ * @author    Dennis Rogers <dennis@storefrontconsulting.com>
+ * @copyright 2016 StoreFront Consulting, Inc
+ * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
+ * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
  */
 
 namespace Bazaarvoice\Connector\Model\Feed;
@@ -21,8 +26,8 @@ use Magento\Review\Model\ReviewFactory;
 
 class Export extends Feed
 {
-    protected $reviewFactory;
-    protected $urlFactory;
+    protected $_reviewFactory;
+    protected $_urlFactory;
 
     /**
      * Category constructor.
@@ -38,15 +43,16 @@ class Export extends Feed
         ObjectManagerInterface $objectManager,
         ReviewFactory $reviewFactory,
         UrlFactory $urlFactory
-    ) {
-        $this->reviewFactory = $reviewFactory;
-        $this->urlFactory = $urlFactory;
+    )
+    {
+        $this->_reviewFactory = $reviewFactory;
+        $this->_urlFactory = $urlFactory;
         parent::__construct($logger, $helper, $objectManager);
     }
 
     public function exportReviews()
     {
-        $factory = $this->reviewFactory->create();
+        $factory = $this->_reviewFactory->create();
 
         $reviews = $factory->getProductCollection();
         $reviews->addStatusFilter(Review::STATUS_APPROVED);
@@ -57,7 +63,7 @@ class Export extends Feed
         $export->startElement('Reviews');
 
         /** @var Review $review */
-        foreach($reviews as $review) {
+        foreach ($reviews as $review) {
             $export->startElement('Review');
 
             $export->writeElement('ExternalId', $review->getReviewId());
@@ -70,10 +76,10 @@ class Export extends Feed
             $export->writeElement('ProductId', $this->helper->getProductId($review->getSku()));
             $export->writeElement('ProductName', $this->helper->getProductId($review->getName()));
 
-            $export->endElement(); // Review
+            $export->endElement(); /** Review */
         }
 
-        $export->endElement(); // Reviews
+        $export->endElement(); /** Reviews */
         $this->closeFile($export, BP . '/var/export/bvfeeds/magento-core-reviews.xml');
 
     }

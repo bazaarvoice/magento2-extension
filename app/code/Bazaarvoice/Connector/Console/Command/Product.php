@@ -1,25 +1,29 @@
 <?php
-namespace Bazaarvoice\Connector\Console\Command;
 /**
- * NOTICE OF LICENSE
+ * StoreFront Bazaarvoice Extension for Magento
  *
- * This source file is subject to commercial source code license 
+ * PHP Version 5
+ *
+ * LICENSE: This source file is subject to commercial source code license
  * of StoreFront Consulting, Inc.
  *
- * @copyright	(C)Copyright 2016 StoreFront Consulting, Inc (http://www.StoreFrontConsulting.com/)
- * @package		Bazaarvoice_Connector
- * @author		Dennis Rogers <dennis@storefrontconsulting.com>
+ * @category  SFC
+ * @package   Bazaarvoice_Ext
+ * @author    Dennis Rogers <dennis@storefrontconsulting.com>
+ * @copyright 2016 StoreFront Consulting, Inc
+ * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
+ * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
  */
+
+namespace Bazaarvoice\Connector\Console\Command;
  
 use Bazaarvoice\Connector\Model\Feed\ProductFeed;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Input\InputInterface;
 
 class Product extends Command
 {
-    /** @var ProductFeed $productFeed */
-    protected $productFeed;
+    /** @var ProductFeed $_productFeed */
+    protected $_productFeed;
 
     /**
      * Purchase constructor.
@@ -28,7 +32,7 @@ class Product extends Command
     public function __construct(ProductFeed $productFeed)
     {
         parent::__construct();
-        $this->productFeed = $productFeed;
+        $this->_productFeed = $productFeed;
     }
 
     protected function configure()
@@ -36,11 +40,11 @@ class Product extends Command
         $this->setName('bv:product')->setDescription('Generates Bazaarvoice Product Feed.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute()
     {
-	    echo "\n" . 'Memory usage: ' . memory_get_usage() . "\n";
+        echo "\n" . 'Memory usage: ' . memory_get_usage() . "\n";
         try {
-            $this->productFeed->generateFeed();
+            $this->_productFeed->generateFeed();
         } Catch (\Exception $e) {
             echo $e->getMessage() . "\n" . $e->getTraceAsString();
         }

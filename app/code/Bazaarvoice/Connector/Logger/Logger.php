@@ -1,21 +1,27 @@
 <?php
-namespace Bazaarvoice\Connector\Logger;
-use Bazaarvoice\Connector\Helper\Data;
-
 /**
- * NOTICE OF LICENSE
+ * StoreFront Bazaarvoice Extension for Magento
  *
- * This source file is subject to commercial source code license 
+ * PHP Version 5
+ *
+ * LICENSE: This source file is subject to commercial source code license
  * of StoreFront Consulting, Inc.
  *
- * @copyright	(C)Copyright 2016 StoreFront Consulting, Inc (http://www.StoreFrontConsulting.com/)
- * @package		Bazaarvoice_Connector
- * @author		Dennis Rogers <dennis@storefrontconsulting.com>
+ * @category  SFC
+ * @package   Bazaarvoice_Ext
+ * @author    Dennis Rogers <dennis@storefrontconsulting.com>
+ * @copyright 2016 StoreFront Consulting, Inc
+ * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
+ * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
  */
+
+namespace Bazaarvoice\Connector\Logger;
+
+use Bazaarvoice\Connector\Helper\Data;
 
 class Logger extends \Monolog\Logger
 {
-    protected $helper;
+    protected $_helper;
 
     /**
      * Logger constructor.
@@ -23,9 +29,11 @@ class Logger extends \Monolog\Logger
      * @param array|\Monolog\Handler\HandlerInterface[] $handlers
      * @param Data $helper
      */
+    /** @codingStandardsIgnoreStart */
     public function __construct($name, array $handlers = array(), Data $helper)
     {
-        $this->helper = $helper;
+        /** @codingStandardsIgnoreEnd */
+        $this->_helper = $helper;
         parent::__construct($name, $handlers);
     }
 
@@ -36,7 +44,7 @@ class Logger extends \Monolog\Logger
      */
     public function debug($message, array $context = array())
     {
-        if($this->helper->getConfig('general/debug') == true)
+        if ($this->_helper->getConfig('general/debug') == true)
             return $this->addRecord(static::DEBUG, $message, $context);
 
         return true;
@@ -50,7 +58,7 @@ class Logger extends \Monolog\Logger
      */
     public function addRecord($level, $message, array $context = array())
     {
-        if(is_array($message))
+        if (is_array($message))
             $message = print_r($message, 1);
 
         return parent::addRecord($level, $message, $context);

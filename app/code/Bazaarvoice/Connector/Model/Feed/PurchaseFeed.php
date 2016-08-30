@@ -1,17 +1,23 @@
 <?php
-namespace Bazaarvoice\Connector\Model\Feed;
-
 /**
- * NOTICE OF LICENSE
+ * StoreFront Bazaarvoice Extension for Magento
  *
- * This source file is subject to commercial source code license 
+ * PHP Version 5
+ *
+ * LICENSE: This source file is subject to commercial source code license
  * of StoreFront Consulting, Inc.
  *
- * @copyright	(C)Copyright 2016 StoreFront Consulting, Inc (http://www.StoreFrontConsulting.com/)
- * @package		Bazaarvoice_Connector
- * @author		Dennis Rogers <dennis@storefrontconsulting.com>
+ * @category  SFC
+ * @package   Bazaarvoice_Ext
+ * @author    Dennis Rogers <dennis@storefrontconsulting.com>
+ * @copyright 2016 StoreFront Consulting, Inc
+ * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
+ * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
  */
 
+namespace Bazaarvoice\Connector\Model\Feed;
+
+use Bazaarvoice\Connector\Model\Source\Trigger;
 use \Magento\Catalog\Model\Product;
 use \Magento\ConfigurableProduct\Model\Product\Type;
 use \Magento\Sales\Model\Order;
@@ -27,9 +33,9 @@ class PurchaseFeed extends Feed
     const TRIGGER_EVENT_PURCHASE = 'purchase';
     const TRIGGER_EVENT_SHIP = 'ship';
 
-    protected $type_id = 'purchase';
-    protected $num_days_lookback;
-    protected $triggering_event;
+    protected $_typeId = 'purchase';
+    protected $_numDaysLookback;
+    protected $_triggeringEvent;
 
     /**
      * Constructor
@@ -41,11 +47,15 @@ class PurchaseFeed extends Feed
         \Bazaarvoice\Connector\Logger\Logger $logger,
         \Bazaarvoice\Connector\Helper\Data $helper,
         \Magento\Framework\ObjectManagerInterface $objectManager
-    ) {
+    )
+    {
         parent::__construct($logger, $helper, $objectManager);
 
-        $this->triggering_event = $helper->getConfig('feeds/triggering_event') === \Bazaarvoice\Connector\Model\Source\Trigger::SHIPPING ? self::TRIGGER_EVENT_SHIP : self::TRIGGER_EVENT_PURCHASE;
-        $this->num_days_lookback = $helper->getConfig('feeds/lookback');
+        $this->_triggeringEvent =
+            $helper->getConfig('feeds/triggering_event') === Trigger::SHIPPING
+                ? self::TRIGGER_EVENT_SHIP
+                : self::TRIGGER_EVENT_PURCHASE;
+        $this->_numDaysLookback = $helper->getConfig('feeds/lookback');
     }
 
     /**
@@ -54,14 +64,14 @@ class PurchaseFeed extends Feed
     public function exportFeedForStore(Store $store)
     {
         /** @var \Magento\Sales\Model\OrderFactory $orderFactory */
-        $orderFactory = $this->objectManager->get('\Magento\Sales\Model\OrderFactory');
+        $orderFactory = $this->_objectManager->get('\Magento\Sales\Model\OrderFactory');
         /* @var \Magento\Sales\Model\ResourceModel\Order\Collection $orders */
         $orders = $orderFactory->create()->getCollection();
 
-        // Add filter to limit orders to this store
+        /** Add filter to limit orders to this store */
         $orders->addFieldToFilter('store_id', $store->getId());
-        // Status is 'complete' or 'closed'
-        if($this->test == false) {
+        /** Status is 'complete' or 'closed' */
+        if ($this->_test == false) {
             $orders->addFieldToFilter('status', array(
                 'in' => array(
                     'complete',
@@ -70,10 +80,10 @@ class PurchaseFeed extends Feed
             ));
         }
 
-        // Only orders created within our look-back window
+        /** Only orders created within our look-back window */
         $orders->addFieldToFilter('created_at', array('gteq' => $this->getNumDaysLookbackStartDate()));
-        // Include only orders that have not been sent or have errored out
-        if($this->test == false) {
+        /** Include only orders that have not been sent or have errored out */
+        if ($this->_test == false) {
             $orders->addFieldToFilter(
                 array(self::ALREADY_SENT_IN_FEED_FLAG, self::ALREADY_SENT_IN_FEED_FLAG),
                 array(
@@ -84,11 +94,11 @@ class PurchaseFeed extends Feed
         }
         $this->log('Found ' . $orders->count() . ' orders to send.');
 
-        // Build local file name / path
+        /** Build local file name / path */
         $purchaseFeedFilePath = BP . '/var/export/bvfeeds';
         $purchaseFeedFileName = $purchaseFeedFilePath . '/purchaseFeed-store-' . $store->getId() . '-' . date('U') . '.xml';
-        // Write orders to file
-        if($orders->count())
+        /** Write orders to file */
+        if ($orders->count())
             $this->sendOrders($orders, $store, $purchaseFeedFileName);
     }
 
@@ -98,16 +108,16 @@ class PurchaseFeed extends Feed
     public function exportFeedForStoreGroup(Group $storeGroup)
     {
         /** @var \Magento\Sales\Model\OrderFactory $orderFactory */
-        $orderFactory = $this->objectManager->get('\Magento\Sales\Model\OrderFactory');
+        $orderFactory = $this->_objectManager->get('\Magento\Sales\Model\OrderFactory');
         /* @var \Magento\Sales\Model\ResourceModel\Order\Collection $orders */
         $orders = $orderFactory->create()->getCollection();
 
-        // Add filter to limit orders to this store group
+        /** Add filter to limit orders to this store group */
         $orders->getSelect()
             ->joinLeft('store', 'main_table.store_id = store.store_id', 'store.group_id')
             ->where('store.group_id = ' . $storeGroup->getId());
-        // Status is 'complete' or 'closed'
-        if($this->test == false) {
+        /** Status is 'complete' or 'closed' */
+        if ($this->_test == false) {
             $orders->addFieldToFilter('status', array(
                 'in' => array(
                     'complete',
@@ -116,10 +126,10 @@ class PurchaseFeed extends Feed
             ));
         }
 
-        // Only orders created within our look-back window
+        /** Only orders created within our look-back window */
         $orders->addFieldToFilter('created_at', array('gteq' => $this->getNumDaysLookbackStartDate()));
-        // Include only orders that have not been sent or have errored out
-        if($this->test == false) {
+        /** Include only orders that have not been sent or have errored out */
+        if ($this->_test == false) {
             $orders->addFieldToFilter(
                 array(self::ALREADY_SENT_IN_FEED_FLAG, self::ALREADY_SENT_IN_FEED_FLAG),
                 array(
@@ -130,13 +140,13 @@ class PurchaseFeed extends Feed
         }
         $this->log('Found ' . $orders->count() . ' orders to send.');
 
-        // Build local file name / path
+        /** Build local file name / path */
         $purchaseFeedFilePath = BP . '/var/export/bvfeeds';
         $purchaseFeedFileName = $purchaseFeedFilePath . '/purchaseFeed-group-' . $storeGroup->getId() . '-' . date('U') . '.xml';
-        // Using default store for now
+        /** Using default store for now */
         $store = $storeGroup->getDefaultStore();
-        // Write orders to file
-        if($orders->count())
+        /** Write orders to file */
+        if ($orders->count())
             $this->sendOrders($orders, $store, $purchaseFeedFileName);
     }
 
@@ -147,16 +157,16 @@ class PurchaseFeed extends Feed
     public function exportFeedForWebsite(Website $website)
     {
         /** @var \Magento\Sales\Model\OrderFactory $orderFactory */
-        $orderFactory = $this->objectManager->get('\Magento\Sales\Model\OrderFactory');
+        $orderFactory = $this->_objectManager->get('\Magento\Sales\Model\OrderFactory');
         /* @var \Magento\Sales\Model\ResourceModel\Order\Collection $orders */
         $orders = $orderFactory->create()->getCollection();
 
-        // Add filter to limit orders to this website
+        /** Add filter to limit orders to this website */
         $orders->getSelect()
             ->joinLeft('store', 'main_table.store_id = store.store_id', 'store.website_id')
             ->where('store.website_id = ' . $website->getId());
-        // Status is 'complete' or 'closed'
-        if($this->test == false) {
+        /** Status is 'complete' or 'closed' */
+        if ($this->_test == false) {
             $orders->addFieldToFilter('status', array(
                 'in' => array(
                     'complete',
@@ -165,10 +175,10 @@ class PurchaseFeed extends Feed
             ));
         }
 
-        // Only orders created within our look-back window
+        /** Only orders created within our look-back window */
         $orders->addFieldToFilter('created_at', array('gteq' => $this->getNumDaysLookbackStartDate()));
-        // Include only orders that have not been sent or have errored out
-        if($this->test == false) {
+        /** Include only orders that have not been sent or have errored out */
+        if ($this->_test == false) {
             $orders->addFieldToFilter(
                 array(self::ALREADY_SENT_IN_FEED_FLAG, self::ALREADY_SENT_IN_FEED_FLAG),
                 array(
@@ -179,13 +189,13 @@ class PurchaseFeed extends Feed
         }
         $this->log('Found ' . $orders->count() . ' orders to send.');
 
-        // Build local file name / path
+        /** Build local file name / path */
         $purchaseFeedFilePath = BP . '/var/export/bvfeeds';
         $purchaseFeedFileName = $purchaseFeedFilePath . '/purchaseFeed-website-' . $website->getId() . '-' . date('U') . '.xml';
-        // Using default store for now
+        /** Using default store for now */
         $store = $website->getDefaultStore();
-        // Write orders to file
-        if($orders->count())
+        /** Write orders to file */
+        if ($orders->count())
             $this->sendOrders($orders, $store, $purchaseFeedFileName);
     }
 
@@ -194,13 +204,13 @@ class PurchaseFeed extends Feed
     public function exportFeedForGlobal()
     {
         /** @var \Magento\Sales\Model\OrderFactory $orderFactory */
-        $orderFactory = $this->objectManager->get('\Magento\Sales\Model\OrderFactory');
+        $orderFactory = $this->_objectManager->get('\Magento\Sales\Model\OrderFactory');
         /* @var \Magento\Sales\Model\ResourceModel\Order\Collection $orders */
         $orders = $orderFactory->create()->getCollection();
 
         $orders->getSelect();
-        // Status is 'complete' or 'closed'
-        if($this->test == false) {
+        /** Status is 'complete' or 'closed' */
+        if ($this->_test == false) {
             $orders->addFieldToFilter('status', array(
                 'in' => array(
                     'complete',
@@ -209,10 +219,10 @@ class PurchaseFeed extends Feed
             ));
         }
 
-        // Only orders created within our look-back window
+        /** Only orders created within our look-back window */
         $orders->addFieldToFilter('created_at', array('gteq' => $this->getNumDaysLookbackStartDate()));
-        // Include only orders that have not been sent or have errored out
-        if($this->test == false) {
+        /** Include only orders that have not been sent or have errored out */
+        if ($this->_test == false) {
             $orders->addFieldToFilter(
                 array(self::ALREADY_SENT_IN_FEED_FLAG, self::ALREADY_SENT_IN_FEED_FLAG),
                 array(
@@ -223,17 +233,17 @@ class PurchaseFeed extends Feed
         }
         $this->log('Found ' . $orders->count() . ' orders to send.');
 
-        // Build local file name / path
+        /** Build local file name / path */
         $purchaseFeedFilePath = BP . '/var/export/bvfeeds';
         $purchaseFeedFileName = $purchaseFeedFilePath . '/purchaseFeed-' . date('U') . '.xml';
 
-        // Using admin store for now
+        /** Using admin store for now */
         /** @var \Magento\Store\Model\StoreManagerInterface $storeManager */
-        $storeManager = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface');
+        $storeManager = $this->_objectManager->get('Magento\Store\Model\StoreManagerInterface');
         $store = $storeManager->getStore(0);
         
-        // Write orders to file
-        if($orders->count())
+        /** Write orders to file */
+        if ($orders->count())
             $this->sendOrders($orders, $store, $purchaseFeedFileName);
     }    
 
@@ -244,20 +254,20 @@ class PurchaseFeed extends Feed
      */
     public function sendOrders($orders, $store, $purchaseFeedFileName)
     {
-        if($this->test)
+        if ($this->_test)
             $purchaseFeedFileName = dirname($purchaseFeedFileName) . '/test-' . basename($purchaseFeedFileName);
 
-        // Get client name for the scope
+        /** Get client name for the scope */
         $clientName = $this->helper->getConfig('general/client_name', $store->getId());
 
         $baseMediaUrl = $store->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog/product';
 
-        // Create varien io object and write local feed file
+        /** Create varien io object and write local feed file */
         /** @var XMLWriter $writer */
         $writer = $this->openFile('http://www.bazaarvoice.com/xs/PRR/PurchaseFeed/5.6', $clientName);
 
         /** @var \Magento\Sales\Model\Order $order */
-        foreach($orders as $order) {
+        foreach ($orders as $order) {
 
             $writer->startElement('Interaction');
 
@@ -266,7 +276,7 @@ class PurchaseFeed extends Feed
             $writer->writeElement('Locale', $this->helper->getConfig('general/locale', $order->getStoreId()));
             $writer->writeElement('UserName', $order->getBillingAddress()->getFirstname());
 
-            if($order->getCustomerId()) {
+            if ($order->getCustomerId()) {
                 $userId = $order->getCustomerId();
             } else {
                 $userId = md5($order->getCustomerEmail());
@@ -275,14 +285,14 @@ class PurchaseFeed extends Feed
 
             $writer->startElement('Products');
             
-            // if families are enabled, get all items
-            if($this->families){
+            /** if families are enabled, get all items */
+            if ($this->_families) {
                 $items = $order->getAllItems();
             } else {
                 $items = $order->getAllVisibleItems();
             }
             foreach ($items as $item) {
-                if($this->families && $item->getProductType() == Type\Configurable::TYPE_CODE)
+                if ($this->_families && $item->getProductType() == Type\Configurable::TYPE_CODE)
                     continue;
 
                 /* @var Order\Item $item */
@@ -290,7 +300,7 @@ class PurchaseFeed extends Feed
                 
                 /** @var Product $product */
                 $product = $item->getProduct();
-                // Using store on the order, to handle website/group data
+                /** Using store on the order, to handle website/group data */
                 $product->setStoreId($order->getStoreId());
                 $product->load($product->getId());
                 
@@ -300,26 +310,26 @@ class PurchaseFeed extends Feed
                 $imageUrl = $product->getImage();
                 $originalPrice = $item->getOriginalPrice();
 
-                if($item->getParentItem()) {
+                if ($item->getParentItem()) {
                     /** @var Order\Item $parentItem */
                     $parentItem = $item->getParentItem();
 
-                    // get price from parent item
+                    /** get price from parent item */
                     $originalPrice = $parentItem->getOriginalPrice();
 
-                    if($this->families) {
+                    if ($this->_families) {
                         /** @var Product $parent */
                         $parent = $parentItem->getProduct();
 
-                        if($product->getImage() == 'no_selection'){
-                            // if product families are enabled and product has no image, use configurable image
+                        if ($product->getImage() == 'no_selection') {
+                            /** if product families are enabled and product has no image, use configurable image */
                             $imageUrl = $parent->getImage();
                         }
                     }
                 }
 
-                if($imageUrl == '' || $imageUrl == 'no_selection') {
-                    $placeholders = $this->objectManager->create('\Bazaarvoice\Connector\Model\Indexer\Flat')->getPlaceholderUrls($store->getId());
+                if ($imageUrl == '' || $imageUrl == 'no_selection') {
+                    $placeholders = $this->_objectManager->create('\Bazaarvoice\Connector\Model\Indexer\Flat')->getPlaceholderUrls($store->getId());
                     $imageUrl = $placeholders['default'];
                 } else {
                     $imageUrl = $baseMediaUrl . $imageUrl;
@@ -328,15 +338,15 @@ class PurchaseFeed extends Feed
                 $writer->writeElement('ImageUrl', $imageUrl);
                 $writer->writeElement('Price', number_format((float)$originalPrice, 2));
                 
-                $writer->endElement(); // Product
+                $writer->endElement(); /** Product */
             }
 
-            $writer->endElement(); // Products
+            $writer->endElement(); /** Products */
 
-            $writer->endElement(); // Interaction
+            $writer->endElement(); /** Interaction */
             
-            // Mark order as sent
-            if($this->test == false)
+            /** Mark order as sent */
+            if ($this->_test == false)
                 $order->setData(self::ALREADY_SENT_IN_FEED_FLAG, true)->save();
             else
                 break;
@@ -345,9 +355,9 @@ class PurchaseFeed extends Feed
         $this->closeFile($writer, $purchaseFeedFileName);
         $this->log("Wrote file $purchaseFeedFileName");
 
-        // Upload feed
+        /** Upload feed */
         $destinationFile = '/ppe/inbox/bv_ppe_tag_feed-magento-' . date('U') . '.xml';
-        if($this->test == false)
+        if ($this->_test == false)
             $this->uploadFeed($purchaseFeedFileName, $destinationFile, $store);
     }
 
@@ -359,7 +369,7 @@ class PurchaseFeed extends Feed
     {
         $timestamp = strtotime($order->getCreatedAt());
 
-        if ($this->triggering_event === self::TRIGGER_EVENT_SHIP) {
+        if ($this->_triggeringEvent === self::TRIGGER_EVENT_SHIP) {
             $timestamp = $this->getLatestShipmentDate($order);
         }
 
@@ -380,12 +390,12 @@ class PurchaseFeed extends Feed
             $latestShipmentTimestamp = max(strtotime($shipment->getCreatedAt()), $latestShipmentTimestamp);
         }
 
-        return $latestShipmentTimestamp; // This should be an int timestamp of num seconds since epoch
+        return $latestShipmentTimestamp; /** This should be an int timestamp of num seconds since epoch */
     }
 
     protected function getNumDaysLookbackStartDate()
     {
-        return date('Y-m-d', strtotime(date('Y-m-d', time()) . ' -' . $this->num_days_lookback . ' days'));
+        return date('Y-m-d', strtotime(date('Y-m-d', time()) . ' -' . $this->_numDaysLookback . ' days'));
     }
 
 }

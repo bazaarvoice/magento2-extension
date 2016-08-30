@@ -1,15 +1,19 @@
 <?php
 /**
- * NOTICE OF LICENSE
+ * StoreFront Bazaarvoice Extension for Magento
  *
- * This source file is subject to commercial source code license
+ * PHP Version 5
+ *
+ * LICENSE: This source file is subject to commercial source code license
  * of StoreFront Consulting, Inc.
  *
- * @package   Bazaarvoice_Connector
+ * @category  SFC
+ * @package   Bazaarvoice_Ext
  * @author    Dennis Rogers <dennis@storefrontconsulting.com>
- * @copyright 2016 StoreFront Consulting, Inc (http://www.StoreFrontConsulting.com/)
+ * @copyright 2016 StoreFront Consulting, Inc
+ * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
+ * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
  */
-
 namespace Bazaarvoice\Connector\Model\Feed\Product;
 
 use Bazaarvoice\Connector\Helper\Data;
@@ -19,9 +23,9 @@ use Magento\Framework\ObjectManagerInterface;
 class Generic
 {
 
-    protected $logger;
-    protected $helper;
-    protected $objectManager;
+    protected $_logger;
+    protected $_helper;
+    protected $_objectManager;
 
     /**
      * Generic constructor.
@@ -31,9 +35,9 @@ class Generic
      */
     public function __construct(Logger $logger, Data $helper, ObjectManagerInterface $objectManager)
     {
-        $this->logger = $logger;
-        $this->helper = $helper;
-        $this->objectManager = $objectManager;
+        $this->_logger = $logger;
+        $this->_helper = $helper;
+        $this->_objectManager = $objectManager;
     }
 
     /**
@@ -43,7 +47,7 @@ class Generic
      */
     public function getAttributeCode($type)
     {
-        return $this->helper->getConfig('feeds/' . $type . '_code');
+        return $this->_helper->getConfig('feeds/' . $type . '_code');
     }
 
     /**
@@ -54,7 +58,7 @@ class Generic
     {
         $locales = array();
         foreach ($storeIds as $storeId) {
-            $localeCode = $this->helper->getConfig('general/locale', $storeId);
+            $localeCode = $this->_helper->getConfig('general/locale', $storeId);
             $locales[$localeCode] = $storeId;
         }
         return $locales;
@@ -73,14 +77,14 @@ class Generic
      */
     protected function getCategoryId($category, $storeId = null)
     {
-        if($this->helper->getConfig('feeds/category_id_use_url_path', $storeId) == false) {
+        if ($this->_helper->getConfig('feeds/category_id_use_url_path', $storeId) == false) {
             return $category->getId();
         }
         else {
             $rawCategoryId = $category->getUrlPath();
 
             $rawCategoryId = str_replace('/', '-', $rawCategoryId);
-            return $this->helper->replaceIllegalCharacters($rawCategoryId);
+            return $this->_helper->replaceIllegalCharacters($rawCategoryId);
         }
     }
 

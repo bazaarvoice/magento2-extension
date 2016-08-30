@@ -1,18 +1,34 @@
 <?php
+/**
+ * StoreFront Bazaarvoice Extension for Magento
+ *
+ * PHP Version 5
+ *
+ * LICENSE: This source file is subject to commercial source code license
+ * of StoreFront Consulting, Inc.
+ *
+ * @category  SFC
+ * @package   Bazaarvoice_Ext
+ * @author    Dennis Rogers <dennis@storefrontconsulting.com>
+ * @copyright 2016 StoreFront Consulting, Inc
+ * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
+ * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
+ */
 namespace Bazaarvoice\Connector\Helper;
 
 use \Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Store\Model\Store;
 
 class Data extends AbstractHelper
 {
-    public function getConfig($config_path, $store = null, $scope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE)
+    public function getConfig($configPath, $store = null, $scope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE)
     {
-        return $this->getDefaultConfig('bazaarvoice/'.$config_path, $store, $scope);
+        return $this->getDefaultConfig('bazaarvoice/'.$configPath, $store, $scope);
     }
 
-    public function getDefaultConfig($config_path, $store = null, $scope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE)
+    public function getDefaultConfig($configPath, $store = null, $scope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE)
     {
-        $value = $this->scopeConfig->getValue($config_path, $scope, $store);
+        $value = $this->scopeConfig->getValue($configPath, $scope, $store);
         return $value;
     }
 
@@ -26,14 +42,15 @@ class Data extends AbstractHelper
      * </code>
      *
      * @static
-     * @param  $isStatic
+     * @param $isStatic
+     * @param null|Store $store
      * @return string
      */
     public function getBvApiHostUrl($isStatic, $store = null)
     {
-        // Build protocol based on current page
+        /** Build protocol based on current page */
         $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != '') ? 'https' : 'http';
-        // Build hostname based on environment setting
+        /** Build hostname based on environment setting */
         $environment = $this->getConfig('general/environment', $store);
         if ($environment == 'staging') {
             $apiHostname =  'display.ugc.bazaarvoice.com/bvstaging';
@@ -41,22 +58,22 @@ class Data extends AbstractHelper
         else {
             $apiHostname =  'display.ugc.bazaarvoice.com';
         }
-        // Build static dir name based on param
-        if($isStatic) {
+        /** Build static dir name based on param */
+        if ($isStatic) {
             $static = 'static/';
         }
         else {
             $static = '';
         }
-        // Lookup other config settings
+        /** Lookup other config settings */
         $clientName = $this->getConfig('general/client_name', $store);
         $deploymentZoneName = $this->getConfig('general/deployment_zone', $store);
-        // Get locale code from BV config, 
-        // Note that this doesn't use Magento's locale, this will allow clients to override this and map it as they see fit
+        /** Get locale code from BV config,  */
+        /** Note that this doesn't use Magento's locale, this will allow clients to override this and map it as they see fit */
         $localeCode = $this->getConfig('general/locale', $store);
-        // Build url string
+        /** Build url string */
         $url = $protocol . '://' . $apiHostname . '/' . $static . $clientName . '/' . urlencode($deploymentZoneName) . '/' . $localeCode;
-        // Return final url
+        /** Return final url */
         return $url;
     }
     
@@ -73,19 +90,19 @@ class Data extends AbstractHelper
      */
     public function getProductId($product)
     {
-        if(is_numeric($product)) {
+        if (is_numeric($product)) {
             $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
             $product = $objectManager->get('Magento\Catalog\Model\Product')->load($product);    
         }
 
-        if(is_object($product))
+        if (is_object($product))
             $rawProductId = $product->getSku();
         else
             $rawProductId = $product;
 
-        // >> Customizations go here
-        $rawProductId = preg_replace_callback('/\./s', create_function('$match','return "_bv".ord($match[0])."_";'), $rawProductId);        
-        // << No further customizations after this
+        /** Customizations go here */
+        $rawProductId = preg_replace_callback('/\./s', create_function('$match', 'return "_bv".ord($match[0])."_";'), $rawProductId);
+        /** No further customizations after this */
         
         return $this->replaceIllegalCharacters($rawProductId);
     }
@@ -103,11 +120,13 @@ class Data extends AbstractHelper
      */
     public function replaceIllegalCharacters($rawId)
     {
-        // We need to use a reversible replacement so that we can reconstruct the original ID later.
-        // Example rawId = qwerty$%@#asdf
-        // Example encoded = qwerty_bv36__bv37__bv64__bv35_asdf
+        /**
+         * We need to use a reversible replacement so that we can reconstruct the original ID later.
+         * Example rawId = qwerty$%@#asdf
+         * Example encoded = qwerty_bv36__bv37__bv64__bv35_asdf
+         */
 
-        return preg_replace_callback('/[^\w\d\*-\._]/s', create_function('$match','return "_bv".ord($match[0])."_";'), $rawId);
+        return preg_replace_callback('/[^\w\d\*-\._]/s', create_function('$match', 'return "_bv".ord($match[0])."_";'), $rawId);
     }
 
 
@@ -126,17 +145,18 @@ class Data extends AbstractHelper
         $product->setStoreId($item->getStoreId());
         $product->load($item->getProductId());
 
-        if ($product->getVisibility() == \Magento\Catalog\Model\Product\Visibility::VISIBILITY_NOT_VISIBLE)
-        {
+        if ($product->getVisibility() == \Magento\Catalog\Model\Product\Visibility::VISIBILITY_NOT_VISIBLE) {
             $options = $item->getProductOptions();
-            if(isset($options['super_product_config']['product_id'])){
+            if (isset($options['super_product_config']['product_id'])) {
                 try
                 {
                     $parentId = $options['super_product_config']['product_id'];
                     $product = $objectManager->get('Magento\Catalog\Model\Product');
                     $product = $product->load($parentId);
                 }
-                catch (\Magento\Framework\Exception $ex) {}
+                catch (\Exception $ex) {
+                    
+                }
             }
         }
 
@@ -169,7 +189,7 @@ class Data extends AbstractHelper
     public function jsonDecode($value)
     {
         $result = json_decode($value, true);
-        if(json_last_error() != JSON_ERROR_NONE)
+        if (json_last_error() != JSON_ERROR_NONE)
             return $value;
         return $result;
     }

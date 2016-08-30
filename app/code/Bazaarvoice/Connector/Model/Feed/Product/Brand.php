@@ -1,15 +1,19 @@
 <?php
 /**
- * NOTICE OF LICENSE
+ * StoreFront Bazaarvoice Extension for Magento
  *
- * This source file is subject to commercial source code license
+ * PHP Version 5
+ *
+ * LICENSE: This source file is subject to commercial source code license
  * of StoreFront Consulting, Inc.
  *
- * @copyright     (C)Copyright 2016 StoreFront Consulting, Inc (http://www.StoreFrontConsulting.com/)
- * @package       Bazaarvoice_Connector
- * @author        Dennis Rogers <dennis@storefrontconsulting.com>
+ * @category  SFC
+ * @package   Bazaarvoice_Ext
+ * @author    Dennis Rogers <dennis@storefrontconsulting.com>
+ * @copyright 2016 StoreFront Consulting, Inc
+ * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
+ * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
  */
-
 namespace Bazaarvoice\Connector\Model\Feed\Product;
 
 use \Bazaarvoice\Connector\Model\Feed;
@@ -28,10 +32,10 @@ class Brand extends Generic
      */
     public function processBrandsForStore(XMLWriter $writer, Store $store)
     {
-        // Lookup the configured attribute code for "Brand"
+        /** Lookup the configured attribute code for "Brand" */
         $attributeCode = $this->getAttributeCode('brand');
-        // If there is no attribute code for store, then bail
-        if(!strlen(trim($attributeCode))) {
+        /** If there is no attribute code for store, then bail */
+        if (!strlen(trim($attributeCode))) {
             return;
         }
         
@@ -39,16 +43,16 @@ class Brand extends Generic
 
             $brands = $this->getOptionsForStore($attributeCode, $store);
 
-            foreach($brands as $brandId => $brandValue) {
+            foreach ($brands as $brandId => $brandValue) {
                 $writer->startElement('Brand');
 
                 $writer->writeElement('ExternalId', $brandId);
                 $writer->writeElement('Name', $brandValue, true);
 
-                $writer->endElement(); // Brand
+                $writer->endElement(); /** Brand */
             }
 
-        $writer->endElement(); // Brands
+        $writer->endElement(); /** Brands */
     }
 
     /**
@@ -57,10 +61,10 @@ class Brand extends Generic
      */
     public function processBrandsForStoreGroup(XMLWriter $writer, Group $storeGroup)
     {
-        // Lookup the configured attribute code for "Brand"
+        /** Lookup the configured attribute code for "Brand" */
         $attributeCode = $this->getAttributeCode('brand');
-        // If there is no attribute code for store, then bail
-        if(!strlen(trim($attributeCode))) {
+        /** If there is no attribute code for store, then bail */
+        if (!strlen(trim($attributeCode))) {
             return;
         }
 
@@ -72,7 +76,7 @@ class Brand extends Generic
 
         $this->writeBrandsByLocale($writer, $defaultBrands, $brandsByLocale);
 
-        $writer->endElement(); // Brands
+        $writer->endElement(); /** Brands */
     }
 
     /**
@@ -81,10 +85,10 @@ class Brand extends Generic
      */
     public function processBrandsForWebsite(XMLWriter $writer, Website $website)
     {
-        // Lookup the configured attribute code for "Brand"
+        /** Lookup the configured attribute code for "Brand" */
         $attributeCode = $this->getAttributeCode('brand');
-        // If there is no attribute code for store, then bail
-        if(!strlen(trim($attributeCode))) {
+        /** If there is no attribute code for store, then bail */
+        if (!strlen(trim($attributeCode))) {
             return;
         }
 
@@ -96,7 +100,7 @@ class Brand extends Generic
 
         $this->writeBrandsByLocale($writer, $defaultBrands, $brandsByLocale);
 
-        $writer->endElement(); // Brands
+        $writer->endElement(); /** Brands */
     }
 
     /**
@@ -104,24 +108,24 @@ class Brand extends Generic
      */
     public function processBrandsForGlobal(XMLWriter $writer)
     {
-        // Lookup the configured attribute code for "Brand"
+        /** Lookup the configured attribute code for "Brand" */
         $attributeCode = $this->getAttributeCode('brand');
-        // If there is no attribute code for store, then bail
-        if(!strlen(trim($attributeCode))) {
+        /** If there is no attribute code for store, then bail */
+        if (!strlen(trim($attributeCode))) {
             return;
         }
 
-        $storesList = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStores();
+        $storesList = $this->_objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStores();
         $stores = [];
         /** @var StoreInterface $store */
-        foreach($storesList as $store) {
+        foreach ($storesList as $store) {
             $stores[] = $store->getId();
         }
         $brandsByLocale = $this->getOptionsByLocale($attributeCode, $stores);
 
-        // Using admin store for now
+        /** Using admin store for now */
         /** @var StoreManagerInterface $storeManager */
-        $storeManager = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface');
+        $storeManager = $this->_objectManager->get('Magento\Store\Model\StoreManagerInterface');
         $store = $storeManager->getStore(0);
         $defaultBrands = $this->getOptionsForStore($attributeCode, $store);
 
@@ -129,7 +133,7 @@ class Brand extends Generic
 
         $this->writeBrandsByLocale($writer, $defaultBrands, $brandsByLocale);
 
-        $writer->endElement(); // Brands
+        $writer->endElement(); /** Brands */
     }    
 
     /**
@@ -137,8 +141,9 @@ class Brand extends Generic
      * @param array $defaultBrands
      * @param array $brandsByLocale
      */
-    protected function writeBrandsByLocale(XMLWriter $writer, $defaultBrands, $brandsByLocale) {
-        foreach($defaultBrands as $brandId => $brandDefaultValue) {
+    protected function writeBrandsByLocale(XMLWriter $writer, $defaultBrands, $brandsByLocale)
+    {
+        foreach ($defaultBrands as $brandId => $brandDefaultValue) {
 
             $writer->startElement('Brand');
 
@@ -147,18 +152,18 @@ class Brand extends Generic
 
             $writer->startElement('Names');
 
-            foreach($brandsByLocale as $locale => $brands) {
-                if(isset($brands[$brandId])) {
+            foreach ($brandsByLocale as $locale => $brands) {
+                if (isset($brands[$brandId])) {
                     $writer->startElement('Name');
                     $writer->writeAttribute('locale', $locale);
                     $writer->writeRaw($brands[$brandId], true);
-                    $writer->endElement(); // Name
+                    $writer->endElement(); /** Name */
                 }
             }
 
-            $writer->endElement(); // Names
+            $writer->endElement(); /** Names */
 
-            $writer->endElement(); // Brand
+            $writer->endElement(); /** Brand */
 
         }
     }
@@ -171,8 +176,8 @@ class Brand extends Generic
     protected function getOptionsByLocale($code, $storeIds)
     {
         $brandsByLocale = array();
-        foreach($storeIds as $storeId) {
-            $locale = $this->helper->getConfig('general/locale', $storeId);
+        foreach ($storeIds as $storeId) {
+            $locale = $this->_helper->getConfig('general/locale', $storeId);
             $brandsByLocale[$locale] = $this->getOptionsForStore($code, $storeId);
         }
         return $brandsByLocale;
@@ -187,16 +192,16 @@ class Brand extends Generic
     protected function getOptionsForStore($code, $store)
     {
         $storeId = $store instanceof Store ? $store->getId() : $store;
-        // Lookup the attribute options for this store
+        /** Lookup the attribute options for this store */
         /** @var \Magento\Catalog\Model\ResourceModel\Eav\Attribute $attribute */
-        $attribute = $this->objectManager->get('\Magento\Catalog\Model\ResourceModel\Eav\Attribute');
+        $attribute = $this->_objectManager->get('\Magento\Catalog\Model\ResourceModel\Eav\Attribute');
         $attribute->loadByCode(\Magento\Catalog\Model\Product::ENTITY, $code);
         $attribute->setStoreId($storeId);
         $attributeOptions = $attribute->getSource()->getAllOptions();
-        // Reformat array
+        /** Reformat array */
         $processedOptions = array();
         foreach ($attributeOptions as $attributeOption) {
-            if(!empty($attributeOption['value']))
+            if (!empty($attributeOption['value']))
                 $processedOptions[$attributeOption['value']] = $attributeOption['label'];
         }
         return $processedOptions;

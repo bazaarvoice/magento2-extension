@@ -1,17 +1,22 @@
 <?php
-namespace Bazaarvoice\Connector\Model\Feed;
-
 /**
- * NOTICE OF LICENSE
+ * StoreFront Bazaarvoice Extension for Magento
  *
- * This source file is subject to commercial source code license 
+ * PHP Version 5
+ *
+ * LICENSE: This source file is subject to commercial source code license
  * of StoreFront Consulting, Inc.
  *
- * @copyright	(C)Copyright 2016 StoreFront Consulting, Inc (http://www.StoreFrontConsulting.com/)
- * @package		Bazaarvoice_Connector
- * @author		Dennis Rogers <dennis@storefrontconsulting.com>
+ * @category  SFC
+ * @package   Bazaarvoice_Ext
+ * @author    Dennis Rogers <dennis@storefrontconsulting.com>
+ * @copyright 2016 StoreFront Consulting, Inc
+ * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
+ * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
  */
- 
+
+namespace Bazaarvoice\Connector\Model\Feed;
+
 use Bazaarvoice\Connector\Helper\Data;
 use Bazaarvoice\Connector\Logger\Logger;
 use Bazaarvoice\Connector\Model\Feed\Product\Brand;
@@ -29,7 +34,7 @@ class ProductFeed extends Feed
     const INCLUDE_IN_FEED_FLAG = 'bv_feed_exclude';
     const FEED_FILE_XSD = 'http://www.bazaarvoice.com/xs/PRR/ProductFeed/5.6';
 
-    protected $type_id = 'product';
+    protected $_typeId = 'product';
 
     protected $_brand;
     protected $_category;
@@ -77,7 +82,7 @@ class ProductFeed extends Feed
     public function exportFeedForStoreGroup(Group $storeGroup)
     {
         $store = $storeGroup->getDefaultStore();
-        // Create varien io object and write local feed file
+        /** Create varien io object and write local feed file */
         $writer = $this->openProductFile($store);
 
         $this->_brand
@@ -96,7 +101,7 @@ class ProductFeed extends Feed
     public function exportFeedForWebsite(Website $website)
     {
         $store = $website->getDefaultStore();
-        // Create varien io object and write local feed file
+        /** Create varien io object and write local feed file */
         $writer = $this->openProductFile($store);
 
         $this->_brand
@@ -113,13 +118,13 @@ class ProductFeed extends Feed
      */
     public function exportFeedForGlobal()
     {
-        // Using admin store for now
+        /** Using admin store for now */
         /** @var \Magento\Store\Model\StoreManagerInterface $storeManager */
-        $storeManager = $this->objectManager->get('Magento\Store\Model\StoreManagerInterface');
+        $storeManager = $this->_objectManager->get('Magento\Store\Model\StoreManagerInterface');
         /** @var Store $store */
         $store = $storeManager->getStore(0);
 
-        // Create varien io object and write local feed file
+        /** Create varien io object and write local feed file */
         $writer = $this->openProductFile($store);
 
         $this->_brand
@@ -144,16 +149,16 @@ class ProductFeed extends Feed
     }
 
     /**
-     * @param $store
+     * @param Store $store
      * @return XMLWriter
      */
     protected function openProductFile($store)
     {
 
-        // Get client name for the scope
+        /** Get client name for the scope */
         $clientName = $this->helper->getConfig('general/client_name', $store->getId());
 
-        // Create varien io object and write local feed file
+        /** Create varien io object and write local feed file */
         $writer = parent::openFile(self::FEED_FILE_XSD, $clientName);
         return $writer;
     }
@@ -165,7 +170,7 @@ class ProductFeed extends Feed
      */
     protected function closeAndUploadFile($writer, $scopeId, $store)
     {
-        // Build local file name / path
+        /** Build local file name / path */
         $productFeedFilePath = BP . '/var/export/bvfeeds';
         $scope = $this->helper->getConfig('feeds/generation_scope');
         $date = date('U');
@@ -175,7 +180,7 @@ class ProductFeed extends Feed
 
         parent::closeFile($writer, $productFeedFileName);
 
-        // Upload feed
+        /** Upload feed */
         $destinationFile = $this->helper->getConfig('feeds/product_path', $store->getId()) . '/' .
             $this->helper->getConfig('feeds/product_filename', $store->getId());
         $this->uploadFeed($productFeedFileName, $destinationFile, $store);

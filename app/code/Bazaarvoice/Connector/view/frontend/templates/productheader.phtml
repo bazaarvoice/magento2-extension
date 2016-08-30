@@ -1,14 +1,32 @@
+<?php
+/**
+ * StoreFront Bazaarvoice Extension for Magento
+ *
+ * PHP Version 5
+ *
+ * LICENSE: This source file is subject to commercial source code license
+ * of StoreFront Consulting, Inc.
+ *
+ * @category  SFC
+ * @package   Bazaarvoice_Ext
+ * @author    Dennis Rogers <dennis@storefrontconsulting.com>
+ * @copyright 2016 StoreFront Consulting, Inc
+ * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
+ * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
+ */
+?>
 <?php /** @var Bazaarvoice\Connector\Block\Product $this */ ?>
 
-<?php if($this->isEnabled()): ?>
+<?php if ($this->isEnabled()): ?>
+    <!--suppress ALL -->
     <script type="text/javascript">
         var bvConfigData = {};
-<?php if($this->getProductId()) : ?>
+<?php if ($this->getProductId()) : ?>
         bvConfigData.productId = "<?php echo $this->getProductSku() ?>";
-<?php endif; ?>å
+<?php endif; ?>
         $BV.configure("global", bvConfigData);
     </script>
-<?php if($this->isConfigurable()): ?>
+<?php if ($this->isConfigurable()): ?>
     <script type="text/javascript">
         var bvChildren = <?php echo $this->getChildrenJson(); ?>;
         var bvSelected = "<?php echo $this->getProductSku() ?>";
@@ -20,7 +38,7 @@
                     bvCurrent = bvCurrent + jQuery(this).attr('attribute-id') + '_' + jQuery(this).attr('option-selected') + '_';
                 });
                 console.log(bvCurrent);
-                if(bvChildren[bvCurrent] != undefined && bvChildren[bvCurrent] != bvSelected) {
+                if (bvChildren[bvCurrent] != undefined && bvChildren[bvCurrent] != bvSelected) {
                     console.log("switching to " + bvChildren[bvCurrent]);
                     bvConfigData.productId = bvChildren[bvCurrent];
                     $BV.configure("global", bvConfigData);
@@ -37,4 +55,4 @@
     </script>
 <?php endif; ?>
     
-<?php endif; ?>
+<?php endif;

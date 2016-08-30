@@ -1,30 +1,33 @@
 <?php
 /**
- * NOTICE OF LICENSE
+ * StoreFront Bazaarvoice Extension for Magento
  *
- * This source file is subject to commercial source code license
+ * PHP Version 5
+ *
+ * LICENSE: This source file is subject to commercial source code license
  * of StoreFront Consulting, Inc.
  *
- * @copyright    (C)Copyright 2016 StoreFront Consulting, Inc (http://www.StoreFrontConsulting.com/)
- * @package      Bazaarvoice_Connector
- * @author       Dennis Rogers <dennis@storefrontconsulting.com>
+ * @category  SFC
+ * @package   Bazaarvoice_Ext
+ * @author    Dennis Rogers <dennis@storefrontconsulting.com>
+ * @copyright 2016 StoreFront Consulting, Inc
+ * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
+ * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
  */
-
 namespace Bazaarvoice\Connector\Model\Backend;
 
 class Remote extends \Magento\Framework\App\Config\Value
 {
-
     /**
      * @param string $value
      * @return string
      */
     public function setValue($value)
     {
-        if($value == '') {
-            if($this->getPath() == 'bazaarvoice/feeds/product_filename')
+        if ($value == '') {
+            if ($this->getPath() == 'bazaarvoice/feeds/product_filename')
                 $value = 'productfeed.xml';
-            elseif($this->getPath() == 'bazaarvoice/feeds/product_path')
+            elseif ($this->getPath() == 'bazaarvoice/feeds/product_path')
                 $value = '/import-inbox';
         }
         return parent::setValue($value);

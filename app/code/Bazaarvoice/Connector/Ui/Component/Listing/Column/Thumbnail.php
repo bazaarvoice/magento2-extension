@@ -1,13 +1,18 @@
 <?php
 /**
- * NOTICE OF LICENSE
+ * StoreFront Bazaarvoice Extension for Magento
  *
- * This source file is subject to commercial source code license
+ * PHP Version 5
+ *
+ * LICENSE: This source file is subject to commercial source code license
  * of StoreFront Consulting, Inc.
  *
- * @package   Bazaarvoice_Connector
+ * @category  SFC
+ * @package   Bazaarvoice_Ext
  * @author    Dennis Rogers <dennis@storefrontconsulting.com>
- * @copyright 2016 StoreFront Consulting, Inc (http://www.StoreFrontConsulting.com/)
+ * @copyright 2016 StoreFront Consulting, Inc
+ * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
+ * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
  */
 
 namespace Bazaarvoice\Connector\Ui\Component\Listing\Column;
@@ -27,7 +32,7 @@ class Thumbnail extends \Magento\Ui\Component\Listing\Columns\Column
             $fieldName = $this->getData('name');
             foreach ($dataSource['data']['items'] as & $item) {
                 $value = $item[$fieldName];
-                if(strlen($value)) {
+                if (strlen($value)) {
                     $item[$fieldName . '_src'] = $value;
                     $item[$fieldName . '_alt'] = $fieldName;
                     $item[$fieldName . '_link'] = $value;

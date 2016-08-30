@@ -1,13 +1,18 @@
 <?php
 /**
- * NOTICE OF LICENSE
+ * StoreFront Bazaarvoice Extension for Magento
  *
- * This source file is subject to commercial source code license
+ * PHP Version 5
+ *
+ * LICENSE: This source file is subject to commercial source code license
  * of StoreFront Consulting, Inc.
  *
- * @package   Bazaarvoice_Connector
+ * @category  SFC
+ * @package   Bazaarvoice_Ext
  * @author    Dennis Rogers <dennis@storefrontconsulting.com>
- * @copyright 2016 StoreFront Consulting, Inc (http://www.StoreFrontConsulting.com/)
+ * @copyright 2016 StoreFront Consulting, Inc
+ * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
+ * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
  */
 
 namespace Bazaarvoice\Connector\Ui\Component\Listing\Column;
@@ -19,7 +24,7 @@ use Magento\Framework\View\Element\UiComponentFactory;
 
 class Json extends \Magento\Ui\Component\Listing\Columns\Column
 {
-    protected $helper;
+    protected $_helper;
 
     /**
      * Json constructor.
@@ -35,8 +40,9 @@ class Json extends \Magento\Ui\Component\Listing\Columns\Column
         array $components,
         array $data,
         Data $helper
-    ) {
-        $this->helper = $helper;
+    )
+    {
+        $this->_helper = $helper;
         parent::__construct($context, $uiComponentFactory, $components, $data);
     }
 
@@ -52,8 +58,8 @@ class Json extends \Magento\Ui\Component\Listing\Columns\Column
         if (isset($dataSource['data']['items'])) {
             $fieldName = $this->getData('name');
             foreach ($dataSource['data']['items'] as & $item) {
-                if(empty($item[$fieldName])) continue;
-                $valueData = $this->helper->jsonDecode($item[$fieldName]);
+                if (empty($item[$fieldName])) continue;
+                $valueData = $this->_helper->jsonDecode($item[$fieldName]);
                 if (is_object($valueData) == true ||
                     is_array($valueData) == true) {
                     $html = '';
@@ -61,7 +67,7 @@ class Json extends \Magento\Ui\Component\Listing\Columns\Column
                         if (!is_numeric($key)) {
                             $html .= "<strong>$key:</strong> ";
                         }
-                        $html .= $this->truncate($value) . "<br/>";
+                        $html .= $this->truncate($value) . '<br/>';
                     }
                     $item[$fieldName] = $html;
                 }

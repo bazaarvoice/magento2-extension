@@ -1,13 +1,18 @@
 <?php
 /**
- * NOTICE OF LICENSE
+ * StoreFront Bazaarvoice Extension for Magento
  *
- * This source file is subject to commercial source code license
+ * PHP Version 5
+ *
+ * LICENSE: This source file is subject to commercial source code license
  * of StoreFront Consulting, Inc.
  *
- * @copyright    (C)Copyright 2016 StoreFront Consulting, Inc (http://www.StoreFrontConsulting.com/)
- * @package      Bazaarvoice_Connector
- * @author       Dennis Rogers <dennis@storefrontconsulting.com>
+ * @category  SFC
+ * @package   Bazaarvoice_Ext
+ * @author    Dennis Rogers <dennis@storefrontconsulting.com>
+ * @copyright 2016 StoreFront Consulting, Inc
+ * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
+ * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
  */
 
 namespace Bazaarvoice\Connector\Model\Source;
@@ -16,8 +21,8 @@ use \Magento\Framework\ObjectManagerInterface;
 
 class ProductAttribute
 {
-    /** @var ObjectManagerInterface $objectManager */
-    protected $objectManager;
+    /** @var ObjectManagerInterface $_objectManager */
+    protected $_objectManager;
 
     /**
      * ProductAttribute constructor.
@@ -25,8 +30,9 @@ class ProductAttribute
      */
     public function __construct(
         ObjectManagerInterface $interface
-    ) {
-        $this->objectManager = $interface;
+    )
+    {
+        $this->_objectManager = $interface;
     }
 
     /**
@@ -35,7 +41,7 @@ class ProductAttribute
     public function toOptionArray()
     {
         /** @var \Magento\Catalog\Model\ResourceModel\Product\Attribute\CollectionFactory $factory */
-        $factory = $this->objectManager->get('\Magento\Catalog\Model\ResourceModel\Product\Attribute\CollectionFactory');
+        $factory = $this->_objectManager->get('\Magento\Catalog\Model\ResourceModel\Product\Attribute\CollectionFactory');
         $attributes = $factory->create();
 
         $attributeOptions = array(array(
@@ -43,8 +49,8 @@ class ProductAttribute
             'value' => ''
         ));
 
-        foreach($attributes as $attribute){
-            if(
+        foreach ($attributes as $attribute) {
+            if (
                 $attribute->getIsUserDefined() == 0
                 || $attribute->getUsedInProductListing() == 0
             )

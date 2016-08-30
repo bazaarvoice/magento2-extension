@@ -1,13 +1,18 @@
 <?php
 /**
- * NOTICE OF LICENSE
+ * StoreFront Bazaarvoice Extension for Magento
  *
- * This source file is subject to commercial source code license
+ * PHP Version 5
+ *
+ * LICENSE: This source file is subject to commercial source code license
  * of StoreFront Consulting, Inc.
  *
- * @package   Bazaarvoice_Connector
+ * @category  SFC
+ * @package   Bazaarvoice_Ext
  * @author    Dennis Rogers <dennis@storefrontconsulting.com>
- * @copyright 2016 StoreFront Consulting, Inc (http://www.StoreFrontConsulting.com/)
+ * @copyright 2016 StoreFront Consulting, Inc
+ * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
+ * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
  */
 
 namespace Bazaarvoice\Connector\Observer;
@@ -23,9 +28,9 @@ class Config implements ObserverInterface
     /**
      * @var Logger
      */
-    protected $logger;
-    protected $indexer;
-    protected $messageManger;
+    protected $_logger;
+    protected $_indexer;
+    protected $_messageManger;
 
     /**
      * @param Logger $logger
@@ -36,17 +41,20 @@ class Config implements ObserverInterface
         Logger $logger,
         Flat $indexer,
         ManagerInterface $messageManager
-    ) {
-        $this->logger = $logger;
-        $this->indexer = $indexer;
-        $this->messageManger = $messageManager;
+    )
+    {
+        $this->_logger = $logger;
+        $this->_indexer = $indexer;
+        $this->_messageManger = $messageManager;
     }
 
+    // @codingStandardsIgnoreStart
     public function execute(EventObserver $observer)
     {
-        $this->logger->debug('Store Config Save Event');
-        $this->indexer->executeFull();
-        $this->messageManger->addNotice(__('Bazaarvoice Product Feed Index has been flagged for rebuild.'));
+        // @codingStandardsIgnoreEnd
+        $this->_logger->debug('Store Config Save Event');
+        $this->_indexer->executeFull();
+        $this->_messageManger->addNotice(__('Bazaarvoice Product Feed Index has been flagged for rebuild.'));
 
     }
 }

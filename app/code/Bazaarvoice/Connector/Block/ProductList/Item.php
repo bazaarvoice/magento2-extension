@@ -1,13 +1,18 @@
 <?php
 /**
- * NOTICE OF LICENSE
+ * StoreFront Bazaarvoice Extension for Magento
  *
- * This source file is subject to commercial source code license
+ * PHP Version 5
+ *
+ * LICENSE: This source file is subject to commercial source code license
  * of StoreFront Consulting, Inc.
  *
- * @copyright    (C)Copyright 2016 StoreFront Consulting, Inc (http://www.StoreFrontConsulting.com/)
- * @package      Bazaarvoice_Connector
- * @author       Dennis Rogers <dennis@storefrontconsulting.com>
+ * @category  SFC
+ * @package   Bazaarvoice_Ext
+ * @author    Dennis Rogers <dennis@storefrontconsulting.com>
+ * @copyright 2016 StoreFront Consulting, Inc
+ * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
+ * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
  */
 
 namespace Bazaarvoice\Connector\Block\ProductList;
@@ -15,41 +20,46 @@ namespace Bazaarvoice\Connector\Block\ProductList;
 class Item extends \Bazaarvoice\Connector\Block\Product
 {
     /* @var \Magento\Catalog\Model\Product\Interceptor */
-    protected $product;
-    protected $productIds;
+    protected $_product;
+    protected $_productIds;
 
-    protected $type;
+    protected $_type;
 
-    public function isEnabled() {
+    public function isEnabled()
+    {
         $typesEnabled = explode(',', $this->getConfig('rr/inline_ratings'));
-        return in_array($this->type, $typesEnabled);
+        return in_array($this->_type, $typesEnabled);
     }
 
     public function beforeGetProductPrice($subject, $product)
     {
-        if($this->isEnabled()) {
-            $this->product = $product;
+        $this->logger->debug(get_class($subject));
+        if ($this->isEnabled()) {
+            $this->_product = $product;
         }
     }
 
     public function afterGetProductPrice($subject, $result)
     {
-        if($this->isEnabled()) {
-            $productIdentifier = $this->helper->getProductId($this->product);
-            $this->productIds[$productIdentifier] = array('url' => $this->product->getProductUrl());
-            $result = '<div id="BVRRInlineRating_' . $this->type . '-' . $productIdentifier . '"></div>' . $result;
+        $this->logger->debug(get_class($subject));
+        if ($this->isEnabled()) {
+            $productIdentifier = $this->helper->getProductId($this->_product);
+            $this->_productIds[$productIdentifier] = array('url' => $this->_product->getProductUrl());
+            $result = '<div id="BVRRInlineRating_' . $this->_type . '-' . $productIdentifier . '"></div>' . $result;
         }
         return $result;
     }
 
     public function afterToHtml($subject, $result)
     {
-        if($this->isEnabled() && count($this->productIds)) {
+        $this->logger->debug(get_class($subject));
+        if ($this->isEnabled() && count($this->_productIds)) {
             $result .= '
-            <script type="text/javascript">
+            <!--suppress JSUnresolvedVariable -->
+<script type="text/javascript">
             $BV.ui("rr", "inline_ratings", {
-                productIds: ' . json_encode($this->productIds) . ',
-                containerPrefix : "BVRRInlineRating_' . $this->type .'" 
+                productIds: ' . json_encode($this->_productIds) . ',
+                containerPrefix : "BVRRInlineRating_' . $this->_type .'" 
             });
             </script>';
         }

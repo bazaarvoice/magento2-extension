@@ -1,26 +1,29 @@
 <?php
-namespace Bazaarvoice\Connector\Console\Command;
 /**
- * NOTICE OF LICENSE
+ * StoreFront Bazaarvoice Extension for Magento
  *
- * This source file is subject to commercial source code license \
+ * PHP Version 5
+ *
+ * LICENSE: This source file is subject to commercial source code license
  * of StoreFront Consulting, Inc.
  *
- * @copyright	(C)Copyright 2016 StoreFront Consulting, Inc (http://www.StoreFrontConsulting.com/)
- * @package		Bazaarvoice_Connector
- * @author		Dennis Rogers <dennis@storefrontconsulting.com>
+ * @category  SFC
+ * @package   Bazaarvoice_Ext
+ * @author    Dennis Rogers <dennis@storefrontconsulting.com>
+ * @copyright 2016 StoreFront Consulting, Inc
+ * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
+ * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
  */
- 
-use Bazaarvoice\Connector\Model\Feed\PurchaseFeed;
-use \Symfony\Component\Console\Command\Command;
-use \Symfony\Component\Console\Output\OutputInterface;
-use \Symfony\Component\Console\Input\InputInterface;
 
+namespace Bazaarvoice\Connector\Console\Command;
+
+use \Bazaarvoice\Connector\Model\Feed\PurchaseFeed;
+use \Symfony\Component\Console\Command\Command;
 
 class Purchase extends Command
 {
-    /** @var PurchaseFeed $purchaseFeed */
-    protected $purchaseFeed;
+    /** @var PurchaseFeed $_purchaseFeed */
+    protected $_purchaseFeed;
 
     /**
      * Purchase constructor.
@@ -29,7 +32,7 @@ class Purchase extends Command
     public function __construct(PurchaseFeed $purchaseFeed)
     {
         parent::__construct();
-        $this->purchaseFeed = $purchaseFeed;
+        $this->_purchaseFeed = $purchaseFeed;
     }
 
     protected function configure()
@@ -37,10 +40,10 @@ class Purchase extends Command
         $this->setName('bv:purchase')->setDescription('Generates Bazaarvoice Purchase Feed.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute()
     {
-	    echo "\n" . 'Memory usage: ' . memory_get_usage() . "\n";
-        $this->purchaseFeed->generateFeed();
+        echo "\n" . 'Memory usage: ' . memory_get_usage() . "\n";
+        $this->_purchaseFeed->generateFeed();
         echo "\n" . 'Memory usage: ' . memory_get_usage() . "\n";
     }
 

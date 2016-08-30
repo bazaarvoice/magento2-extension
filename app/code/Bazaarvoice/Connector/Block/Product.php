@@ -1,18 +1,25 @@
 <?php
-    
-namespace Bazaarvoice\Connector\Block;
-
 /**
- * NOTICE OF LICENSE
+ * StoreFront Bazaarvoice Extension for Magento
  *
- * This source file is subject to commercial source code license 
+ * PHP Version 5
+ *
+ * LICENSE: This source file is subject to commercial source code license
  * of StoreFront Consulting, Inc.
  *
- * @copyright	(C)Copyright 2016 StoreFront Consulting, Inc (http://www.StoreFrontConsulting.com/)
- * @package	    Bazaarvoice_Connector
- * @author		Dennis Rogers <dennis@storefrontconsulting.com>
+ * @category  SFC
+ * @package   Bazaarvoice_Ext
+ * @author    Dennis Rogers <dennis@storefrontconsulting.com>
+ * @copyright 2016 StoreFront Consulting, Inc
+ * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
+ * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
  */
- 
+
+namespace Bazaarvoice\Connector\Block;
+/**
+ * Class Product
+ * @package Bazaarvoice\Connector\Block
+ */
 class Product extends \Magento\Framework\View\Element\Template
 {
     /* @var \Magento\Framework\Registry */
@@ -27,37 +34,37 @@ class Product extends \Magento\Framework\View\Element\Template
     /** @var  \Magento\Framework\ObjectManagerInterface */
     public $objectManager;
 
-    
+
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
         \Magento\Framework\Registry $registry,
         \Magento\Framework\ObjectManagerInterface $objectManager,
         \Bazaarvoice\Connector\Helper\Data $helper,
         \Bazaarvoice\Connector\Logger\Logger $logger,
-        array $data = []
-    ) {
+        array $data = [])
+    {
         $this->helper = $helper;
         $this->logger = $logger;
         $this->_coreRegistry = $registry;
         $this->objectManager = $objectManager;
         parent::__construct($context, $data);
     }
-    
+
     public function getHelper()
     {
         return $this->helper;
     }
-    
+
     public function getConfig($path)
     {
         return $this->helper->getConfig($path);
     }
-    
+
     public function isEnabled()
     {
         return $this->getConfig('general/enable_bv') == 1;
     }
-    
+
     /**
      * Get current product id
      *
@@ -73,20 +80,20 @@ class Product extends \Magento\Framework\View\Element\Template
     {
         return $this->_storeManager->getStore()->getBaseUrl() . 'bazaarvoice/submission/container';
     }
-    
+
     public function getProductSku()
     {
-        if($this->getProductId())
+        if ($this->getProductId())
             return $this->helper->getProductId($this->getProductId());
         return '';
     }
 
     /**
-     * @return \Magento\Catalog\Model\Product
+     * @return bool|\Magento\Catalog\Model\Product
      */
     public function getProduct()
     {
-        if(is_numeric($this->getProductId())) {
+        if (is_numeric($this->getProductId())) {
             $product = $this->objectManager->get('Magento\Catalog\Model\Product')->load($this->getProductId());
             return $product;
         }
@@ -98,29 +105,29 @@ class Product extends \Magento\Framework\View\Element\Template
      */
     public function isConfigurable()
     {
-        if($this->getProduct()) {
+        if ($this->getProduct()) {
             return $this->getProduct()->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE;
         }
         return false;
     }
-    
+
     /**
      * @return String
      */
     public function getChildrenJson()
     {
         $children = array();
-        if($this->isConfigurable()) {
+        if ($this->isConfigurable()) {
             $product = $this->getProduct();
 
             $childProducts = $product->getTypeInstance()->getUsedProducts($product);
             $options = $this->objectManager->get('\Magento\ConfigurableProduct\Helper\Data')->getOptions($product, $childProducts);
 
             /** @var \Magento\Catalog\Model\Product $childProduct */
-            foreach($childProducts as $childProduct) {
+            foreach ($childProducts as $childProduct) {
                 $attributeValues = $options['index'][$childProduct->getId()];
                 $attributeValue = '';
-                foreach($attributeValues as $key => $value)
+                foreach ($attributeValues as $key => $value)
                     $attributeValue .= $key . '_' . $value . '_';
 
                 $children[$attributeValue] = $this->helper->getProductId($childProduct);
@@ -129,6 +136,6 @@ class Product extends \Magento\Framework\View\Element\Template
         }
         return json_encode($children, JSON_UNESCAPED_UNICODE);
     }
-    
-    
+
+
 }

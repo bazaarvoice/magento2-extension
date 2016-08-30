@@ -1,13 +1,18 @@
 <?php
 /**
- * NOTICE OF LICENSE
+ * StoreFront Bazaarvoice Extension for Magento
  *
- * This source file is subject to commercial source code license
+ * PHP Version 5
+ *
+ * LICENSE: This source file is subject to commercial source code license
  * of StoreFront Consulting, Inc.
  *
- * @copyright    (C)Copyright 2016 StoreFront Consulting, Inc (http://www.StoreFrontConsulting.com/)
- * @package      Bazaarvoice_Connector
- * @author       Dennis Rogers <dennis@storefrontconsulting.com>
+ * @category  SFC
+ * @package   Bazaarvoice_Ext
+ * @author    Dennis Rogers <dennis@storefrontconsulting.com>
+ * @copyright 2016 StoreFront Consulting, Inc
+ * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
+ * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
  */
 
 namespace Bazaarvoice\Connector\Block;
@@ -17,7 +22,7 @@ use Magento\Framework\View\Element\Template;
 
 class SubmissionContainer extends Template
 {
-    protected $helper;
+    protected $_helper;
 
     /**
      * SubmissionContainer constructor.
@@ -27,12 +32,12 @@ class SubmissionContainer extends Template
      */
     public function __construct(Template\Context $context, array $data, Data $helper)
     {
-        $this->helper = $helper;
+        $this->_helper = $helper;
         parent::__construct($context, $data);
     }
 
     /**
-     * @return $this
+     * @return Template
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function _prepareLayout()
@@ -49,7 +54,7 @@ class SubmissionContainer extends Template
      */
     public function isEnabled()
     {
-        return $this->helper->getConfig('rr/enable_rr') && $this->helper->getConfig('rr/container');
+        return $this->_helper->getConfig('rr/enable_rr') && $this->_helper->getConfig('rr/container');
     }
 
 }

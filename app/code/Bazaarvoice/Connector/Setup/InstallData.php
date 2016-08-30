@@ -1,13 +1,18 @@
 <?php
 /**
- * NOTICE OF LICENSE
+ * StoreFront Bazaarvoice Extension for Magento
  *
- * This source file is subject to commercial source code license
+ * PHP Version 5
+ *
+ * LICENSE: This source file is subject to commercial source code license
  * of StoreFront Consulting, Inc.
  *
- * @copyright    (C)Copyright 2016 StoreFront Consulting, Inc (http://www.StoreFrontConsulting.com/)
- * @package      Bazaarvoice_Connector
- * @author       Dennis Rogers <dennis@storefrontconsulting.com>
+ * @category  SFC
+ * @package   Bazaarvoice_Ext
+ * @author    Dennis Rogers <dennis@storefrontconsulting.com>
+ * @copyright 2016 StoreFront Consulting, Inc
+ * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
+ * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
  */
 
 namespace Bazaarvoice\Connector\Setup;
@@ -26,13 +31,13 @@ use Magento\Catalog\Model\Product;
 class InstallData implements Setup\InstallDataInterface
 {
     /** @var SalesSetupFactory */
-    protected $salesSetupFactory;
+    protected $_salesSetupFactory;
 
     /** @var CategorySetupFactory */
-    protected $categorySetupFactory;
+    protected $_categorySetupFactory;
 
     /** @var ObjectManagerInterface */
-    protected $objectManager;
+    protected $_objectManager;
 
     /**
      * Init
@@ -47,10 +52,11 @@ class InstallData implements Setup\InstallDataInterface
         CategorySetupFactory $categorySetupFactory,
         ObjectManagerInterface $objectManger,
         \Magento\Framework\App\State $state
-    ) {
-        $this->salesSetupFactory = $salesSetupFactory;
-        $this->categorySetupFactory = $categorySetupFactory;
-        $this->objectManager = $objectManger;
+    )
+    {
+        $this->_salesSetupFactory = $salesSetupFactory;
+        $this->_categorySetupFactory = $categorySetupFactory;
+        $this->_objectManager = $objectManger;
         $state->setAreaCode('frontend');
     }
 
@@ -58,10 +64,12 @@ class InstallData implements Setup\InstallDataInterface
     /**
      * {@inheritdoc}
      */
+    // @codingStandardsIgnoreStart
     public function install(Setup\ModuleDataSetupInterface $setup, Setup\ModuleContextInterface $context)
     {
+        // @codingStandardsIgnoreEnd
         /** @var SalesSetup $eavSetup */
-        $eavSetup = $this->salesSetupFactory->create(['setup' => $setup]);
+        $eavSetup = $this->_salesSetupFactory->create(['setup' => $setup]);
 
         $eavSetup->addAttribute(
             Order::ENTITY,
@@ -75,7 +83,7 @@ class InstallData implements Setup\InstallDataInterface
         );
 
         /** @var CategorySetup $eavSetup */
-        $eavSetup = $this->categorySetupFactory->create(['setup' => $setup]);
+        $eavSetup = $this->_categorySetupFactory->create(['setup' => $setup]);
 
         $eavSetup->addAttribute(
             Product::ENTITY,
@@ -128,10 +136,10 @@ class InstallData implements Setup\InstallDataInterface
         $storeId = 0;
 
         /** @var \Magento\Catalog\Model\ProductFactory $productFactory */
-        $productFactory = $this->objectManager->get('\Magento\Catalog\Model\ProductFactory');
+        $productFactory = $this->_objectManager->get('\Magento\Catalog\Model\ProductFactory');
         $productIds = $productFactory->create()->getCollection()->getAllIds();
         /** @var \Magento\Catalog\Model\Product\Action $action */
-        $this->objectManager->get('\Magento\Catalog\Model\Product\Action')->updateAttributes(
+        $this->_objectManager->get('\Magento\Catalog\Model\Product\Action')->updateAttributes(
             $productIds,
             $attrData,
             $storeId
