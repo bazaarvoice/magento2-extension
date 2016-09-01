@@ -31,17 +31,23 @@ class Item extends \Bazaarvoice\Connector\Block\Product
         return in_array($this->_type, $typesEnabled);
     }
 
-    public function beforeGetProductPrice($subject, $product)
+    // @codingStandardsIgnoreStart
+    public function beforeGetProductPrice(
+        /** @noinspection PhpUnusedParameterInspection */
+        $subject, $product)
     {
-        $this->logger->debug(get_class($subject));
+        // @codingStandardsIgnoreEnd
         if ($this->isEnabled()) {
             $this->_product = $product;
         }
     }
 
-    public function afterGetProductPrice($subject, $result)
+    // @codingStandardsIgnoreStart
+    public function afterGetProductPrice(
+        /** @noinspection PhpUnusedParameterInspection */
+        $subject, $result)
     {
-        $this->logger->debug(get_class($subject));
+        // @codingStandardsIgnoreEnd
         if ($this->isEnabled()) {
             $productIdentifier = $this->helper->getProductId($this->_product);
             $this->_productIds[$productIdentifier] = array('url' => $this->_product->getProductUrl());
@@ -50,9 +56,11 @@ class Item extends \Bazaarvoice\Connector\Block\Product
         return $result;
     }
 
-    public function afterToHtml($subject, $result)
+    // @codingStandardsIgnoreStart
+    public function afterToHtml(/** @noinspection PhpUnusedParameterInspection */
+        $subject, $result)
     {
-        $this->logger->debug(get_class($subject));
+        // @codingStandardsIgnoreEnd
         if ($this->isEnabled() && count($this->_productIds)) {
             $result .= '
             <!--suppress JSUnresolvedVariable -->
