@@ -16,7 +16,7 @@
  */
 namespace Bazaarvoice\Connector\Block;
 
-use Bazaarvoice\BV;
+use Bazaarvoice\Connector\Helper\Seosdk;
 
 class Reviews extends Product
 {
@@ -28,7 +28,7 @@ class Reviews extends Product
     {
         if ($this->getIsEnabled()) {
             $params = $this->_getParams();
-            $bv = new BV($params);
+            $bv = new Seosdk($params);
             $seoContent = $bv->reviews->getAggregateRating();
             $seoContent .= '
 <!-- BV Aggregate Rating Parameters: ' . print_r($params, 1) . '-->';
@@ -45,7 +45,7 @@ class Reviews extends Product
     {
         if ($this->getIsEnabled()) {
             $params = $this->_getParams();
-            $bv = new BV($params);
+            $bv = new Seosdk($params);
             $seoContent = $bv->reviews->getReviews();
             $seoContent .= '
 <!-- BV Reviews SEO Parameters: ' . print_r($params, 1) . '-->';

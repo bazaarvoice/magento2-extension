@@ -17,7 +17,7 @@
 
 namespace Bazaarvoice\Connector\Block;
 
-use Bazaarvoice\BV;
+use \Bazaarvoice\Connector\Helper\Seosdk;
 
 class Questions extends Product
 {
@@ -68,7 +68,7 @@ class Questions extends Product
             if ($requestInterface->getParam('bvreveal') == 'debug')
                 $params['bvreveal'] = 'debug';
 
-            $bv = new BV($params);
+            $bv = new Seosdk($params);
             $seoContent = $bv->questions->getContent();
             $seoContent .= '<!-- BV Questions Parameters: ' . print_r($params, 1) . '-->';
         }
