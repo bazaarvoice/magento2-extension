@@ -19,6 +19,8 @@ namespace Bazaarvoice\Connector\Console\Command;
  
 use Bazaarvoice\Connector\Model\Feed\ProductFeed;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Input\InputInterface;
 
 class Product extends Command
 {
@@ -40,8 +42,11 @@ class Product extends Command
         $this->setName('bv:product')->setDescription('Generates Bazaarvoice Product Feed.');
     }
 
-    protected function execute()
+
+    // @codingStandardsIgnoreStart
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
+        // @codingStandardsIgnoreEnd
         echo "\n" . 'Memory usage: ' . memory_get_usage() . "\n";
         try {
             $this->_productFeed->generateFeed();

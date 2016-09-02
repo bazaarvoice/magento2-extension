@@ -18,6 +18,8 @@ namespace Bazaarvoice\Connector\Console\Command;
 
 use Bazaarvoice\Connector\Model\Indexer\Flat;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Input\InputInterface;
 
 class Index extends Command
 {
@@ -39,8 +41,10 @@ class Index extends Command
         $this->setName('bv:index')->setDescription('Clear Bazaarvoice Product Feed Index.');
     }
 
-    protected function execute()
+    // @codingStandardsIgnoreStart
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
+        // @codingStandardsIgnoreEnd
         try {
             $this->_indexer->executeFull();
         } Catch (\Exception $e) {
