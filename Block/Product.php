@@ -47,6 +47,7 @@ class Product extends \Magento\Framework\View\Element\Template
         $this->logger = $logger;
         $this->_coreRegistry = $registry;
         $this->objectManager = $objectManager;
+        $this->logger->debug(__CLASS__.' construct');
         parent::__construct($context, $data);
     }
 
@@ -93,6 +94,7 @@ class Product extends \Magento\Framework\View\Element\Template
      */
     public function getProduct()
     {
+        $this->logger->debug(__CLASS__.' get product');
         if (is_numeric($this->getProductId())) {
             $product = $this->objectManager->get('Magento\Catalog\Model\Product')->load($this->getProductId());
             return $product;

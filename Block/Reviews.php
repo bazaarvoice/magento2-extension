@@ -26,6 +26,7 @@ class Reviews extends Product
      */
     public function getAggregateSEOContent()
     {
+        $this->logger->debug(__CLASS__.' getAggregateSEOContent');
         if ($this->getIsEnabled()) {
             $params = $this->_getParams();
             $bv = new Seosdk($params);
@@ -43,6 +44,7 @@ class Reviews extends Product
      */
     public function getSEOContent()
     {
+        $this->logger->debug(__CLASS__.' getSEOContent');
         if ($this->getIsEnabled()) {
             $params = $this->_getParams();
             $bv = new Seosdk($params);
