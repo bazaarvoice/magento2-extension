@@ -1,0 +1,104 @@
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.bazaarvoice</groupId>
+  <artifactId>bv-seo-sdk-php</artifactId>
+  <version>3.2.0</version>
+  <name>bv-seo-sdk-php</name>
+  <description>Bazaarvoice SEO SDK for PHP.</description>
+
+  <scm>
+    <!--
+    example for scm.connection.url:
+    scm:ssh:git@github.com:bazaarvoice/bv_seo_sdk_php.git
+    Use -D options in the maven or a property variable setter.
+    -->
+    <connection>${scm.connection.url}</connection>
+  </scm>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.maven.scm</groupId>
+      <artifactId>maven-scm-provider-gitexe</artifactId>
+      <version>1.9.2</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+
+      <!--
+      bypass/skip the actual maven deploy and run custom s3 plugin upload.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>2.7</version>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+
+      <!--
+      Assembly plugin to zip the contents. Ensure that already there are
+      binaries compiled and present in the release folder.
+      Usage: mvn assembly:single
+      -->
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.5.4</version>
+        <configuration>
+          <descriptors>
+            <descriptor>archive-assembly.xml</descriptor>
+          </descriptors>
+        </configuration>
+      </plugin>
+
+      <!--
+      Upload the install script into the scripts directory.
+      Usage: mvn -Ds3.repo.path=<THE_PATH> -Dartifact.source=<ARTIFACT_DIR> deploy
+      -->
+      <plugin>
+        <groupId>com.bazaarvoice.maven.plugins</groupId>
+        <artifactId>s3-upload-maven-plugin</artifactId>
+        <version>1.2</version>
+        <executions>
+          <execution>
+            <phase>deploy</phase>
+            <goals>
+              <goal>s3-upload</goal>
+            </goals>
+            <configuration>
+              <bucketName>nexus-private-artifacts</bucketName>
+              <source>
+                ${artifact.source}/${project.name}-${project.version}-assembly.zip
+              </source>
+              <destination>
+                ${s3.repo.path}/php_v${project.version}.zip
+              </destination>
+              <recursive>false</recursive>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!--
+      maven scm plugin use it only for tagging
+      usage: mvn scm:tag
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-scm-plugin</artifactId>
+        <version>1.9.2</version>
+        <configuration>
+          <connectionType>connection</connectionType>
+          <tag>Release_v${project.version}</tag>
+        </configuration>
+      </plugin>
+
+    </plugins>
+  </build>
+</project>
