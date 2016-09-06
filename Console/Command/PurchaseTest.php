@@ -19,6 +19,8 @@ namespace Bazaarvoice\Connector\Console\Command;
  
 use Bazaarvoice\Connector\Model\Feed\PurchaseFeed;
 use \Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Input\InputInterface;
 
 class PurchaseTest extends Command
 {
@@ -40,8 +42,10 @@ class PurchaseTest extends Command
         $this->setName('bv:purchasetest')->setDescription('Generates Bazaarvoice Test Purchase Feed.');
     }
 
-    protected function execute()
+    // @codingStandardsIgnoreStart
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
+        // @codingStandardsIgnoreEnd
         echo "\n" . 'Memory usage: ' . memory_get_usage() . "\n";
         $this->_purchaseFeed->generateFeed(true);
         echo "\n" . 'Memory usage: ' . memory_get_usage() . "\n";

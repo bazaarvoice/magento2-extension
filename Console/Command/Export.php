@@ -18,6 +18,8 @@
 namespace Bazaarvoice\Connector\Console\Command;
 
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Input\InputInterface;
 
 class Export extends Command
 {
@@ -26,8 +28,10 @@ class Export extends Command
         $this->setName('bv:export')->setDescription('Generates Bazaarvoice formatted Magento reviews.');
     }
 
-    protected function execute()
+    // @codingStandardsIgnoreStart
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
+        // @codingStandardsIgnoreEnd
         echo "\n" . 'Memory usage: ' . memory_get_usage() . "\n";
 
         /** @var \Bazaarvoice\Connector\Model\Feed\Export $exporter */

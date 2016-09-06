@@ -28,8 +28,8 @@ class Logger extends \Monolog\Logger
      * @param string $name
      * @param array|\Monolog\Handler\HandlerInterface[] $handlers
      * @param Data $helper
+     * @codingStandardsIgnoreStart
      */
-    /** @codingStandardsIgnoreStart */
     public function __construct($name, array $handlers = array(), Data $helper)
     {
         /** @codingStandardsIgnoreEnd */

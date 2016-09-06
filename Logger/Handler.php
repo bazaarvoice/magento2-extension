@@ -25,15 +25,21 @@ class Handler extends \Magento\Framework\Logger\Handler\Base
     /**
      * Logging level
      * @var int
+     * @codingStandardsIgnoreStart
      */
-    protected $_loggerType = \Monolog\Logger::DEBUG;
+    protected $loggerType = \Monolog\Logger::DEBUG;
 
     /**
      * File name
      * @var string
      */
-    protected $_fileName = '/var/log/bazaarvoice.log';
+    protected $fileName = '/var/log/bazaarvoice.log';
+    /** @codingStandardsIgnoreEnd */
 
+    /**
+     * Format string
+     * @var string
+     */
     protected $_format = "[%datetime%] %level_name%: %message%\n";
 
     /**
