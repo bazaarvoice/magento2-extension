@@ -18,6 +18,7 @@
 namespace Bazaarvoice\Connector\Model\Source;
 
 use \Magento\Framework\ObjectManagerInterface;
+use Magento\Store\Model\Store;
 
 class ProductAttribute
 {
@@ -42,17 +43,40 @@ class ProductAttribute
     {
         /** @var \Magento\Catalog\Model\ResourceModel\Product\Attribute\CollectionFactory $factory */
         $factory = $this->_objectManager->get('\Magento\Catalog\Model\ResourceModel\Product\Attribute\CollectionFactory');
+
+        /** @var \Magento\Catalog\Model\ResourceModel\Product\Attribute\Collection $attributes */
         $attributes = $factory->create();
+
+
+        $stores = $this->_objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStores();
+        $defaultStore = null;
+        /** @var Store $store */
+        foreach ($stores as $store) {
+            if (isset($defaultStore) == false) {
+                $defaultStore = $store;
+                break;
+            }
+        }
 
         $attributeOptions = array(array(
             'label' => __('-- Please Select --'),
             'value' => ''
         ));
 
+        /** @var \Magento\Framework\DB\Adapter\AdapterInterface $read */
+        $read = $attributes->getConnection();
+        $columnResults = $read->query('DESCRIBE `' . $read->getTableName('catalog_product_flat') . '_' . $defaultStore->getId() . '`;');
+        $flatColumns = array();
+        while ($row = $columnResults->fetch()) {
+            $flatColumns[] = $row['Field'];
+        }
+
+        /** @var \Magento\Catalog\Model\ResourceModel\Attribute $attribute */
         foreach ($attributes as $attribute) {
             if (
                 $attribute->getIsUserDefined() == 0
                 || $attribute->getUsedInProductListing() == 0
+                || in_array($attribute->getAttributeCode(), $flatColumns) == false
             )
                 continue;
             $attributeOptions[] = array(
