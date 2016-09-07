@@ -509,8 +509,8 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 if (!empty($indexData['parent_url'])) {
                     $indexData['product_page_url'] = $indexData['parent_url'];
                     $this->_logger->debug('Using Parent URL');
-                    if (is_array($indexData['locale_product_page_url'])
-                        && count($indexData['locale_product_page_url'])) {
+                    if (isset($indexData['locale_product_page_url'])
+                        && is_array($indexData['locale_product_page_url'])) {
                         foreach ($indexData['locale_product_page_url'] as $locale => $localeUrl) {
                             if (!empty($indexData['locale_parent_url'][$locale])) {
                                 $indexData['locale_product_page_url'][$locale] = $indexData['locale_parent_url'][$locale];
@@ -528,7 +528,8 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 if (!empty($indexData['parent_image'])) {
                     $indexData['image_url'] = $indexData['parent_image'];
                     $this->_logger->debug('Using Parent image');
-                    if (is_array($indexData['locale_image_url']) && count($indexData['locale_image_url'])) {
+                    if (isset($indexData['locale_image_url'])
+                        && is_array($indexData['locale_image_url'])) {
                         foreach ($indexData['locale_image_url'] as $locale => $localeUrl) {
                             if (!empty($indexData['locale_parent_image'][$locale]))
                                 $indexData['locale_image_url'][$locale] = $indexData['locale_parent_image'][$locale];
@@ -549,7 +550,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
             /** Add Store base to URLs */
             $indexData['product_page_url'] = $this->getStoreUrl($store->getBaseUrl(), $indexData['product_page_url']);
-            if (is_array($indexData['locale_product_page_url']) && count($indexData['locale_product_page_url'])) {
+            if (isset($indexData['locale_product_page_url']) && is_array($indexData['locale_product_page_url'])) {
                 /** @var Store $storeLocale */
                 foreach ($this->_storeLocales[$storeId] as $locale => $storeLocale) {
                     if (isset($indexData['locale_product_page_url'][$locale]))
@@ -561,12 +562,13 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 }
             }
             $this->_logger->debug("URL {$indexData['product_page_url']}");
-            $this->_logger->debug($indexData['locale_product_page_url']);
+            if(isset($indexData['locale_product_page_url']))
+                $this->_logger->debug($indexData['locale_product_page_url']);
 
             /** Add Store base to images */
             if (substr($indexData['image_url'], 0, 4) != 'http') {
                 $indexData['image_url'] = $store->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog/product' . $indexData['image_url'];
-                if (is_array($indexData['locale_image_url']) && count($indexData['locale_image_url'])) {
+                if (isset($indexData['locale_image_url']) && is_array($indexData['locale_image_url'])) {
                     /** @var Store $storeLocale */
                     foreach ($this->_storeLocales[$storeId] as $locale => $storeLocale) {
                         if (isset($indexData['locale_image_url'][$locale]))

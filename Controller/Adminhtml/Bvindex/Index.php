@@ -24,17 +24,22 @@ use \Magento\Backend\Model\View\Result\Page;
 class Index extends \Magento\Backend\App\Action
 {
 
+    /** @var \Bazaarvoice\Connector\Helper\Data $_bvHelper */
+    protected $_bvHelper;
     protected $_resultPageFactory;
 
     /**
      * @param Context $context
      * @param PageFactory $resultPageFactory
+     * @param \Bazaarvoice\Connector\Helper\Data $helper
      */
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
-        \Magento\Framework\View\Result\PageFactory $resultPageFactory
+        \Magento\Framework\View\Result\PageFactory $resultPageFactory,
+        \Bazaarvoice\Connector\Helper\Data $helper
     )
     {
+        $this->_bvHelper = $helper;
         $this->_resultPageFactory = $resultPageFactory;
         parent::__construct($context);
     }
@@ -48,6 +53,17 @@ class Index extends \Magento\Backend\App\Action
     {
         /** @var Page $resultPage */
         $resultPage = $this->_resultPageFactory->create();
+
+        if ($this->_bvHelper->getDefaultConfig('catalog/frontend/flat_catalog_product') == false
+            || $this->_bvHelper->getDefaultConfig('catalog/frontend/flat_catalog_category') == false) {
+            $url = $this->getUrl('*/system_config/edit/section/catalog');
+            $this->messageManager->addError(
+                __(
+                    'Bazaarvoice Product feed requires Catalog Flat Tables to be enabled. Please check your <a href="%1">Store Config</a>.',
+                    $url
+                )
+            );
+        }
 
         $resultPage->setActiveMenu('Magento_Catalog::inventory');
         $resultPage->getConfig()->getTitle()->prepend(__('Bazaarvoice Product Feed'));
