@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="bazaarvoice_ext" default="build" basedir=".">
+<project name="bazaarvoice_mage2_ext" default="build" basedir=".">
 	<!-- Properties -->
-	<property name="source" value="app/code/local/Bazaarvoice"/>
+	<property name="source" value="."/>
 	<property name="module_name" value="Bazaarvoice_Connector"/>
-	<property name="license_id" value="${module_name}-6.0.x.x"/>
-	
+
 	<!-- Meta Targets -->
 	<target name="analyze" depends="clean,lint,parallelTasks,phpunit"/>
-	<target name="build" depends="clean,lint,parallelTasks,phpunit,phpcb,encode,package"/>
+	<target name="build" depends="clean,lint,parallelTasks,phpunit,phpcb,package"/>
 
 	<target name="parallelTasks" description="Run the pdepend, phpmd, phpcpd, phpcs, phpdoc and phploc tasks in parallel using a maximum of 2 threads.">
 		<parallel threadCount="2">
@@ -30,7 +29,6 @@
 		<delete dir="${basedir}/build/logs"/>
 		<delete dir="${basedir}/build/pdepend"/>
 		<delete dir="${basedir}/build/phpdox"/>
-		<delete dir="${basedir}/build/encoded"/>
 		<delete dir="${basedir}/build/package"/>
 
 		<mkdir dir="${basedir}/build/api"/>
@@ -39,7 +37,6 @@
 		<mkdir dir="${basedir}/build/logs"/>
 		<mkdir dir="${basedir}/build/pdepend"/>
 		<mkdir dir="${basedir}/build/phpdox"/>
-		<mkdir dir="${basedir}/build/encoded"/>
 		<mkdir dir="${basedir}/build/package"/>
 	</target>
 
@@ -52,13 +49,6 @@
 				<include name="**/*.php" />
 				<modified />
 			</fileset>
-
-			<!--
-			<fileset dir="${basedir}/tests">
-			<include name="**/*.php" />
-			<modified />
-			</fileset>
-			-->
 
 		</apply>
 	</target>
@@ -124,82 +114,16 @@
 		</exec>
 	</target>
 
-	<target name="encode" description="Encode extension with ioncube">
-		<!-- Call ioncube to encode the main source code files only -->
-		<!-- We're not actually going to encode any of the Bazaarvoice ext files, just copy them all -->
-		<!-- Copy other directories to the encoded copy of extension -->
-		<copy todir="${basedir}/build/encoded/app">
-			<fileset dir="${basedir}/app" erroronmissingdir="true" />
-		</copy>
-		<copy todir="${basedir}/build/encoded/skin">
-			<fileset dir="${basedir}/skin" erroronmissingdir="true" />
-		</copy>
-		<copy todir="${basedir}/build/encoded/shell">
-			<fileset dir="${basedir}/shell" erroronmissingdir="false" />
-		</copy>
-		<copy todir="${basedir}/build/encoded/lib">
-			<fileset dir="${basedir}/lib" erroronmissingdir="false" />
-		</copy>
-                <copy todir="${basedir}/build/encoded/docs">
-                        <fileset dir="${basedir}/docs" erroronmissingdir="false" />
-                </copy>
+	<target name="package" description="Package Extension.">
+		<tar destfile="${basedir}/build/package/${module_name}-.tgz" compression="gzip">
+			<tarfileset dir="${basedir}">
+				<exclude name="**/build"/>
+				<exclude name="**/.gitignore"/>
+				<exclude name="**/build.xml"/>
+				<exclude name="**/phpdox.xml"/>
+				<exclude name="**/phpunit.xml"/>
+			</tarfileset>
+		</tar>
 	</target>
-
-	<target name="package" description="Package extension using Magento instance Magento Connect packager.  (Magento instance expected at: /var/www/packager)"
-			depends="finalclean-packager_1,copy-package,create-package,install-extension,setup-packager_1">
-	</target>	
-	
-	<target name="finalclean-packager_1" depends="copy-package">
-		<delete dir="/var/www/packager_1"/>
-	</target>
-
-	<target name="copy-package" depends="create-package">
-		<copy todir="${basedir}/build/package" >
-			<fileset dir="/var/www/packager_1/var/connect">
-				<include name="**/${module_name}*tgz"/>
-			</fileset>		
-		</copy>		
-	</target>	
-
-	<target name="create-package" depends="setup-packager_1,install-extension">
-		<exec executable="php" dir="/var/www/packager_1" failonerror="true">
-			<arg line="/var/www/packager_1/shell/sfcpack.php ${basedir}/var/connect/${module_name}.xml" />
-		</exec>		
-	</target>	
-
-	<target name="install-extension" depends="setup-packager_1" >
-		<copy todir="/var/www/packager_1">
-			<fileset dir="${basedir}/build/encoded" />
-		</copy>		
-	</target>
-	
-	<target name="setup-packager_1" depends="clean-packager_1,create-db-packager_1,setup-db-packager_1">
-		<copy todir="/var/www/packager_1">
-			<fileset dir="/var/www/packager" >
-				<exclude name="**/var/cache/**" />
-				<exclude name="**/var/full_page_cache/**" />
-				<exclude name="**/var/log/**" />
-				<exclude name="**/var/report/*" />
-				<exclude name="**/var/session/**" />
-				<exclude name="**/var/licenser/**" />
-			</fileset>
-		</copy>				
-   	</target>
-
-	<target name="clean-packager_1">
-		<delete dir="/var/www/packager_1"/>
-	</target>
-
-	<target name="setup-db-packager_1" depends="create-db-packager_1">
-		<exec executable="mysql" input="/var/www/packager/instance/packager_1.sql" failonerror="true">
-			<arg line="-u packager_admin -pabc_123_xyz packager_1" />
-		</exec>		
-   	</target>
-
-	<target name="create-db-packager_1" depends="">
-		<exec executable="mysql" input="/var/www/packager/instance/create_packager_1.sql" failonerror="true">
-			<arg line="-u packager_admin -pabc_123_xyz" />
-		</exec>		
-   	</target>
 
 </project>
