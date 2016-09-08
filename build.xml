@@ -2,7 +2,7 @@
 
 <project name="bazaarvoice_mage2_ext" default="build" basedir=".">
 	<!-- Properties -->
-	<property name="source" value="./"/>
+	<property name="source" value="."/>
 	<property name="module_name" value="Bazaarvoice_Connector"/>
 
 	<!-- Meta Targets -->

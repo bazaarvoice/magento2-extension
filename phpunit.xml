@@ -5,7 +5,7 @@
          strict="true"
          verbose="true">
   <testsuites>
-    <testsuite name="bazaarvoice_ext">
+    <testsuite name="bazaarvoice_mage2_ext">
       <directory suffix="Test.php">tests</directory>
     </testsuite>
   </testsuites>
