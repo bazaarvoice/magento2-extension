@@ -65,10 +65,14 @@ class ProductAttribute
 
         /** @var \Magento\Framework\DB\Adapter\AdapterInterface $read */
         $read = $attributes->getConnection();
-        $columnResults = $read->query('DESCRIBE `' . $read->getTableName('catalog_product_flat') . '_' . $defaultStore->getId() . '`;');
-        $flatColumns = array();
-        while ($row = $columnResults->fetch()) {
-            $flatColumns[] = $row['Field'];
+        try {
+            $columnResults = $read->query('DESCRIBE `' . $read->getTableName('catalog_product_flat') . '_' . $defaultStore->getId() . '`;');
+            $flatColumns = array();
+            while ($row = $columnResults->fetch()) {
+                $flatColumns[] = $row['Field'];
+            }
+        } Catch (\Exception $e) {
+            $flatColumns = array();
         }
 
         /** @var \Magento\Catalog\Model\ResourceModel\Attribute $attribute */
