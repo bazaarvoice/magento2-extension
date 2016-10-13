@@ -2,6 +2,7 @@
   "name": "bazaarvoice/connector",
   "description": "Bazaarvoice Connector",
   "type": "magento2-module",
+  "license": [ "MIT" ],
   "authors": [
     {
       "name": "Dennis Rogers",
