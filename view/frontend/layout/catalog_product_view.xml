@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to commercial source code license 
+ * of StoreFront Consulting, Inc.
+ *
+ * @package        Bazaarvoice_Connector
+ * @copyright    (C)Copyright 2016 StoreFront Consulting, Inc (http://www.StoreFrontConsulting.com/)
+ * @author        Dennis Rogers <dennis@storefrontconsulting.com>
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="after.body.start">
+            <block class="Bazaarvoice\Connector\Block\Reviews" name="bazaarvoice.product.header" as="bv_productheader" template="Bazaarvoice_Connector::productheader.phtml" />
+        </referenceContainer>
+        <referenceContainer name="product.info.price">
+            <block class="Bazaarvoice\Connector\Block\Reviews" name="bazaarvoice.reviews.summary" as="bv_summary" template="Bazaarvoice_Connector::rr/summary.phtml" />
+        </referenceContainer>
+        <referenceBlock name="product.info.details">
+            <block class="Bazaarvoice\Connector\Block\Reviews" name="bazaarvoice.reviews.tab" as="bv_reviews" template="Bazaarvoice_Connector::rr/reviews.phtml" group="detailed_info" after="reviews">
+                <arguments>
+                    <argument translate="true" name="title" xsi:type="string">Reviews</argument>
+                </arguments>
+            </block>
+            <block class="Bazaarvoice\Connector\Block\Questions" name="bazaarvoice.questions.tab" as="bv_questions" template="Bazaarvoice_Connector::qa/questions.phtml" group="detailed_info" after="bv_reviews">
+                <arguments>
+                    <argument translate="true" name="title" xsi:type="string">Questions</argument>
+                </arguments>
+            </block>
+        </referenceBlock>
+    </body>
+</page>

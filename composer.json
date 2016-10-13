@@ -1,0 +1,20 @@
+{
+  "name": "bazaarvoice/connector",
+  "description": "Bazaarvoice Connector",
+  "type": "magento2-module",
+  "authors": [
+    {
+      "name": "Dennis Rogers",
+      "email": "dennis@storefrontconsulting.com"
+    }
+  ],
+  "version": "7.0.1",
+  "autoload": {
+    "files": [
+      "registration.php"
+    ],
+    "psr-4": {
+      "Bazaarvoice\\Connector\\": ""
+    }
+  }
+}

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to commercial source code license 
+ * of StoreFront Consulting, Inc.
+ *
+ * @package        Bazaarvoice_Connector
+ * @copyright    (C)Copyright 2016 StoreFront Consulting, Inc (http://www.StoreFrontConsulting.com/)
+ * @author        Dennis Rogers <dennis@storefrontconsulting.com>
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="after.body.start">
+            <block class="Bazaarvoice\Connector\Block\Reviews" name="bazaarvoice.header" as="bv_header" template="Bazaarvoice_Connector::header.phtml" />
+        </referenceContainer>
+    </body>
+</page>

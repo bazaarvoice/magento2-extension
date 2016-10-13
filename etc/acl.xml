@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Magento_Backend::stores">
+                    <resource id="Magento_Backend::stores_settings">
+                        <resource id="Magento_Config::config">
+                            <!-- this resource id we can use in system.xml for section -->
+                            <resource id="Bazaarvoice_Connector::config_bazaarvoice" title="Bazaarvoice Connector" sortOrder="80" />
+                        </resource>
+                    </resource>
+                </resource>
+            </resource>
+            <resource id="Magento_Catalog::index" title="Catalog" sortOrder="40">
+                <resource id="Bazaarvoice_Connector::index" title="Bazaarvoice Product Feed" sortOrder="10" />
+            </resource>
+        </resources>
+    </acl>
+</config>

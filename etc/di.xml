@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    
+    <!-- block injection -->
+    <!-- inline ratings -->
+    <type name="Magento\Catalog\Block\Product\ListProduct">
+        <plugin name="bazaarvoice-category" type="Bazaarvoice\Connector\Block\ProductList\Category" sortOrder="100"/>
+    </type>
+    <type name="Magento\CatalogSearch\Block\SearchResult\ListProduct">
+        <plugin name="bazaarvoice-search" type="Bazaarvoice\Connector\Block\ProductList\Search" sortOrder="100"/>
+    </type>
+    <type name="Magento\Catalog\Block\Product\ProductList\Upsell">
+        <plugin name="bazaarvoice-upsell" type="Bazaarvoice\Connector\Block\ProductList\Upsell" sortOrder="100"/>
+    </type>
+    <type name="Magento\Catalog\Block\Product\ProductList\Related">
+        <plugin name="bazaarvoice-related" type="Bazaarvoice\Connector\Block\ProductList\Related" sortOrder="100"/>
+    </type>
+    <type name="Magento\Checkout\Block\Cart\Crosssell">
+        <plugin name="bazaarvoice-crosssell" type="Bazaarvoice\Connector\Block\ProductList\Crosssell" sortOrder="100"/>
+    </type>
+    <!-- success page -->
+    <type name="Magento\Checkout\Block\Onepage\Success">
+        <plugin name="bazaarvoice-roibeacon" type="Bazaarvoice\Connector\Block\RoiBeacon" sortOrder="100"/>
+    </type>
+
+    <!-- Admin Grid -->
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="bv_index_data_source" xsi:type="string">Bazaarvoice\Connector\Model\ResourceModel\Index\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="BvIndexGridDataProvider" type="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
+        <arguments>
+            <argument name="collection" xsi:type="object" shared="false">Bazaarvoice\Connector\Model\ResourceModel\Index\Collection</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Console commands -->
+    <type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="product" xsi:type="object">Bazaarvoice\Connector\Console\Command\Product</item>
+                <item name="export" xsi:type="object">Bazaarvoice\Connector\Console\Command\Export</item>
+                <item name="purchase" xsi:type="object">Bazaarvoice\Connector\Console\Command\Purchase</item>
+                <item name="index" xsi:type="object">Bazaarvoice\Connector\Console\Command\Index</item>
+            </argument>
+        </arguments>
+    </type>
+    
+    <!-- Logging -->
+    <type name="Bazaarvoice\Connector\Logger\Handler">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </type>
+    <type name="Bazaarvoice\Connector\Logger\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">bvLogger</argument>
+            <argument name="handlers"  xsi:type="array">
+                <item name="system" xsi:type="object">Bazaarvoice\Connector\Logger\Handler</item>
+            </argument>
+        </arguments>
+    </type>    
+</config>
