@@ -40,7 +40,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         }
 
-        if (version_compare($context->getVersion(), '7.0.1') < 0) {
+        if (version_compare($context->getVersion(), '7.0.1.1') < 0) {
 
             $table = $setup->getTable('bazaarvoice_index_product');
 
