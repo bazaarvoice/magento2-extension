@@ -90,10 +90,15 @@ class Data extends AbstractHelper
      */
     public function getProductId($product)
     {
+        /**
+         * Disabling this code which allowed getProductId to accept a
+         * product ID instead of sku.
+         * It causes a bug with numeric skus.
         if (is_numeric($product)) {
             $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-            $product = $objectManager->get('Magento\Catalog\Model\Product')->load($product);    
+            $product = $objectManager->get('Magento\Catalog\Model\Product')->load($product);
         }
+         * */
 
         if (is_object($product))
             $rawProductId = $product->getSku();
@@ -103,7 +108,7 @@ class Data extends AbstractHelper
         /** Customizations go here */
         $rawProductId = preg_replace_callback('/\./s', create_function('$match', 'return "_bv".ord($match[0])."_";'), $rawProductId);
         /** No further customizations after this */
-        
+
         return $this->replaceIllegalCharacters($rawProductId);
     }
     
