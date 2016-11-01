@@ -458,7 +458,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
         $select->where('p.entity_id IN(?)', $productIds)->group('p.entity_id');
 
-        /** $this->logger->debug($select->__toString()); */
+        /** $this->_logger->debug($select->__toString()); */
 
         try {
             $rows = $select->query();
