@@ -13,7 +13,8 @@
  * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
  * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
  */ ?>
-<?php if ($this->isEnabled()): ?>
+<?php /** @var \Bazaarvoice\Connector\Block\Questions $this */ ?>
+<?php if ($this->canShow('qa')): ?>
 <?php
 $doShowContentJs = $this->getConfig('qa/do_show_content_js');
 $seoContent = $this->getSEOContent();
