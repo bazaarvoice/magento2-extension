@@ -62,7 +62,12 @@ class Product extends \Magento\Framework\View\Element\Template
 
     public function isEnabled()
     {
-        return $this->getConfig('general/enable_bv') == 1;
+        return $this->getConfig('general/enable_bv');
+    }
+
+    public function canShow($type)
+    {
+        return $this->isEnabled() && $this->getConfig($type.'/enable_'.$type);
     }
 
     /**

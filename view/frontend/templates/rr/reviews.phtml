@@ -14,7 +14,7 @@
  * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
  */ ?>
 <?php /** @var \Bazaarvoice\Connector\Block\Reviews $this */ ?>
-<?php if ($this->isEnabled()): ?>
+<?php if ($this->canShow('rr')): ?>
 <?php
 $doShowContentJs = $this->getConfig('rr/do_show_content_js');
 $seoContent = $this->getSEOContent();
