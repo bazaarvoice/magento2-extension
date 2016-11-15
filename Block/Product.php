@@ -84,7 +84,7 @@ class Product extends \Magento\Framework\View\Element\Template
     public function getProductSku()
     {
         if ($this->getProductId())
-            return $this->helper->getProductId($this->getProductId());
+            return $this->helper->getProductId($this->getProduct()->getSku());
         return '';
     }
 
