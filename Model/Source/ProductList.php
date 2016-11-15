@@ -29,6 +29,10 @@ class ProductList
     {
         return array(
             array(
+                'value' => '',
+                'label' => __('None')
+            ),
+            array(
                 'value' => self::CATEGORY,
                 'label' => __('Category Pages')
             ),
