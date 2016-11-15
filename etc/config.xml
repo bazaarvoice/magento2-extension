@@ -9,6 +9,7 @@
             <rr>
                 <enable_rr>1</enable_rr>
                 <inline_ratings>category,search</inline_ratings>
+                <container>1</container>
             </rr>
             <qa>
                 <enable_qa>1</enable_qa>
