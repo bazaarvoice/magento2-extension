@@ -65,7 +65,7 @@
                 <field id="container" translate="label" type="select" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Use Submission Container Page</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment><![CDATA[Turn on BV submission container page.]]></comment>
+                    <comment><![CDATA[Turn on BV mobile-friendly submission container page. This replaces the lightbox review submission form on mobile devices. (Container URL: {site url}/bazaarvoice/submission/container)]]></comment>
                 </field>
                 <field id="do_show_content_js" translate="label" type="textarea" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>JS Callback function to display R&amp;R content (doShowContent)</label>
