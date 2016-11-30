@@ -1,5 +1,5 @@
 {
-  "name": "bazaarvoice/connector",
+  "name": "bazaarvoice/bazaarvoice-magento2-ext",
   "description": "Bazaarvoice Connector",
   "type": "magento2-module",
   "license": [ "MIT" ],
@@ -9,7 +9,7 @@
       "email": "dennis@storefrontconsulting.com"
     }
   ],
-  "version": "7.0.1.2",
+  "version": "7.0.1.3",
   "autoload": {
     "files": [
       "registration.php"

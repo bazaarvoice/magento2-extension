@@ -19,7 +19,7 @@ namespace Bazaarvoice\Connector\Block;
 
 use \Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 
-class RoiBeacon
+class Pixel
 {
 
     /**
@@ -41,7 +41,7 @@ class RoiBeacon
     public function afterToHtml(/** @noinspection PhpUnusedParameterInspection */ $subject, $result)
     {
         /** @codingStandardsIgnoreEnd */
-        if ($this->helper->getConfig('general/enable_roibeacon') != true)
+        if ($this->helper->getConfig('general/enable_bvpixel') != true)
             return $result;
 
         /** @var \Magento\Sales\Model\Order $order */
