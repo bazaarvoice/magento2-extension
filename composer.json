@@ -1,5 +1,5 @@
 {
-  "name": "bazaarvoice/connector",
+  "name": "bazaarvoice/bazaarvoice-magento2-ext",
   "description": "Bazaarvoice Connector",
   "type": "magento2-module",
   "license": [ "MIT" ],
