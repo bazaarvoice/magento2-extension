@@ -17,6 +17,7 @@
 
 namespace Bazaarvoice\Connector\Setup;
 
+use Magento\Framework\App\State;
 use Magento\Framework\Setup;
 use Magento\Framework\ObjectManagerInterface;
 use Bazaarvoice\Connector;
@@ -39,25 +40,28 @@ class InstallData implements Setup\InstallDataInterface
     /** @var ObjectManagerInterface */
     protected $_objectManager;
 
+    /** @var  State */
+    protected $_state;
+
     /**
      * Init
      *
      * @param SalesSetupFactory $salesSetupFactory
      * @param CategorySetupFactory $categorySetupFactory
      * @param ObjectManagerInterface $objectManger
-     * @param \Magento\Framework\App\State $state
+     * @param State $state
      */
     public function __construct(
         SalesSetupFactory $salesSetupFactory,
         CategorySetupFactory $categorySetupFactory,
         ObjectManagerInterface $objectManger,
-        \Magento\Framework\App\State $state
+        State $state
     )
     {
         $this->_salesSetupFactory = $salesSetupFactory;
         $this->_categorySetupFactory = $categorySetupFactory;
         $this->_objectManager = $objectManger;
-        $state->setAreaCode('frontend');
+        $this->_state = $state;
     }
 
 
@@ -68,6 +72,10 @@ class InstallData implements Setup\InstallDataInterface
     public function install(Setup\ModuleDataSetupInterface $setup, Setup\ModuleContextInterface $context)
     {
         // @codingStandardsIgnoreEnd
+        if (!$this->_state->getAreaCode()) {
+            $this->_state->setAreaCode('frontend');
+        }
+
         /** @var SalesSetup $eavSetup */
         $eavSetup = $this->_salesSetupFactory->create(['setup' => $setup]);
 
