@@ -32,7 +32,7 @@ class ProductFeed extends Feed
 {
     
     const INCLUDE_IN_FEED_FLAG = 'bv_feed_exclude';
-    const FEED_FILE_XSD = 'http://www.bazaarvoice.com/xs/PRR/ProductFeed/5.6';
+    const FEED_FILE_XSD = 'http://www.bazaarvoice.com/xs/PRR/ProductFeed/14.4';
 
     protected $_typeId = 'product';
 
