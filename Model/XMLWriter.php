@@ -21,6 +21,7 @@ class XMLWriter extends \XMLWriter
 {
     public function writeElement($name, $content = null, $cdata = false)
     {
+    	$content = trim($content);
         if ($cdata) {
             $this->startElement($name);
             $this->writeCdata($content);
@@ -32,6 +33,7 @@ class XMLWriter extends \XMLWriter
 
     public function writeRaw($content = null, $cdata = false)
     {
+	    $content = trim($content);
         if ($cdata) {
             $this->writeCdata($content);
         } else {

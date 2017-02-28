@@ -146,6 +146,8 @@ class Product extends Generic
             $values = $product->getData($code);
             if (!empty($values)) {
                 $this->_writer->startElement($label . 's');
+                if(is_string($values) && strpos($values, ','))
+                	$values = explode(',', $values);
                 if (is_array($values)) {
                     foreach ($values as $value) {
                         $this->_writer->writeElement($label, $value);
