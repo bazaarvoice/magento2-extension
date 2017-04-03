@@ -30,7 +30,7 @@ use Magento\Store\Model\Website;
 
 class ProductFeed extends Feed
 {
-    
+
     const INCLUDE_IN_FEED_FLAG = 'bv_feed_exclude';
     const FEED_FILE_XSD = 'http://www.bazaarvoice.com/xs/PRR/ProductFeed/14.4';
 
@@ -42,6 +42,7 @@ class ProductFeed extends Feed
 
     /**
      * ProductFeed constructor.
+     *
      * @param Logger $logger
      * @param Data $helper
      * @param ObjectManagerInterface $objectManager
@@ -49,15 +50,21 @@ class ProductFeed extends Feed
      * @param Category $category
      * @param Product $product
      */
-    public function __construct(Logger $logger, Data $helper, ObjectManagerInterface $objectManager, Brand $brand, Category $category, Product $product)
-    {
+    public function __construct(
+        Logger $logger,
+        Data $helper,
+        ObjectManagerInterface $objectManager,
+        \Magento\Framework\Filesystem\Io\SftpFactory $sftpFactory,
+        Brand $brand,
+        Category $category,
+        Product $product
+    ) {
         $this->_brand = $brand;
         $this->_category = $category;
         $this->_product = $product;
 
-        parent::__construct($logger, $helper, $objectManager);
+        parent::__construct($logger, $helper, $objectManager, $sftpFactory);
     }
-
 
     /**
      * @param Store $store
@@ -140,7 +147,9 @@ class ProductFeed extends Feed
 
     /**
      * Get custom configured attributes
+     *
      * @param string $type
+     *
      * @return string
      */
     public function getAttributeCode($type)
@@ -150,6 +159,7 @@ class ProductFeed extends Feed
 
     /**
      * @param Store $store
+     *
      * @return XMLWriter
      */
     protected function openProductFile($store)
@@ -160,13 +170,14 @@ class ProductFeed extends Feed
 
         /** Create varien io object and write local feed file */
         $writer = parent::openFile(self::FEED_FILE_XSD, $clientName);
+
         return $writer;
     }
 
     /**
      * @param \Bazaarvoice\Connector\Model\XMLWriter $writer
-     * @param String $scopeId ID of current scope, store website or group
-     * @param Store $store Config store for destination paths
+     * @param String                                 $scopeId ID of current scope, store website or group
+     * @param Store                                  $store   Config store for destination paths
      */
     protected function closeAndUploadFile($writer, $scopeId, $store)
     {
@@ -182,10 +193,9 @@ class ProductFeed extends Feed
 
         /** Upload feed */
         $destinationFile = $this->helper->getConfig('feeds/product_path', $store->getId()) . '/' .
-            $this->helper->getConfig('feeds/product_filename', $store->getId());
+                           $this->helper->getConfig('feeds/product_filename', $store->getId());
         $this->uploadFeed($productFeedFileName, $destinationFile, $store);
     }
-
 
 }
 

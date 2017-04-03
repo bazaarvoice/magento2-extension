@@ -36,23 +36,30 @@ class Feed
     protected $_force;
     protected $_typeId;
     protected $_families;
+    /**
+     * @var \Magento\Framework\Filesystem\Io\SftpFactory
+     */
+    private $sftpFactory;
 
     /**
      * Constructor
-     * @param \Bazaarvoice\Connector\Logger\Logger $logger
-     * @param \Bazaarvoice\Connector\Helper\Data $helper
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
+     *
+     * @param \Bazaarvoice\Connector\Logger\Logger         $logger
+     * @param \Bazaarvoice\Connector\Helper\Data           $helper
+     * @param \Magento\Framework\ObjectManagerInterface    $objectManager
+     * @param \Magento\Framework\Filesystem\Io\SftpFactory $sftpFactory
      */
     public function __construct(
         Logger $logger,
         Data $helper,
-        ObjectManagerInterface $objectManager
-    )
-    {
+        ObjectManagerInterface $objectManager,
+        \Magento\Framework\Filesystem\Io\SftpFactory $sftpFactory
+    ) {
         $this->helper = $helper;
         $this->logger = $logger;
         $this->_objectManager = $objectManager;
         $this->_families = $helper->getConfig('general/families');
+        $this->sftpFactory = $sftpFactory;
     }
 
     public function generateFeed($test = false, $force = false)
@@ -68,7 +75,7 @@ class Feed
         $this->_force = $force;
 
         try {
-            switch($this->helper->getConfig('feeds/generation_scope')) {
+            switch ($this->helper->getConfig('feeds/generation_scope')) {
                 case Scope::STORE_GROUP:
                     $this->exportFeedByStoreGroup();
                     break;
@@ -83,7 +90,7 @@ class Feed
                     break;
             }
         } Catch (\Exception $e) {
-            $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+            $this->logger->crit($e->getMessage() . "\n" . $e->getTraceAsString());
         }
         $this->log('End Bazaarvoice ' . $this->_typeId . ' Feed Generation');
     }
@@ -98,18 +105,16 @@ class Feed
             /* @var \Magento\Store\Model\Store $store */
             try {
                 if ($this->_force || $this->helper->getConfig('feeds/enable_' . $this->_typeId . '_feed', $store->getId()) === '1'
-                    && $this->helper->getConfig('general/enable_bv', $store->getId()) === '1'
+                                     && $this->helper->getConfig('general/enable_bv', $store->getId()) === '1'
                 ) {
                     $this->log('Exporting ' . $this->_typeId . ' feed for store: ' . $store->getCode());
                     $this->exportFeedForStore($store);
-                }
-                else {
+                } else {
                     $this->log(ucwords($this->_typeId) . ' feed disabled for store: ' . $store->getCode());
                 }
-            }
-            catch (\Exception $e) {
+            } catch (\Exception $e) {
                 $this->logger->error('Failed to export daily ' . $this->_typeId . ' feed for store: ' . $store->getCode());
-                $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+                $this->logger->crit($e->getMessage() . "\n" . $e->getTraceAsString());
             }
         }
     }
@@ -126,18 +131,16 @@ class Feed
             $store = $storeGroup->getDefaultStore();
             try {
                 if ($this->_force || $this->helper->getConfig('feeds/enable_' . $this->_typeId . '_feed', $store->getId()) === '1'
-                    && $this->helper->getConfig('general/enable_bv', $store->getId()) === '1'
+                                     && $this->helper->getConfig('general/enable_bv', $store->getId()) === '1'
                 ) {
                     $this->log('Exporting ' . $this->_typeId . ' feed for store group: ' . $storeGroup->getName());
                     $this->exportFeedForStoreGroup($storeGroup);
-                }
-                else {
+                } else {
                     $this->log(ucwords($this->_typeId) . ' feed disabled for store group: ' . $storeGroup->getName());
                 }
-            }
-            catch (\Exception $e) {
+            } catch (\Exception $e) {
                 $this->logger->error('Failed to export daily ' . $this->_typeId . ' feed for store group: ' . $storeGroup->getName());
-                $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+                $this->logger->crit($e->getMessage() . "\n" . $e->getTraceAsString());
             }
         }
     }
@@ -153,18 +156,16 @@ class Feed
             try {
                 if ($this->_force
                     || ($this->helper->getConfig('feeds/enable_' . $this->_typeId . '_feed', $website->getId(), ScopeInterface::SCOPE_WEBSITE) === '1'
-                    && $this->helper->getConfig('general/enable_bv', $website->getId(), ScopeInterface::SCOPE_WEBSITE) === '1')
+                        && $this->helper->getConfig('general/enable_bv', $website->getId(), ScopeInterface::SCOPE_WEBSITE) === '1')
                 ) {
                     $this->log('Exporting ' . $this->_typeId . ' feed for website: ' . $website->getName());
                     $this->exportFeedForWebsite($website);
-                }
-                else {
+                } else {
                     $this->log(ucwords($this->_typeId) . ' feed disabled for website: ' . $website->getName());
                 }
-            }
-            catch (\Exception $e) {
+            } catch (\Exception $e) {
                 $this->logger->error('Failed to export daily ' . $this->_typeId . ' feed for website: ' . $website->getName());
-                $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+                $this->logger->crit($e->getMessage() . "\n" . $e->getTraceAsString());
             }
         }
     }
@@ -175,47 +176,42 @@ class Feed
 
         try {
             if ($this->_force || $this->helper->getConfig('feeds/enable_' . $this->_typeId . '_feed', 0) === '1'
-                && $this->helper->getConfig('general/enable_bv', 0) === '1'
+                                 && $this->helper->getConfig('general/enable_bv', 0) === '1'
             ) {
                 $this->exportFeedForGlobal();
-            }
-            else {
+            } else {
                 $this->log(ucwords($this->_typeId) . ' feed disabled.');
             }
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             $this->logger->error('Failed to export daily ' . $this->_typeId . ' feed.');
-            $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+            $this->logger->crit($e->getMessage() . "\n" . $e->getTraceAsString());
         }
     }
 
     public function exportFeedForStore(Store $store)
     {
-
     }
 
     public function exportFeedForStoreGroup(Group $storeGroup)
     {
-
     }
 
     public function exportFeedForWebsite(Website $website)
     {
-
     }
 
     public function exportFeedForGlobal()
     {
-
     }
 
     /**
-     * @param String $xmlns Bazaarvoice Feed xsd reference
+     * @param String $xmlns      Bazaarvoice Feed xsd reference
      * @param String $clientName Bazaarvoice Client name
+     *
      * @return \Bazaarvoice\Connector\Model\XMLWriter
      */
     protected function openFile($xmlns, $clientName)
-    {   
+    {
         $writer = $this->_objectManager->create('\Bazaarvoice\Connector\Model\XMLWriter');
         $writer->openMemory();
         $writer->setIndent(true);
@@ -228,46 +224,46 @@ class Feed
         $writer->writeAttribute('incremental', 'false');
         $writer->writeAttribute('extractDate', date('Y-m-d\Th:i:s.u'));
         $writer->writeAttribute('generator', 'Magento Extension r' . $this->helper->getExtensionVersion());
-        
+
         return $writer;
     }
 
     /**
      * @param \Bazaarvoice\Connector\Model\XMLWriter $writer
-     * @param String $filename
+     * @param String                                 $filename
      */
     protected function closeFile($writer, $filename)
     {
         $writer->endElement();
         $writer->endDocument();
-                
+
         $ioObject = $this->_objectManager->get('Magento\Framework\Filesystem\Io\File');
-        
+
         $ioObject->setAllowCreateFolders(true);
-        $ioObject->open(array('path' => dirname($filename)));
+        $ioObject->open(['path' => dirname($filename)]);
         $ioObject->write($filename, $writer->outputMemory());
     }
 
     /**
-     * @param $sourceFile
-     * @param $destinationFile
+     * @param       $sourceFile
+     * @param       $destinationFile
      * @param Store $store
      */
     protected function uploadFeed($sourceFile, $destinationFile, $store = null)
     {
         $this->log('Uploading file');
         $this->log('Local file ' . basename($sourceFile));
-        $this->log('Remote file ' . $this->getSFTPHost($store).$destinationFile);
+        $this->log('Remote file ' . $this->getSFTPHost($store) . $destinationFile);
 
-        $params = array(
-            'host'      => $this->getSFTPHost($store),
-            'username'  => $this->helper->getConfig('feeds/sftp_username', $store),
-            'password'  => $this->helper->getConfig('feeds/sftp_password', $store)
-        );
+        $params = [
+            'host'     => $this->getSFTPHost($store),
+            'username' => $this->helper->getConfig('feeds/sftp_username', $store),
+            'password' => $this->helper->getConfig('feeds/sftp_password', $store),
+        ];
         $this->log('Username ' . $params['username']);
 
         /** @var Sftp $sftp */
-        $sftp = new Sftp();
+        $sftp = $this->sftpFactory->create();
         $sftp->open($params);
 
         $result = $sftp->write($destinationFile, $sourceFile);
@@ -279,13 +275,14 @@ class Feed
             $sentFile = dirname($sourceFile) . '/sent/' . basename($sourceFile);
 
             $ioObject->setAllowCreateFolders(true);
-            $ioObject->open(array('path' => dirname($sentFile)));
+            $ioObject->open(['path' => dirname($sentFile)]);
             $ioObject->mv($sourceFile, $sentFile);
         }
     }
 
     /**
      * @param Store $store
+     *
      * @return string
      * If sftp host is set in config, use that.
      * Else use preset hosts based on staging or production mode.
@@ -297,16 +294,16 @@ class Feed
 
         if ($environment == Environment::STAGING) {
             $sftpHost = $hostSelection . '-stg.bazaarvoice.com';
-        }
-        else {
+        } else {
             $sftpHost = $hostSelection . '.bazaarvoice.com';
         }
+
         return $sftpHost;
     }
-    
+
     public function log($message)
     {
-        echo $message."\n";
+        echo $message . "\n";
         $this->logger->info($message);
     }
 
