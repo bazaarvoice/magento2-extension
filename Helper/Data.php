@@ -114,7 +114,7 @@ class Data extends AbstractHelper
     
     /**
      * This unique ID can only contain alphanumeric characters (letters and numbers
-     * only) and also the asterisk, hyphen, period, and underscore characters. If your
+     * only) and also the asterisk, hyphen, and underscore characters. If your
      * product IDs contain invalid characters, simply replace them with an alternate
      * character like an underscore. This will only be used in the feed and not for
      * any customer facing purpose.
@@ -131,7 +131,7 @@ class Data extends AbstractHelper
          * Example encoded = qwerty_bv36__bv37__bv64__bv35_asdf
          */
 
-        return preg_replace_callback('/[^\w\d\*-\._]/s', create_function('$match', 'return "_bv".ord($match[0])."_";'), $rawId);
+        return preg_replace_callback('/[^\w\d\*-\-_]/s', create_function('$match', 'return "_bv".ord($match[0])."_";'), $rawId);
     }
 
 

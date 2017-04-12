@@ -84,6 +84,7 @@ class Generic
             $rawCategoryId = $category->getUrlPath();
 
             $rawCategoryId = str_replace('/', '-', $rawCategoryId);
+            $rawCategoryId = str_replace('.html', '', $rawCategoryId);
             return $this->_helper->replaceIllegalCharacters($rawCategoryId);
         }
     }
