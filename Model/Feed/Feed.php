@@ -17,11 +17,8 @@
 
 namespace Bazaarvoice\Connector\Model\Feed;
 
-use Bazaarvoice\Connector\Logger\Logger;
-use Bazaarvoice\Connector\Helper\Data;
 use Bazaarvoice\Connector\Model\Source\Environment;
 use Bazaarvoice\Connector\Model\Source\Scope;
-use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Filesystem\Io\Sftp;
 use Magento\Store\Model\Group;
 use Magento\Store\Model\ScopeInterface;
@@ -50,9 +47,9 @@ class Feed
      * @param \Magento\Framework\Filesystem\Io\SftpFactory $sftpFactory
      */
     public function __construct(
-        Logger $logger,
-        Data $helper,
-        ObjectManagerInterface $objectManager,
+        \Bazaarvoice\Connector\Logger\Logger $logger,
+        \Bazaarvoice\Connector\Helper\Data $helper,
+        \Magento\Framework\ObjectManagerInterface $objectManager,
         \Magento\Framework\Filesystem\Io\SftpFactory $sftpFactory
     ) {
         $this->helper = $helper;
@@ -204,6 +201,12 @@ class Feed
     {
     }
 
+    public function log($message)
+    {
+        echo $message . "\n";
+        $this->logger->info($message);
+    }
+
     /**
      * @param String $xmlns      Bazaarvoice Feed xsd reference
      * @param String $clientName Bazaarvoice Client name
@@ -299,12 +302,6 @@ class Feed
         }
 
         return $sftpHost;
-    }
-
-    public function log($message)
-    {
-        echo $message . "\n";
-        $this->logger->info($message);
     }
 
 }

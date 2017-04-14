@@ -28,14 +28,16 @@ class Item extends \Bazaarvoice\Connector\Block\Product
     public function isEnabled()
     {
         $typesEnabled = explode(',', $this->getConfig('rr/inline_ratings'));
+
         return in_array($this->_type, $typesEnabled);
     }
 
     // @codingStandardsIgnoreStart
     public function beforeGetProductPrice(
         /** @noinspection PhpUnusedParameterInspection */
-        $subject, $product)
-    {
+        $subject,
+        $product
+    ) {
         // @codingStandardsIgnoreEnd
         if ($this->isEnabled()) {
             $this->_product = $product;
@@ -45,21 +47,25 @@ class Item extends \Bazaarvoice\Connector\Block\Product
     // @codingStandardsIgnoreStart
     public function afterGetProductPrice(
         /** @noinspection PhpUnusedParameterInspection */
-        $subject, $result)
-    {
+        $subject,
+        $result
+    ) {
         // @codingStandardsIgnoreEnd
         if ($this->isEnabled()) {
             $productIdentifier = $this->helper->getProductId($this->_product);
-            $this->_productIds[$productIdentifier] = array('url' => $this->_product->getProductUrl());
+            $this->_productIds[$productIdentifier] = ['url' => $this->_product->getProductUrl()];
             $result = '<div id="BVRRInlineRating_' . $this->_type . '-' . $productIdentifier . '"></div>' . $result;
         }
+
         return $result;
     }
 
     // @codingStandardsIgnoreStart
-    public function afterToHtml(/** @noinspection PhpUnusedParameterInspection */
-        $subject, $result)
-    {
+    public function afterToHtml(
+        /** @noinspection PhpUnusedParameterInspection */
+        $subject,
+        $result
+    ) {
         // @codingStandardsIgnoreEnd
         if ($this->isEnabled() && count($this->_productIds)) {
             $result .= '
@@ -67,10 +73,11 @@ class Item extends \Bazaarvoice\Connector\Block\Product
 <script type="text/javascript">
             $BV.ui("rr", "inline_ratings", {
                 productIds: ' . json_encode($this->_productIds) . ',
-                containerPrefix : "BVRRInlineRating_' . $this->_type .'" 
+                containerPrefix : "BVRRInlineRating_' . $this->_type . '" 
             });
             </script>';
         }
+
         return $result;
     }
 }

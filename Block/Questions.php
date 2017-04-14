@@ -17,7 +17,7 @@
 
 namespace Bazaarvoice\Connector\Block;
 
-use \Bazaarvoice\Connector\Helper\Seosdk;
+use Bazaarvoice\Connector\Helper\Seosdk;
 
 class Questions extends Product
 {
@@ -31,8 +31,7 @@ class Questions extends Product
                 $deploymentZoneId =
                     $this->getConfig('bv_config/display_code') .
                     '-' . $this->getConfig('general/locale');
-            }
-            else {
+            } else {
                 $deploymentZoneId =
                     str_replace(' ', '_', $this->getConfig('general/deployment_zone')) .
                     '-' . $this->getConfig('general/locale');
@@ -53,20 +52,24 @@ class Questions extends Product
 
             $this->_logger->debug($baseUrl);
 
-            $params = array(
-                'seo_sdk_enabled' => TRUE,
-                'bv_root_folder' => $deploymentZoneId, /** replace with your display code (BV provided) */
-                'subject_id' => $this->getHelper()->getProductId($product), /** replace with product id */
-                'cloud_key' => $this->getConfig('general/cloud_seo_key'), /** BV provided value */
-                'base_url' => $baseUrl,
-                'page_url' => $productUrl,
-                'staging' => ($this->getConfig('general/environment') == 'staging' ? TRUE : FALSE)
-            );
+            $params = [
+                'seo_sdk_enabled' => true,
+                'bv_root_folder'  => $deploymentZoneId,
+                /** replace with your display code (BV provided) */
+                'subject_id'      => $this->getHelper()->getProductId($product),
+                /** replace with product id */
+                'cloud_key'       => $this->getConfig('general/cloud_seo_key'),
+                /** BV provided value */
+                'base_url'        => $baseUrl,
+                'page_url'        => $productUrl,
+                'staging'         => ($this->getConfig('general/environment') == 'staging' ? true : false),
+            ];
 
 
             $requestInterface = \Magento\Framework\App\ObjectManager::getInstance()->get('Magento\Framework\App\RequestInterface');
-            if ($requestInterface->getParam('bvreveal') == 'debug')
+            if ($requestInterface->getParam('bvreveal') == 'debug') {
                 $params['bvreveal'] = 'debug';
+            }
 
             $bv = new Seosdk($params);
             $seoContent = $bv->questions->getContent();

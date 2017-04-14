@@ -17,15 +17,9 @@
 
 namespace Bazaarvoice\Connector\Model\Feed;
 
-use Bazaarvoice\Connector\Helper\Data;
-use Bazaarvoice\Connector\Logger\Logger;
-use Bazaarvoice\Connector\Model\Feed\Product\Brand;
-use Bazaarvoice\Connector\Model\Feed\Product\Category;
-use Bazaarvoice\Connector\Model\Feed\Product\Product;
 use Bazaarvoice\Connector\Model\XMLWriter;
-use Magento\Framework\ObjectManagerInterface;
 use Magento\Store\Model\Group;
-use \Magento\Store\Model\Store;
+use Magento\Store\Model\Store;
 use Magento\Store\Model\Website;
 
 class ProductFeed extends Feed
@@ -43,21 +37,22 @@ class ProductFeed extends Feed
     /**
      * ProductFeed constructor.
      *
-     * @param Logger $logger
-     * @param Data $helper
-     * @param ObjectManagerInterface $objectManager
-     * @param Brand $brand
-     * @param Category $category
-     * @param Product $product
+     * @param \Bazaarvoice\Connector\Logger\Logger               $logger
+     * @param \Bazaarvoice\Connector\Helper\Data                 $helper
+     * @param \Magento\Framework\ObjectManagerInterface          $objectManager
+     * @param \Magento\Framework\Filesystem\Io\SftpFactory       $sftpFactory
+     * @param \Bazaarvoice\Connector\Model\Feed\Product\Brand    $brand
+     * @param \Bazaarvoice\Connector\Model\Feed\Product\Category $category
+     * @param \Bazaarvoice\Connector\Model\Feed\Product\Product  $product
      */
     public function __construct(
-        Logger $logger,
-        Data $helper,
-        ObjectManagerInterface $objectManager,
+        \Bazaarvoice\Connector\Logger\Logger $logger,
+        \Bazaarvoice\Connector\Helper\Data $helper,
+        \Magento\Framework\ObjectManagerInterface $objectManager,
         \Magento\Framework\Filesystem\Io\SftpFactory $sftpFactory,
-        Brand $brand,
-        Category $category,
-        Product $product
+        \Bazaarvoice\Connector\Model\Feed\Product\Brand $brand,
+        \Bazaarvoice\Connector\Model\Feed\Product\Category $category,
+        \Bazaarvoice\Connector\Model\Feed\Product\Product $product
     ) {
         $this->_brand = $brand;
         $this->_category = $category;

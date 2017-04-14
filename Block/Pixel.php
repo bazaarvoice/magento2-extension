@@ -17,7 +17,7 @@
 
 namespace Bazaarvoice\Connector\Block;
 
-use \Magento\ConfigurableProduct\Model\Product\Type\Configurable;
+use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 
 class Pixel
 {
@@ -30,24 +30,28 @@ class Pixel
     public function __construct(
         \Bazaarvoice\Connector\Helper\Data $helper,
         \Magento\Checkout\Model\Session $checkoutSession,
-        \Magento\Framework\ObjectManagerInterface $objectManager)
-    {
+        \Magento\Framework\ObjectManagerInterface $objectManager
+    ) {
         $this->helper = $helper;
         $this->checkoutSession = $checkoutSession;
         $this->objectManager = $objectManager;
     }
 
     /** @codingStandardsIgnoreStart */
-    public function afterToHtml(/** @noinspection PhpUnusedParameterInspection */ $subject, $result)
-    {
+    public function afterToHtml(
+        /** @noinspection PhpUnusedParameterInspection */
+        $subject,
+        $result
+    ) {
         /** @codingStandardsIgnoreEnd */
-        if ($this->helper->getConfig('general/enable_bvpixel') != true)
+        if ($this->helper->getConfig('general/enable_bvpixel') != true) {
             return $result;
+        }
 
         /** @var \Magento\Sales\Model\Order $order */
         $order = $this->checkoutSession->getLastRealOrder();
 
-        $orderDetails = array();
+        $orderDetails = [];
 
         $address = $order->getBillingAddress();
 
@@ -62,7 +66,7 @@ class Pixel
         $orderDetails['country'] = $address->getCountryId();
         $orderDetails['currency'] = $order->getOrderCurrencyCode();
 
-        $orderDetails['items'] = array();
+        $orderDetails['items'] = [];
         /** if families are enabled, get all items */
         if ($this->helper->getConfig('general/families')) {
             $items = $order->getAllItems();
@@ -76,9 +80,12 @@ class Pixel
             /** skip configurable items if families are enabled */
             if (
                 $this->helper->getConfig('general/families')
-                && $product->getTypeId() == Configurable::TYPE_CODE) continue;
+                && $product->getTypeId() == Configurable::TYPE_CODE
+            ) {
+                continue;
+            }
 
-            $itemDetails = array();
+            $itemDetails = [];
             $itemDetails['sku'] = $this->helper->getProductId($product);
             $itemDetails['name'] = $item->getName();
             /** 'category' is not included.  Mage products can be in 0 - many categories.  Should we try to include it? */
