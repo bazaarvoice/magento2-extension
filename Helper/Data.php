@@ -48,8 +48,6 @@ class Data extends AbstractHelper
      */
     public function getBvApiHostUrl($isStatic, $store = null)
     {
-        /** Build protocol based on current page */
-        $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != '') ? 'https' : 'http';
         /** Build hostname based on environment setting */
         $environment = $this->getConfig('general/environment', $store);
         if ($environment == 'staging') {
@@ -72,7 +70,7 @@ class Data extends AbstractHelper
         /** Note that this doesn't use Magento's locale, this will allow clients to override this and map it as they see fit */
         $localeCode = $this->getConfig('general/locale', $store);
         /** Build url string */
-        $url = $protocol . '://' . $apiHostname . '/' . $static . $clientName . '/' . urlencode($deploymentZoneName) . '/' . $localeCode;
+        $url = '//' . $apiHostname . '/' . $static . $clientName . '/' . urlencode($deploymentZoneName) . '/' . $localeCode;
         /** Return final url */
         return $url;
     }
