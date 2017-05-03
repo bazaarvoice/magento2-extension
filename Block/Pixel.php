@@ -37,11 +37,17 @@ class Pixel
         $this->objectManager = $objectManager;
     }
 
-    /** @codingStandardsIgnoreStart */
+    /** @codingStandardsIgnoreStart
+     * @param \Magento\Checkout\Block\Onepage\Success $subject
+     * @param $result
+     * @return string
+     */
     public function afterToHtml(/** @noinspection PhpUnusedParameterInspection */ $subject, $result)
     {
         /** @codingStandardsIgnoreEnd */
-        if ($this->helper->getConfig('general/enable_bvpixel') != true)
+        if (
+            $subject->getNameInLayout() != 'checkout.success'
+            || $this->helper->getConfig('general/enable_bvpixel') != true)
             return $result;
 
         /** @var \Magento\Sales\Model\Order $order */
@@ -51,16 +57,17 @@ class Pixel
 
         $address = $order->getBillingAddress();
 
+        $orderDetails['currency'] = $order->getOrderCurrencyCode();
         $orderDetails['orderId'] = $order->getIncrementId();
+        $orderDetails['total'] = number_format($order->getGrandTotal(), 2, '.', '');
+
         $orderDetails['tax'] = number_format($order->getTaxAmount(), 2, '.', '');
         $orderDetails['shipping'] = number_format($order->getShippingAmount(), 2, '.', '');
-        $orderDetails['total'] = number_format($order->getGrandTotal(), 2, '.', '');
         $orderDetails['city'] = $address->getCity();
         /** @var \Magento\Directory\Model\Region $region */
         $region = $this->objectManager->get('\Magento\Directory\Model\Region');
         $orderDetails['state'] = $region->load($address->getRegionId())->getCode();
         $orderDetails['country'] = $address->getCountryId();
-        $orderDetails['currency'] = $order->getOrderCurrencyCode();
 
         $orderDetails['items'] = array();
         /** if families are enabled, get all items */
@@ -80,19 +87,20 @@ class Pixel
 
             $itemDetails = array();
             $itemDetails['sku'] = $this->helper->getProductId($product);
+
             $itemDetails['name'] = $item->getName();
             /** 'category' is not included.  Mage products can be in 0 - many categories.  Should we try to include it? */
             $itemDetails['price'] = number_format($item->getPrice(), 2, '.', '');
             $itemDetails['quantity'] = number_format($item->getQtyOrdered(), 0);
-            $itemDetails['imageUrl'] = $product->getStore()->getUrl() . 'pub/media/catalog/product' . $product->getImage();
+            $itemDetails['imageURL'] = $product->getStore()->getUrl() . 'pub/media/catalog/product' . $product->getImage();
 
             if ($this->helper->getConfig('general/families') && $item->getParentItem()) {
-                if (strpos($itemDetails['imageUrl'], 'placeholder/image.jpg')) {
+                if (strpos($itemDetails['imageURL'], 'placeholder/image.jpg')) {
                     /** if product families are enabled and product has no image, use configurable image */
                     $parentId = $item->getParentItem()->getProductId();
                     /** @var \Magento\Catalog\Model\Product $parent */
                     $parent = $this->objectManager->get('\Magento\Catalog\Model\Product')->load($parentId);
-                    $itemDetails['imageUrl'] = $parent->getStore()->getUrl() . 'pub/media/catalog/product' . $parent->getImage();
+                    $itemDetails['imageURL'] = $parent->getStore()->getUrl() . 'pub/media/catalog/product' . $parent->getImage();
                 }
                 /** also get price from parent item */
                 $itemDetails['price'] = number_format($item->getParentItem()->getPrice(), 2, '.', '');
@@ -100,7 +108,6 @@ class Pixel
 
             array_push($orderDetails['items'], $itemDetails);
         }
-
         if ($order->getCustomerId()) {
             $userId = $order->getCustomerId();
         } else {
@@ -114,10 +121,24 @@ class Pixel
 
         /** Add partnerSource field */
         $orderDetails['partnerSource'] = 'Magento Extension r' . $this->helper->getExtensionVersion();
+        $orderDetails['deploymentZone'] = $this->helper->getConfig('general/deployment_zone');
+
+        $loader = '<script src="//apps.bazaarvoice.com/deployments/'
+            . $this->helper->getConfig('general/client_name')
+            . '/' . strtolower(str_replace(' ', '_', $this->helper->getConfig('general/deployment_zone')))
+            . '/' . $this->helper->getConfig('general/environment')
+            . '/' . $this->helper->getConfig('general/locale')
+            . '/bv.js"></script>';
 
         $result .= '
+        <!--
+        ' . print_r($orderDetails, 1) . '
+        -->';
+        $result .= $loader."\n";
+        $result .= '
         <script type="text/javascript">
-        $BV.SI.trackTransactionPageView(' . json_encode($orderDetails, JSON_UNESCAPED_UNICODE) . '); 
+            var transactionData = ' . json_encode($orderDetails, JSON_UNESCAPED_UNICODE) . ';
+            BV.pixel.trackTransaction(transactionData);
         </script>';
 
         return $result;
