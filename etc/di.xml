@@ -62,5 +62,6 @@
                 <item name="system" xsi:type="object">Bazaarvoice\Connector\Logger\Handler</item>
             </argument>
         </arguments>
-    </type>    
+    </type>
+    <preference for="Magento\Framework\Filesystem\Io\Sftp" type="Bazaarvoice\Connector\Model\Filesystem\Io\Sftp"/>
 </config>

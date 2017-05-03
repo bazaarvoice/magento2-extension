@@ -25,12 +25,12 @@ class Logger extends \Monolog\Logger
 
     /**
      * Logger constructor.
+     * @param Data $helper
      * @param string $name
      * @param array|\Monolog\Handler\HandlerInterface[] $handlers
-     * @param Data $helper
      * @codingStandardsIgnoreStart
      */
-    public function __construct($name, array $handlers = array(), Data $helper)
+    public function __construct(\Bazaarvoice\Connector\Helper\Data $helper, $name, array $handlers = array())
     {
         /** @codingStandardsIgnoreEnd */
         $this->_helper = $helper;

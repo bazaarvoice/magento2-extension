@@ -14,6 +14,7 @@
  * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
  * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
  */
+
 namespace Bazaarvoice\Connector\Block\ProductList;
 
 class Category extends Item

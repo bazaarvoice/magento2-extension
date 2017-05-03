@@ -17,20 +17,14 @@
 
 namespace Bazaarvoice\Connector\Model\Feed;
 
-use Bazaarvoice\Connector\Helper\Data;
-use Bazaarvoice\Connector\Logger\Logger;
-use Bazaarvoice\Connector\Model\Feed\Product\Brand;
-use Bazaarvoice\Connector\Model\Feed\Product\Category;
-use Bazaarvoice\Connector\Model\Feed\Product\Product;
 use Bazaarvoice\Connector\Model\XMLWriter;
-use Magento\Framework\ObjectManagerInterface;
 use Magento\Store\Model\Group;
-use \Magento\Store\Model\Store;
+use Magento\Store\Model\Store;
 use Magento\Store\Model\Website;
 
 class ProductFeed extends Feed
 {
-    
+
     const INCLUDE_IN_FEED_FLAG = 'bv_feed_exclude';
     const FEED_FILE_XSD = 'http://www.bazaarvoice.com/xs/PRR/ProductFeed/14.4';
 
@@ -42,22 +36,30 @@ class ProductFeed extends Feed
 
     /**
      * ProductFeed constructor.
-     * @param Logger $logger
-     * @param Data $helper
-     * @param ObjectManagerInterface $objectManager
-     * @param Brand $brand
-     * @param Category $category
-     * @param Product $product
+     *
+     * @param \Bazaarvoice\Connector\Logger\Logger               $logger
+     * @param \Bazaarvoice\Connector\Helper\Data                 $helper
+     * @param \Magento\Framework\ObjectManagerInterface          $objectManager
+     * @param \Magento\Framework\Filesystem\Io\SftpFactory       $sftpFactory
+     * @param \Bazaarvoice\Connector\Model\Feed\Product\Brand    $brand
+     * @param \Bazaarvoice\Connector\Model\Feed\Product\Category $category
+     * @param \Bazaarvoice\Connector\Model\Feed\Product\Product  $product
      */
-    public function __construct(Logger $logger, Data $helper, ObjectManagerInterface $objectManager, Brand $brand, Category $category, Product $product)
-    {
+    public function __construct(
+        \Bazaarvoice\Connector\Logger\Logger $logger,
+        \Bazaarvoice\Connector\Helper\Data $helper,
+        \Magento\Framework\ObjectManagerInterface $objectManager,
+        \Magento\Framework\Filesystem\Io\SftpFactory $sftpFactory,
+        \Bazaarvoice\Connector\Model\Feed\Product\Brand $brand,
+        \Bazaarvoice\Connector\Model\Feed\Product\Category $category,
+        \Bazaarvoice\Connector\Model\Feed\Product\Product $product
+    ) {
         $this->_brand = $brand;
         $this->_category = $category;
         $this->_product = $product;
 
-        parent::__construct($logger, $helper, $objectManager);
+        parent::__construct($logger, $helper, $objectManager, $sftpFactory);
     }
-
 
     /**
      * @param Store $store
@@ -140,7 +142,9 @@ class ProductFeed extends Feed
 
     /**
      * Get custom configured attributes
+     *
      * @param string $type
+     *
      * @return string
      */
     public function getAttributeCode($type)
@@ -150,6 +154,7 @@ class ProductFeed extends Feed
 
     /**
      * @param Store $store
+     *
      * @return XMLWriter
      */
     protected function openProductFile($store)
@@ -160,13 +165,14 @@ class ProductFeed extends Feed
 
         /** Create varien io object and write local feed file */
         $writer = parent::openFile(self::FEED_FILE_XSD, $clientName);
+
         return $writer;
     }
 
     /**
      * @param \Bazaarvoice\Connector\Model\XMLWriter $writer
-     * @param String $scopeId ID of current scope, store website or group
-     * @param Store $store Config store for destination paths
+     * @param String                                 $scopeId ID of current scope, store website or group
+     * @param Store                                  $store   Config store for destination paths
      */
     protected function closeAndUploadFile($writer, $scopeId, $store)
     {
@@ -182,10 +188,9 @@ class ProductFeed extends Feed
 
         /** Upload feed */
         $destinationFile = $this->helper->getConfig('feeds/product_path', $store->getId()) . '/' .
-            $this->helper->getConfig('feeds/product_filename', $store->getId());
+                           $this->helper->getConfig('feeds/product_filename', $store->getId());
         $this->uploadFeed($productFeedFileName, $destinationFile, $store);
     }
-
 
 }
 

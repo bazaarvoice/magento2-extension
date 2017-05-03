@@ -16,24 +16,22 @@
  */
 
 namespace Bazaarvoice\Connector\Block;
+
 /**
  * Class Product
+ *
  * @package Bazaarvoice\Connector\Block
  */
 class Product extends \Magento\Framework\View\Element\Template
 {
-    /* @var \Magento\Framework\Registry */
-    protected $_coreRegistry;
-
     /* @var \Bazaarvoice\Connector\Helper\Data */
     public $helper;
-
     /* @var \Bazaarvoice\Connector\Logger\Logger */
     public $logger;
-
     /** @var  \Magento\Framework\ObjectManagerInterface */
     public $objectManager;
-
+    /* @var \Magento\Framework\Registry */
+    protected $_coreRegistry;
 
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
@@ -41,8 +39,8 @@ class Product extends \Magento\Framework\View\Element\Template
         \Magento\Framework\ObjectManagerInterface $objectManager,
         \Bazaarvoice\Connector\Helper\Data $helper,
         \Bazaarvoice\Connector\Logger\Logger $logger,
-        array $data = [])
-    {
+        array $data = []
+    ) {
         $this->helper = $helper;
         $this->logger = $logger;
         $this->_coreRegistry = $registry;
@@ -67,7 +65,7 @@ class Product extends \Magento\Framework\View\Element\Template
 
     public function canShow($type)
     {
-        return $this->isEnabled() && $this->getConfig($type.'/enable_'.$type);
+        return $this->isEnabled() && $this->getConfig($type . '/enable_' . $type);
     }
 
     /**
@@ -78,6 +76,7 @@ class Product extends \Magento\Framework\View\Element\Template
     public function getProductId()
     {
         $product = $this->_coreRegistry->registry('product');
+
         return $product ? $product->getId() : null;
     }
 
@@ -88,8 +87,10 @@ class Product extends \Magento\Framework\View\Element\Template
 
     public function getProductSku()
     {
-        if ($this->getProductId())
+        if ($this->getProductId()) {
             return $this->helper->getProductId($this->getProduct()->getSku());
+        }
+
         return '';
     }
 
@@ -100,8 +101,10 @@ class Product extends \Magento\Framework\View\Element\Template
     {
         if (is_numeric($this->getProductId())) {
             $product = $this->objectManager->get('Magento\Catalog\Model\Product')->load($this->getProductId());
+
             return $product;
         }
+
         return false;
     }
 
@@ -113,6 +116,7 @@ class Product extends \Magento\Framework\View\Element\Template
         if ($this->getProduct()) {
             return $this->getProduct()->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE;
         }
+
         return false;
     }
 
@@ -121,7 +125,7 @@ class Product extends \Magento\Framework\View\Element\Template
      */
     public function getChildrenJson()
     {
-        $children = array();
+        $children = [];
         if ($this->isConfigurable()) {
             $product = $this->getProduct();
 
@@ -132,15 +136,15 @@ class Product extends \Magento\Framework\View\Element\Template
             foreach ($childProducts as $childProduct) {
                 $attributeValues = $options['index'][$childProduct->getId()];
                 $attributeValue = '';
-                foreach ($attributeValues as $key => $value)
+                foreach ($attributeValues as $key => $value) {
                     $attributeValue .= $key . '_' . $value . '_';
+                }
 
                 $children[$attributeValue] = $this->helper->getProductId($childProduct);
             }
-
         }
+
         return json_encode($children, JSON_UNESCAPED_UNICODE);
     }
-
 
 }
