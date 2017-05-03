@@ -16,6 +16,7 @@
  */
 
 namespace Bazaarvoice\Connector\Block\System\Config;
+
 /**
  * Class Export
  */
@@ -25,12 +26,13 @@ class Button extends \Magento\Config\Block\System\Config\Form\Field
      * Retrieve element HTML markup
      *
      * @param \Magento\Framework\Data\Form\Element\AbstractElement $element
+     *
      * @return string
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     protected function _getElementHtml(\Magento\Framework\Data\Form\Element\AbstractElement $element)
     {
-        /** @var \Magento\Backend\Block\Widget\Button $buttonBlock  */
+        /** @var \Magento\Backend\Block\Widget\Button $buttonBlock */
         $buttonBlock = $this->getForm()->getLayout()->createBlock('Magento\Backend\Block\Widget\Button');
 
         $originalData = $element->getOriginalData();
@@ -41,13 +43,14 @@ class Button extends \Magento\Config\Block\System\Config\Form\Field
         $url = $this->getUrl($url);
 
         $data = [
-            'id' => $buttonId,
-            'label' => $buttonLabel,
+            'id'      => $buttonId,
+            'label'   => $buttonLabel,
             'onclick' => "window.open('" . $url . "')",
         ];
 
         $html = $buttonBlock->setData($data)->toHtml();
+
         return $html;
     }
-    
+
 }

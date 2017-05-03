@@ -18,13 +18,13 @@
 namespace Bazaarvoice\Connector\Model\Feed;
 
 use Bazaarvoice\Connector\Model\Source\Trigger;
-use \Magento\Catalog\Model\Product;
-use \Magento\ConfigurableProduct\Model\Product\Type;
-use \Magento\Sales\Model\Order;
-use \Magento\Store\Model\Group;
-use \Magento\Store\Model\Store;
-use \Bazaarvoice\Connector\Model\XMLWriter;
-use \Magento\Store\Model\Website;
+use Bazaarvoice\Connector\Model\XMLWriter;
+use Magento\Catalog\Model\Product;
+use Magento\ConfigurableProduct\Model\Product\Type;
+use Magento\Sales\Model\Order;
+use Magento\Store\Model\Group;
+use Magento\Store\Model\Store;
+use Magento\Store\Model\Website;
 
 
 class PurchaseFeed extends Feed
@@ -40,9 +40,10 @@ class PurchaseFeed extends Feed
     /**
      * Constructor
      *
-     * @param \Bazaarvoice\Connector\Logger\Logger      $logger
-     * @param \Bazaarvoice\Connector\Helper\Data        $helper
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
+     * @param \Bazaarvoice\Connector\Logger\Logger         $logger
+     * @param \Bazaarvoice\Connector\Helper\Data           $helper
+     * @param \Magento\Framework\ObjectManagerInterface    $objectManager
+     * @param \Magento\Framework\Filesystem\Io\SftpFactory $sftpFactory
      */
     public function __construct(
         \Bazaarvoice\Connector\Logger\Logger $logger,

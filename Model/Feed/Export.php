@@ -17,12 +17,7 @@
 
 namespace Bazaarvoice\Connector\Model\Feed;
 
-use Bazaarvoice\Connector\Helper\Data;
-use Bazaarvoice\Connector\Logger\Logger;
-use Magento\Framework\ObjectManagerInterface;
-use Magento\Framework\UrlFactory;
 use Magento\Review\Model\Review;
-use Magento\Review\Model\ReviewFactory;
 
 class Export extends Feed
 {
@@ -31,23 +26,24 @@ class Export extends Feed
 
     /**
      * Category constructor.
-     * @param Logger $logger
-     * @param Data $helper
-     * @param ObjectManagerInterface $objectManager
-     * @param ReviewFactory $reviewFactory
-     * @param UrlFactory $urlFactory
+     *
+     * @param \Bazaarvoice\Connector\Logger\Logger      $logger
+     * @param \Bazaarvoice\Connector\Helper\Data        $helper
+     * @param \Magento\Framework\ObjectManagerInterface $objectManager
+     * @param \Magento\Review\Model\ReviewFactory       $reviewFactory
+     * @param \Magento\Framework\UrlFactory             $urlFactory
      */
     public function __construct(
-        Logger $logger,
-        Data $helper,
-        ObjectManagerInterface $objectManager,
-        ReviewFactory $reviewFactory,
-        UrlFactory $urlFactory
-    )
-    {
+        \Bazaarvoice\Connector\Logger\Logger $logger,
+        \Bazaarvoice\Connector\Helper\Data $helper,
+        \Magento\Framework\ObjectManagerInterface $objectManager,
+        \Magento\Review\Model\ReviewFactory $reviewFactory,
+        \Magento\Framework\UrlFactory $urlFactory,
+        \Magento\Framework\Filesystem\Io\SftpFactory $sftpFactory
+    ) {
         $this->_reviewFactory = $reviewFactory;
         $this->_urlFactory = $urlFactory;
-        parent::__construct($logger, $helper, $objectManager);
+        parent::__construct($logger, $helper, $objectManager, $sftpFactory);
     }
 
     public function exportReviews()
@@ -76,12 +72,13 @@ class Export extends Feed
             $export->writeElement('ProductId', $this->helper->getProductId($review->getSku()));
             $export->writeElement('ProductName', $this->helper->getProductId($review->getName()));
 
-            $export->endElement(); /** Review */
+            $export->endElement();
+            /** Review */
         }
 
-        $export->endElement(); /** Reviews */
+        $export->endElement();
+        /** Reviews */
         $this->closeFile($export, BP . '/var/export/bvfeeds/magento-core-reviews.xml');
-
     }
 
 }

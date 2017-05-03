@@ -26,9 +26,10 @@ class SubmissionContainer extends Template
 
     /**
      * SubmissionContainer constructor.
+     *
      * @param Template\Context $context
-     * @param array $data
-     * @param Data $helper
+     * @param array            $data
+     * @param Data             $helper
      */
     public function __construct(Template\Context $context, array $data, Data $helper)
     {
