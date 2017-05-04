@@ -433,7 +433,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         $brandAttr = $this->_helper->getConfig('feeds/brand_code', $storeId);
         if ($brandAttr) {
             if (in_array($brandAttr, $flatColumns)) {
-                $select->columns(array('brand_external_id' => 'brand'));
+                $select->columns(array('brand_external_id' => $brandAttr));
             }
         }
         foreach ($index->customAttributes as $label) {
