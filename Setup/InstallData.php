@@ -72,9 +72,11 @@ class InstallData implements Setup\InstallDataInterface
     public function install(Setup\ModuleDataSetupInterface $setup, Setup\ModuleContextInterface $context)
     {
         // @codingStandardsIgnoreEnd
-        // if (!$this->_state->getAreaCode()) {
+        try {
+            $this->_state->getAreaCode();
+        } Catch (\Magento\Framework\Exception\LocalizedException $e) {
             $this->_state->setAreaCode('frontend');
-        // }
+        }
 
         /** @var SalesSetup $eavSetup */
         $eavSetup = $this->_salesSetupFactory->create(['setup' => $setup]);

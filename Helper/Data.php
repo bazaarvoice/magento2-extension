@@ -48,8 +48,6 @@ class Data extends AbstractHelper
      */
     public function getBvApiHostUrl($isStatic, $store = null)
     {
-        /** Build protocol based on current page */
-        $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != '') ? 'https' : 'http';
         /** Build hostname based on environment setting */
         $environment = $this->getConfig('general/environment', $store);
         if ($environment == 'staging') {
@@ -72,7 +70,7 @@ class Data extends AbstractHelper
         /** Note that this doesn't use Magento's locale, this will allow clients to override this and map it as they see fit */
         $localeCode = $this->getConfig('general/locale', $store);
         /** Build url string */
-        $url = $protocol . '://' . $apiHostname . '/' . $static . $clientName . '/' . urlencode($deploymentZoneName) . '/' . $localeCode;
+        $url = '//' . $apiHostname . '/' . $static . $clientName . '/' . urlencode($deploymentZoneName) . '/' . $localeCode;
         /** Return final url */
         return $url;
     }
@@ -114,7 +112,7 @@ class Data extends AbstractHelper
     
     /**
      * This unique ID can only contain alphanumeric characters (letters and numbers
-     * only) and also the asterisk, hyphen, period, and underscore characters. If your
+     * only) and also the asterisk, hyphen, and underscore characters. If your
      * product IDs contain invalid characters, simply replace them with an alternate
      * character like an underscore. This will only be used in the feed and not for
      * any customer facing purpose.
@@ -131,7 +129,7 @@ class Data extends AbstractHelper
          * Example encoded = qwerty_bv36__bv37__bv64__bv35_asdf
          */
 
-        return preg_replace_callback('/[^\w\d\*-\._]/s', create_function('$match', 'return "_bv".ord($match[0])."_";'), $rawId);
+        return preg_replace_callback('/[^\w\d\*-\-_]/s', create_function('$match', 'return "_bv".ord($match[0])."_";'), $rawId);
     }
 
 
