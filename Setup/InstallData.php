@@ -32,10 +32,10 @@ use Magento\Catalog\Model\Product;
 class InstallData implements Setup\InstallDataInterface
 {
     /** @var SalesSetupFactory */
-    protected $_salesSetupFactory;
+    protected $salesSetupFactory;
 
     /** @var CategorySetupFactory */
-    protected $_categorySetupFactory;
+    protected $categorySetupFactory;
 
     /**
      * @param SalesSetupFactory $salesSetupFactory
@@ -45,8 +45,8 @@ class InstallData implements Setup\InstallDataInterface
         SalesSetupFactory $salesSetupFactory,
         CategorySetupFactory $categorySetupFactory
     ) {
-        $this->_salesSetupFactory = $salesSetupFactory;
-        $this->_categorySetupFactory = $categorySetupFactory;
+        $this->salesSetupFactory = $salesSetupFactory;
+        $this->categorySetupFactory = $categorySetupFactory;
     }
 
     /**
@@ -56,7 +56,7 @@ class InstallData implements Setup\InstallDataInterface
     public function install(Setup\ModuleDataSetupInterface $setup, Setup\ModuleContextInterface $context)
     {
         /** @var SalesSetup $eavSetup */
-        $eavSetup = $this->_salesSetupFactory->create(['setup' => $setup]);
+        $eavSetup = $this->salesSetupFactory->create(['setup' => $setup]);
 
         $eavSetup->addAttribute(
             Order::ENTITY,
@@ -70,7 +70,7 @@ class InstallData implements Setup\InstallDataInterface
         );
 
         /** @var CategorySetup $eavSetup */
-        $eavSetup = $this->_categorySetupFactory->create(['setup' => $setup]);
+        $eavSetup = $this->categorySetupFactory->create(['setup' => $setup]);
 
         $eavSetup->addAttribute(
             Product::ENTITY,
