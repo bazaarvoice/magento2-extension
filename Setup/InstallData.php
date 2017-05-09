@@ -37,33 +37,17 @@ class InstallData implements Setup\InstallDataInterface
     /** @var CategorySetupFactory */
     protected $_categorySetupFactory;
 
-    /** @var ObjectManagerInterface */
-    protected $_objectManager;
-
-    /** @var  State */
-    protected $_state;
-
     /**
-     * Init
-     *
      * @param SalesSetupFactory $salesSetupFactory
      * @param CategorySetupFactory $categorySetupFactory
-     * @param ObjectManagerInterface $objectManger
-     * @param State $state
      */
     public function __construct(
         SalesSetupFactory $salesSetupFactory,
-        CategorySetupFactory $categorySetupFactory,
-        ObjectManagerInterface $objectManger,
-        State $state
-    )
-    {
+        CategorySetupFactory $categorySetupFactory
+    ) {
         $this->_salesSetupFactory = $salesSetupFactory;
         $this->_categorySetupFactory = $categorySetupFactory;
-        $this->_objectManager = $objectManger;
-        $this->_state = $state;
     }
-
 
     /**
      * {@inheritdoc}
@@ -71,13 +55,6 @@ class InstallData implements Setup\InstallDataInterface
     // @codingStandardsIgnoreStart
     public function install(Setup\ModuleDataSetupInterface $setup, Setup\ModuleContextInterface $context)
     {
-        // @codingStandardsIgnoreEnd
-        try {
-            $this->_state->getAreaCode();
-        } Catch (\Magento\Framework\Exception\LocalizedException $e) {
-            $this->_state->setAreaCode('frontend');
-        }
-
         /** @var SalesSetup $eavSetup */
         $eavSetup = $this->_salesSetupFactory->create(['setup' => $setup]);
 
@@ -138,23 +115,5 @@ class InstallData implements Setup\InstallDataInterface
         if (!$eavSetup->getAttributesNumberInGroup($entityTypeId, $attributeSetId, 'Product Details')) {
             $eavSetup->removeAttributeGroup($entityTypeId, $attributeSetId, 'Product Details');
         }
-
-        $attrData = array(
-            Connector\Model\Feed\ProductFeed::INCLUDE_IN_FEED_FLAG => \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED,
-        );
-
-        $storeId = 0;
-
-        /** @var \Magento\Catalog\Model\ProductFactory $productFactory */
-        $productFactory = $this->_objectManager->get('\Magento\Catalog\Model\ProductFactory');
-        $productIds = $productFactory->create()->getCollection()->getAllIds();
-        /** @var \Magento\Catalog\Model\Product\Action $action */
-        $this->_objectManager->get('\Magento\Catalog\Model\Product\Action')->updateAttributes(
-            $productIds,
-            $attrData,
-            $storeId
-        );
-
     }
-
 }
