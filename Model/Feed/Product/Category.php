@@ -260,7 +260,7 @@ class Category extends Generic
 
         $collection->getSelect()
             ->joinLeft(array('url' => $this->_resourceConnection->getTableName('url_rewrite')),
-                "entity_type = 'category' AND url.entity_id = e.entity_id AND url.store_id = {$store->getId()} AND metadata IS NULL",
+                "entity_type = 'category' AND url.entity_id = e.entity_id AND url.store_id = {$store->getId()} AND metadata IS NULL AND redirect_type = 0",
                 array('url_path' => 'request_path'));
 
         return $collection;
