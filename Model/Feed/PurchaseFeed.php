@@ -264,7 +264,7 @@ class PurchaseFeed extends Feed
 
         /** Create varien io object and write local feed file */
         /** @var XMLWriter $writer */
-        $writer = $this->openFile('http://www.bazaarvoice.com/xs/PRR/PurchaseFeed/5.6', $clientName);
+        $writer = $this->openFile('http://www.bazaarvoice.com/xs/PRR/PostPurchaseFeed/5.6', $clientName);
 
         /** @var \Magento\Sales\Model\Order $order */
         foreach ($orders as $order) {
@@ -396,6 +396,26 @@ class PurchaseFeed extends Feed
     protected function getNumDaysLookbackStartDate()
     {
         return date('Y-m-d', strtotime(date('Y-m-d', time()) . ' -' . $this->_numDaysLookback . ' days'));
+    }
+
+    /**
+     * @param String $xmlns Bazaarvoice Feed xsd reference
+     * @param String $clientName Bazaarvoice Client name
+     * @return \Bazaarvoice\Connector\Model\XMLWriter
+     */
+    protected function openFile($xmlns, $clientName)
+    {
+        $writer = $this->_objectManager->create('\Bazaarvoice\Connector\Model\XMLWriter');
+        $writer->openMemory();
+        $writer->setIndent(true);
+        $writer->setIndentString(str_repeat(' ', 4));
+
+        $writer->startDocument('1.0', 'UTF-8');
+        $writer->startElement('Feed');
+        $writer->writeAttribute('xmlns', $xmlns);
+        $writer->writeAttribute('generator', 'Magento Extension r' . $this->helper->getExtensionVersion());
+
+        return $writer;
     }
 
 }
