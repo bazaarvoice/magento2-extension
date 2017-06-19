@@ -151,8 +151,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
             }
 
             $this->_logger->info($msg);
-            echo "$msg\n";
-
+           
         } Catch (\Exception $e) {
             $this->_logger->err($e->getMessage()."\n".$e->getTraceAsString());
         }
