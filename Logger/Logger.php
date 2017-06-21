@@ -61,6 +61,10 @@ class Logger extends \Monolog\Logger
         if (is_array($message))
             $message = print_r($message, 1);
 
+        if (php_sapi_name() == "cli") {
+            echo $message."\n";
+        }
+
         return parent::addRecord($level, $message, $context);
     }
 
