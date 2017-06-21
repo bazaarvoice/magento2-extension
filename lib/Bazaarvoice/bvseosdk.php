@@ -1,5 +1,5 @@
 <?php
-
+/** @codingStandardsIgnoreFile */
 /**
  * BV PHP SEO SDK
  *

@@ -1,4 +1,5 @@
 <?php
+/** @codingStandardsIgnoreFile */
 //Please provide cloud_key, bv_root_folder and subject_id
 require('bvseosdk.php');
 $bv = new BV(array(
