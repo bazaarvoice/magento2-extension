@@ -336,7 +336,7 @@ class PurchaseFeed extends Feed
                 }
 
                 $writer->writeElement('ImageUrl', $imageUrl);
-                $writer->writeElement('Price', number_format((float)$originalPrice, 2));
+                $writer->writeElement('Price', number_format((float)$originalPrice, 2, '.', ''));
                 
                 $writer->endElement(); /** Product */
             }
