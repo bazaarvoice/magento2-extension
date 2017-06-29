@@ -150,10 +150,10 @@ class Product extends Generic
                 	$values = explode(',', $values);
                 if (is_array($values)) {
                     foreach ($values as $value) {
-                        $this->_writer->writeElement($label, $value);
+                        $this->_writer->writeElement($label, $value, true);
                     }
                 } else {
-                    $this->_writer->writeElement($label, $values);
+                    $this->_writer->writeElement($label, $values, true);
                 }
                 $this->_writer->endElement();
             }

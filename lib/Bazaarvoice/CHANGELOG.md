@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.2.1
+* Removed tick_timer function as timeouts are handled via curl options.
+* Switched to CURLOPT_TIMEOUT_MS option for better granularity.
+
 ## 3.2.0
 
 * Pass-through of User Agent to gather statistics.
