@@ -1,5 +1,5 @@
 <?php
-
+/** @codingStandardsIgnoreFile */
 /**
  * Tick function for execTimer.
  *
