@@ -53,17 +53,19 @@ class Product extends Generic
         $this->_writer->startElement('Products');
         $productCollection = $this->getProductCollection();
 
-        $productCollection->setStore($store);
+        if($store->getId())
+            $productCollection->setStore($store);
+
         $this->_logger->info($productCollection->count() . ' products found to export.');
 
         /** @var \Magento\Framework\Model\ResourceModel\Iterator $iterator */
         $iterator = $this->_objectManager->create('\Magento\Framework\Model\ResourceModel\Iterator');
         $iterator
             ->walk($productCollection->getSelect(), array(array($this, 'writeProduct')));
-        
+
         $this->_writer->endElement(); /** Products */
     }
-    
+
     /**
      * @param array $args
      */
@@ -72,7 +74,7 @@ class Product extends Generic
         /** @var \Bazaarvoice\Connector\Model\Index $product */
         $product = $this->_objectManager->create('\Bazaarvoice\Connector\Model\Index');
         $product->setData($args['row']);
-        
+
         $this->_logger->debug('Write product '.$product->getData('product_id'));
 
         foreach ($product->getData() as $key => $value) {
@@ -147,7 +149,7 @@ class Product extends Generic
             if (!empty($values)) {
                 $this->_writer->startElement($label . 's');
                 if(is_string($values) && strpos($values, ','))
-                	$values = explode(',', $values);
+                    $values = explode(',', $values);
                 if (is_array($values)) {
                     foreach ($values as $value) {
                         $this->_writer->writeElement($label, $value, true);

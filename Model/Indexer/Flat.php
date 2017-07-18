@@ -47,7 +47,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
     protected $_collectionFactory;
     protected $_resourceConnection;
     protected $_storeLocales;
-    
+
     /**
      * Indexer constructor.
      * @param Logger $logger
@@ -287,7 +287,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         $mviewTable = $this->_resourceConnection->getTableName('mview_state');
         $writeAdapter->query("UPDATE `$mviewTable` SET `version_id` = NULL, `status` = 'idle' WHERE `view_id` = 'bazaarvoice_product';");
         $indexCheck = $writeAdapter
-            ->query("SELECT COUNT(1) indexIsThere FROM INFORMATION_SCHEMA.STATISTICS 
+            ->query("SELECT COUNT(1) indexIsThere FROM INFORMATION_SCHEMA.STATISTICS
                     WHERE table_schema=DATABASE() AND table_name='{$changelogTable}' AND index_name='entity_id';");
         $indexCheck = $indexCheck->fetchObject();
         if ($indexCheck->indexIsThere == 0)
@@ -349,22 +349,25 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 ))
             ->joinLeft(
                 array('cp' => $res->getTableName('catalog_category_product_index')),
-                "(cp.product_id = p.entity_id OR cp.product_id = parent.entity_id) AND cp.store_id = {$storeId}", '');
+                "cp.product_id = p.entity_id AND cp.store_id = {$storeId}", '')
+            ->joinLeft(
+                array('cpp' => $res->getTableName('catalog_category_product_index')),
+                "cpp.product_id = parent.entity_id AND cpp.store_id = {$storeId}", '');
 
         /** urls */
         $select
             ->joinLeft(
                 array('url' => $res->getTableName('url_rewrite')),
-                "url.entity_type = 'product' 
-                AND url.metadata IS NULL 
-                AND url.entity_id = p.entity_id 
+                "url.entity_type = 'product'
+                AND url.metadata IS NULL
+                AND url.entity_id = p.entity_id
                 AND url.store_id = {$storeId}",
                 array('product_page_url' => 'request_path'))
             ->joinLeft(
                 array('parent_url' => $res->getTableName('url_rewrite')),
-                "parent_url.entity_type = 'product' 
-                AND parent_url.metadata IS NULL 
-                AND parent_url.entity_id = parent.entity_id 
+                "parent_url.entity_type = 'product'
+                AND parent_url.metadata IS NULL
+                AND parent_url.entity_id = parent.entity_id
                 AND parent_url.store_id = {$storeId}",
                 array('parent_url' => 'request_path'));
 
@@ -372,10 +375,21 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         if ($this->_helper->getConfig('feeds/category_id_use_url_path', $storeId)) {
             $select->joinLeft(
                 array('cat' => $res->getTableName('catalog_category_flat').'_store_'.$storeId),
-                'cat.entity_id = cp.category_id AND cat.level >= 2',
+                'cat.entity_id = cp.category_id AND cat.level > 1',
                 array('category_external_id' => 'max(cat.url_path)'));
+            $select->joinLeft(
+                array('parent_cat' => $res->getTableName('catalog_category_flat').'_store_'.$storeId),
+                'parent_cat.entity_id = cpp.category_id AND parent_cat.level > 1',
+                array('parent_category_external_id' => 'max(parent_cat.url_path)'));
         } else {
-            $select->columns(array('category_external_id' => 'cp.category_id'));
+            $select->joinLeft(
+                array('cat' => $res->getTableName('catalog_category_flat').'_store_'.$storeId),
+                'cat.entity_id = cp.category_id AND cat.level > 1',
+                array('category_external_id' => 'max(cat.entity_id)'));
+            $select->joinLeft(
+                array('parent_cat' => $res->getTableName('catalog_category_flat').'_store_'.$storeId),
+                'parent_cat.entity_id = cpp.category_id AND parent_cat.level > 1',
+                array('parent_category_external_id' => 'max(parent_cat.entity_id)'));
         }
 
         /** Locale Data */
@@ -407,16 +421,16 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                             array("{$locale}|parent_image" => 'small_image'))
                         ->joinLeft(
                             array("{$locale}_url" => $res->getTableName('url_rewrite')),
-                            "{$locale}_url.entity_type = 'product' 
-                            AND {$locale}_url.metadata IS NULL 
-                            AND {$locale}_url.entity_id = p.entity_id 
+                            "{$locale}_url.entity_type = 'product'
+                            AND {$locale}_url.metadata IS NULL
+                            AND {$locale}_url.entity_id = p.entity_id
                             AND {$locale}_url.store_id = {$localeStore->getId()}",
                             array("{$locale}|product_page_url" => 'request_path'))
                         ->joinLeft(
                             array("{$locale}_parent_url" => $res->getTableName('url_rewrite')),
-                            "{$locale}_parent_url.entity_type = 'product' 
-                            AND {$locale}_parent_url.metadata IS NULL 
-                            AND {$locale}_parent_url.entity_id = {$locale}_parent.entity_id 
+                            "{$locale}_parent_url.entity_type = 'product'
+                            AND {$locale}_parent_url.metadata IS NULL
+                            AND {$locale}_parent_url.entity_id = {$locale}_parent.entity_id
                             AND {$locale}_parent_url.store_id = {$localeStore->getId()}",
                             array("{$locale}|parent_url" => 'request_path'));
                 }
@@ -498,12 +512,12 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
             }
             if ($indexData['category_external_id'] == '') {
                 $indexData['status'] = Status::STATUS_DISABLED;
-                $this->_logger->info('Product marked disabled because not category found.');
+                $this->_logger->info('Product marked disabled because no category found.');
             } else {
                 $this->_logger->debug("Category '{$indexData['category_external_id']}'");
             }
 
-            /** Use parent URLs if appropriate */
+            /** Use parent URLs/categories if appropriate */
             if ($indexData['visibility'] == Visibility::VISIBILITY_NOT_VISIBLE) {
                 $this->_logger->debug('Not visible');
                 if (!empty($indexData['parent_url'])) {
@@ -518,7 +532,14 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                         }
                     }
                 } else {
-                    $this->_logger->debug('Product marked disabled because no parent found');
+                    $this->_logger->debug('Product marked disabled because no parent URL found');
+                    $indexData['status'] = Status::STATUS_DISABLED;
+                }
+                if(!empty($indexData['parent_category_external_id'])) {
+                    $indexData['category_external_id'] = $indexData['parent_category_external_id'];
+                    $this->_logger->debug('Using Parent Category');
+                } else {
+                    $this->_logger->debug('Product marked disabled because no parent category found');
                     $indexData['status'] = Status::STATUS_DISABLED;
                 }
             }
