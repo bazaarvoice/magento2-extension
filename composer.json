@@ -9,7 +9,7 @@
       "email": "dennis@storefrontconsulting.com"
     }
   ],
-  "version": "7.0.9",
+  "version": "7.0.10",
   "autoload": {
     "files": [
       "registration.php"
