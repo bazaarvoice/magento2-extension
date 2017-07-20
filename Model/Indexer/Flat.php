@@ -30,6 +30,7 @@ use Magento\Framework\DB\Select;
 use Magento\Framework\Indexer\IndexerInterface;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Store\Model\Store;
+use Magento\Store\Model\StoreManagerInterface;
 use Magento\Store\Model\Website;
 use Magento\Store\Model\Group;
 
@@ -43,6 +44,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
     protected $_logger;
     protected $_indexer;
     protected $_generationScope;
+    protected $_storeManager;
     protected $_objectManager;
     protected $_collectionFactory;
     protected $_resourceConnection;
@@ -62,11 +64,13 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         Data $helper,
         IndexerInterface $indexerInterface,
         ObjectManagerInterface $objectManager,
+        StoreManagerInterface $storeManager,
         Collection\Factory $collectionFactory,
         ResourceConnection $resourceConnection)
     {
         $this->_logger = $logger;
         $this->_helper = $helper;
+        $this->_storeManager = $storeManager;
         $this->_objectManager = $objectManager;
         $this->_indexer = $indexerInterface->load('bazaarvoice_product');
         $this->_collectionFactory = $collectionFactory;
@@ -77,7 +81,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         /** @var Store $store */
         switch ($this->_generationScope) {
             case Scope::STORE_VIEW:
-                $stores = $this->_objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStores();
+                $stores = $this->_storeManager->getStores();
                 $defaultStore = null;
                 /** @var Store $store */
                 foreach ($stores as $store) {
@@ -86,7 +90,8 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 }
                 break;
             case Scope::WEBSITE:
-                $websites = $this->_objectManager->get('Magento\Store\Model\StoreManagerInterface')->getWebsites();
+            case Scope::SCOPE_GLOBAL:
+                $websites = $this->_storeManager->getWebsites();
                 /** @var Website $website */
                 foreach ($websites as $website) {
                     $defaultStore = $website->getDefaultStore();
@@ -101,7 +106,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 }
                 break;
             case Scope::STORE_GROUP:
-                $groups = $this->_objectManager->get('Magento\Store\Model\StoreManagerInterface')->getGroups();
+                $groups = $this->_storeManager->getGroups();
                 /** @var Group $group */
                 foreach ($groups as $group) {
                     $defaultStore = $group->getDefaultStore();
@@ -114,21 +119,6 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                     $defaultLocale = $this->_helper->getConfig('general/locale', $defaultStore);
                     $this->_storeLocales[$defaultStore->getId()][$defaultLocale] = $defaultStore;
                 }
-                break;
-            case Scope::SCOPE_GLOBAL:
-                $stores = $this->_objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStores();
-                $defaultStore = null;
-                /** @var Store $store */
-                foreach ($stores as $store) {
-                    if (isset($defaultStore) == false) {
-                        $defaultStore = $store;
-                        $this->_storeLocales[$defaultStore->getId()] = array();
-                    }
-                    $localeCode = $this->_helper->getConfig('general/locale', $store->getId());
-                    $this->_storeLocales[$defaultStore->getId()][$localeCode] = $store;
-                }
-                $defaultLocale = $this->_helper->getConfig('general/locale', $defaultStore);
-                $this->_storeLocales[$defaultStore->getId()][$defaultLocale] = $defaultStore;
                 break;
         }
     }
@@ -218,13 +208,8 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
         switch ($this->_generationScope) {
             case Scope::SCOPE_GLOBAL:
-                $stores = $this->_objectManager->get('\Magento\Store\Model\StoreManagerInterface')->getStores();
-                /** @var Store $store */
-                $store = array_shift($stores);
-                $this->reindexProductsForStore($productIds, $store);
-                break;
             case Scope::WEBSITE:
-                $websites = $this->_objectManager->get('Magento\Store\Model\StoreManagerInterface')->getWebsites();
+                $websites = $this->_storeManager->getWebsites();
                 /** @var \Magento\Store\Model\Website $website */
                 foreach ($websites as $website) {
                     $defaultStore = $website->getDefaultStore();
@@ -236,7 +221,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 }
                 break;
             case Scope::STORE_GROUP:
-                $groups = $this->_objectManager->get('Magento\Store\Model\StoreManagerInterface')->getGroups();
+                $groups = $this->_storeManager->getGroups();
                 /** @var \Magento\Store\Model\Group $group */
                 foreach ($groups as $group) {
                     $defaultStore = $group->getDefaultStore();
@@ -248,7 +233,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 }
                 break;
             case Scope::STORE_VIEW:
-                $stores = $this->_objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStores();
+                $stores = $this->_storeManager->getStores();
                 /** @var \Magento\Store\Model\Store $store */
                 foreach ($stores as $store) {
                     if ($store->getId()) {
@@ -510,12 +495,6 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 $indexData['category_external_id'] = str_replace('.html', '', $indexData['category_external_id']);
                 $indexData['category_external_id'] = $this->_helper->replaceIllegalCharacters($indexData['category_external_id']);
             }
-            if ($indexData['category_external_id'] == '') {
-                $indexData['status'] = Status::STATUS_DISABLED;
-                $this->_logger->info('Product marked disabled because no category found.');
-            } else {
-                $this->_logger->debug("Category '{$indexData['category_external_id']}'");
-            }
 
             /** Use parent URLs/categories if appropriate */
             if ($indexData['visibility'] == Visibility::VISIBILITY_NOT_VISIBLE) {
@@ -538,9 +517,6 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 if(!empty($indexData['parent_category_external_id'])) {
                     $indexData['category_external_id'] = $indexData['parent_category_external_id'];
                     $this->_logger->debug('Using Parent Category');
-                } else {
-                    $this->_logger->debug('Product marked disabled because no parent category found');
-                    $indexData['status'] = Status::STATUS_DISABLED;
                 }
             }
 
@@ -567,6 +543,13 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                             $indexData['locale_image_url'][$locale] = $placeholders[$locale];
                     }
                 }
+            }
+
+            if ($indexData['category_external_id'] == '') {
+                $indexData['status'] = Status::STATUS_DISABLED;
+                $this->_logger->info('Product marked disabled because no category found.');
+            } else {
+                $this->_logger->debug("Category '{$indexData['category_external_id']}'");
             }
 
             /** Add Store base to URLs */
