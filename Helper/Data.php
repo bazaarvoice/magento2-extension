@@ -66,11 +66,13 @@ class Data extends AbstractHelper
         /** Lookup other config settings */
         $clientName = $this->getConfig('general/client_name', $store);
         $deploymentZoneName = $this->getConfig('general/deployment_zone', $store);
+        /** url prep deployment zone */
+        $deploymentZoneName = strtolower(str_replace(' ', '_', $deploymentZoneName));
         /** Get locale code from BV config,  */
         /** Note that this doesn't use Magento's locale, this will allow clients to override this and map it as they see fit */
         $localeCode = $this->getConfig('general/locale', $store);
         /** Build url string */
-        $url = '//' . $apiHostname . '/' . $static . $clientName . '/' . urlencode($deploymentZoneName) . '/' . $localeCode;
+        $url = '//' . $apiHostname . '/' . $static . $clientName . '/' . $deploymentZoneName . '/' . $localeCode;
         /** Return final url */
         return $url;
     }
