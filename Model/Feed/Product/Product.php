@@ -161,7 +161,7 @@ class Product extends Generic
             }
         }
 
-        if ($this->_helper->getConfig('feeds/families')) {
+        if ($this->_helper->getConfig('general/families')) {
             if ($product->getData('family') && count($product->getData('family'))) {
                 $this->_writer->startElement('Attributes');
 
