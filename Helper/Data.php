@@ -72,7 +72,10 @@ class Data extends AbstractHelper
         /** Note that this doesn't use Magento's locale, this will allow clients to override this and map it as they see fit */
         $localeCode = $this->getConfig('general/locale', $store);
         /** Build url string */
-        $url = '//' . $apiHostname . '/' . $static . $clientName . '/' . $deploymentZoneName . '/' . $localeCode;
+        $url = '//' . $apiHostname . '/' . $static . $clientName . '/' . $deploymentZoneName;
+        if (!empty($localeCode)) {
+            $url .= '/' . $localeCode;
+        }
         /** Return final url */
         return $url;
     }
