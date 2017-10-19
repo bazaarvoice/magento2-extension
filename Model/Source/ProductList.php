@@ -24,6 +24,7 @@ class ProductList
     const UPSELL = 'upsell';
     const RELATED = 'related';
     const CROSSSELL = 'crosssell';
+    const WIDGET = 'widget';
 
     public function toOptionArray()
     {
@@ -52,6 +53,10 @@ class ProductList
                 'value' => self::CROSSSELL,
                 'label' => __('Cross Sells on Cart Page')
             ),
+	        array(
+		        'value' => self::WIDGET,
+		        'label' => __('Product List Widget')
+	        ),
         );
     }
 }
