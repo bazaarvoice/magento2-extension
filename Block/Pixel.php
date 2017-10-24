@@ -45,9 +45,7 @@ class Pixel
     public function afterToHtml(/** @noinspection PhpUnusedParameterInspection */ $subject, $result)
     {
         /** @codingStandardsIgnoreEnd */
-        if (
-            $subject->getNameInLayout() != 'checkout.success'
-            || $this->helper->getConfig('general/enable_bvpixel') != true)
+        if ($this->helper->getConfig('general/enable_bvpixel') != true)
             return $result;
 
         /** @var \Magento\Sales\Model\Order $order */
