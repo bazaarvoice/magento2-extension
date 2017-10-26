@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    
+
     <!-- block injection -->
     <!-- inline ratings -->
     <type name="Magento\Catalog\Block\Product\ListProduct">
@@ -17,6 +17,9 @@
     </type>
     <type name="Magento\Checkout\Block\Cart\Crosssell">
         <plugin name="bazaarvoice-crosssell" type="Bazaarvoice\Connector\Block\ProductList\Crosssell" sortOrder="100"/>
+    </type>
+    <type name="Magento\CatalogWidget\Block\Product\ProductsList">
+        <plugin name="bazaarvoice-widget" type="Bazaarvoice\Connector\Block\ProductList\Widget" sortOrder="100"/>
     </type>
     <!-- success page -->
     <type name="Magento\Checkout\Block\Onepage\Success">
@@ -48,7 +51,7 @@
             </argument>
         </arguments>
     </type>
-    
+
     <!-- Logging -->
     <type name="Bazaarvoice\Connector\Logger\Handler">
         <arguments>
@@ -62,5 +65,5 @@
                 <item name="system" xsi:type="object">Bazaarvoice\Connector\Logger\Handler</item>
             </argument>
         </arguments>
-    </type>    
+    </type>
 </config>
