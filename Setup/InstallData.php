@@ -87,7 +87,7 @@ class InstallData implements Setup\InstallDataInterface
                 'visible' => true,
                 'required' => false,
                 'user_defined' => false,
-                'default' => \Magento\Eav\Model\Entity\Attribute\Source\Boolean::VALUE_YES,
+                'default' => \Magento\Eav\Model\Entity\Attribute\Source\Boolean::VALUE_NO,
                 'apply_to' => '',
                 'visible_on_front' => false,
                 'is_used_in_grid' => true,
