@@ -25,16 +25,22 @@ class Pixel
     /**
      * @param \Bazaarvoice\Connector\Helper\Data $helper
      * @param \Magento\Checkout\Model\Session $checkoutSession
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
+     * @param \Magento\Catalog\Helper\Image $imageHelper
+     * @param \Magento\Directory\Model\Region $region
+     * @param \Magento\Catalog\Model\ProductRepository $productRepo
      */
     public function __construct(
         \Bazaarvoice\Connector\Helper\Data $helper,
         \Magento\Checkout\Model\Session $checkoutSession,
-        \Magento\Framework\ObjectManagerInterface $objectManager)
-    {
+		\Magento\Catalog\Helper\Image $imageHelper,
+	    \Magento\Directory\Model\Region $region,
+		\Magento\Catalog\Model\ProductRepository $productRepo
+    ) {
         $this->helper = $helper;
         $this->checkoutSession = $checkoutSession;
-        $this->objectManager = $objectManager;
+        $this->imageHelper = $imageHelper;
+        $this->region = $region;
+        $this->productRepo = $productRepo;
     }
 
     /** @codingStandardsIgnoreStart
@@ -45,9 +51,7 @@ class Pixel
     public function afterToHtml(/** @noinspection PhpUnusedParameterInspection */ $subject, $result)
     {
         /** @codingStandardsIgnoreEnd */
-        if (
-            $subject->getNameInLayout() != 'checkout.success'
-            || $this->helper->getConfig('general/enable_bvpixel') != true)
+        if ($this->helper->getConfig('general/enable_bvpixel') != true)
             return $result;
 
         /** @var \Magento\Sales\Model\Order $order */
@@ -64,9 +68,7 @@ class Pixel
         $orderDetails['tax'] = number_format($order->getTaxAmount(), 2, '.', '');
         $orderDetails['shipping'] = number_format($order->getShippingAmount(), 2, '.', '');
         $orderDetails['city'] = $address->getCity();
-        /** @var \Magento\Directory\Model\Region $region */
-        $region = $this->objectManager->get('\Magento\Directory\Model\Region');
-        $orderDetails['state'] = $region->load($address->getRegionId())->getCode();
+        $orderDetails['state'] = $this->region->load($address->getRegionId())->getCode();
         $orderDetails['country'] = $address->getCountryId();
 
         $orderDetails['items'] = array();
@@ -78,8 +80,7 @@ class Pixel
         }
         foreach ($items as $itemId => $item) {
             $product = $this->helper->getReviewableProductFromOrderItem($item);
-            /** @var \Magento\Catalog\Model\Product $product */
-            $product = $this->objectManager->get('\Magento\Catalog\Model\Product')->load($product->getId());
+            $product = $this->productRepo->getById($product->getId());
             /** skip configurable items if families are enabled */
             if (
                 $this->helper->getConfig('general/families')
@@ -92,15 +93,14 @@ class Pixel
             /** 'category' is not included.  Mage products can be in 0 - many categories.  Should we try to include it? */
             $itemDetails['price'] = number_format($item->getPrice(), 2, '.', '');
             $itemDetails['quantity'] = number_format($item->getQtyOrdered(), 0);
-            $itemDetails['imageURL'] = $product->getStore()->getUrl() . 'pub/media/catalog/product' . $product->getImage();
+            $itemDetails['imageURL'] = $this->imageHelper->init($product, 'product_page_image_small')->setImageFile($product->getImage())->getUrl();
 
             if ($this->helper->getConfig('general/families') && $item->getParentItem()) {
                 if (strpos($itemDetails['imageURL'], 'placeholder/image.jpg')) {
                     /** if product families are enabled and product has no image, use configurable image */
                     $parentId = $item->getParentItem()->getProductId();
-                    /** @var \Magento\Catalog\Model\Product $parent */
-                    $parent = $this->objectManager->get('\Magento\Catalog\Model\Product')->load($parentId);
-                    $itemDetails['imageURL'] = $parent->getStore()->getUrl() . 'pub/media/catalog/product' . $parent->getImage();
+                    $parent = $this->productRepo->getById($parentId);
+                    $itemDetails['imageURL'] = $this->imageHelper->init($parent, 'product_page_image_small')->setImageFile($parent->getImage())->getUrl();
                 }
                 /** also get price from parent item */
                 $itemDetails['price'] = number_format($item->getParentItem()->getPrice(), 2, '.', '');
@@ -115,7 +115,9 @@ class Pixel
         }
         $orderDetails['userId'] = $userId;
         $orderDetails['email'] = $order->getCustomerEmail();
-        $orderDetails['nickname'] = $order->getCustomerFirstname();
+        $orderDetails['nickname'] = $order->getCustomerFirstname()
+	        ? $order->getCustomerFirstname()
+            : $order->getBillingAddress()->getFirstname();
         /** There is no 'deliveryDate' yet */
         $orderDetails['locale'] = $this->helper->getConfig('general/locale', $order->getStoreId());
 
