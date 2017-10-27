@@ -15,7 +15,7 @@
                 <enable_qa>1</enable_qa>
             </qa>
             <feeds>
-                <limit>5</limit>
+                <limit>1</limit>
                 <triggering_event>purchase</triggering_event>
                 <lookback>30</lookback>
                 <generation_scope>website</generation_scope>
