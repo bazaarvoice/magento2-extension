@@ -25,6 +25,7 @@ use Bazaarvoice\Connector\Model\Source\Scope;
 use Magento\Catalog\Helper\Image;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
+use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Indexer\IndexerInterface;
@@ -487,7 +488,9 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
             $indexData['status'] = $indexData[ProductFeed::INCLUDE_IN_FEED_FLAG] ? Status::STATUS_ENABLED : Status::STATUS_DISABLED;
 
-            if (!empty($indexData['family']) && !is_array($indexData['family']))
+	        if($indexData['product_type'] == Configurable::TYPE_CODE)
+	        	$indexData['family'] = array($indexData['external_id']);
+	        else if (!empty($indexData['family']) && !is_array($indexData['family']))
                 $indexData['family'] = array($indexData['family']);
 
             if ($this->_helper->getConfig('feeds/category_id_use_url_path', $storeId)) {
