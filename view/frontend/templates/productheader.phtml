@@ -17,7 +17,7 @@
 ?>
 <?php /** @var Bazaarvoice\Connector\Block\Product $this */ ?>
 
-<?php if ($this->isEnabled()): ?>
+<?php /* if ($this->isEnabled()): ?>
     <!--suppress ALL -->
     <script type="text/javascript">
         var bvConfigData = {};
@@ -55,4 +55,19 @@
     </script>
 <?php endif; ?>
     
-<?php endif;
+<?php endif; */ ?>
+<?php
+$rrDoShowContentJs = $this->getConfig('rr/do_show_content_js');
+$qaDoShowContentJs = $this->getConfig('qa/do_show_content_js');
+?>
+
+<script async type="text/javascript">
+    window.bvCallback = function (BV) {
+        BV.reviews.on('show', function () {
+            <?php echo $rrDoShowContentJs ?>
+        });
+        BV.questions.on('show', function () {
+            <?php echo $qaDoShowContentJs ?>
+        });
+    };
+</script>
