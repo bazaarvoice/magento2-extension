@@ -125,18 +125,10 @@ class Pixel
         $orderDetails['partnerSource'] = 'Magento Extension r' . $this->helper->getExtensionVersion();
         $orderDetails['deploymentZone'] = $this->helper->getConfig('general/deployment_zone');
 
-        $loader = '<script src="//apps.bazaarvoice.com/deployments/'
-            . $this->helper->getConfig('general/client_name')
-            . '/' . strtolower(str_replace(' ', '_', $this->helper->getConfig('general/deployment_zone')))
-            . '/' . $this->helper->getConfig('general/environment')
-            . '/' . $this->helper->getConfig('general/locale')
-            . '/bv.js"></script>';
-
-        $result .= '
+        $result = '
         <!--
         ' . print_r($orderDetails, 1) . '
         -->';
-        $result .= $loader."\n";
         $result .= '
         <script type="text/javascript">
             var transactionData = ' . json_encode($orderDetails, JSON_UNESCAPED_UNICODE) . ';
