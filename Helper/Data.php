@@ -106,7 +106,7 @@ class Data extends AbstractHelper
             $rawProductId = $product;
 
         /** Customizations go here */
-        $rawProductId = preg_replace_callback('/\./s', create_function('$match', 'return "_bv".ord($match[0])."_";'), $rawProductId);
+
         /** No further customizations after this */
 
         return $this->replaceIllegalCharacters($rawProductId);
@@ -131,7 +131,7 @@ class Data extends AbstractHelper
          * Example encoded = qwerty_bv36__bv37__bv64__bv35_asdf
          */
 
-        return preg_replace_callback('/[^\w\d\*-\-_]/s', create_function('$match', 'return "_bv".ord($match[0])."_";'), $rawId);
+        return preg_replace_callback('/[^\w\d\*-\-\._]/s', create_function('$match', 'return "_bv".ord($match[0])."_";'), $rawId);
     }
 
 
