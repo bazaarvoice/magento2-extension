@@ -63,10 +63,12 @@ class Pixel
 
         $orderDetails['currency'] = $order->getOrderCurrencyCode();
         $orderDetails['orderId'] = $order->getIncrementId();
-        $orderDetails['total'] = number_format($order->getGrandTotal(), 2, '.', '');
 
+        $total = $order->getGrandTotal() - $order->getTaxAmount() - $order->getShippingAmount();
+        $orderDetails['total'] = number_format($total, 2, '.', '');
         $orderDetails['tax'] = number_format($order->getTaxAmount(), 2, '.', '');
         $orderDetails['shipping'] = number_format($order->getShippingAmount(), 2, '.', '');
+
         $orderDetails['city'] = $address->getCity();
         $orderDetails['state'] = $this->region->load($address->getRegionId())->getCode();
         $orderDetails['country'] = $address->getCountryId();
