@@ -22,7 +22,7 @@ use Bazaarvoice\Connector\Helper\Data;
 use Bazaarvoice\Connector\Model\Source\Environment;
 use Bazaarvoice\Connector\Model\Source\Scope;
 use Magento\Framework\ObjectManagerInterface;
-use Magento\Framework\Filesystem\Io\Sftp;
+use Bazaarvoice\Connector\Model\Filesystem\Io\Sftp;
 use Magento\Store\Model\Group;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\Store;
