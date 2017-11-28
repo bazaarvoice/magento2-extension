@@ -26,10 +26,12 @@ use Magento\Catalog\Helper\Image;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Indexer\IndexerInterface;
 use Magento\Framework\ObjectManagerInterface;
+use Magento\Setup\Exception;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Store\Model\Website;
@@ -50,6 +52,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
     protected $_collectionFactory;
     protected $_resourceConnection;
     protected $_storeLocales;
+    protected $_scopeConfig;
 
     /**
      * Indexer constructor.
@@ -67,8 +70,9 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         ObjectManagerInterface $objectManager,
         StoreManagerInterface $storeManager,
         Collection\Factory $collectionFactory,
-        ResourceConnection $resourceConnection)
-    {
+        ResourceConnection $resourceConnection,
+	    ScopeConfigInterface $scopeConfig
+    ) {
         $this->_logger = $logger;
         $this->_helper = $helper;
         $this->_storeManager = $storeManager;
@@ -76,6 +80,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         $this->_indexer = $indexerInterface->load('bazaarvoice_product');
         $this->_collectionFactory = $collectionFactory;
         $this->_resourceConnection = $resourceConnection;
+        $this->_scopeConfig = $scopeConfig;
 
         $this->_generationScope = $helper->getConfig('feeds/generation_scope');
 
@@ -157,6 +162,10 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
      */
     public function execute($ids = array())
     {
+	    if ($this->_scopeConfig->getValue('catalog/frontend/flat_catalog_product') == false
+	        || $this->_scopeConfig->getValue('catalog/frontend/flat_catalog_category') == false)
+		    throw new Exception('Bazaarvoice Product feed requires Catalog Flat Tables to be enabled. Please check your Store Config.');
+
         try {
             $this->_logger->info('Partial Product Feed Index');
 
