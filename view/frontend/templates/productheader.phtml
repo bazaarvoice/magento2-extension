@@ -36,11 +36,11 @@
                         var externalId = bvChildren[bvCurrent];
                         console.log("switching to " + externalId);
                         bvSelected = bvChildren[bvCurrent];
-                        $('div[data-bv-show=reviews]').data('bv-productid', externalId)
+                        $('div[data-bv-show=reviews]').attr('data-bv-productid', externalId)
                         BV.reviews.render($('div[data-bv-show=reviews]')[0]);
-                        $('div[data-bv-show=questions]').data('bv-productid', externalId)
+                        $('div[data-bv-show=questions]').attr('data-bv-productid', externalId)
                         BV.questions.render($('div[data-bv-show=questions]')[0]);
-                        $('div[data-bv-show=rating_summary]').data('bv-productid', externalId)
+                        $('div[data-bv-show=rating_summary]').attr('data-bv-productid', externalId)
                         BV.rating_summary.render($('div[data-bv-show=rating_summary]')[0]);
                     }
                 });
