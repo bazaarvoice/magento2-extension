@@ -1,5 +1,4 @@
 <?php
-/** @codingStandardsIgnoreFile */
 //Please provide cloud_key and bv_root_folder
 require('bvseosdk.php');
 
