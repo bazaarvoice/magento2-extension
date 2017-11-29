@@ -40,6 +40,52 @@
             </item>
         </argument>
     </dataSource>
+
+    <container name="listing_top">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="template" xsi:type="string">ui/grid/toolbar</item>
+                <item name="stickyTmpl" xsi:type="string">ui/grid/sticky/toolbar</item>
+            </item>
+        </argument>
+        <bookmark name="bookmarks">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="storageConfig" xsi:type="array">
+                        <item name="namespace" xsi:type="string">bv_product_index</item>
+                    </item>
+                </item>
+            </argument>
+        </bookmark>
+        <filters name="listing_filters">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="columnsProvider" xsi:type="string">bv_product_index.bv_product_index.bv_product_index_columns</item>
+                    <item name="storageConfig" xsi:type="array">
+                        <item name="provider" xsi:type="string">bv_product_index.bv_product_index.listing_top.bookmarks</item>
+                        <item name="namespace" xsi:type="string">current.filters</item>
+                    </item>
+                    <item name="templates" xsi:type="array">
+                        <item name="filters" xsi:type="array">
+                            <item name="select" xsi:type="array">
+                                <item name="component" xsi:type="string">Magento_Ui/js/form/element/ui-select</item>
+                                <item name="template" xsi:type="string">ui/grid/filters/elements/ui-select</item>
+                            </item>
+                        </item>
+                    </item>
+                    <item name="childDefaults" xsi:type="array">
+                        <item name="provider" xsi:type="string">bv_product_index.bv_product_index.listing_top.listing_filters</item>
+                        <item name="imports" xsi:type="array">
+                            <item name="visible" xsi:type="string">bv_product_index.bv_product_index.bv_product_index_columns.${ $.index }:visible</item>
+                        </item>
+                    </item>
+                </item>
+                <item name="observers" xsi:type="array">
+                    <item name="column" xsi:type="string">column</item>
+                </item>
+            </argument>
+        </filters>
+    </container>
     <columns name="bv_product_index_columns">
         <column name="entity_id">
             <argument name="data" xsi:type="array">
@@ -52,6 +98,7 @@
         <column name="product_id">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
                     <item name="sorting" xsi:type="string">asc</item>
                     <item name="label" xsi:type="string" translate="true">Product ID</item>
                 </item>
@@ -60,6 +107,7 @@
         <column name="product_type">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
                     <item name="label" xsi:type="string" translate="true">Prod Type</item>
                 </item>
             </argument>
@@ -67,6 +115,7 @@
         <column name="external_id">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
                     <item name="label" xsi:type="string" translate="true">ExternalID</item>
                 </item>
             </argument>
@@ -74,6 +123,7 @@
         <column name="category_external_id">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
                     <item name="label" xsi:type="string" translate="true">CategoryExternalId</item>
                 </item>
             </argument>
@@ -81,6 +131,7 @@
         <column name="brand_external_id">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
                     <item name="label" xsi:type="string" translate="true">BrandExternalId</item>
                 </item>
             </argument>
@@ -88,6 +139,7 @@
         <column name="family" class="Bazaarvoice\Connector\Ui\Component\Listing\Column\Json">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
                     <item name="bodyTmpl" xsi:type="string">ui/grid/cells/html</item>
                     <item name="label" xsi:type="string" translate="true">Family</item>
                 </item>
@@ -96,6 +148,7 @@
         <column name="name">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
                     <item name="label" xsi:type="string" translate="true">Name</item>
                 </item>
             </argument>
@@ -103,6 +156,7 @@
         <column name="locale_name" class="Bazaarvoice\Connector\Ui\Component\Listing\Column\Json">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
                     <item name="bodyTmpl" xsi:type="string">ui/grid/cells/html</item>
                     <item name="label" xsi:type="string" translate="true">Locale Name</item>
                 </item>
@@ -111,6 +165,7 @@
         <column name="description">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
                     <item name="label" xsi:type="string" translate="true">Description</item>
                 </item>
             </argument>
@@ -118,6 +173,7 @@
         <column name="locale_description" class="Bazaarvoice\Connector\Ui\Component\Listing\Column\Json">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
                     <item name="bodyTmpl" xsi:type="string">ui/grid/cells/html</item>
                     <item name="label" xsi:type="string" translate="true">Locale Description</item>
                 </item>
@@ -126,6 +182,7 @@
         <column name="product_page_url">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
                     <item name="label" xsi:type="string" translate="true">URL</item>
                 </item>
             </argument>
@@ -133,6 +190,7 @@
         <column name="locale_product_page_url" class="Bazaarvoice\Connector\Ui\Component\Listing\Column\Json">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
                     <item name="bodyTmpl" xsi:type="string">ui/grid/cells/html</item>
                     <item name="label" xsi:type="string" translate="true">Locale URL</item>
                 </item>
@@ -160,6 +218,7 @@
         <column name="upcs">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
                     <item name="label" xsi:type="string" translate="true">UPCs</item>
                 </item>
             </argument>
@@ -167,6 +226,7 @@
         <column name="eans">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
                     <item name="label" xsi:type="string" translate="true">EANs</item>
                 </item>
             </argument>
@@ -174,6 +234,7 @@
         <column name="isbns">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
                     <item name="label" xsi:type="string" translate="true">ISBNs</item>
                 </item>
             </argument>
@@ -181,6 +242,7 @@
         <column name="manufacturerpartnumbers">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
                     <item name="label" xsi:type="string" translate="true">MPNs</item>
                 </item>
             </argument>
@@ -188,6 +250,7 @@
         <column name="modelnumbers">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
                     <item name="label" xsi:type="string" translate="true">ModelNumbers</item>
                 </item>
             </argument>
@@ -195,6 +258,7 @@
         <column name="scope">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
                     <item name="label" xsi:type="string" translate="true">Scope</item>
                 </item>
             </argument>
@@ -202,6 +266,7 @@
         <column name="store_id">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
                     <item name="label" xsi:type="string" translate="true">Store ID</item>
                 </item>
             </argument>
@@ -228,17 +293,15 @@
             </argument>
         </column>
     </columns>
-    <container>
-        <paging name="listing_paging">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="storageConfig" xsi:type="array">
-                        <item name="provider" xsi:type="string">bv_product_index.bv_product_index.listing_top.bookmarks</item>
-                        <item name="namespace" xsi:type="string">current.paging</item>
-                    </item>
-                    <item name="selectProvider" xsi:type="string">bv_product_index.bv_product_index.bv_product_index_columns.ids</item>
+    <paging name="listing_paging">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="storageConfig" xsi:type="array">
+                    <item name="provider" xsi:type="string">bv_product_index.bv_product_index.listing_top.bookmarks</item>
+                    <item name="namespace" xsi:type="string">bv_product_index.paging</item>
                 </item>
-            </argument>
-        </paging>
-    </container>
+                <item name="selectProvider" xsi:type="string">bv_product_index.bv_product_index.bv_product_index_columns.ids</item>
+            </item>
+        </argument>
+    </paging>
 </listing>
