@@ -26,10 +26,12 @@ use \Magento\Store\Model\Website;
 
 class Brand extends Generic
 {
-    /**
-     * @param XMLWriter $writer
-     * @param $store
-     */
+	/**
+	 * @param XMLWriter $writer
+	 * @param $store
+	 *
+	 * @throws \Magento\Framework\Exception\LocalizedException
+	 */
     public function processBrandsForStore(XMLWriter $writer, Store $store)
     {
         /** Lookup the configured attribute code for "Brand" */
@@ -55,10 +57,12 @@ class Brand extends Generic
         $writer->endElement(); /** Brands */
     }
 
-    /**
-     * @param XMLWriter $writer
-     * @param Group $storeGroup
-     */
+	/**
+	 * @param XMLWriter $writer
+	 * @param Group $storeGroup
+	 *
+	 * @throws \Magento\Framework\Exception\LocalizedException
+	 */
     public function processBrandsForStoreGroup(XMLWriter $writer, Group $storeGroup)
     {
         /** Lookup the configured attribute code for "Brand" */
@@ -79,10 +83,12 @@ class Brand extends Generic
         $writer->endElement(); /** Brands */
     }
 
-    /**
-     * @param XMLWriter $writer
-     * @param Website $website
-     */
+	/**
+	 * @param XMLWriter $writer
+	 * @param Website $website
+	 *
+	 * @throws \Magento\Framework\Exception\LocalizedException
+	 */
     public function processBrandsForWebsite(XMLWriter $writer, Website $website)
     {
         /** Lookup the configured attribute code for "Brand" */
@@ -103,9 +109,11 @@ class Brand extends Generic
         $writer->endElement(); /** Brands */
     }
 
-    /**
-     * @param XMLWriter $writer
-     */
+	/**
+	 * @param XMLWriter $writer
+	 *
+	 * @throws \Magento\Framework\Exception\LocalizedException
+	 */
     public function processBrandsForGlobal(XMLWriter $writer)
     {
         /** Lookup the configured attribute code for "Brand" */
@@ -168,11 +176,13 @@ class Brand extends Generic
         }
     }
 
-    /**
-     * @param string $code
-     * @param array $storeIds
-     * @return array
-     */
+	/**
+	 * @param string $code
+	 * @param array $storeIds
+	 *
+	 * @return array
+	 * @throws \Magento\Framework\Exception\LocalizedException
+	 */
     protected function getOptionsByLocale($code, $storeIds)
     {
         $brandsByLocale = array();
@@ -184,11 +194,13 @@ class Brand extends Generic
     }
 
 
-    /**
-     * @param string $code
-     * @param mixed $store
-     * @return array
-     */
+	/**
+	 * @param string $code
+	 * @param mixed $store
+	 *
+	 * @return array
+	 * @throws \Magento\Framework\Exception\LocalizedException
+	 */
     protected function getOptionsForStore($code, $store)
     {
         $storeId = $store instanceof Store ? $store->getId() : $store;

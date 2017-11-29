@@ -36,7 +36,11 @@ class Rebuildproduct extends \Magento\Backend\App\Action
         $this->_indexer = $indexer;
     }
 
-    public function execute()
+	/**
+	 * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface|void
+	 * @throws \Magento\Setup\Exception
+	 */
+	public function execute()
     {
         $result = $this->_indexer->executeFull();
         if ($result)

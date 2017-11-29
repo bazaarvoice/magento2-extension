@@ -142,9 +142,10 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 	    return true;
     }
 
-    /**
-     * @return mixed
-     */
+	/**
+	 * @return mixed
+	 * @throws Exception
+	 */
     public function executeFull()
     {
 	    $this->canIndex();
@@ -168,12 +169,14 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         return true;
     }
 
-    /**
-     * Update a batch of index rows
-     *
-     * @param \int[] $ids
-     * @return mixed
-     */
+	/**
+	 * Update a batch of index rows
+	 *
+	 * @param \int[] $ids
+	 *
+	 * @return mixed
+	 * @throws Exception
+	 */
     public function execute($ids = array())
     {
 	    $this->canIndex();
@@ -268,9 +271,11 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         $this->_purgeUnversioned($productIds);
     }
 
-    /**
-     * Prepare for full reindex
-     */
+	/**
+	 * Prepare for full reindex
+	 * @throws Exception
+	 * @throws \Zend_Db_Statement_Exception
+	 */
     protected function flushIndex()
     {
 	    $this->canIndex();
@@ -669,7 +674,10 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         $write->query($delete);
     }
 
-    protected function logStats()
+	/**
+	 * @throws \Zend_Db_Statement_Exception
+	 */
+	protected function logStats()
     {
         /** @var Select $select */
         $select = $this->_resourceConnection->getConnection('core_read')
@@ -746,7 +754,11 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         return $placeholders;
     }
 
-    protected function hasBadScopeIndex()
+	/**
+	 * @return bool
+	 * @throws \Zend_Db_Statement_Exception
+	 */
+	protected function hasBadScopeIndex()
     {
         /** @var Select $select */
         $select = $this->_resourceConnection->getConnection('core_read')

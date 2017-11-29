@@ -59,9 +59,11 @@ class ProductFeed extends Feed
     }
 
 
-    /**
-     * @param Store $store
-     */
+	/**
+	 * @param Store $store
+	 *
+	 * @throws \Exception
+	 */
     public function exportFeedForStore(Store $store)
     {
         $writer = $this->openProductFile($store);
@@ -76,9 +78,11 @@ class ProductFeed extends Feed
         $this->closeAndUploadFile($writer, $store->getId(), $store);
     }
 
-    /**
-     * @param Group $storeGroup
-     */
+	/**
+	 * @param Group $storeGroup
+	 *
+	 * @throws \Exception
+	 */
     public function exportFeedForStoreGroup(Group $storeGroup)
     {
         $store = $storeGroup->getDefaultStore();
@@ -95,9 +99,11 @@ class ProductFeed extends Feed
         $this->closeAndUploadFile($writer, $storeGroup->getId(), $store);
     }
 
-    /**
-     * @param Website $website
-     */
+	/**
+	 * @param Website $website
+	 *
+	 * @throws \Exception
+	 */
     public function exportFeedForWebsite(Website $website)
     {
         $store = $website->getDefaultStore();
@@ -114,8 +120,9 @@ class ProductFeed extends Feed
         $this->closeAndUploadFile($writer, $website->getId(), $store);
     }
 
-    /**
-     */
+	/**
+	 * @throws \Exception
+	 */
     public function exportFeedForGlobal()
     {
         /** Using admin store for now */

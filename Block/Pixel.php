@@ -18,6 +18,7 @@
 namespace Bazaarvoice\Connector\Block;
 
 use \Magento\ConfigurableProduct\Model\Product\Type\Configurable;
+use Magento\Framework\Exception\NoSuchEntityException;
 
 class Pixel
 {
@@ -82,8 +83,12 @@ class Pixel
         }
         foreach ($items as $itemId => $item) {
             $product = $this->helper->getReviewableProductFromOrderItem($item);
-            $product = $this->productRepo->getById($product->getId());
-            /** skip configurable items if families are enabled */
+	        try {
+		        $product = $this->productRepo->getById( $product->getId() );
+	        } catch ( NoSuchEntityException $e ) {
+	        	continue;
+	        }
+	        /** skip configurable items if families are enabled */
             if (
                 $this->helper->getConfig('general/families')
                 && $product->getTypeId() == Configurable::TYPE_CODE) continue;
@@ -101,8 +106,10 @@ class Pixel
                 if (strpos($itemDetails['imageURL'], 'placeholder/image.jpg')) {
                     /** if product families are enabled and product has no image, use configurable image */
                     $parentId = $item->getParentItem()->getProductId();
-                    $parent = $this->productRepo->getById($parentId);
-                    $itemDetails['imageURL'] = $this->imageHelper->init($parent, 'product_page_image_small')->setImageFile($parent->getImage())->getUrl();
+	                try {
+		                $parent = $this->productRepo->getById( $parentId );
+		                $itemDetails['imageURL'] = $this->imageHelper->init($parent, 'product_page_image_small')->setImageFile($parent->getImage())->getUrl();
+	                } catch ( NoSuchEntityException $e ) { }
                 }
                 /** also get price from parent item */
                 $itemDetails['price'] = number_format($item->getParentItem()->getPrice(), 2, '.', '');

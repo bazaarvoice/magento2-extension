@@ -25,10 +25,12 @@ class Index extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
         $this->_init('bazaarvoice_index_product', 'entity_id');
     }
 
-    /**
-     * @param array $attributes
-     * @return array
-     */
+	/**
+	 * @param array $attributes
+	 *
+	 * @return array
+	 * @throws \Magento\Framework\Exception\LocalizedException
+	 */
     public function loadBy($attributes)
     {
         $adapter = $this->_resources->getConnection('core_read');
@@ -36,6 +38,7 @@ class Index extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
         foreach ($attributes as $attributeCode=> $value) {
             $where[] = sprintf('%s=:%s', $attributeCode, $attributeCode);
         }
+
         $select = $adapter->select()
             ->from($this->getMainTable())
             ->where(implode(' AND ', $where));
@@ -44,4 +47,5 @@ class Index extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
 
         return $adapter->fetchRow($select, $binds);
     }
+
 }
