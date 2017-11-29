@@ -129,11 +129,25 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         }
     }
 
+	/**
+	 * Check if flat tables are enabled
+	 *
+	 * @return bool
+	 * @throws Exception
+	 */
+	public function canIndex() {
+	    if ($this->_scopeConfig->getValue('catalog/frontend/flat_catalog_product') == false
+	        || $this->_scopeConfig->getValue('catalog/frontend/flat_catalog_category') == false)
+		    throw new Exception('Bazaarvoice Product feed requires Catalog Flat Tables to be enabled. Please check your Store Config.');
+	    return true;
+    }
+
     /**
      * @return mixed
      */
     public function executeFull()
     {
+	    $this->canIndex();
         $this->_logger->info('Full Product Feed Index');
         try {
             /** @var Collection $incompleteIndex */
@@ -162,10 +176,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
      */
     public function execute($ids = array())
     {
-	    if ($this->_scopeConfig->getValue('catalog/frontend/flat_catalog_product') == false
-	        || $this->_scopeConfig->getValue('catalog/frontend/flat_catalog_category') == false)
-		    throw new Exception('Bazaarvoice Product feed requires Catalog Flat Tables to be enabled. Please check your Store Config.');
-
+	    $this->canIndex();
         try {
             $this->_logger->info('Partial Product Feed Index');
 
@@ -262,6 +273,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
      */
     protected function flushIndex()
     {
+	    $this->canIndex();
         /** Set indexer to use mview */
         $this->_indexer->setScheduled(true);
 
