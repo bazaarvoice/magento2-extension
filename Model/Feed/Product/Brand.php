@@ -33,7 +33,7 @@ class Brand extends Generic
     public function processBrandsForStore(XMLWriter $writer, Store $store)
     {
         /** Lookup the configured attribute code for "Brand" */
-        $attributeCode = $this->getAttributeCode('brand');
+        $attributeCode = $this->getAttributeCode('brand', $store);
         /** If there is no attribute code for store, then bail */
         if (!strlen(trim($attributeCode))) {
             return;
@@ -62,7 +62,7 @@ class Brand extends Generic
     public function processBrandsForStoreGroup(XMLWriter $writer, Group $storeGroup)
     {
         /** Lookup the configured attribute code for "Brand" */
-        $attributeCode = $this->getAttributeCode('brand');
+        $attributeCode = $this->getAttributeCode('brand', $storeGroup->getDefaultStore());
         /** If there is no attribute code for store, then bail */
         if (!strlen(trim($attributeCode))) {
             return;
@@ -86,7 +86,7 @@ class Brand extends Generic
     public function processBrandsForWebsite(XMLWriter $writer, Website $website)
     {
         /** Lookup the configured attribute code for "Brand" */
-        $attributeCode = $this->getAttributeCode('brand');
+        $attributeCode = $this->getAttributeCode('brand', $website->getDefaultStore());
         /** If there is no attribute code for store, then bail */
         if (!strlen(trim($attributeCode))) {
             return;
