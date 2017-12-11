@@ -40,8 +40,11 @@ class Widget extends Item
 		// @codingStandardsIgnoreEnd
 		if ($this->isEnabled()) {
 			$productIdentifier = $this->helper->getProductId($this->_product);
-			$this->_productIds[$productIdentifier] = array('url' => $this->_product->getProductUrl());
-			$result = '<div id="BVRRInlineRating_' . $this->_type . '-' . $productIdentifier . '"></div>' . $result;
+			$productUrl = $this->_product->getProductUrl();
+			$result = '
+            <div data-bv-show="inline_rating"
+				 data-bv-productId="' . $productIdentifier . '"
+				 data-bv-redirect-url="' . $productUrl . '"></div>' . $result;
 		}
 		return $result;
 	}
