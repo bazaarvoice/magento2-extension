@@ -26,6 +26,9 @@
         <plugin name="bazaarvoice-bvpixel" type="Bazaarvoice\Connector\Block\Pixel" sortOrder="100"/>
     </type>
 
+    <!-- sftp -->
+    <preference for="Magento\Framework\Filesystem\Io\Sftp" type="Bazaarvoice\Connector\Model\Filesystem\Io\Sftp" />
+
     <!-- Admin Grid -->
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
