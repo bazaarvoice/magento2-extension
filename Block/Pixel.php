@@ -134,9 +134,8 @@ class Pixel
         $orderDetails['partnerSource'] = 'Magento Extension r' . $this->helper->getExtensionVersion();
         $orderDetails['deploymentZone'] = $this->helper->getConfig('general/deployment_zone');
 
-        $result = '';
-        if($this->getConfig('general/environment') == 'staging') {
-	        $result = '
+        if($this->helper->getConfig('general/environment') == 'staging') {
+	        $result .= '
 	        <!--
 	        ' . print_r( $orderDetails, 1 ) . '
 	        -->';
