@@ -45,9 +45,9 @@ class Generic
      * @param string $type
      * @return string
      */
-    public function getAttributeCode($type)
+    public function getAttributeCode($type, $store = null, $scope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE)
     {
-        return $this->_helper->getConfig('feeds/' . $type . '_code');
+        return $this->_helper->getConfig('feeds/' . $type . '_code', $store, $scope);
     }
 
     /**

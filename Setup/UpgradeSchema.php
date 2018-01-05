@@ -36,9 +36,9 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         /** handle all possible upgrade versions */
 
-        if (!$context->getVersion()) {
-
-        }
+//        if (!$context->getVersion()) {
+//
+//        }
 
         if (version_compare($context->getVersion(), '7.0.1.1') < 0) {
 

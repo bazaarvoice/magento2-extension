@@ -26,10 +26,12 @@ use Magento\Catalog\Helper\Image;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Indexer\IndexerInterface;
 use Magento\Framework\ObjectManagerInterface;
+use Magento\Setup\Exception;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Store\Model\Website;
@@ -50,6 +52,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
     protected $_collectionFactory;
     protected $_resourceConnection;
     protected $_storeLocales;
+    protected $_scopeConfig;
 
     /**
      * Indexer constructor.
@@ -67,8 +70,9 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         ObjectManagerInterface $objectManager,
         StoreManagerInterface $storeManager,
         Collection\Factory $collectionFactory,
-        ResourceConnection $resourceConnection)
-    {
+        ResourceConnection $resourceConnection,
+	    ScopeConfigInterface $scopeConfig
+    ) {
         $this->_logger = $logger;
         $this->_helper = $helper;
         $this->_storeManager = $storeManager;
@@ -76,6 +80,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         $this->_indexer = $indexerInterface->load('bazaarvoice_product');
         $this->_collectionFactory = $collectionFactory;
         $this->_resourceConnection = $resourceConnection;
+        $this->_scopeConfig = $scopeConfig;
 
         $this->_generationScope = $helper->getConfig('feeds/generation_scope');
 
@@ -124,11 +129,26 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         }
     }
 
-    /**
-     * @return mixed
-     */
+	/**
+	 * Check if flat tables are enabled
+	 *
+	 * @return bool
+	 * @throws Exception
+	 */
+	public function canIndex() {
+	    if ($this->_scopeConfig->getValue('catalog/frontend/flat_catalog_product') == false
+	        || $this->_scopeConfig->getValue('catalog/frontend/flat_catalog_category') == false)
+		    throw new Exception('Bazaarvoice Product feed requires Catalog Flat Tables to be enabled. Please check your Store Config.');
+	    return true;
+    }
+
+	/**
+	 * @return mixed
+	 * @throws Exception
+	 */
     public function executeFull()
     {
+	    $this->canIndex();
         $this->_logger->info('Full Product Feed Index');
         try {
             /** @var Collection $incompleteIndex */
@@ -149,14 +169,17 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         return true;
     }
 
-    /**
-     * Update a batch of index rows
-     *
-     * @param \int[] $ids
-     * @return mixed
-     */
+	/**
+	 * Update a batch of index rows
+	 *
+	 * @param \int[] $ids
+	 *
+	 * @return mixed
+	 * @throws Exception
+	 */
     public function execute($ids = array())
     {
+	    $this->canIndex();
         try {
             $this->_logger->info('Partial Product Feed Index');
 
@@ -248,11 +271,14 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         $this->_purgeUnversioned($productIds);
     }
 
-    /**
-     * Prepare for full reindex
-     */
+	/**
+	 * Prepare for full reindex
+	 * @throws Exception
+	 * @throws \Zend_Db_Statement_Exception
+	 */
     protected function flushIndex()
     {
+	    $this->canIndex();
         /** Set indexer to use mview */
         $this->_indexer->setScheduled(true);
 
@@ -648,7 +674,10 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         $write->query($delete);
     }
 
-    protected function logStats()
+	/**
+	 * @throws \Zend_Db_Statement_Exception
+	 */
+	protected function logStats()
     {
         /** @var Select $select */
         $select = $this->_resourceConnection->getConnection('core_read')
@@ -725,7 +754,11 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         return $placeholders;
     }
 
-    protected function hasBadScopeIndex()
+	/**
+	 * @return bool
+	 * @throws \Zend_Db_Statement_Exception
+	 */
+	protected function hasBadScopeIndex()
     {
         /** @var Select $select */
         $select = $this->_resourceConnection->getConnection('core_read')

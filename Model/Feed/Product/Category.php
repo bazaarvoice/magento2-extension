@@ -56,25 +56,35 @@ class Category extends Generic
         parent::__construct($logger, $helper, $objectManager);
     }
 
-    public function processCategoriesForStore(XMLWriter $writer, Store $store)
+	/**
+	 * @param XMLWriter $writer
+	 * @param Store $store
+	 *
+	 * @throws \Exception
+	 */
+	public function processCategoriesForStore(XMLWriter $writer, Store $store)
     {
         $this->processCategories($writer, $store);
     }
 
-    /** 
-     * @param XMLWriter $writer
-     * @param Group $storeGroup
-     */
+	/**
+	 * @param XMLWriter $writer
+	 * @param Group $storeGroup
+	 *
+	 * @throws \Exception
+	 */
     public function processCategoriesForStoreGroup(XMLWriter $writer, Group $storeGroup)
     {
         $locales = $this->getLocales($storeGroup->getStoreIds());
         $this->processCategories($writer, $storeGroup->getDefaultStore(), $locales);
     }
 
-    /** 
-     * @param XMLWriter $writer
-     * @param Website $website
-     */
+	/**
+	 * @param XMLWriter $writer
+	 * @param Website $website
+	 *
+	 * @throws \Exception
+	 */
     public function processCategoriesForWebsite(XMLWriter $writer, Website $website)
     {
         $locales = $this->getLocales($website->getStoreIds());
@@ -82,9 +92,11 @@ class Category extends Generic
         $this->processCategories($writer, $website->getDefaultStore(), $locales);
     }
 
-    /** 
-     * @param XMLWriter $writer
-     */
+	/**
+	 * @param XMLWriter $writer
+	 *
+	 * @throws \Exception
+	 */
     public function processCategoriesForGlobal(XMLWriter $writer)
     {
         $storesList = $this->_objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStores();
@@ -231,10 +243,12 @@ class Category extends Generic
         return $url;
     }
 
-    /**
-     * @param Store $store
-     * @return \Magento\Catalog\Model\ResourceModel\Category\Collection
-     */
+	/**
+	 * @param Store $store
+	 *
+	 * @return \Magento\Catalog\Model\ResourceModel\Category\Collection
+	 * @throws \Magento\Framework\Exception\LocalizedException
+	 */
     protected function getProductCollection($store)
     {
         $rootCategoryId = $store->getRootCategoryId();

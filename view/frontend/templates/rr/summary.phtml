@@ -1,4 +1,5 @@
-<?php /**
+<?php
+/**
  * StoreFront Bazaarvoice Extension for Magento
  *
  * PHP Version 5
@@ -12,9 +13,12 @@
  * @copyright 2016 StoreFront Consulting, Inc
  * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
  * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
- */ ?>
+ */
+?>
 <?php /** @var \Bazaarvoice\Connector\Block\Reviews $this */ ?>
-<?php if ($this->isEnabled()): ?>
-    <!-- foo -->
-<div id="BVRRSummaryContainer" style="display:table-row"><?php echo $this->getAggregateSEOContent() ?></div>
+<?php if ($this->isEnabled()) : ?>
+    <div data-bv-show="rating_summary"
+         data-bv-productId="<?php echo $this->getProductSku() ?>">
+        <?php echo $this->getAggregateSEOContent() ?>
+    </div>
 <?php endif;

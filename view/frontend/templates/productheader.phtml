@@ -17,42 +17,52 @@
 ?>
 <?php /** @var Bazaarvoice\Connector\Block\Product $this */ ?>
 
-<?php if ($this->isEnabled()): ?>
-    <!--suppress ALL -->
-    <script type="text/javascript">
-        var bvConfigData = {};
-<?php if ($this->getProductId()) : ?>
-        bvConfigData.productId = "<?php echo $this->getProductSku() ?>";
-<?php endif; ?>
-        $BV.configure("global", bvConfigData);
-    </script>
-<?php if ($this->isConfigurable()): ?>
+<?php if ($this->isEnabled()) : ?>
+<?php if ($this->isConfigurable()) : ?>
     <script type="text/javascript">
         var bvChildren = <?php echo $this->getChildrenJson(); ?>;
         var bvSelected = "<?php echo $this->getProductSku() ?>";
-        require(["jquery", "jquery/ui", "swatchRenderer"], function ($) {
-
-            jQuery('.swatch-option').live("mouseout", function(){
-                var bvCurrent = '';
-                jQuery('.swatch-attribute').each(function(){
-                    bvCurrent = bvCurrent + jQuery(this).attr('attribute-id') + '_' + jQuery(this).attr('option-selected') + '_';
-                });
-                console.log(bvCurrent);
-                if (bvChildren[bvCurrent] != undefined && bvChildren[bvCurrent] != bvSelected) {
-                    console.log("switching to " + bvChildren[bvCurrent]);
-                    bvConfigData.productId = bvChildren[bvCurrent];
-                    $BV.configure("global", bvConfigData);
-                    $BV.ui( 'rr', 'show_reviews', {
-                        doShowContent : function () {
-                            <?php echo $this->getConfig('rr/do_show_content_js'); ?>
-                        }
+        require(["jquery"], function ($) {
+            function bindBvSwatches() {
+                $('#product-options-wrapper').on('mouseout', '.swatch-option', function () {
+                    var bvCurrent = '';
+                    $('.swatch-attribute').each(function () {
+                        bvCurrent = bvCurrent
+                            + $(this).attr('attribute-id') + '_'
+                            + $(this).attr('option-selected') + '_';
                     });
-                    bvSelected = bvChildren[bvCurrent];
-                }
-            });
+                    console.log(bvCurrent);
+                    if (bvChildren[bvCurrent] != undefined && bvChildren[bvCurrent] != bvSelected) {
+                        var externalId = bvChildren[bvCurrent];
+                        console.log("switching to " + externalId);
+                        bvSelected = bvChildren[bvCurrent];
+                        $('div[data-bv-show=reviews]').attr('data-bv-productid', externalId)
+                        BV.reviews.render($('div[data-bv-show=reviews]')[0]);
+                        $('div[data-bv-show=questions]').attr('data-bv-productid', externalId)
+                        BV.questions.render($('div[data-bv-show=questions]')[0]);
+                        $('div[data-bv-show=rating_summary]').attr('data-bv-productid', externalId)
+                        BV.rating_summary.render($('div[data-bv-show=rating_summary]')[0]);
+                    }
+                });
+            }
 
+            $(document).ready(bindBvSwatches());
         });
     </script>
+    <?php endif; ?>
+<?php
+$rrDoShowContentJs = $this->getConfig('rr/do_show_content_js');
+$qaDoShowContentJs = $this->getConfig('qa/do_show_content_js');
+?>
+
+<script async type="text/javascript">
+    window.bvCallback = function (BV) {
+        BV.reviews.on('show', function () {
+            <?php echo $rrDoShowContentJs ?>
+        });
+        BV.questions.on('show', function () {
+            <?php echo $qaDoShowContentJs ?>
+        });
+    };
+</script>
 <?php endif; ?>
-    
-<?php endif;

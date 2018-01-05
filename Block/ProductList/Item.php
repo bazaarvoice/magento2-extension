@@ -50,27 +50,14 @@ class Item extends \Bazaarvoice\Connector\Block\Product
         // @codingStandardsIgnoreEnd
         if ($this->isEnabled()) {
             $productIdentifier = $this->helper->getProductId($this->_product);
-            $this->_productIds[$productIdentifier] = array('url' => $this->_product->getProductUrl());
-            $result = '<div id="BVRRInlineRating_' . $this->_type . '-' . $productIdentifier . '"></div>' . $result;
+            $productUrl = $this->_product->getProductUrl();
+            $result = '
+            <div data-bv-show="inline_rating"
+				 data-bv-productId="' . $productIdentifier . '"
+				 data-bv-redirect-url="' . $productUrl . '"></div>' . $result;
+
         }
         return $result;
     }
 
-    // @codingStandardsIgnoreStart
-    public function afterToHtml(/** @noinspection PhpUnusedParameterInspection */
-        $subject, $result)
-    {
-        // @codingStandardsIgnoreEnd
-        if ($this->isEnabled() && count($this->_productIds)) {
-            $result .= '
-            <!--suppress JSUnresolvedVariable -->
-<script type="text/javascript">
-            $BV.ui("rr", "inline_ratings", {
-                productIds: ' . json_encode($this->_productIds) . ',
-                containerPrefix : "BVRRInlineRating_' . $this->_type .'" 
-            });
-            </script>';
-        }
-        return $result;
-    }
 }

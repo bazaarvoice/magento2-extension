@@ -347,7 +347,11 @@ class PurchaseFeed extends Feed
             
             /** Mark order as sent */
             if ($this->_test == false)
-                $order->setData(self::ALREADY_SENT_IN_FEED_FLAG, true)->save();
+	            try {
+		            $order->setData( self::ALREADY_SENT_IN_FEED_FLAG, true )->save();
+	            } catch ( \Exception $e ) {
+            	    $this->logger->error($e->getMessage());
+	            }
             else
                 break;
         }

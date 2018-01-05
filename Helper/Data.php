@@ -33,12 +33,12 @@ class Data extends AbstractHelper
     }
 
     /**
-     * Get url to bvapi.js javascript API file
+     * Get url to bv.js javascript API file
      *
      * C2013 staging call:
      * ----------------------
      * <code>
-     *   src="//display-stg.ugc.bazaarvoice.com/static/{{ClientName}}/{{DeploymentZoneName}}/{{Locale}}/bvapi.js"
+     *   src="//apps.bazaarvoice.com/deployments/{{ClientName}}/{{DeploymentZoneName}}/{{Environment}}/{{Locale}}/bv.js"
      * </code>
      *
      * @static
@@ -48,32 +48,13 @@ class Data extends AbstractHelper
      */
     public function getBvApiHostUrl($isStatic, $store = null)
     {
-        /** Build hostname based on environment setting */
-        $environment = $this->getConfig('general/environment', $store);
-        if ($environment == 'staging') {
-            $apiHostname =  'display.ugc.bazaarvoice.com/bvstaging';
-        }
-        else {
-            $apiHostname =  'display.ugc.bazaarvoice.com';
-        }
-        /** Build static dir name based on param */
-        if ($isStatic) {
-            $static = 'static/';
-        }
-        else {
-            $static = '';
-        }
-        /** Lookup other config settings */
-        $clientName = $this->getConfig('general/client_name', $store);
-        $deploymentZoneName = $this->getConfig('general/deployment_zone', $store);
-        /** url prep deployment zone */
-        $deploymentZoneName = strtolower(str_replace(' ', '_', $deploymentZoneName));
-        /** Get locale code from BV config,  */
-        /** Note that this doesn't use Magento's locale, this will allow clients to override this and map it as they see fit */
-        $localeCode = $this->getConfig('general/locale', $store);
-        /** Build url string */
-        $url = '//' . $apiHostname . '/' . $static . $clientName . '/' . $deploymentZoneName . '/' . $localeCode;
-        /** Return final url */
+	    $url = '//apps.bazaarvoice.com/deployments/'
+	              . $this->getConfig('general/client_name')
+	              . '/' . strtolower(str_replace(' ', '_', $this->getConfig('general/deployment_zone')))
+	              . '/' . $this->getConfig('general/environment')
+	              . '/' . $this->getConfig('general/locale')
+	              . '/bv.js';
+	    
         return $url;
     }
     

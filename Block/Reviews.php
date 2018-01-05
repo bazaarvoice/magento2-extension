@@ -49,8 +49,8 @@ class Reviews extends Product
             $params = $this->_getParams();
             $bv = new Seosdk($params);
             $seoContent = $bv->reviews->getReviews();
-            $seoContent .= '
-<!-- BV Reviews SEO Parameters: ' . print_r($params, 1) . '-->';
+            if($this->getConfig('general/environment') == 'staging')
+	            $seoContent .= '<!-- BV Reviews SEO Parameters: ' . print_r($params, 1) . '-->';
             return $seoContent;
         }
         return '';

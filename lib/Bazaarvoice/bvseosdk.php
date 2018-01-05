@@ -1,5 +1,6 @@
 <?php
 /** @codingStandardsIgnoreFile */
+
 /**
  * BV PHP SEO SDK
  *
@@ -31,10 +32,6 @@
  */
 require_once 'BVUtility.php';
 require_once 'BVFooter.php';
-
-// Should be declared in file where execTimer will be used.
-// If declared in the another file it does not affect the current file.
-declare(ticks = 1);
 
 // Default charset will be used in case charset parameter is not properly configured by user.
 define('DEFAULT_CHARSET', 'UTF-8');
@@ -235,7 +232,7 @@ class Base {
         : $this->config['execution_timeout'];
 
     // set up combined user agent to be passed to cloud storage (if needed)
-    $this->config['user_agent'] = "bv_php_sdk/3.2.0;" . $_SERVER['HTTP_USER_AGENT'];
+    $this->config['user_agent'] = "bv_php_sdk/3.2.1;" . $_SERVER['HTTP_USER_AGENT'];
   }
 
   protected function validateParams($params) {
@@ -424,12 +421,10 @@ class Base {
       }
 
       try {
-        BVUtility::execTimer($this->config['latency_timeout'], $isBot, $this->start_time);
         $payload = $this->_getFullSeoContents($access_method);
       } catch (Exception $e) {
         $this->_setBuildMessage($e->getMessage());
       }
-      BVUtility::stopTimer();
     }
 
     $payload .= $this->_buildComment($access_method);
@@ -696,7 +691,7 @@ class Base {
     // Should cURL return or print out the data? (true = return, false = print)
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     // Timeout in seconds
-    curl_setopt($ch, CURLOPT_TIMEOUT, ($this->config['latency_timeout'] / 1000));
+    curl_setopt($ch, CURLOPT_TIMEOUT_MS, $this->config['latency_timeout']);
     // Enable decoding of the response
     curl_setopt($ch, CURLOPT_ENCODING, 'gzip,deflate');
     // Enable following of redirects
@@ -970,7 +965,7 @@ class Stories extends Base {
   }
 
   public function getContent() {
-    $payload = $this->_renderSeo('getContent');
+    $payload = $this->_renderSEO('getContent');
     if (!empty($this->config['page_params']['subject_id']) && $this->_checkBVStateContentType()) {
       $subject_id = $this->config['page_params']['subject_id'];
     } else {

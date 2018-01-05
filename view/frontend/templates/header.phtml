@@ -15,8 +15,8 @@
  * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
  */
 ?>
-<?php if ($this->isEnabled()): ?>
+<?php if ($this->isEnabled()) : ?>
 <?php $bvApiUrl = $this->helper->getBvApiHostUrl(true); ?>
     <!--suppress HtmlUnknownTarget -->
-    <script type="text/javascript" src="<?php echo $bvApiUrl ?>/bvapi.js"></script>
+    <script async type="text/javascript" src="<?php echo $bvApiUrl ?>"></script>
 <?php endif;
