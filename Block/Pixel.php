@@ -132,7 +132,7 @@ class Pixel
 
         /** Add partnerSource field */
         $orderDetails['partnerSource'] = 'Magento Extension r' . $this->helper->getExtensionVersion();
-        $orderDetails['deploymentZone'] = $this->helper->getConfig('general/deployment_zone');
+        $orderDetails['deploymentZone'] = strtolower(str_replace(' ', '_', $this->helper->getConfig('general/deployment_zone')));
 
         if($this->helper->getConfig('general/environment') == 'staging') {
 	        $result .= '
