@@ -114,8 +114,8 @@ class PurchaseFeed extends Feed
 
         /** Add filter to limit orders to this store group */
         $orders->getSelect()
-            ->joinLeft('store', 'main_table.store_id = store.store_id', 'store.group_id')
-            ->where('store.group_id = ' . $storeGroup->getId());
+            ->joinLeft(['store_table' => 'store'], 'main_table.store_id = store_table.store_id', 'store_table.group_id')
+            ->where('store_table.group_id = ' . $storeGroup->getId());
         /** Status is 'complete' or 'closed' */
         if ($this->_test == false) {
             $orders->addFieldToFilter('status', array(
@@ -163,8 +163,8 @@ class PurchaseFeed extends Feed
 
         /** Add filter to limit orders to this website */
         $orders->getSelect()
-            ->joinLeft('store', 'main_table.store_id = store.store_id', 'store.website_id')
-            ->where('store.website_id = ' . $website->getId());
+            ->joinLeft(['store_table' => 'store'], 'main_table.store_id = store_table.store_id', 'store_table.website_id')
+            ->where('store_table.website_id = ' . $website->getId());
         /** Status is 'complete' or 'closed' */
         if ($this->_test == false) {
             $orders->addFieldToFilter('status', array(
