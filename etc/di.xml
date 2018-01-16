@@ -54,6 +54,27 @@
             </argument>
         </arguments>
     </type>
+    <!-- Configure the console command feed dependencies as proxies to prevent Feed::__construct() during setup -->
+    <type name="Bazaarvoice\Connector\Console\Command\Product">
+        <arguments>
+            <argument name="productFeed" xsi:type="object">Bazaarvoice\Connector\Model\Feed\ProductFeed\Proxy</argument>
+        </arguments>
+    </type>
+    <type name="Bazaarvoice\Connector\Console\Command\Export">
+        <arguments>
+            <argument name="exporter" xsi:type="object">Bazaarvoice\Connector\Model\Feed\Export\Proxy</argument>
+        </arguments>
+    </type>
+    <type name="Bazaarvoice\Connector\Console\Command\Purchase">
+        <arguments>
+            <argument name="purchaseFeed" xsi:type="object">Bazaarvoice\Connector\Model\Feed\PurchaseFeed\Proxy</argument>
+        </arguments>
+    </type>
+    <type name="Bazaarvoice\Connector\Console\Command\Index">
+        <arguments>
+            <argument name="indexer" xsi:type="object">Bazaarvoice\Connector\Model\Indexer\Flat\Proxy</argument>
+        </arguments>
+    </type>
 
     <!-- Logging -->
     <type name="Bazaarvoice\Connector\Logger\Handler">

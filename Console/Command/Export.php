@@ -17,12 +17,28 @@
 
 namespace Bazaarvoice\Connector\Console\Command;
 
+use Bazaarvoice\Connector\Model\Feed\Export as FeedExport;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputInterface;
 
 class Export extends Command
 {
+    /**
+     * @var FeedExport
+     */
+    protected $_exporter;
+
+    /**
+     * Export constructor.
+     *
+     * @param FeedExport $exporter
+     */
+    public function __construct(FeedExport $exporter)
+    {
+        $this->exporter = $exporter;
+    }
+
     protected function configure()
     {
         $this->setName('bv:export')->setDescription('Generates Bazaarvoice formatted Magento reviews.');
@@ -34,10 +50,8 @@ class Export extends Command
         // @codingStandardsIgnoreEnd
         echo "\n" . 'Memory usage: ' . memory_get_usage() . "\n";
 
-        /** @var \Bazaarvoice\Connector\Model\Feed\Export $exporter */
-        $exporter = \Magento\Framework\App\ObjectManager::getInstance()->get('Bazaarvoice\Connector\Model\Feed\Export');
         try {
-            $exporter->exportReviews();
+            $this->_exporter->exportReviews();
         } Catch (\Exception $e) {
             echo $e->getMessage() . "\n" . $e->getTraceAsString();
         }
