@@ -1,4 +1,5 @@
-<?php /**
+<?php
+/**
  * StoreFront Bazaarvoice Extension for Magento
  *
  * PHP Version 5
@@ -12,21 +13,15 @@
  * @copyright 2016 StoreFront Consulting, Inc
  * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
  * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
- */ ?>
+ */
+?>
 <?php /** @var \Bazaarvoice\Connector\Block\Reviews $this */ ?>
-<?php if ($this->canShow('rr')): ?>
+<?php if ($this->canShow('rr')) : ?>
 <?php
-$doShowContentJs = $this->getConfig('rr/do_show_content_js');
 $seoContent = $this->getSEOContent();
 ?>
-<div id="BVRRContainer">
-    <?php echo $seoContent ?>
-</div>
-<script type="text/javascript">
-    $BV.ui( 'rr', 'show_reviews', {
-        doShowContent : function () {
-            <?php echo $doShowContentJs ?>
-        }
-    });
-</script>
+    <div data-bv-show="reviews"
+         data-bv-productId="<?php echo $this->getProductSku() ?>">
+        <?php echo $seoContent ?>
+    </div>
 <?php endif;

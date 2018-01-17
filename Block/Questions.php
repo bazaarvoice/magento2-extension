@@ -71,7 +71,8 @@ class Questions extends Product
 
             $bv = new Seosdk($params);
             $seoContent = $bv->questions->getContent();
-            $seoContent .= '<!-- BV Questions Parameters: ' . print_r($params, 1) . '-->';
+            if($this->getConfig('general/environment') == 'staging')
+	            $seoContent .= '<!-- BV Questions Parameters: ' . print_r($params, 1) . '-->';
         }
 
         return $seoContent;

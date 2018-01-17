@@ -49,7 +49,13 @@ class Config implements ObserverInterface
     }
 
     // @codingStandardsIgnoreStart
-    public function execute(EventObserver $observer)
+
+	/**
+	 * @param EventObserver $observer
+	 *
+	 * @throws \Magento\Setup\Exception
+	 */
+	public function execute(EventObserver $observer)
     {
         // @codingStandardsIgnoreEnd
         $this->_logger->debug('Store Config Save Event');

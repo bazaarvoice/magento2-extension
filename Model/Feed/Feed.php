@@ -268,20 +268,24 @@ class Feed
 
         /** @var Sftp $sftp */
         $sftp = new Sftp();
-        $sftp->open($params);
+	    try {
+		    $sftp->open( $params );
 
-        $result = $sftp->write($destinationFile, $sourceFile);
-        $this->log('result ' . $result);
-        if ($result) {
-            /** @var \Magento\Framework\Filesystem\Io\File $ioObject */
-            $ioObject = $this->_objectManager->get('Magento\Framework\Filesystem\Io\File');
+		    $result = $sftp->write($destinationFile, $sourceFile);
+		    $this->log('result ' . $result);
+		    if ($result) {
+			    /** @var \Magento\Framework\Filesystem\Io\File $ioObject */
+			    $ioObject = $this->_objectManager->get('Magento\Framework\Filesystem\Io\File');
 
-            $sentFile = dirname($sourceFile) . '/sent/' . basename($sourceFile);
+			    $sentFile = dirname($sourceFile) . '/sent/' . basename($sourceFile);
 
-            $ioObject->setAllowCreateFolders(true);
-            $ioObject->open(array('path' => dirname($sentFile)));
-            $ioObject->mv($sourceFile, $sentFile);
-        }
+			    $ioObject->setAllowCreateFolders(true);
+			    $ioObject->open(array('path' => dirname($sentFile)));
+			    $ioObject->mv($sourceFile, $sentFile);
+		    }
+	    } catch ( \Exception $e ) {
+	    	$this->logger->err($e->getMessage());
+	    }
     }
 
     /**

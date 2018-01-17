@@ -18,6 +18,7 @@
 namespace Bazaarvoice\Connector\Block;
 
 use \Magento\ConfigurableProduct\Model\Product\Type\Configurable;
+use Magento\Framework\Exception\NoSuchEntityException;
 
 class Pixel
 {
@@ -63,10 +64,12 @@ class Pixel
 
         $orderDetails['currency'] = $order->getOrderCurrencyCode();
         $orderDetails['orderId'] = $order->getIncrementId();
-        $orderDetails['total'] = number_format($order->getGrandTotal(), 2, '.', '');
 
+        $total = $order->getGrandTotal() - $order->getTaxAmount() - $order->getShippingAmount();
+        $orderDetails['total'] = number_format($total, 2, '.', '');
         $orderDetails['tax'] = number_format($order->getTaxAmount(), 2, '.', '');
         $orderDetails['shipping'] = number_format($order->getShippingAmount(), 2, '.', '');
+
         $orderDetails['city'] = $address->getCity();
         $orderDetails['state'] = $this->region->load($address->getRegionId())->getCode();
         $orderDetails['country'] = $address->getCountryId();
@@ -80,8 +83,12 @@ class Pixel
         }
         foreach ($items as $itemId => $item) {
             $product = $this->helper->getReviewableProductFromOrderItem($item);
-            $product = $this->productRepo->getById($product->getId());
-            /** skip configurable items if families are enabled */
+	        try {
+		        $product = $this->productRepo->getById( $product->getId() );
+	        } catch ( NoSuchEntityException $e ) {
+	        	continue;
+	        }
+	        /** skip configurable items if families are enabled */
             if (
                 $this->helper->getConfig('general/families')
                 && $product->getTypeId() == Configurable::TYPE_CODE) continue;
@@ -99,8 +106,10 @@ class Pixel
                 if (strpos($itemDetails['imageURL'], 'placeholder/image.jpg')) {
                     /** if product families are enabled and product has no image, use configurable image */
                     $parentId = $item->getParentItem()->getProductId();
-                    $parent = $this->productRepo->getById($parentId);
-                    $itemDetails['imageURL'] = $this->imageHelper->init($parent, 'product_page_image_small')->setImageFile($parent->getImage())->getUrl();
+	                try {
+		                $parent = $this->productRepo->getById( $parentId );
+		                $itemDetails['imageURL'] = $this->imageHelper->init($parent, 'product_page_image_small')->setImageFile($parent->getImage())->getUrl();
+	                } catch ( NoSuchEntityException $e ) { }
                 }
                 /** also get price from parent item */
                 $itemDetails['price'] = number_format($item->getParentItem()->getPrice(), 2, '.', '');
@@ -123,20 +132,14 @@ class Pixel
 
         /** Add partnerSource field */
         $orderDetails['partnerSource'] = 'Magento Extension r' . $this->helper->getExtensionVersion();
-        $orderDetails['deploymentZone'] = $this->helper->getConfig('general/deployment_zone');
+        $orderDetails['deploymentZone'] = strtolower(str_replace(' ', '_', $this->helper->getConfig('general/deployment_zone')));
 
-        $loader = '<script src="//apps.bazaarvoice.com/deployments/'
-            . $this->helper->getConfig('general/client_name')
-            . '/' . strtolower(str_replace(' ', '_', $this->helper->getConfig('general/deployment_zone')))
-            . '/' . $this->helper->getConfig('general/environment')
-            . '/' . $this->helper->getConfig('general/locale')
-            . '/bv.js"></script>';
-
-        $result .= '
-        <!--
-        ' . print_r($orderDetails, 1) . '
-        -->';
-        $result .= $loader."\n";
+        if($this->helper->getConfig('general/environment') == 'staging') {
+	        $result .= '
+	        <!--
+	        ' . print_r( $orderDetails, 1 ) . '
+	        -->';
+        }
         $result .= '
         <script type="text/javascript">
             var transactionData = ' . json_encode($orderDetails, JSON_UNESCAPED_UNICODE) . ';

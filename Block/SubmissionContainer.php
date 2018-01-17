@@ -38,7 +38,6 @@ class SubmissionContainer extends Template
 
     /**
      * @return Template
-     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function _prepareLayout()
     {

@@ -57,12 +57,14 @@ class Index
         return [self::CACHE_TAG . '_' . $this->getId()];
     }
 
-    /**
-     * @param \Magento\Catalog\Model\Product|int $productId
-     * @param \Magento\Store\Model\Store|int $storeId
-     * @param $scope
-     * @return Index
-     */
+	/**
+	 * @param \Magento\Catalog\Model\Product|int $productId
+	 * @param \Magento\Store\Model\Store|int $storeId
+	 * @param $scope
+	 *
+	 * @return Index
+	 * @throws \Magento\Framework\Exception\LocalizedException
+	 */
     public function loadByStore($productId, $storeId, $scope = null)
     {
         if (is_object($productId))
