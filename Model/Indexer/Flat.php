@@ -91,21 +91,44 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 $defaultStore = null;
                 /** @var Store $store */
                 foreach ($stores as $store) {
-                    $localeCode = $this->_helper->getConfig('general/locale', $store->getId());
-                    $this->_storeLocales[$store->getId()][$localeCode] = $store;
+	                if($this->_helper->canSendFeed($store->getId())) {
+		                $localeCode = $this->_helper->getConfig( 'general/locale', $store->getId() );
+		                $this->_storeLocales[ $store->getId() ][ $localeCode ] = $store;
+	                }
                 }
                 break;
             case Scope::WEBSITE:
+	            $websites = $this->_storeManager->getWebsites();
+	            /** @var Website $website */
+	            foreach ($websites as $website) {
+		            $defaultStore = $website->getDefaultStore();
+		            $this->_storeLocales[$defaultStore->getId()] = array();
+		            /** @var Store $localeStore */
+		            foreach ($website->getStores() as $localeStore) {
+			            if($this->_helper->canSendFeed($localeStore->getId())) {
+				            $localeCode = $this->_helper->getConfig( 'general/locale', $localeStore->getId() );
+				            $this->_storeLocales[ $defaultStore->getId() ][ $localeCode ] = $localeStore;
+			            }
+		            }
+		            $defaultLocale = $this->_helper->getConfig('general/locale', $defaultStore);
+		            $this->_storeLocales[$defaultStore->getId()][$defaultLocale] = $defaultStore;
+	            }
+	            break;
             case Scope::SCOPE_GLOBAL:
                 $websites = $this->_storeManager->getWebsites();
+	            $defaultStore = null;
                 /** @var Website $website */
                 foreach ($websites as $website) {
-                    $defaultStore = $website->getDefaultStore();
-                    $this->_storeLocales[$defaultStore->getId()] = array();
+                	if(!$defaultStore) {
+		                $defaultStore = $website->getDefaultStore();
+		                $this->_storeLocales[ $defaultStore->getId() ] = array();
+	                }
                     /** @var Store $localeStore */
                     foreach ($website->getStores() as $localeStore) {
-                        $localeCode = $this->_helper->getConfig('general/locale', $localeStore->getId());
-                        $this->_storeLocales[$defaultStore->getId()][$localeCode] = $localeStore;
+                    	if($this->_helper->canSendFeed($localeStore->getId())) {
+		                    $localeCode = $this->_helper->getConfig( 'general/locale', $localeStore->getId() );
+		                    $this->_storeLocales[ $defaultStore->getId() ][ $localeCode ] = $localeStore;
+	                    }
                     }
                     $defaultLocale = $this->_helper->getConfig('general/locale', $defaultStore);
                     $this->_storeLocales[$defaultStore->getId()][$defaultLocale] = $defaultStore;
@@ -119,8 +142,10 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                     $this->_storeLocales[$defaultStore->getId()] = array();
                     /** @var Store $localeStore */
                     foreach ($group->getStores() as $localeStore) {
-                        $localeCode = $this->_helper->getConfig('general/locale', $localeStore->getId());
-                        $this->_storeLocales[$defaultStore->getId()][$localeCode] = $localeStore;
+	                    if($this->_helper->canSendFeed($localeStore->getId())) {
+		                    $localeCode = $this->_helper->getConfig( 'general/locale', $localeStore->getId() );
+		                    $this->_storeLocales[ $defaultStore->getId() ][ $localeCode ] = $localeStore;
+	                    }
                     }
                     $defaultLocale = $this->_helper->getConfig('general/locale', $defaultStore);
                     $this->_storeLocales[$defaultStore->getId()][$defaultLocale] = $defaultStore;

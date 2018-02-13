@@ -32,6 +32,11 @@ class Data extends AbstractHelper
         return $value;
     }
 
+    public function canSendFeed($storeId)
+    {
+    	return $this->getConfig('general/enable_bv', $storeId) && $this->getConfig('feeds/enable_product_feed', $storeId);
+    }
+
     /**
      * Get url to bv.js javascript API file
      *
