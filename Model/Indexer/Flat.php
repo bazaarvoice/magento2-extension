@@ -242,6 +242,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                     } else {
                         throw new \Exception('Website %s has no default store!', $website->getCode());
                     }
+                    if($this->_generationScope == Scope::SCOPE_GLOBAL) break;
                 }
                 break;
             case Scope::STORE_GROUP:
