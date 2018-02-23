@@ -93,7 +93,8 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 foreach ($stores as $store) {
 	                if($this->_helper->canSendFeed($store->getId())) {
 		                $localeCode = $this->_helper->getConfig( 'general/locale', $store->getId() );
-		                $this->_storeLocales[ $store->getId() ][ $localeCode ] = $store;
+		                if(!empty($localeCode))
+			                $this->_storeLocales[ $store->getId() ][ $localeCode ] = $store;
 	                }
                 }
                 break;
@@ -107,7 +108,8 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 		            foreach ($website->getStores() as $localeStore) {
 			            if($this->_helper->canSendFeed($localeStore->getId())) {
 				            $localeCode = $this->_helper->getConfig( 'general/locale', $localeStore->getId() );
-				            $this->_storeLocales[ $defaultStore->getId() ][ $localeCode ] = $localeStore;
+				            if(!empty($localeCode))
+					            $this->_storeLocales[ $defaultStore->getId() ][ $localeCode ] = $localeStore;
 			            }
 		            }
 		            $defaultLocale = $this->_helper->getConfig('general/locale', $defaultStore);
@@ -127,7 +129,8 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                     foreach ($website->getStores() as $localeStore) {
                     	if($this->_helper->canSendFeed($localeStore->getId())) {
 		                    $localeCode = $this->_helper->getConfig( 'general/locale', $localeStore->getId() );
-		                    $this->_storeLocales[ $defaultStore->getId() ][ $localeCode ] = $localeStore;
+		                    if(!empty($localeCode))
+			                    $this->_storeLocales[ $defaultStore->getId() ][ $localeCode ] = $localeStore;
 	                    }
                     }
                     $defaultLocale = $this->_helper->getConfig('general/locale', $defaultStore);
@@ -144,7 +147,8 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                     foreach ($group->getStores() as $localeStore) {
 	                    if($this->_helper->canSendFeed($localeStore->getId())) {
 		                    $localeCode = $this->_helper->getConfig( 'general/locale', $localeStore->getId() );
-		                    $this->_storeLocales[ $defaultStore->getId() ][ $localeCode ] = $localeStore;
+		                    if(!empty($localeCode))
+			                    $this->_storeLocales[ $defaultStore->getId() ][ $localeCode ] = $localeStore;
 	                    }
                     }
                     $defaultLocale = $this->_helper->getConfig('general/locale', $defaultStore);
