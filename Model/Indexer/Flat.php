@@ -86,75 +86,79 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
 		$this->_generationScope = $helper->getConfig( 'feeds/generation_scope' );
 
-		/** @var Store $store */
-		switch ( $this->_generationScope ) {
-			case Scope::STORE_VIEW:
-				$stores       = $this->_storeManager->getStores();
-				$defaultStore = null;
-				/** @var Store $store */
-				foreach ( $stores as $store ) {
-					if ( $this->_helper->canSendFeed( $store->getId() ) ) {
-						$localeCode                                            = $this->_helper->getConfig( 'general/locale', $store->getId() );
-						$this->_storeLocales[ $store->getId() ][ $localeCode ] = $store;
-					}
-				}
-				break;
-			case Scope::WEBSITE:
-				$websites = $this->_storeManager->getWebsites();
-				/** @var Website $website */
-				foreach ( $websites as $website ) {
-					$defaultStore                                  = $website->getDefaultStore();
-					$this->_storeLocales[ $defaultStore->getId() ] = array();
-					/** @var Store $localeStore */
-					foreach ( $website->getStores() as $localeStore ) {
-						if ( $this->_helper->canSendFeed( $localeStore->getId() ) ) {
-							$localeCode                                                   = $this->_helper->getConfig( 'general/locale', $localeStore->getId() );
-							$this->_storeLocales[ $defaultStore->getId() ][ $localeCode ] = $localeStore;
-						}
-					}
-					$defaultLocale                                                   = $this->_helper->getConfig( 'general/locale', $defaultStore );
-					$this->_storeLocales[ $defaultStore->getId() ][ $defaultLocale ] = $defaultStore;
-				}
-				break;
-			case Scope::SCOPE_GLOBAL:
-				$websites     = $this->_storeManager->getWebsites();
-				$defaultStore = null;
-				/** @var Website $website */
-				foreach ( $websites as $website ) {
-					if ( ! $defaultStore ) {
-						$defaultStore                                  = $website->getDefaultStore();
-						$this->_storeLocales[ $defaultStore->getId() ] = array();
-					}
-					/** @var Store $localeStore */
-					foreach ( $website->getStores() as $localeStore ) {
-						if ( $this->_helper->canSendFeed( $localeStore->getId() ) ) {
-							$localeCode                                                   = $this->_helper->getConfig( 'general/locale', $localeStore->getId() );
-							$this->_storeLocales[ $defaultStore->getId() ][ $localeCode ] = $localeStore;
-						}
-					}
-					$defaultLocale                                                   = $this->_helper->getConfig( 'general/locale', $defaultStore );
-					$this->_storeLocales[ $defaultStore->getId() ][ $defaultLocale ] = $defaultStore;
-				}
-				break;
-			case Scope::STORE_GROUP:
-				$groups = $this->_storeManager->getGroups();
-				/** @var Group $group */
-				foreach ( $groups as $group ) {
-					$defaultStore                                  = $group->getDefaultStore();
-					$this->_storeLocales[ $defaultStore->getId() ] = array();
-					/** @var Store $localeStore */
-					foreach ( $group->getStores() as $localeStore ) {
-						if ( $this->_helper->canSendFeed( $localeStore->getId() ) ) {
-							$localeCode                                                   = $this->_helper->getConfig( 'general/locale', $localeStore->getId() );
-							$this->_storeLocales[ $defaultStore->getId() ][ $localeCode ] = $localeStore;
-						}
-					}
-					$defaultLocale                                                   = $this->_helper->getConfig( 'general/locale', $defaultStore );
-					$this->_storeLocales[ $defaultStore->getId() ][ $defaultLocale ] = $defaultStore;
-				}
-				break;
-		}
-	}
+        /** @var Store $store */
+        switch ($this->_generationScope) {
+            case Scope::STORE_VIEW:
+                $stores = $this->_storeManager->getStores();
+                $defaultStore = null;
+                /** @var Store $store */
+                foreach ($stores as $store) {
+	                if($this->_helper->canSendFeed($store->getId())) {
+		                $localeCode = $this->_helper->getConfig( 'general/locale', $store->getId() );
+		                if(!empty($localeCode))
+			                $this->_storeLocales[ $store->getId() ][ $localeCode ] = $store;
+	                }
+                }
+                break;
+            case Scope::WEBSITE:
+	            $websites = $this->_storeManager->getWebsites();
+	            /** @var Website $website */
+	            foreach ($websites as $website) {
+		            $defaultStore = $website->getDefaultStore();
+		            $this->_storeLocales[$defaultStore->getId()] = array();
+		            /** @var Store $localeStore */
+		            foreach ($website->getStores() as $localeStore) {
+			            if($this->_helper->canSendFeed($localeStore->getId())) {
+				            $localeCode = $this->_helper->getConfig( 'general/locale', $localeStore->getId() );
+				            if(!empty($localeCode))
+					            $this->_storeLocales[ $defaultStore->getId() ][ $localeCode ] = $localeStore;
+			            }
+		            }
+		            $defaultLocale = $this->_helper->getConfig('general/locale', $defaultStore);
+		            $this->_storeLocales[$defaultStore->getId()][$defaultLocale] = $defaultStore;
+	            }
+	            break;
+            case Scope::SCOPE_GLOBAL:
+                $websites = $this->_storeManager->getWebsites();
+	            $defaultStore = null;
+                /** @var Website $website */
+                foreach ($websites as $website) {
+                	if(!$defaultStore) {
+		                $defaultStore = $website->getDefaultStore();
+		                $this->_storeLocales[ $defaultStore->getId() ] = array();
+	                }
+                    /** @var Store $localeStore */
+                    foreach ($website->getStores() as $localeStore) {
+                    	if($this->_helper->canSendFeed($localeStore->getId())) {
+		                    $localeCode = $this->_helper->getConfig( 'general/locale', $localeStore->getId() );
+		                    if(!empty($localeCode))
+			                    $this->_storeLocales[ $defaultStore->getId() ][ $localeCode ] = $localeStore;
+	                    }
+                    }
+                    $defaultLocale = $this->_helper->getConfig('general/locale', $defaultStore);
+                    $this->_storeLocales[$defaultStore->getId()][$defaultLocale] = $defaultStore;
+                }
+                break;
+            case Scope::STORE_GROUP:
+                $groups = $this->_storeManager->getGroups();
+                /** @var Group $group */
+                foreach ($groups as $group) {
+                    $defaultStore = $group->getDefaultStore();
+                    $this->_storeLocales[$defaultStore->getId()] = array();
+                    /** @var Store $localeStore */
+                    foreach ($group->getStores() as $localeStore) {
+	                    if($this->_helper->canSendFeed($localeStore->getId())) {
+		                    $localeCode = $this->_helper->getConfig( 'general/locale', $localeStore->getId() );
+		                    if(!empty($localeCode))
+			                    $this->_storeLocales[ $defaultStore->getId() ][ $localeCode ] = $localeStore;
+	                    }
+                    }
+                    $defaultLocale = $this->_helper->getConfig('general/locale', $defaultStore);
+                    $this->_storeLocales[$defaultStore->getId()][$defaultLocale] = $defaultStore;
+                }
+                break;
+        }
+    }
 
 	/**
 	 * Check if flat tables are enabled
