@@ -25,6 +25,7 @@ use Magento\Framework\App\ResourceConnection;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\Group;
 use Magento\Store\Model\Store;
+use Magento\Store\Model\StoreManagerInterface;
 use Magento\Store\Model\Website;
 use Magento\Framework\ObjectManagerInterface;
 
@@ -46,6 +47,7 @@ class Category extends Generic
     public function __construct(
         Logger $logger,
         Data $helper,
+        StoreManagerInterface $storeManager,
         ObjectManagerInterface $objectManager,
         CategoryFactory $categoryFactory,
         ResourceConnection $resourceConnection
@@ -53,7 +55,7 @@ class Category extends Generic
     {
         $this->_categoryFactory = $categoryFactory;
         $this->_resourceConnection = $resourceConnection;
-        parent::__construct($logger, $helper, $objectManager);
+        parent::__construct($logger, $helper, $storeManager, $objectManager);
     }
 
 	/**
@@ -75,7 +77,7 @@ class Category extends Generic
 	 */
     public function processCategoriesForStoreGroup(XMLWriter $writer, Group $storeGroup)
     {
-        $locales = $this->getLocales($storeGroup->getStoreIds());
+        $locales = $this->getLocales();
         $this->processCategories($writer, $storeGroup->getDefaultStore(), $locales);
     }
 
@@ -87,7 +89,7 @@ class Category extends Generic
 	 */
     public function processCategoriesForWebsite(XMLWriter $writer, Website $website)
     {
-        $locales = $this->getLocales($website->getStoreIds());
+        $locales = $this->getLocales();
 
         $this->processCategories($writer, $website->getDefaultStore(), $locales);
     }
@@ -105,7 +107,7 @@ class Category extends Generic
         foreach ($storesList as $store) {
             $stores[] = $store->getId();
         }
-        $locales = $this->getLocales($stores);
+        $locales = $this->getLocales();
 
         $stores = $this->_objectManager->get('\Magento\Store\Model\StoreManagerInterface')->getStores();
         /** @var Store $store */
@@ -140,9 +142,8 @@ class Category extends Generic
         unset($defaultCollection);
 
         /** get localized data */
-        foreach ($localeStores as $localeCode => $localeStore) {
+        foreach ($localeStores[$defaultStore->getId()] as $localeCode => $localeStore) {
             /** @var Store $localeStore */
-            $localeStore = $this->_objectManager->create('\Magento\Store\Model\Store')->load($localeStore);
             $localeBaseUrl = $localeStore->getBaseUrl();
             $localeStoreCode = $localeStore->getCode();
 

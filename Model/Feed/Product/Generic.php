@@ -18,7 +18,9 @@ namespace Bazaarvoice\Connector\Model\Feed\Product;
 
 use Bazaarvoice\Connector\Helper\Data;
 use Bazaarvoice\Connector\Logger\Logger;
+use Bazaarvoice\Connector\Model\Source\Scope;
 use Magento\Framework\ObjectManagerInterface;
+use Magento\Store\Model\StoreManagerInterface;
 
 class Generic
 {
@@ -26,18 +28,27 @@ class Generic
     protected $_logger;
     protected $_helper;
     protected $_objectManager;
+	protected $_generationScope;
+	protected $_storeManager;
 
-    /**
+	/**
      * Generic constructor.
      * @param Logger $logger
      * @param Data $helper
      * @param ObjectManagerInterface $objectManager
      */
-    public function __construct(Logger $logger, Data $helper, ObjectManagerInterface $objectManager)
-    {
+    public function __construct(
+    	Logger $logger,
+	    Data $helper,
+	    StoreManagerInterface $storeManager,
+	    ObjectManagerInterface $objectManager
+    ) {
         $this->_logger = $logger;
         $this->_helper = $helper;
         $this->_objectManager = $objectManager;
+	    $this->_storeManager = $storeManager;
+
+	    $this->_generationScope = $helper->getConfig('feeds/generation_scope');
     }
 
     /**
@@ -54,13 +65,80 @@ class Generic
      * @param $storeIds
      * @return array
      */
-    protected function getLocales($storeIds)
+    public function getLocales()
     {
         $locales = array();
-        foreach ($storeIds as $storeId) {
-            $localeCode = $this->_helper->getConfig('general/locale', $storeId);
-            $locales[$localeCode] = $storeId;
-        }
+	    switch ($this->_generationScope) {
+		    case Scope::STORE_VIEW:
+			    $stores = $this->_storeManager->getStores();
+			    $defaultStore = null;
+			    /** @var Store $store */
+			    foreach ($stores as $store) {
+				    if($this->_helper->canSendFeed($store->getId())) {
+					    $localeCode = $this->_helper->getConfig( 'general/locale', $store->getId() );
+					    if(!empty($localeCode))
+						    $locales[ $store->getId() ][ $localeCode ] = $store;
+				    }
+			    }
+			    break;
+		    case Scope::WEBSITE:
+			    $websites = $this->_storeManager->getWebsites();
+			    /** @var Website $website */
+			    foreach ($websites as $website) {
+				    $defaultStore = $website->getDefaultStore();
+				    $locales[$defaultStore->getId()] = array();
+				    /** @var Store $localeStore */
+				    foreach ($website->getStores() as $localeStore) {
+					    if($this->_helper->canSendFeed($localeStore->getId())) {
+						    $localeCode = $this->_helper->getConfig( 'general/locale', $localeStore->getId() );
+						    if(!empty($localeCode))
+							    $locales[ $defaultStore->getId() ][ $localeCode ] = $localeStore;
+					    }
+				    }
+				    $defaultLocale = $this->_helper->getConfig('general/locale', $defaultStore);
+				    $locales[$defaultStore->getId()][$defaultLocale] = $defaultStore;
+			    }
+			    break;
+		    case Scope::SCOPE_GLOBAL:
+			    $websites = $this->_storeManager->getWebsites();
+			    $defaultStore = null;
+			    /** @var Website $website */
+			    foreach ($websites as $website) {
+				    if(!$defaultStore) {
+					    $defaultStore = $website->getDefaultStore();
+					    $locales[ $defaultStore->getId() ] = array();
+				    }
+				    /** @var Store $localeStore */
+				    foreach ($website->getStores() as $localeStore) {
+					    if($this->_helper->canSendFeed($localeStore->getId())) {
+						    $localeCode = $this->_helper->getConfig( 'general/locale', $localeStore->getId() );
+						    if(!empty($localeCode))
+							    $locales[ $defaultStore->getId() ][ $localeCode ] = $localeStore;
+					    }
+				    }
+				    $defaultLocale = $this->_helper->getConfig('general/locale', $defaultStore);
+				    $locales[$defaultStore->getId()][$defaultLocale] = $defaultStore;
+			    }
+			    break;
+		    case Scope::STORE_GROUP:
+			    $groups = $this->_storeManager->getGroups();
+			    /** @var Group $group */
+			    foreach ($groups as $group) {
+				    $defaultStore = $group->getDefaultStore();
+				    $locales[$defaultStore->getId()] = array();
+				    /** @var Store $localeStore */
+				    foreach ($group->getStores() as $localeStore) {
+					    if($this->_helper->canSendFeed($localeStore->getId())) {
+						    $localeCode = $this->_helper->getConfig( 'general/locale', $localeStore->getId() );
+						    if(!empty($localeCode))
+							    $locales[ $defaultStore->getId() ][ $localeCode ] = $localeStore;
+					    }
+				    }
+				    $defaultLocale = $this->_helper->getConfig('general/locale', $defaultStore);
+				    $locales[$defaultStore->getId()][$defaultLocale] = $defaultStore;
+			    }
+			    break;
+	    }
         return $locales;
     }
 

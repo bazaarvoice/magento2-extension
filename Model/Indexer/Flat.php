@@ -19,6 +19,7 @@ namespace Bazaarvoice\Connector\Model\Indexer;
 
 use Bazaarvoice\Connector\Helper\Data;
 use Bazaarvoice\Connector\Logger\Logger;
+use Bazaarvoice\Connector\Model\Feed\Product\Generic;
 use Bazaarvoice\Connector\Model\Feed\ProductFeed;
 use Bazaarvoice\Connector\Model\ResourceModel\Index\Collection;
 use Bazaarvoice\Connector\Model\Source\Scope;
@@ -54,115 +55,41 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 	protected $_scopeConfig;
 	protected $_productIdField;
 
-	/**
-	 * Indexer constructor.
-	 *
-	 * @param Logger $logger
-	 * @param Data $helper
-	 * @param IndexerInterface $indexerInterface
-	 * @param ObjectManagerInterface $objectManager
-	 * @param Collection\Factory $collectionFactory
-	 * @param ResourceConnection $resourceConnection
-	 */
-	public function __construct(
-		Logger $logger,
-		Data $helper,
-		IndexerInterface $indexerInterface,
-		ObjectManagerInterface $objectManager,
-		StoreManagerInterface $storeManager,
-		Collection\Factory $collectionFactory,
-		ResourceConnection $resourceConnection,
-		ScopeConfigInterface $scopeConfig
-	) {
-		$this->_logger             = $logger;
-		$this->_helper             = $helper;
-		$this->_storeManager       = $storeManager;
-		$this->_objectManager      = $objectManager;
-		$this->_indexer            = $indexerInterface->load( 'bazaarvoice_product' );
-		$this->_collectionFactory  = $collectionFactory;
-		$this->_resourceConnection = $resourceConnection;
-		$this->_scopeConfig        = $scopeConfig;
-		$this->_productIdField     = $this->getProductIdFieldName();
+    /**
+     * Indexer constructor.
+     *
+     * @param Logger $logger
+     * @param Data $helper
+     * @param IndexerInterface $indexerInterface
+     * @param ObjectManagerInterface $objectManager
+     * @param Collection\Factory $collectionFactory
+     * @param ResourceConnection $resourceConnection
+     */
+    public function __construct(
+        Logger $logger,
+        Data $helper,
+        IndexerInterface $indexerInterface,
+        ObjectManagerInterface $objectManager,
+        StoreManagerInterface $storeManager,
+        Collection\Factory $collectionFactory,
+        ResourceConnection $resourceConnection,
+	    ScopeConfigInterface $scopeConfig,
+		Generic $feed
+    ) {
+        $this->_logger = $logger;
+        $this->_helper = $helper;
+        $this->_storeManager = $storeManager;
+        $this->_objectManager = $objectManager;
+        $this->_indexer = $indexerInterface->load('bazaarvoice_product');
+        $this->_collectionFactory = $collectionFactory;
+        $this->_resourceConnection = $resourceConnection;
+        $this->_scopeConfig = $scopeConfig;
+	    $this->_productIdField     = $this->getProductIdFieldName();
 
 		$this->_generationScope = $helper->getConfig( 'feeds/generation_scope' );
 
-		/** @var Store $store */
-		switch ( $this->_generationScope ) {
-			case Scope::STORE_VIEW:
-				$stores       = $this->_storeManager->getStores();
-				$defaultStore = null;
-				/** @var Store $store */
-				foreach ( $stores as $store ) {
-					if ( $this->_helper->canSendFeed( $store->getId() ) ) {
-						$localeCode = $this->_helper->getConfig( 'general/locale', $store->getId() );
-						if ( ! empty( $localeCode ) ) {
-							$this->_storeLocales[ $store->getId() ][ $localeCode ] = $store;
-						}
-					}
-				}
-				break;
-			case Scope::WEBSITE:
-				$websites = $this->_storeManager->getWebsites();
-				/** @var Website $website */
-				foreach ( $websites as $website ) {
-					$defaultStore                                  = $website->getDefaultStore();
-					$this->_storeLocales[ $defaultStore->getId() ] = array();
-					/** @var Store $localeStore */
-					foreach ( $website->getStores() as $localeStore ) {
-						if ( $this->_helper->canSendFeed( $localeStore->getId() ) ) {
-							$localeCode = $this->_helper->getConfig( 'general/locale', $localeStore->getId() );
-							if ( ! empty( $localeCode ) ) {
-								$this->_storeLocales[ $defaultStore->getId() ][ $localeCode ] = $localeStore;
-							}
-						}
-					}
-					$defaultLocale                                                   = $this->_helper->getConfig( 'general/locale', $defaultStore );
-					$this->_storeLocales[ $defaultStore->getId() ][ $defaultLocale ] = $defaultStore;
-				}
-				break;
-			case Scope::SCOPE_GLOBAL:
-				$websites     = $this->_storeManager->getWebsites();
-				$defaultStore = null;
-				/** @var Website $website */
-				foreach ( $websites as $website ) {
-					if ( ! $defaultStore ) {
-						$defaultStore                                  = $website->getDefaultStore();
-						$this->_storeLocales[ $defaultStore->getId() ] = array();
-					}
-					/** @var Store $localeStore */
-					foreach ( $website->getStores() as $localeStore ) {
-						if ( $this->_helper->canSendFeed( $localeStore->getId() ) ) {
-							$localeCode = $this->_helper->getConfig( 'general/locale', $localeStore->getId() );
-							if ( ! empty( $localeCode ) ) {
-								$this->_storeLocales[ $defaultStore->getId() ][ $localeCode ] = $localeStore;
-							}
-						}
-					}
-					$defaultLocale                                                   = $this->_helper->getConfig( 'general/locale', $defaultStore );
-					$this->_storeLocales[ $defaultStore->getId() ][ $defaultLocale ] = $defaultStore;
-				}
-				break;
-			case Scope::STORE_GROUP:
-				$groups = $this->_storeManager->getGroups();
-				/** @var Group $group */
-				foreach ( $groups as $group ) {
-					$defaultStore                                  = $group->getDefaultStore();
-					$this->_storeLocales[ $defaultStore->getId() ] = array();
-					/** @var Store $localeStore */
-					foreach ( $group->getStores() as $localeStore ) {
-						if ( $this->_helper->canSendFeed( $localeStore->getId() ) ) {
-							$localeCode = $this->_helper->getConfig( 'general/locale', $localeStore->getId() );
-							if ( ! empty( $localeCode ) ) {
-								$this->_storeLocales[ $defaultStore->getId() ][ $localeCode ] = $localeStore;
-							}
-						}
-					}
-					$defaultLocale                                                   = $this->_helper->getConfig( 'general/locale', $defaultStore );
-					$this->_storeLocales[ $defaultStore->getId() ][ $defaultLocale ] = $defaultStore;
-				}
-				break;
-		}
-	}
+        $this->_storeLocales = $feed->getLocales();
+    }
 
 	/**
 	 * Check if flat tables are enabled
