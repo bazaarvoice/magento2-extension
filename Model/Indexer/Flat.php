@@ -34,7 +34,6 @@ use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Indexer\IndexerInterface;
 use Magento\Framework\ObjectManagerInterface;
-use Magento\Setup\Exception;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 
