@@ -24,6 +24,7 @@ use Bazaarvoice\Connector\Model\Feed\ProductFeed;
 use Bazaarvoice\Connector\Model\ResourceModel\Index\Collection;
 use Bazaarvoice\Connector\Model\Source\Scope;
 use Magento\Catalog\Helper\Image;
+use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
@@ -35,8 +36,6 @@ use Magento\Framework\ObjectManagerInterface;
 use Magento\Setup\Exception;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
-use Magento\Store\Model\Website;
-use Magento\Store\Model\Group;
 
 /**
  * Class Flat
@@ -773,10 +772,9 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 	 * @return string
 	 */
 	protected function getProductIdFieldName() {
-		$table     = $this->_defaultIndexerResource->getTable( 'catalog_product_entity' );
-		$indexList = $this->_connection->getIndexList( $table );
-
-		return $indexList[ $this->_connection->getPrimaryKeyName( $table ) ]['COLUMNS_LIST'][0];
+		$connection = $this->_resourceConnection->getConnection('core_read');
+		$indexList = $connection->getIndexList(Product::ENTITY.'_entity');
+		return $indexList[$connection->getPrimaryKeyName(Product::ENTITY.'_entity')]['COLUMNS_LIST'][0];
 	}
 
 }
