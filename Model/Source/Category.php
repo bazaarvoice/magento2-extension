@@ -17,40 +17,98 @@
 
 namespace Bazaarvoice\Connector\Model\Source;
 
-class Category extends \Magento\Eav\Model\Entity\Attribute\Source\AbstractSource
-{
-    const SCOPE_GLOBAL = 'global';
-    const WEBSITE = 'website';
-    const STORE_GROUP = 'group';
-    const STORE_VIEW = 'view';
+use Bazaarvoice\Connector\Model\Feed\ProductFeed;
+use Magento\Catalog\Model\CategoryRepository;
+use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\ResourceModel\Category\Collection;
+use Magento\Framework\Registry;
 
-    public function toOptionArray()
-    {
-        return array(
-            array(
-                'value' => self::SCOPE_GLOBAL,
-                'label' => __('Global')
-            ),
-            array(
-                'value' => self::WEBSITE,
-                'label' => __('Magento Website')
-            ),
-            array(
-                'value' => self::STORE_GROUP,
-                'label' => __('Magento Store / Store Group')
-            ),
-            array(
-                'value' => self::STORE_VIEW,
-                'label' => __('Magento Store View')
-            ),
-        );
-    }
+class Category extends \Magento\Eav\Model\Entity\Attribute\Source\AbstractSource {
+	/** @var Product currentProduct */
+	protected $currentProduct;
+	protected $categories = [];
+	protected $categoryRepository;
+
+	/**
+	 * Category constructor.
+	 *
+	 * @param Registry $registry
+	 * @param Collection $categoryCollection
+	 *
+	 * @param CategoryRepository $categoryRepository
+	 *
+	 * @throws \Magento\Framework\Exception\LocalizedException
+	 */
+	public function __construct(
+		Registry $registry,
+		Collection $categoryCollection,
+		CategoryRepository $categoryRepository
+	) {
+		$this->categoryRepository = $categoryRepository;
+
+		$this->currentProduct = $registry->registry( 'current_product' );
+		if ( $this->currentProduct ) {
+			$collection = $this->currentProduct->getCategoryCollection();
+			$collection->addAttributeToSelect( 'name' );
+			/** @var \Magento\Catalog\Model\Category $category */
+			foreach ( $collection as $category ) {
+				$names = [];
+				foreach ( $category->getParentCategories() as $parent ) {
+					$names[ $parent->getId() ] = $parent->getName();
+				}
+				$names[ $category->getId() ] = $category->getName();
+				$name                        = implode( '/', $names );
+				$this->categories[]          = [
+					'value' => $category->getId(),
+					'label' => $name
+				];
+			}
+		} else {
+			$categoryCollection->addAttributeToSelect( 'name' );
+			foreach ( $categoryCollection as $category ) {
+				$this->categories[] = [
+					'value' => $category->getId(),
+					'label' => $category->getName()
+				];
+			}
+		}
+	}
+
+	/**
+	 * @param int|string $value
+	 *
+	 * @return bool|string
+	 */
+	public function getOptionText( $value ) {
+		return $value;
+	}
+
+
+	public function toOptionArray() {
+		return array_merge( [ [ 'value' => '', 'label' => __( 'Please Select...' ) ] ], $this->categories );
+	}
 
 	/**
 	 * @return array
 	 */
 	public function getAllOptions() {
 		return $this->toOptionArray();
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getFlatColumns() {
+		return [
+			ProductFeed::CATEGORY_EXTERNAL_ID => [
+				'unsigned' => false,
+				'default'  => null,
+				'extra'    => null,
+				'type'     => \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+				'nullable' => true,
+				'comment'  => 'Bazaarvoice Category ID',
+			],
+		];
 	}
 
 
