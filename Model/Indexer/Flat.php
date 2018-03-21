@@ -331,7 +331,8 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 			               'external_id'     => 'p.sku',
 			               'image_url'       => 'p.small_image',
 			               'visibility'      => 'p.visibility',
-			               'bv_feed_exclude' => 'bv_feed_exclude'
+			               'bv_feed_exclude' => 'bv_feed_exclude',
+			               'bv_category_id'  => 'p.bv_category_id'
 		               ) );
 
 		/** parents */
@@ -384,6 +385,14 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 				array( 'parent_cat' => $res->getTableName( 'catalog_category_flat' ) . '_store_' . $storeId ),
 				'parent_cat.entity_id = cpp.category_id AND parent_cat.level > 1',
 				array( 'parent_category_external_id' => 'max(parent_cat.url_path)' ) );
+			$select->joinLeft(
+				array( 'bv_cat' => $res->getTableName( 'catalog_category_flat' ) . '_store_' . $storeId ),
+				'bv_cat.entity_id = p.bv_category_id',
+				array( 'bv_category_external_id' => 'bv_cat.url_path' ) );
+			$select->joinLeft(
+				array( 'bv_parent_cat' => $res->getTableName( 'catalog_category_flat' ) . '_store_' . $storeId ),
+				'bv_parent_cat.entity_id = parent.bv_category_id',
+				array( 'bv_parent_category_external_id' => 'bv_parent_cat.url_path' ) );
 		} else {
 			$select->joinLeft(
 				array( 'cat' => $res->getTableName( 'catalog_category_entity' ) ),
@@ -393,6 +402,14 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 				array( 'parent_cat' => $res->getTableName( 'catalog_category_entity' ) ),
 				'parent_cat.entity_id = cpp.category_id AND parent_cat.level > 1',
 				array( 'parent_category_external_id' => 'max(parent_cat.entity_id)' ) );
+			$select->joinLeft(
+				array( 'bv_cat' => $res->getTableName( 'catalog_category_entity' ) ),
+				'bv_cat.entity_id = p.bv_category_id',
+				array( 'bv_category_external_id' => 'bv_cat.entity_id' ) );
+			$select->joinLeft(
+				array( 'bv_parent_cat' => $res->getTableName( 'catalog_category_entity' ) ),
+				'bv_parent_cat.entity_id = parent.bv_category_id',
+				array( 'bv_parent_category_external_id' => 'bv_parent_cat.entity_id' ) );
 		}
 
 		/** Locale Data */
@@ -514,6 +531,12 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 			} else if ( ! empty( $indexData['family'] ) && ! is_array( $indexData['family'] ) ) {
 				$indexData['family'] = array( $indexData['family'] );
 			}
+
+			/** categories */
+			if($indexData['bv_category_external_id'])
+				$indexData['category_external_id'] = $indexData['bv_category_external_id'];
+			if($indexData['bv_parent_category_external_id'])
+				$indexData['parent_category_external_id'] = $indexData['bv_parent_category_external_id'];
 
 			if ( $this->_helper->getConfig( 'feeds/category_id_use_url_path', $storeId ) ) {
 				$indexData['category_external_id'] = str_replace( '/', '-', $indexData['category_external_id'] );
