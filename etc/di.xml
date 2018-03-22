@@ -15,6 +15,12 @@
     <type name="Magento\Catalog\Block\Product\ProductList\Related">
         <plugin name="bazaarvoice-related" type="Bazaarvoice\Connector\Block\ProductList\Related" sortOrder="100"/>
     </type>
+    <type name="Magento\TargetRule\Block\Catalog\Product\ProductList\Upsell">
+        <plugin name="bazaarvoice-upsell" type="Bazaarvoice\Connector\Block\ProductList\Upsell" sortOrder="100"/>
+    </type>
+    <type name="Magento\TargetRule\Block\Catalog\Product\ProductList\Related">
+        <plugin name="bazaarvoice-related" type="Bazaarvoice\Connector\Block\ProductList\Related" sortOrder="100"/>
+    </type>
     <type name="Magento\Checkout\Block\Cart\Crosssell">
         <plugin name="bazaarvoice-crosssell" type="Bazaarvoice\Connector\Block\ProductList\Crosssell" sortOrder="100"/>
     </type>
