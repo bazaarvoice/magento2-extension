@@ -152,7 +152,7 @@ class ProductFeed extends Feed
      */
     public function getAttributeCode($type)
     {
-        return $this->helper->getConfig('feeds/' . $type . '_code');
+        return $this->_helper->getConfig( 'feeds/' . $type . '_code');
     }
 
     /**
@@ -163,7 +163,7 @@ class ProductFeed extends Feed
     {
 
         /** Get client name for the scope */
-        $clientName = $this->helper->getConfig('general/client_name', $store->getId());
+        $clientName = $this->_helper->getConfig('general/client_name', $store->getId());
 
         /** Create varien io object and write local feed file */
         $writer = parent::openFile(self::FEED_FILE_XSD, $clientName);
@@ -179,17 +179,17 @@ class ProductFeed extends Feed
     {
         /** Build local file name / path */
         $productFeedFilePath = BP . '/var/export/bvfeeds';
-        $scope = $this->helper->getConfig('feeds/generation_scope');
+        $scope = $this->_helper->getConfig('feeds/generation_scope');
         $date = date('U');
 
         $productFeedFileName = "{$productFeedFilePath}/productFeed-{$scope}-{$scopeId}-{$date}.xml";
-        $this->logger->debug("Creating file $productFeedFileName");
+        $this->_logger->debug("Creating file $productFeedFileName");
 
         parent::closeFile($writer, $productFeedFileName);
 
         /** Upload feed */
-        $destinationFile = $this->helper->getConfig('feeds/product_path', $store->getId()) . '/' .
-            $this->helper->getConfig('feeds/product_filename', $store->getId());
+        $destinationFile = $this->_helper->getConfig('feeds/product_path', $store->getId()) . '/' .
+                           $this->_helper->getConfig('feeds/product_filename', $store->getId());
         $this->uploadFeed($productFeedFileName, $destinationFile, $store);
     }
 

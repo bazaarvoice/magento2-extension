@@ -107,7 +107,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
 	/**
 	 * @return mixed
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function executeFull() {
 		$this->canIndex();
@@ -117,13 +117,11 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 			$incompleteIndex = $this->_collectionFactory->create()->addFieldToFilter( 'version_id', 0 );
 
 			if ( $incompleteIndex->count() == 0 ) {
-				$msg = __( 'Bazaarvoice Product Feed Index has been flushed for rebuild.' );
+				$this->_logger->info(__( 'Bazaarvoice Product Feed Index has been flushed for rebuild.' ));
 				$this->flushIndex();
 			} else {
-				$msg = $this->execute( array() );
+				$this->execute( array() );
 			}
-
-			$this->_logger->info( $msg );
 
 		} Catch ( \Exception $e ) {
 			$this->_logger->err( $e->getMessage() . "\n" . $e->getTraceAsString() );

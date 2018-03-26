@@ -57,7 +57,7 @@ class Export extends Feed
         $reviews = $factory->getProductCollection();
         $reviews->addStatusFilter(Review::STATUS_APPROVED);
 
-        $clientName = $this->helper->getConfig('general/client_name', 0);
+        $clientName = $this->_helper->getConfig('general/client_name', 0);
         $export = $this->openFile('', $clientName);
 
         $export->startElement('Reviews');
@@ -73,8 +73,8 @@ class Export extends Feed
             $export->writeElement('Content', $review->getDetail());
             $export->writeElement('Nickname', $review->getNickname());
 
-            $export->writeElement('ProductId', $this->helper->getProductId($review->getSku()));
-            $export->writeElement('ProductName', $this->helper->getProductId($review->getName()));
+            $export->writeElement('ProductId', $this->_helper->getProductId($review->getSku()));
+            $export->writeElement('ProductName', $this->_helper->getProductId($review->getName()));
 
             $export->endElement(); /** Review */
         }
