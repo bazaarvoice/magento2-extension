@@ -32,6 +32,10 @@
         <plugin name="bazaarvoice-bvpixel" type="Bazaarvoice\Connector\Block\Pixel" sortOrder="100"/>
     </type>
 
+    <!--disable core reviews-->
+    <preference for="Magento\Framework\Module\Manager" type="Bazaarvoice\Connector\Plugin\Module\Manager" />
+
+
     <!-- sftp -->
     <preference for="Magento\Framework\Filesystem\Io\Sftp" type="Bazaarvoice\Connector\Model\Filesystem\Io\Sftp" />
 
