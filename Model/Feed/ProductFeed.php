@@ -183,7 +183,7 @@ class ProductFeed extends Feed
         $date = date('U');
 
         $productFeedFileName = "{$productFeedFilePath}/productFeed-{$scope}-{$scopeId}-{$date}.xml";
-        $this->log("Creating file $productFeedFileName");
+        $this->logger->debug("Creating file $productFeedFileName");
 
         parent::closeFile($writer, $productFeedFileName);
 
