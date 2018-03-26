@@ -34,7 +34,8 @@ class Data extends AbstractHelper
 
     public function canSendFeed($storeId)
     {
-    	return $this->getConfig('general/enable_bv', $storeId) && $this->getConfig('feeds/enable_product_feed', $storeId);
+    	return $this->getConfig('general/enable_bv', $storeId) == true
+	           && $this->getConfig('feeds/enable_product_feed', $storeId) == true;
     }
 
     /**

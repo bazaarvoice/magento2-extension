@@ -201,15 +201,34 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
 		switch ( $this->_generationScope ) {
 			case Scope::SCOPE_GLOBAL:
+				$stores = $this->_storeManager->getStores();
+				/** @var \Magento\Store\Model\Store $store */
+				foreach ( $stores as $store ) {
+					if ( $this->_helper->canSendFeed($store->getId()) ) {
+						$this->reindexProductsForStore( $productIds, $store );
+						break;
+					}
+				}
+				break;
 			case Scope::WEBSITE:
 				$websites = $this->_storeManager->getWebsites();
 				/** @var \Magento\Store\Model\Website $website */
 				foreach ( $websites as $website ) {
 					$defaultStore = $website->getDefaultStore();
-					if ( $defaultStore->getId() ) {
+					if (
+						$defaultStore->getId()
+					    && $this->_helper->canSendFeed($defaultStore->getId())
+					) {
 						$this->reindexProductsForStore( $productIds, $defaultStore );
 					} else {
-						throw new \Exception( 'Website %s has no default store!', $website->getCode() );
+						$stores = $website->getStores();
+						/** @var \Magento\Store\Model\Store $store */
+						foreach ( $stores as $store ) {
+							if ( $this->_helper->canSendFeed($store->getId()) ) {
+								$this->reindexProductsForStore( $productIds, $store );
+								break;
+							}
+						}
 					}
 					if ( $this->_generationScope == Scope::SCOPE_GLOBAL ) {
 						break;
@@ -221,10 +240,20 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 				/** @var \Magento\Store\Model\Group $group */
 				foreach ( $groups as $group ) {
 					$defaultStore = $group->getDefaultStore();
-					if ( $defaultStore->getId() ) {
+					if (
+						$defaultStore->getId()
+						&& $this->_helper->canSendFeed($defaultStore->getId())
+					) {
 						$this->reindexProductsForStore( $productIds, $defaultStore );
 					} else {
-						throw new \Exception( 'Store Group %s has no default store!', $group->getName() );
+						$stores = $group->getStores();
+						/** @var \Magento\Store\Model\Store $store */
+						foreach ( $stores as $store ) {
+							if ( $this->_helper->canSendFeed($store->getId()) ) {
+								$this->reindexProductsForStore( $productIds, $store );
+								break;
+							}
+						}
 					}
 				}
 				break;
