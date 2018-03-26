@@ -258,7 +258,7 @@ class PurchaseFeed extends Feed
             $purchaseFeedFileName = dirname($purchaseFeedFileName) . '/test-' . basename($purchaseFeedFileName);
 
         /** Get client name for the scope */
-        $clientName = $this->helper->getConfig('general/client_name', $store->getId());
+        $clientName = $this->_helper->getConfig('general/client_name', $store->getId());
 
         $baseMediaUrl = $store->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog/product';
 
@@ -273,7 +273,7 @@ class PurchaseFeed extends Feed
 
             $writer->writeElement('TransactionDate', $this->getTriggeringEventDate($order));
             $writer->writeElement('EmailAddress', $order->getCustomerEmail());
-            $writer->writeElement('Locale', $this->helper->getConfig('general/locale', $order->getStoreId()));
+            $writer->writeElement('Locale', $this->_helper->getConfig('general/locale', $order->getStoreId()));
             $writer->writeElement('UserName', $order->getBillingAddress()->getFirstname());
 
             if ($order->getCustomerId()) {
@@ -304,7 +304,7 @@ class PurchaseFeed extends Feed
                 $product->setStoreId($order->getStoreId());
                 $product->load($product->getId());
                 
-                $writer->writeElement('ExternalId', $this->helper->getProductId($product));
+                $writer->writeElement('ExternalId', $this->_helper->getProductId($product));
                 $writer->writeElement('Name', $product->getName());
 
                 $imageUrl = $product->getImage();
@@ -350,7 +350,7 @@ class PurchaseFeed extends Feed
 	            try {
 		            $order->setData( self::ALREADY_SENT_IN_FEED_FLAG, true )->save();
 	            } catch ( \Exception $e ) {
-            	    $this->logger->error($e->getMessage());
+            	    $this->_logger->error($e->getMessage());
 	            }
             else
                 break;
@@ -417,7 +417,7 @@ class PurchaseFeed extends Feed
         $writer->startDocument('1.0', 'UTF-8');
         $writer->startElement('Feed');
         $writer->writeAttribute('xmlns', $xmlns);
-        $writer->writeAttribute('generator', 'Magento Extension r' . $this->helper->getExtensionVersion());
+        $writer->writeAttribute('generator', 'Magento Extension r' . $this->_helper->getExtensionVersion());
 
         return $writer;
     }

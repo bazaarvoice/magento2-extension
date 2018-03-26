@@ -15,6 +15,12 @@
     <type name="Magento\Catalog\Block\Product\ProductList\Related">
         <plugin name="bazaarvoice-related" type="Bazaarvoice\Connector\Block\ProductList\Related" sortOrder="100"/>
     </type>
+    <type name="Magento\TargetRule\Block\Catalog\Product\ProductList\Upsell">
+        <plugin name="bazaarvoice-upsell" type="Bazaarvoice\Connector\Block\ProductList\Upsell" sortOrder="100"/>
+    </type>
+    <type name="Magento\TargetRule\Block\Catalog\Product\ProductList\Related">
+        <plugin name="bazaarvoice-related" type="Bazaarvoice\Connector\Block\ProductList\Related" sortOrder="100"/>
+    </type>
     <type name="Magento\Checkout\Block\Cart\Crosssell">
         <plugin name="bazaarvoice-crosssell" type="Bazaarvoice\Connector\Block\ProductList\Crosssell" sortOrder="100"/>
     </type>
@@ -25,6 +31,16 @@
     <type name="Magento\Checkout\Block\Registration">
         <plugin name="bazaarvoice-bvpixel" type="Bazaarvoice\Connector\Block\Pixel" sortOrder="100"/>
     </type>
+
+    <!--disable core reviews-->
+    <preference for="Magento\Framework\Module\Manager" type="Bazaarvoice\Connector\Plugin\Module\Manager" />
+    <type name="Magento\Review\Block\Product\ReviewRenderer">
+        <plugin name="bazaarvoice-pdp-render" type="Bazaarvoice\Connector\Block\Disable" sortOrder="100"/>
+    </type>
+    <type name="Magento\Review\Block\Product\Review">
+        <plugin name="bazaarvoice-pdp" type="Bazaarvoice\Connector\Block\Disable" sortOrder="100"/>
+    </type>
+
 
     <!-- sftp -->
     <preference for="Magento\Framework\Filesystem\Io\Sftp" type="Bazaarvoice\Connector\Model\Filesystem\Io\Sftp" />

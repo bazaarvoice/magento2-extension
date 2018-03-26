@@ -127,7 +127,8 @@ class Brand extends Generic
         $stores = [];
         /** @var StoreInterface $store */
         foreach ($storesList as $store) {
-            $stores[] = $store->getId();
+        	if($this->_helper->getConfig('general/enable_bv', $store->getId()))
+	            $stores[] = $store->getId();
         }
         $brandsByLocale = $this->getOptionsByLocale($attributeCode, $stores);
 

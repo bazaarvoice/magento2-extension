@@ -4,6 +4,8 @@
     <default>
         <bazaarvoice>
             <general>
+                <deployment_zone>main_site</deployment_zone>
+                <families>1</families>
                 <debug>0</debug>
             </general>
             <rr>
@@ -21,6 +23,8 @@
                 <generation_scope>website</generation_scope>
                 <product_filename>productfeed.xml</product_filename>
                 <product_path>/import-inbox</product_path>
+                <bvfamilies_expand>1</bvfamilies_expand>
+                <category_id_use_url_path>0</category_id_use_url_path>
             </feeds>
         </bazaarvoice>
     </default>

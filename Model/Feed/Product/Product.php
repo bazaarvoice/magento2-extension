@@ -22,6 +22,7 @@ use Bazaarvoice\Connector\Model\XMLWriter;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Store\Model\Store;
 use Bazaarvoice\Connector\Model\ResourceModel\Index\Collection;
+use Magento\Store\Model\StoreManagerInterface;
 
 class Product extends Generic
 {
@@ -37,10 +38,11 @@ class Product extends Generic
     public function __construct(
         \Bazaarvoice\Connector\Logger\Logger $logger,
         \Bazaarvoice\Connector\Helper\Data $helper,
+        StoreManagerInterface $storeManager,
         \Magento\Framework\ObjectManagerInterface $objectManager
     )
     {
-        parent::__construct($logger, $helper, $objectManager);
+        parent::__construct($logger, $helper, $storeManager, $objectManager);
     }
 
     /**
