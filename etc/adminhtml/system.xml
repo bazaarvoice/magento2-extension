@@ -24,7 +24,7 @@
                 </field>
                 <field id="deployment_zone" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Deployment Zone</label>
-                    <comment><![CDATA[Deployment Zone Name as defined in your BV platform account]]></comment>
+                    <comment><![CDATA[Default is "main_site". If using "Deployment Zones", enter the Deployment Zone Id defined in the Bazaarvoice Configuration Hub.]]></comment>
                 </field>
                 <field id="locale" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Locale</label>
@@ -52,7 +52,7 @@
                 <field id="debug" translate="label" type="select" sortOrder="500" showInStore="0" showInWebsite="0" showInDefault="1">
                     <label>Debug</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment><![CDATA[Enable additional logging.]]></comment>
+                    <comment><![CDATA[Debug information can be found at bazaarvoice.log See documentation on how to use the bazaarvoice.log file to troubleshoot your implementation.]]></comment>
                 </field>
             </group>
             <group id="rr" translate="label" type="text" sortOrder="200" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -65,18 +65,16 @@
                 <field id="container" translate="label" type="select" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Use Submission Container Page</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment><![CDATA[Turn on BV mobile-friendly submission container page. This replaces the lightbox review submission form on mobile devices. (Container URL: {site url}/bazaarvoice/submission/container)]]></comment>
+                    <comment><![CDATA[The submission container page is used to collect reviews on mobile sites and to redirect users to the proper product page to see reviews. <strong>You must add these two paths into the Bazaarvoice Configuration Hub - STAGING URL: {staging site url}/bazaarvoice/submission/container PRODUCTION URL: {domain}/bazaarvoice/submission/container</strong>]]></comment>
                 </field>
                 <field id="do_show_content_js" translate="label" type="textarea" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>JS Callback function to display R&amp;R content (doShowContent)</label>
-                    <comment><![CDATA[The Bazaarvoice doShowContent javascript callback is triggered when the "read all reviews" link in the review summary is clicked.
-                        You may provide code here that you wish to execute on said click event.  For example, you may want to activate a specific tab on the page.  This
-                    code will be wrapped in a javascript function(){...} block. See your Bazaarvoice Implementation manual for further information.]]></comment>
+                    <label>Show Hidden Content for Reviews (BV.reviews.on)</label>
+                    <comment><![CDATA[Some user actions cause Bazaarvoice features to come into view, such as clicking the ★★★★★ icons in the rating summary, which scrolls to ratings and reviews. If this content is hidden behind a tab, however, you must add custom, page-specific code that calls the bvCallback function to show the correct tab or container. See your Bazaarvoice Implementation manual for further information.]]></comment>
                 </field>
                 <field id="inline_ratings" translate="label" type="multiselect" sortOrder="30" showInDefault="1" showInStore="1" showInWebsite="1">
                     <label>Enable Hosted Inline Ratings</label>
                     <source_model>Bazaarvoice\Connector\Model\Source\ProductList</source_model>
-                    <comment><![CDATA[Turn on BV Hosted inline ratings. This will enable display of product rating statistics in various store areas.  See documentation for additional steps that must be completed for this feature to take effect.]]></comment>
+                    <comment><![CDATA[This places a simple 1-5 out of 5 star rating wherever products are found on the site. Choose which pages you’d like this functionality to be seen. See Documentation on defining where stars can be added across the site.]]></comment>
                 </field>
             </group>
             <group id="qa" translate="label" type="text" sortOrder="300" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -87,10 +85,8 @@
                     <comment><![CDATA[Turn on BV Questions &amp; Answers. This will enable display of Q&amp;A content on your product pages.  See documentation for additional steps that must be completed for this feature to take effect.]]></comment>
                 </field>
                 <field id="do_show_content_js" translate="label" type="textarea" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>JS Callback function to display Q&amp;A content (doShowContent)</label>
-                    <comment><![CDATA[The Bazaarvoice doShowContent javascript callback is triggered when the "read all Q&amp;A" link in the question/answer summary is clicked.
-                        You may provide code here that you wish to execute on said click event.  For example, you may want to activate a specific tab on the page.  This
-                    code will be wrapped in a javascript function(){...} block. See your Bazaarvoice Implementation manual for further information.]]></comment>
+                    <label>Show Hidden Content for Questions (BV.questions.on)</label>
+                    <comment><![CDATA[Some user actions cause Bazaarvoice features to come into view, such as clicking the ★★★★★ icons in the rating summary, which scrolls to ratings and reviews. If this content is hidden behind a tab, however, you must add custom, page-specific code that calls the bvCallback function to show the correct tab or container. See your Bazaarvoice Implementation manual for further information.]]></comment>
                 </field>
             </group>
 
@@ -103,7 +99,7 @@
                 </field>
                 <field id="limit" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Cronjob Frequency (Minutes)</label>
-                    <comment><![CDATA[Product feed index will only process products for this amount of time, to prevent overlapping data updates.]]></comment>
+                    <comment><![CDATA[This should be set to match the frequency you are running the system level Magento cron.  The extension will populate the Bazaarvoice Product Feed Index for this many minutes in batches of 50 products.]]></comment>
                 </field>
                 <field id="generation_scope" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Feed Generation Scope</label>
@@ -166,12 +162,12 @@
                 <field id="bvfamilies_expand" translate="label" type="select" sortOrder="175" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Expand Families in Product Feed</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment><![CDATA[Setting to determine whether simple products show reviews and ratings for their entire product family.]]></comment>
+                    <comment><![CDATA[Yes (Default) Setting to determine whether simple products show reviews and ratings for their entire product family.]]></comment>
                 </field>
                 <field id="category_id_use_url_path" translate="label" type="select" sortOrder="180" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Use category URL path as category id</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment><![CDATA[If true, use Magento category URL path as category id, otherwise use Mage category entity primary key.]]></comment>
+                    <comment><![CDATA[No (Default) If true, use Magento category URL path as category id, otherwise use Mage category entity primary key.]]></comment>
                 </field>
                 <field id="run_product" translate="button_label" type="button"  sortOrder="190" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label/>
@@ -183,7 +179,7 @@
                 <field id="enable_purchase_feed" translate="label" type="select" sortOrder="200" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enable Purchase Feed</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment><![CDATA[Turn on Purchase Feed generation. This will enable generation of a purchase feed to be sent to the BV SFTP server to be used to send post-interaction emails to your customers in order to solicit review submission.  See documentation for additional steps to setup a scheduled job for this feature to take effect.]]></comment>
+                    <comment><![CDATA[Turn on Purchase Feed generation. This will enable generation of a purchase feed to be sent to the BV SFTP server to be used to send post-interaction emails to your customers in order to solicit review submission.  See documentation for additional steps to setup a scheduled job for this feature to take effect. <strong>WARNING Do not enable in production until emails have been tested</strong>]]></comment>
                 </field>
                 <field id="lookback" translate="label" type="text" sortOrder="210" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Purchase Feed Lookback</label>
@@ -199,6 +195,7 @@
                     <button_label><![CDATA[Run Bazaarvoice Purchase Feed Now]]></button_label>
                     <button_url>*/bvfeed/runpurchase</button_url>
                     <frontend_model>Bazaarvoice\Connector\Block\System\Config\Button</frontend_model>
+                    <comment><![CDATA[<strong>WARNING Do not run in production until emails have been tested.</strong>]]></comment>
                 </field>
             </group>
         </section>
