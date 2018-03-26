@@ -15,19 +15,17 @@
  * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
  */
 
-namespace Bazaarvoice\Connector\Plugin\Module;
+namespace Bazaarvoice\Connector\Block;
 
-class Manager extends \Magento\Framework\Module\Manager {
+
+class Disable {
 
 	/**
-	 * @param string $moduleName
-	 *
-	 * @return bool
+	 * @return false|string
 	 */
-	public function isOutputEnabled( $moduleName ) {
-		if($moduleName == 'Magento_Review') return false;
-
-		return parent::isOutputEnabled( $moduleName );
+	public function afterToHtml($subject, $result) {
+		$result = '';
+		return '';
 	}
 
 
