@@ -79,19 +79,7 @@ class Category extends Generic
     public function processCategoriesForStoreGroup(XMLWriter $writer, Group $storeGroup)
     {
         $locales = $this->getLocales();
-
-        if($this->_helper->canSendFeed($storeGroup->getDefaultStoreId())) {
-	        $this->processCategories( $writer, $storeGroup->getDefaultStore(), $locales );
-        } else {
-	        $stores = $storeGroup->getStores();
-	        /** @var \Magento\Store\Model\Store $store */
-	        foreach ( $stores as $store ) {
-		        if ( $this->_helper->canSendFeed($store->getId()) ) {
-			        $this->processCategories( $writer, $store, $locales );
-			        break;
-		        }
-	        }
-        }
+        $this->processCategories($writer, $storeGroup->getDefaultStore(), $locales);
     }
 
 	/**
@@ -104,18 +92,7 @@ class Category extends Generic
     {
         $locales = $this->getLocales();
 
-        if($this->_helper->canSendFeed($website->getDefaultStore()->getId())) {
-	        $this->processCategories( $writer, $website->getDefaultStore(), $locales );
-        } else {
-	        $stores = $website->getStores();
-	        /** @var \Magento\Store\Model\Store $store */
-	        foreach ( $stores as $store ) {
-		        if ( $this->_helper->canSendFeed($store->getId()) ) {
-			        $this->processCategories( $writer, $store, $locales );
-			        break;
-		        }
-	        }
-        }
+        $this->processCategories($writer, $website->getDefaultStore(), $locales);
     }
 
 	/**
@@ -126,6 +103,7 @@ class Category extends Generic
     public function processCategoriesForGlobal(XMLWriter $writer)
     {
         $storesList = $this->_objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStores();
+        ksort($storesList);
         $stores = [];
         $defaultStore = null;
         /** @var StoreInterface $store */
@@ -172,7 +150,6 @@ class Category extends Generic
 
         /** get localized data */
         foreach ($localeStores[$defaultStore->getId()] as $localeCode => $localeStore) {
-        	$this->_logger->info($localeCode.' ('.$localeStore->getId().')');
             /** @var Store $localeStore */
             $localeBaseUrl = $localeStore->getBaseUrl();
             $localeStoreCode = $localeStore->getCode();
