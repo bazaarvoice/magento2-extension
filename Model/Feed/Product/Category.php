@@ -17,6 +17,7 @@
 namespace Bazaarvoice\Connector\Model\Feed\Product;
 
 use Bazaarvoice\Connector\Model\Feed;
+use Bazaarvoice\Connector\Model\Source\Scope;
 use Bazaarvoice\Connector\Model\XMLWriter;
 use Bazaarvoice\Connector\Logger\Logger;
 use Bazaarvoice\Connector\Helper\Data;
@@ -124,7 +125,10 @@ class Category extends Generic
      */
     protected function processCategories(XMLWriter $writer, $defaultStore, $localeStores = array())
     {
-        $defaultCollection = $this->getProductCollection($defaultStore);
+    	if($this->_generationScope == Scope::SCOPE_GLOBAL)
+		    $defaultCollection = $this->getProductCollection();
+    	else
+	        $defaultCollection = $this->getProductCollection($defaultStore);
 
         $baseUrl = $defaultStore->getBaseUrl();
         $categories = array();
@@ -154,10 +158,10 @@ class Category extends Generic
 
             foreach ($localeCollection as $category) {
                 /** Skip categories not in main store */
-                if (!isset($categories[$category->getId()])) continue;
+                if ( !isset($categories[$category->getId()])) continue;
                 $categories[$category->getId()]['names'][$localeCode] = $category->getName();
                 $categories[$category->getId()]['urls'][$localeCode] =
-                    $this->getStoreUrl($localeBaseUrl, $category->getUrlPath(), $localeStoreCode, $baseUrl);
+                    $this->getStoreUrl($localeBaseUrl, $category->getUrlPath(), $localeStoreCode, $categories[$category->getId()]['urls']);
             }
             unset($localeCollection);
         }
@@ -226,23 +230,26 @@ class Category extends Generic
         $writer->endElement(); /** Category */
     }
 
-    /**
-     * @param string $storeUrl
-     * @param string $categoryUrlPath
-     * @param string|null $storeCode
-     * @param string|null $defaultUrl
-     * @return string string
-     */
-    protected function getStoreUrl($storeUrl, $categoryUrlPath, $storeCode = null, $defaultUrl = null)
-    {
-        $url = $storeUrl . $categoryUrlPath;
+	/**
+	 * @param string $storeUrl
+	 * @param string $urlPath
+	 * @param string|null $storeCode
+	 * @param null $currentUrls
+	 *
+	 * @return string string
+	 */
+	protected function getStoreUrl( $storeUrl, $urlPath, $storeCode = null, $currentUrls = null ) {
+		$url = $storeUrl . $urlPath;
 
-        if ($defaultUrl && $storeUrl == $defaultUrl) {
-            $url .= '?___store=' . $storeCode;
-        }
+		if (
+			is_array($currentUrls)
+			&& in_array($url, $currentUrls)
+		) {
+			$url .= '?___store=' . $storeCode;
+		}
 
-        return $url;
-    }
+		return $url;
+	}
 
 	/**
 	 * @param Store $store
@@ -250,12 +257,13 @@ class Category extends Generic
 	 * @return \Magento\Catalog\Model\ResourceModel\Category\Collection
 	 * @throws \Magento\Framework\Exception\LocalizedException
 	 */
-    protected function getProductCollection($store)
-    {
-        $rootCategoryId = $store->getRootCategoryId();
-        /* @var $rootCategory \Magento\Catalog\Model\Category */
-        $rootCategory = $this->_categoryFactory->create()->load($rootCategoryId);
-        $rootCategoryPath = $rootCategory->getData('path');
+    protected function getProductCollection($store = null) {
+	    if ( $store ) {
+		    $rootCategoryId = $store->getRootCategoryId();
+		    /* @var $rootCategory \Magento\Catalog\Model\Category */
+		    $rootCategory     = $this->_categoryFactory->create()->load( $rootCategoryId );
+		    $rootCategoryPath = $rootCategory->getData( 'path' );
+	    }
 
         /** @var \Magento\Catalog\Model\ResourceModel\Category\Collection $collection */
         $collection = $this->_categoryFactory->create()->getCollection();
@@ -266,16 +274,21 @@ class Category extends Generic
          * Include the root category itself in the feed
          */
         $collection
-            ->setStore($store)
             ->addAttributeToFilter('level', array('gt' => 1))
             ->addAttributeToFilter('is_active', 1)
-            ->addAttributeToFilter('path', array('like' => $rootCategoryPath . '/%'))
             ->addAttributeToSelect('name')
             ->addAttributeToSelect('parent_id');
+        if($store) {
+        	if($this->_generationScope != Scope::SCOPE_GLOBAL)
+		        $collection->addAttributeToFilter( 'path', array( 'like' => $rootCategoryPath . '/%' ) );
+	        $collection->setStore( $store );
+        }
 
         $collection->getSelect()
+	        ->distinct(true)
             ->joinLeft(array('url' => $this->_resourceConnection->getTableName('url_rewrite')),
-                "entity_type = 'category' AND url.entity_id = e.entity_id AND url.store_id = {$store->getId()} AND metadata IS NULL AND redirect_type = 0",
+                "entity_type = 'category' AND url.entity_id = e.entity_id "
+	            . (($store) ? " AND url.store_id = {$store->getId()}" : '' ) . " AND metadata IS NULL AND redirect_type = 0",
                 array('url_path' => 'request_path'));
 
         return $collection;

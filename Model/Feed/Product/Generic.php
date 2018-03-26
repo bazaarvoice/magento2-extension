@@ -20,7 +20,10 @@ use Bazaarvoice\Connector\Helper\Data;
 use Bazaarvoice\Connector\Logger\Logger;
 use Bazaarvoice\Connector\Model\Source\Scope;
 use Magento\Framework\ObjectManagerInterface;
+use Magento\Store\Model\Group;
+use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Store\Model\Website;
 
 class Generic
 {
@@ -100,25 +103,18 @@ class Generic
 			    }
 			    break;
 		    case Scope::SCOPE_GLOBAL:
-			    $websites = $this->_storeManager->getWebsites();
-			    $defaultStore = null;
-			    /** @var Website $website */
-			    foreach ($websites as $website) {
-				    if(!$defaultStore) {
-					    $defaultStore = $website->getDefaultStore();
-					    $locales[ $defaultStore->getId() ] = array();
+			    $stores = $this->_storeManager->getStores();
+			    /** @var Store $store */
+			    $defaultStore = array_shift($stores);
+			    foreach ($stores as $store) {
+				    if($this->_helper->canSendFeed($store->getId())) {
+					    $localeCode = $this->_helper->getConfig( 'general/locale', $store->getId() );
+					    if(!empty($localeCode))
+						    $locales[ $defaultStore->getId() ][ $localeCode ] = $store;
 				    }
-				    /** @var Store $localeStore */
-				    foreach ($website->getStores() as $localeStore) {
-					    if($this->_helper->canSendFeed($localeStore->getId())) {
-						    $localeCode = $this->_helper->getConfig( 'general/locale', $localeStore->getId() );
-						    if(!empty($localeCode))
-							    $locales[ $defaultStore->getId() ][ $localeCode ] = $localeStore;
-					    }
-				    }
-				    $defaultLocale = $this->_helper->getConfig('general/locale', $defaultStore);
-				    $locales[$defaultStore->getId()][$defaultLocale] = $defaultStore;
 			    }
+			    $defaultLocale = $this->_helper->getConfig('general/locale', $defaultStore);
+			    $locales[$defaultStore->getId()][$defaultLocale] = $defaultStore;
 			    break;
 		    case Scope::STORE_GROUP:
 			    $groups = $this->_storeManager->getGroups();

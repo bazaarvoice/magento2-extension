@@ -21,7 +21,6 @@ use Bazaarvoice\Connector\Helper\Data;
 use Bazaarvoice\Connector\Logger\Logger;
 use Bazaarvoice\Connector\Model\Feed\Product\Generic;
 use Bazaarvoice\Connector\Model\Feed\ProductFeed;
-use Bazaarvoice\Connector\Model\Index;
 use Bazaarvoice\Connector\Model\ResourceModel\Index\Collection;
 use Bazaarvoice\Connector\Model\Source\Scope;
 use Magento\Catalog\Helper\Image;
@@ -55,44 +54,41 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 	protected $_scopeConfig;
 	protected $_productIdField;
 
-	/**
-	 * Indexer constructor.
-	 *
-	 * @param Logger $logger
-	 * @param Data $helper
-	 * @param IndexerInterface $indexerInterface
-	 * @param ObjectManagerInterface $objectManager
-	 * @param StoreManagerInterface $storeManager
-	 * @param Collection\Factory $collectionFactory
-	 * @param ResourceConnection $resourceConnection
-	 * @param ScopeConfigInterface $scopeConfig
-	 * @param Generic $feed
-	 */
-	public function __construct(
-		Logger $logger,
-		Data $helper,
-		IndexerInterface $indexerInterface,
-		ObjectManagerInterface $objectManager,
-		StoreManagerInterface $storeManager,
-		Collection\Factory $collectionFactory,
-		ResourceConnection $resourceConnection,
-		ScopeConfigInterface $scopeConfig,
+    /**
+     * Indexer constructor.
+     *
+     * @param Logger $logger
+     * @param Data $helper
+     * @param IndexerInterface $indexerInterface
+     * @param ObjectManagerInterface $objectManager
+     * @param Collection\Factory $collectionFactory
+     * @param ResourceConnection $resourceConnection
+     */
+    public function __construct(
+        Logger $logger,
+        Data $helper,
+        IndexerInterface $indexerInterface,
+        ObjectManagerInterface $objectManager,
+        StoreManagerInterface $storeManager,
+        Collection\Factory $collectionFactory,
+        ResourceConnection $resourceConnection,
+	    ScopeConfigInterface $scopeConfig,
 		Generic $feed
-	) {
-		$this->_logger             = $logger;
-		$this->_helper             = $helper;
-		$this->_storeManager       = $storeManager;
-		$this->_objectManager      = $objectManager;
-		$this->_indexer            = $indexerInterface->load( 'bazaarvoice_product' );
-		$this->_collectionFactory  = $collectionFactory;
-		$this->_resourceConnection = $resourceConnection;
-		$this->_scopeConfig        = $scopeConfig;
-		$this->_productIdField     = $this->getProductIdFieldName();
+    ) {
+        $this->_logger = $logger;
+        $this->_helper = $helper;
+        $this->_storeManager = $storeManager;
+        $this->_objectManager = $objectManager;
+        $this->_indexer = $indexerInterface->load('bazaarvoice_product');
+        $this->_collectionFactory = $collectionFactory;
+        $this->_resourceConnection = $resourceConnection;
+        $this->_scopeConfig = $scopeConfig;
+	    $this->_productIdField     = $this->getProductIdFieldName();
 
 		$this->_generationScope = $helper->getConfig( 'feeds/generation_scope' );
 
-		$this->_storeLocales = $feed->getLocales();
-	}
+        $this->_storeLocales = $feed->getLocales();
+    }
 
 	/**
 	 * Check if flat tables are enabled
@@ -150,9 +146,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 			$this->_logger->info( 'Partial Product Feed Index' );
 
 			if ( empty( $ids ) ) {
-				$idCollection = $this->_collectionFactory->create()->addFieldToFilter( 'version_id', 0 );
-				$idCollection->getSelect()->group( 'product_id' );
-				$ids = $idCollection->getColumnValues( 'product_id' );
+				$ids = $this->_collectionFactory->create()->addFieldToFilter( 'version_id', 0 )->getColumnValues( 'product_id' );
 			}
 
 			$this->_logger->info( 'Found ' . count( $ids ) . ' products to update.' );
@@ -269,8 +263,8 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
 		/** Setup dummy rows */
 		$productTable = $this->_resourceConnection->getTableName( 'catalog_product_entity' );
-		$writeAdapter->query( "INSERT INTO `$indexTable` (`product_id`, `version_id`) SELECT DISTINCT `entity_id`, '0' FROM `$productTable`;" );
-		$writeAdapter->query( "INSERT INTO `$changelogTable` (`entity_id`) SELECT DISTINCT `entity_id` FROM `$productTable`;" );
+		$writeAdapter->query( "INSERT INTO `$indexTable` (`product_id`, `version_id`) SELECT `{$this->_productIdField}`, '0' FROM `$productTable`;" );
+		$writeAdapter->query( "INSERT INTO `$changelogTable` (`entity_id`) SELECT `{$this->_productIdField}` FROM `$productTable`;" );
 
 		/** Reset mview version */
 		$mviewTable = $this->_resourceConnection->getTableName( 'mview_state' );
@@ -319,7 +313,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 		               ->from( array( 'p' => $res->getTableName( 'catalog_product_flat' ) . '_' . $storeId ), array(
 			               'name'            => 'p.name',
 			               'product_type'    => 'p.type_id',
-			               'product_id'      => 'p.entity_id',
+			               'product_id'      => 'p.' . $this->_productIdField,
 			               'description'     => 'p.short_description',
 			               'external_id'     => 'p.sku',
 			               'image_url'       => 'p.small_image',
@@ -331,7 +325,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 		$select
 			->joinLeft(
 				array( 'pp' => $res->getTableName( 'catalog_product_super_link' ) ),
-				'pp.product_id = p.entity_id', '' )
+				'pp.product_id = p.' . $this->_productIdField, '' )
 			->joinLeft(
 				array( 'parent' => $res->getTableName( 'catalog_product_flat' ) . '_' . $storeId ),
 				'pp.parent_id = parent.' . $this->_productIdField,
@@ -341,10 +335,14 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 				) )
 			->joinLeft(
 				array( 'cp' => $res->getTableName( 'catalog_category_product_index' ) ),
-				"cp.product_id = p.entity_id AND cp.store_id = {$storeId}", '' )
+				"cp.product_id = p.{$this->_productIdField}" .
+				($this->_generationScope == Scope::SCOPE_GLOBAL ? '' : " AND cp.store_id = {$storeId}"),
+				'' )
 			->joinLeft(
 				array( 'cpp' => $res->getTableName( 'catalog_category_product_index' ) ),
-				"cpp.product_id = parent.entity_id AND cpp.store_id = {$storeId}", '' );
+				"cpp.product_id = parent.{$this->_productIdField}" .
+				($this->_generationScope == Scope::SCOPE_GLOBAL ? '' : " AND cpp.store_id = {$storeId}"),
+				'' );
 
 		/** urls */
 		$select
@@ -352,16 +350,16 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 				array( 'url' => $res->getTableName( 'url_rewrite' ) ),
 				"url.entity_type = 'product'
                 AND url.metadata IS NULL
-                AND url.entity_id = p.entity_id
+                AND url.entity_id = p.{$this->_productIdField}
                 AND url.store_id = {$storeId}",
 				array( 'product_page_url' => 'request_path' ) )
 			->joinLeft(
 				array( 'parent_url' => $res->getTableName( 'url_rewrite' ) ),
 				"parent_url.entity_type = 'product'
                 AND parent_url.metadata IS NULL
-                AND parent_url.entity_id = parent.entity_id
+                AND parent_url.entity_id = parent.{$this->_productIdField}
                 AND parent_url.store_id = {$storeId}",
-				array( 'parent_url' => 'GROUP_CONCAT(DISTINCT parent_url.request_path)' ) );
+				array( 'parent_url' => 'request_path' ) );
 
 		/** category */
 		if ( $this->_helper->getConfig( 'feeds/category_id_use_url_path', $storeId ) ) {
@@ -375,17 +373,17 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 				array( 'parent_category_external_id' => 'max(parent_cat.url_path)' ) );
 		} else {
 			$select->joinLeft(
-				array( 'cat' => $res->getTableName( 'catalog_category_flat' ) . '_store_' . $storeId ),
+				array( 'cat' => $res->getTableName( 'catalog_category_entity' ) ),
 				'cat.entity_id = cp.category_id AND cat.level > 1',
 				array( 'category_external_id' => 'max(cat.entity_id)' ) );
 			$select->joinLeft(
-				array( 'parent_cat' => $res->getTableName( 'catalog_category_flat' ) . '_store_' . $storeId ),
+				array( 'parent_cat' => $res->getTableName( 'catalog_category_entity' ) ),
 				'parent_cat.entity_id = cpp.category_id AND parent_cat.level > 1',
 				array( 'parent_category_external_id' => 'max(parent_cat.entity_id)' ) );
 		}
 
 		/** Locale Data */
-		$localeColumns = array( 'name' => 'name', 'description' => 'short_description', 'image_url' => 'small_image' );
+		$localeColumns = array( 'entity_id' => 'entity_id', 'name' => 'name', 'description' => 'short_description', 'image_url' => 'small_image' );
 		if ( isset( $this->_storeLocales[ $storeId ] ) ) {
 			/** @var Store $localeStore */
 			foreach ( $this->_storeLocales[ $storeId ] as $locale => $localeStore ) {
@@ -395,7 +393,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 						$columns["{$locale}|{$dest}"] = 'p.' . $source;
 					}
 					$columns["{$locale}|product_page_url"] = 'url.request_path';
-					$columns["{$locale}|parent_url"]       = 'GROUP_CONCAT(DISTINCT parent_url.request_path)';
+					$columns["{$locale}|parent_url"]       = 'parent_url.request_path';
 					$columns["{$locale}|parent_image"]     = 'parent.small_image';
 					$select->columns( $columns );
 				} else {
@@ -407,7 +405,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 					$select
 						->joinLeft(
 							array( $locale => $res->getTableName( 'catalog_product_flat' ) . '_' . $localeStore->getId() ),
-							$locale . '.entity_id = p.entity_id',
+							$locale . '.' . $this->_productIdField . ' = p.' . $this->_productIdField,
 							$columns )
 						->joinLeft(
 							array( "{$locale}_parent" => $res->getTableName( 'catalog_product_flat' ) . '_' . $localeStore->getId() ),
@@ -417,16 +415,16 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 							array( "{$locale}_url" => $res->getTableName( 'url_rewrite' ) ),
 							"{$locale}_url.entity_type = 'product'
                             AND {$locale}_url.metadata IS NULL
-                            AND {$locale}_url.entity_id = p.entity_id
+                            AND {$locale}_url.entity_id = p.{$this->_productIdField}
                             AND {$locale}_url.store_id = {$localeStore->getId()}",
 							array( "{$locale}|product_page_url" => 'request_path' ) )
 						->joinLeft(
 							array( "{$locale}_parent_url" => $res->getTableName( 'url_rewrite' ) ),
 							"{$locale}_parent_url.entity_type = 'product'
                             AND {$locale}_parent_url.metadata IS NULL
-                            AND {$locale}_parent_url.entity_id = {$locale}_parent.entity_id
+                            AND {$locale}_parent_url.entity_id = {$locale}_parent.{$this->_productIdField}
                             AND {$locale}_parent_url.store_id = {$localeStore->getId()}",
-							array( "{$locale}|parent_url" => "GROUP_CONCAT(DISTINCT {$locale}_parent_url.request_path)" ) );
+							array( "{$locale}|parent_url" => 'request_path' ) );
 				}
 			}
 		}
@@ -460,12 +458,12 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 		/** Version */
 		$select->joinLeft(
 			array( 'cl' => $res->getTableName( 'bazaarvoice_product_cl' ) ),
-			'cl.entity_id = p.entity_id',
+			'cl.entity_id = p.' . $this->_productIdField,
 			array( 'version_id' => 'MAX(cl.version_id)' ) );
 
-		$select->where( "p.entity_id IN(?)", $productIds )->group( 'p.entity_id' );
+		$select->where( "p.{$this->_productIdField} IN(?)", $productIds )->group( 'p.' . $this->_productIdField );
 
-		/*$this->_logger->debug( $select->__toString() );*/
+		/*$this->_logger->debug($select->__toString());*/
 
 		try {
 			$rows = $select->query();
@@ -516,10 +514,13 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 				if ( ! empty( $indexData['parent_url'] ) ) {
 					$indexData['product_page_url'] = $indexData['parent_url'];
 					$this->_logger->debug( 'Using Parent URL' );
-					if ( isset( $indexData['locale_parent_url'] )
-					     && is_array( $indexData['locale_parent_url'] )
-					) {
-						$indexData['locale_product_page_url'] = $indexData['locale_parent_url'];
+					if ( isset( $indexData['locale_product_page_url'] )
+					     && is_array( $indexData['locale_product_page_url'] ) ) {
+						foreach ( $indexData['locale_product_page_url'] as $locale => $localeUrl ) {
+							if ( ! empty( $indexData['locale_parent_url'][ $locale ] ) ) {
+								$indexData['locale_product_page_url'][ $locale ] = $indexData['locale_parent_url'][ $locale ];
+							}
+						}
 					}
 				} else {
 					$this->_logger->debug( 'Product marked disabled because no parent URL found' );
@@ -531,32 +532,37 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 				}
 			}
 
+			/** Check locales */
+			$productLocales = [];
+			foreach($this->_storeLocales[$storeId] as $locale => $storeLocale) {
+				if(!empty($indexData['locale_entity_id'][$locale]))
+					$productLocales[$locale] = $storeLocale;
+			}
+
 			/** Use parent image if appropriate */
 			if ( $indexData['image_url'] == '' || $indexData['image_url'] == 'no_selection' ) {
 				if ( ! empty( $indexData['parent_image'] ) ) {
 					$indexData['image_url'] = $indexData['parent_image'];
 					$this->_logger->debug( 'Using Parent image' );
+					if ( isset( $indexData['locale_image_url'] )
+					     && is_array( $indexData['locale_image_url'] ) ) {
+						foreach ( $indexData['locale_image_url'] as $locale => $localeUrl ) {
+							if ( ! empty( $indexData['locale_parent_image'][ $locale ] ) ) {
+								$indexData['locale_image_url'][ $locale ] = $indexData['locale_parent_image'][ $locale ];
+							} else {
+								unset( $indexData['locale_image_url'][ $locale ] );
+							}
+						}
+					}
 				} else {
 					$this->_logger->debug( 'Product has no parent and no image' );
 					if ( isset( $placeholders['default'] ) ) {
 						$indexData['image_url'] = $placeholders['default'];
 					}
-				}
-			}
-			foreach ( $this->_storeLocales[ $storeId ] as $locale => $localeStore ) {
-				if ( !isset($indexData['locale_image_url'])
-				     || empty($indexData['locale_image_url'][$locale])
-				     || $indexData['locale_image_url'][$locale] == 'no_selection'
-				) {
-					if ( isset( $indexData['locale_parent_image'] )
-					     && !empty($indexData['locale_parent_image'][ $locale ])
-					     && $indexData['locale_parent_image'][ $locale ] !== 'no_selection'
-					) {
-						$this->_logger->debug("use parent image for $locale");
-						$indexData['locale_image_url'][ $locale ] = $indexData['locale_parent_image'][ $locale ];
-					} else if ( !empty( $placeholders[ $locale ] ) ) {
-						$this->_logger->debug("use placeholder for  $locale");
-						$indexData['locale_image_url'][ $locale ] = $placeholders[ $locale ];
+					foreach ( $productLocales as $locale => $storeLocale ) {
+						if ( isset( $placeholders[ $locale ] ) ) {
+							$indexData['locale_image_url'][ $locale ] = $placeholders[ $locale ];
+						}
 					}
 				}
 			}
@@ -568,20 +574,28 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 				$this->_logger->debug( "Category '{$indexData['category_external_id']}'" );
 			}
 
+			/** Handle missing rewrites */
+			$standardUrl = 'catalog/product/view/id/'.$indexData['product_id'];
+
 			/** Add Store base to URLs */
-			$indexData['product_page_url'] = $this->getStoreUrl( $store->getBaseUrl(), $indexData['product_page_url'] );
-			if ( isset( $indexData['locale_product_page_url'] ) && is_array( $indexData['locale_product_page_url'] ) ) {
-				/** @var Store $storeLocale */
-				foreach ( $this->_storeLocales[ $storeId ] as $locale => $storeLocale ) {
-					if ( isset( $indexData['locale_product_page_url'][ $locale ] ) ) {
-						$indexData['locale_product_page_url'][ $locale ] = $this->getStoreUrl(
-							$storeLocale->getBaseUrl(),
-							$indexData['locale_product_page_url'][ $locale ],
-							$storeLocale->getCode(),
-							$store->getBaseUrl() );
-					}
-				}
+			$indexData['product_page_url'] = $this->getStoreUrl( $store->getBaseUrl(),
+				$indexData['product_page_url'] == '' ? $standardUrl : $indexData['product_page_url'] );
+
+			$localeUrls = [];
+			/** @var Store $storeLocale */
+			foreach ( $productLocales as $locale => $storeLocale ) {
+				$urlPath = isset($indexData['locale_product_page_url'][ $locale ])
+					? $indexData['locale_product_page_url'][ $locale ]
+					: $standardUrl;
+				$localeUrls[ $locale ] = $this->getStoreUrl(
+					$storeLocale->getBaseUrl(),
+					$urlPath,
+					$storeLocale->getCode(),
+					$localeUrls );
 			}
+			$indexData['locale_product_page_url'] = $localeUrls;
+			unset($localeUrls);
+
 			$this->_logger->debug( "URL {$indexData['product_page_url']}" );
 			if ( isset( $indexData['locale_product_page_url'] ) ) {
 				$this->_logger->debug( $indexData['locale_product_page_url'] );
@@ -592,7 +606,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 				$indexData['image_url'] = $store->getBaseUrl( \Magento\Framework\UrlInterface::URL_TYPE_MEDIA ) . 'catalog/product' . $indexData['image_url'];
 				if ( isset( $indexData['locale_image_url'] ) && is_array( $indexData['locale_image_url'] ) ) {
 					/** @var Store $storeLocale */
-					foreach ( $this->_storeLocales[ $storeId ] as $locale => $storeLocale ) {
+					foreach ( $productLocales as $locale => $storeLocale ) {
 						if ( isset( $indexData['locale_image_url'][ $locale ] ) ) {
 							$indexData['locale_image_url'][ $locale ] =
 								$storeLocale->getBaseUrl( \Magento\Framework\UrlInterface::URL_TYPE_MEDIA )
@@ -614,9 +628,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 				}
 			}
 
-			/** @var Index $index */
-			$index = $this->_objectManager->create( '\Bazaarvoice\Connector\Model\Index' );
-			$index->loadByStore( $indexData['product_id'], $indexData['store_id'] );
+			$index = $this->_objectManager->create( '\Bazaarvoice\Connector\Model\Index' )->loadByStore( $indexData['product_id'], $indexData['store_id'] );
 
 			if ( $index->getId() ) {
 				$indexData['entity_id'] = $index->getId();
@@ -626,7 +638,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
 			if ( count( array_diff( $indexData, $index->getData() ) ) ) {
 				$index->setData( $indexData );
-				$index->getResource()->save( $index );
+				$index->save();
 			}
 			$this->_logger->debug( 'Product Indexed' );
 
@@ -641,14 +653,17 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 	 * @param string $storeUrl
 	 * @param string $urlPath
 	 * @param string|null $storeCode
-	 * @param string|null $defaultUrl
+	 * @param null $currentUrls
 	 *
 	 * @return string string
 	 */
-	protected function getStoreUrl( $storeUrl, $urlPath, $storeCode = null, $defaultUrl = null ) {
+	protected function getStoreUrl( $storeUrl, $urlPath, $storeCode = null, $currentUrls = null ) {
 		$url = $storeUrl . $urlPath;
 
-		if ( $defaultUrl && $storeUrl == $defaultUrl ) {
+		if (
+			is_array($currentUrls)
+		    && in_array($url, $currentUrls)
+		) {
 			$url .= '?___store=' . $storeCode;
 		}
 
@@ -743,8 +758,9 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 			);
 			if ( $localeStore->getId() == $storeId ) {
 				$placeholders['default'] = $assetRepo->createAsset( $imageHelper->getPlaceholder( 'image' ), $assetParams )->getUrl();
+			} else {
+				$placeholders[ $locale ] = $assetRepo->createAsset( $imageHelper->getPlaceholder( 'image' ), $assetParams )->getUrl();
 			}
-			$placeholders[ $locale ] = $assetRepo->createAsset( $imageHelper->getPlaceholder( 'image' ), $assetParams )->getUrl();
 
 		}
 
@@ -778,10 +794,9 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 	 * @return string
 	 */
 	protected function getProductIdFieldName() {
-		$connection = $this->_resourceConnection->getConnection( 'core_read' );
-		$indexList  = $connection->getIndexList( Product::ENTITY . '_entity' );
-
-		return $indexList[ $connection->getPrimaryKeyName( Product::ENTITY . '_entity' ) ]['COLUMNS_LIST'][0];
+		$connection = $this->_resourceConnection->getConnection('core_read');
+		$indexList = $connection->getIndexList(Product::ENTITY.'_entity');
+		return $indexList[$connection->getPrimaryKeyName(Product::ENTITY.'_entity')]['COLUMNS_LIST'][0];
 	}
 
 }
