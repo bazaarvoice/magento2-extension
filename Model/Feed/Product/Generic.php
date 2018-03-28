@@ -54,11 +54,15 @@ class Generic
 	    $this->_generationScope = $helper->getConfig('feeds/generation_scope');
     }
 
-    /**
-     * Get custom configured attributes
-     * @param string $type
-     * @return string
-     */
+	/**
+	 * Get custom configured attributes
+	 *
+	 * @param string $type
+	 * @param null $store
+	 * @param string $scope
+	 *
+	 * @return string
+	 */
     public function getAttributeCode($type, $store = null, $scope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE)
     {
         return $this->_helper->getConfig('feeds/' . $type . '_code', $store, $scope);
@@ -103,6 +107,7 @@ class Generic
 			    break;
 		    case Scope::SCOPE_GLOBAL:
 			    $stores = $this->_storeManager->getStores();
+			    ksort($stores);
 			    /** @var Store $store */
 			    $globalLocales = [];
 			    $defaultStore = null;
