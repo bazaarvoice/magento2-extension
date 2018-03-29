@@ -148,25 +148,29 @@ class Category extends Generic
         }
         unset($defaultCollection);
 
-        /** get localized data */
-        foreach ($localeStores[$defaultStore->getId()] as $localeCode => $localeStore) {
-            /** @var Store $localeStore */
-            $localeBaseUrl = $localeStore->getBaseUrl();
-            $localeStoreCode = $localeStore->getCode();
+        if(is_array($localeStores) && !empty($localeStores[$defaultStore->getId()])) {
+	        /** get localized data */
+	        foreach ( $localeStores[ $defaultStore->getId() ] as $localeCode => $localeStore ) {
+		        /** @var Store $localeStore */
+		        $localeBaseUrl   = $localeStore->getBaseUrl();
+		        $localeStoreCode = $localeStore->getCode();
 
-            $localeCollection = $this->getProductCollection($localeStore);
+		        $localeCollection = $this->getProductCollection( $localeStore );
 
-            /** Get store locale */
-            $localeCode = $this->_helper->getConfig('general/locale', $localeStore->getId());
+		        /** Get store locale */
+		        $localeCode = $this->_helper->getConfig( 'general/locale', $localeStore->getId() );
 
-            foreach ($localeCollection as $category) {
-                /** Skip categories not in main store */
-                if ( !isset($categories[$category->getId()])) continue;
-                $categories[$category->getId()]['names'][$localeCode] = $category->getName();
-                $categories[$category->getId()]['urls'][$localeCode] =
-                    $this->getStoreUrl($localeBaseUrl, $category->getUrlPath(), $localeStoreCode, $categories[$category->getId()]['urls']);
-            }
-            unset($localeCollection);
+		        foreach ( $localeCollection as $category ) {
+			        /** Skip categories not in main store */
+			        if ( ! isset( $categories[ $category->getId() ] ) ) {
+				        continue;
+			        }
+			        $categories[ $category->getId() ]['names'][ $localeCode ] = $category->getName();
+			        $categories[ $category->getId() ]['urls'][ $localeCode ]  =
+				        $this->getStoreUrl( $localeBaseUrl, $category->getUrlPath(), $localeStoreCode, $categories[ $category->getId() ]['urls'] );
+		        }
+		        unset( $localeCollection );
+	        }
         }
 
         /** Check count of categories */

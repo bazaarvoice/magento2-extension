@@ -18,22 +18,34 @@
 namespace Bazaarvoice\Connector\Logger;
 
 use Bazaarvoice\Connector\Helper\Data;
+use Magento\Framework\App\State;
 
 class Logger extends \Monolog\Logger
 {
     protected $_helper;
+	protected $admin = false;
 
-    /**
-     * Logger constructor.
-     * @param string $name
-     * @param array|\Monolog\Handler\HandlerInterface[] $handlers
-     * @param Data $helper
-     * @codingStandardsIgnoreStart
-     */
-    public function __construct($name, array $handlers = array(), Data $helper)
-    {
+	/**
+	 * Logger constructor.
+	 *
+	 * @param string $name
+	 * @param array|\Monolog\Handler\HandlerInterface[] $handlers
+	 * @param Data $helper
+	 * @param State $state
+	 *
+	 * @codingStandardsIgnoreStart
+	 */
+    public function __construct(
+    	$name,
+	    array $handlers = array(),
+	    Data $helper,
+		State $state
+    ) {
         /** @codingStandardsIgnoreEnd */
         $this->_helper = $helper;
+        try {
+	        $this->admin = $state->getAreaCode() === 'adminhtml';
+        } Catch (\Exception $e) { }
         parent::__construct($name, $handlers);
     }
 
@@ -61,7 +73,10 @@ class Logger extends \Monolog\Logger
         if (is_array($message))
             $message = print_r($message, 1);
 
-        if (php_sapi_name() == "cli") {
+        if (
+        	php_sapi_name() == "cli"
+	        || $this->admin
+        ) {
             echo $message."\n";
         }
 

@@ -21,6 +21,7 @@ use Bazaarvoice\Connector\Helper\Data;
 use Bazaarvoice\Connector\Logger\Logger;
 use Bazaarvoice\Connector\Model\Feed\Product\Generic;
 use Bazaarvoice\Connector\Model\Feed\ProductFeed;
+use Bazaarvoice\Connector\Model\Index;
 use Bazaarvoice\Connector\Model\ResourceModel\Index\Collection;
 use Bazaarvoice\Connector\Model\Source\Scope;
 use Magento\Catalog\Helper\Image;
@@ -54,16 +55,19 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 	protected $_scopeConfig;
 	protected $_productIdField;
 
-    /**
-     * Indexer constructor.
-     *
-     * @param Logger $logger
-     * @param Data $helper
-     * @param IndexerInterface $indexerInterface
-     * @param ObjectManagerInterface $objectManager
-     * @param Collection\Factory $collectionFactory
-     * @param ResourceConnection $resourceConnection
-     */
+	/**
+	 * Indexer constructor.
+	 *
+	 * @param Logger $logger
+	 * @param Data $helper
+	 * @param IndexerInterface $indexerInterface
+	 * @param ObjectManagerInterface $objectManager
+	 * @param StoreManagerInterface $storeManager
+	 * @param Collection\Factory $collectionFactory
+	 * @param ResourceConnection $resourceConnection
+	 * @param ScopeConfigInterface $scopeConfig
+	 * @param Generic $feed
+	 */
     public function __construct(
         Logger $logger,
         Data $helper,
@@ -144,7 +148,9 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 			$this->_logger->info( 'Partial Product Feed Index' );
 
 			if ( empty( $ids ) ) {
-				$ids = $this->_collectionFactory->create()->addFieldToFilter( 'version_id', 0 )->getColumnValues( 'product_id' );
+				$idCollection = $this->_collectionFactory->create()->addFieldToFilter( 'version_id', 0 );
+				$idCollection->getSelect()->group( 'product_id' );
+				$ids = $idCollection->getColumnValues( 'product_id' );
 			}
 
 			$this->_logger->info( 'Found ' . count( $ids ) . ' products to update.' );
@@ -271,8 +277,8 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
 		/** Setup dummy rows */
 		$productTable = $this->_resourceConnection->getTableName( 'catalog_product_entity' );
-		$writeAdapter->query( "INSERT INTO `$indexTable` (`product_id`, `version_id`) SELECT `{$this->_productIdField}`, '0' FROM `$productTable`;" );
-		$writeAdapter->query( "INSERT INTO `$changelogTable` (`entity_id`) SELECT `{$this->_productIdField}` FROM `$productTable`;" );
+		$writeAdapter->query( "INSERT INTO `$indexTable` (`product_id`, `version_id`) SELECT DISTINCT `entity_id`, '0' FROM `$productTable`;" );
+		$writeAdapter->query( "INSERT INTO `$changelogTable` (`entity_id`) SELECT DISTINCT `entity_id` FROM `$productTable`;" );
 
 		/** Reset mview version */
 		$mviewTable = $this->_resourceConnection->getTableName( 'mview_state' );
@@ -321,7 +327,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 		               ->from( array( 'p' => $res->getTableName( 'catalog_product_flat' ) . '_' . $storeId ), array(
 			               'name'            => 'p.name',
 			               'product_type'    => 'p.type_id',
-			               'product_id'      => 'p.' . $this->_productIdField,
+			               'product_id'      => 'p.entity_id',
 			               'description'     => 'p.short_description',
 			               'external_id'     => 'p.sku',
 			               'image_url'       => 'p.small_image',
@@ -333,7 +339,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 		$select
 			->joinLeft(
 				array( 'pp' => $res->getTableName( 'catalog_product_super_link' ) ),
-				'pp.product_id = p.' . $this->_productIdField, '' )
+				'pp.product_id = p.entity_id', '' )
 			->joinLeft(
 				array( 'parent' => $res->getTableName( 'catalog_product_flat' ) . '_' . $storeId ),
 				'pp.parent_id = parent.' . $this->_productIdField,
@@ -343,12 +349,12 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 				) )
 			->joinLeft(
 				array( 'cp' => $res->getTableName( 'catalog_category_product_index' ) ),
-				"cp.product_id = p.{$this->_productIdField}" .
+				"cp.product_id = p.entity_id" .
 				($this->_generationScope == Scope::SCOPE_GLOBAL ? '' : " AND cp.store_id = {$storeId}"),
 				'' )
 			->joinLeft(
 				array( 'cpp' => $res->getTableName( 'catalog_category_product_index' ) ),
-				"cpp.product_id = parent.{$this->_productIdField}" .
+				"cpp.product_id = parent.entity_id" .
 				($this->_generationScope == Scope::SCOPE_GLOBAL ? '' : " AND cpp.store_id = {$storeId}"),
 				'' );
 
@@ -358,16 +364,16 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 				array( 'url' => $res->getTableName( 'url_rewrite' ) ),
 				"url.entity_type = 'product'
                 AND url.metadata IS NULL
-                AND url.entity_id = p.{$this->_productIdField}
+                AND url.entity_id = p.entity_id
                 AND url.store_id = {$storeId}",
 				array( 'product_page_url' => 'request_path' ) )
 			->joinLeft(
 				array( 'parent_url' => $res->getTableName( 'url_rewrite' ) ),
 				"parent_url.entity_type = 'product'
                 AND parent_url.metadata IS NULL
-                AND parent_url.entity_id = parent.{$this->_productIdField}
+                AND parent_url.entity_id = parent.entity_id
                 AND parent_url.store_id = {$storeId}",
-				array( 'parent_url' => 'request_path' ) );
+				array( 'parent_url' => 'max(parent_url.request_path)' ) );
 
 		/** category */
 		if ( $this->_helper->getConfig( 'feeds/category_id_use_url_path', $storeId ) ) {
@@ -401,7 +407,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 						$columns["{$locale}|{$dest}"] = 'p.' . $source;
 					}
 					$columns["{$locale}|product_page_url"] = 'url.request_path';
-					$columns["{$locale}|parent_url"]       = 'parent_url.request_path';
+					$columns["{$locale}|parent_url"]       = 'max(parent_url.request_path)';
 					$columns["{$locale}|parent_image"]     = 'parent.small_image';
 					$select->columns( $columns );
 				} else {
@@ -413,7 +419,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 					$select
 						->joinLeft(
 							array( $locale => $res->getTableName( 'catalog_product_flat' ) . '_' . $localeStore->getId() ),
-							$locale . '.' . $this->_productIdField . ' = p.' . $this->_productIdField,
+							$locale . '.entity_id = p.entity_id',
 							$columns )
 						->joinLeft(
 							array( "{$locale}_parent" => $res->getTableName( 'catalog_product_flat' ) . '_' . $localeStore->getId() ),
@@ -423,16 +429,16 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 							array( "{$locale}_url" => $res->getTableName( 'url_rewrite' ) ),
 							"{$locale}_url.entity_type = 'product'
                             AND {$locale}_url.metadata IS NULL
-                            AND {$locale}_url.entity_id = p.{$this->_productIdField}
+                            AND {$locale}_url.entity_id = p.entity_id
                             AND {$locale}_url.store_id = {$localeStore->getId()}",
 							array( "{$locale}|product_page_url" => 'request_path' ) )
 						->joinLeft(
 							array( "{$locale}_parent_url" => $res->getTableName( 'url_rewrite' ) ),
 							"{$locale}_parent_url.entity_type = 'product'
                             AND {$locale}_parent_url.metadata IS NULL
-                            AND {$locale}_parent_url.entity_id = {$locale}_parent.{$this->_productIdField}
+                            AND {$locale}_parent_url.entity_id = {$locale}_parent.entity_id
                             AND {$locale}_parent_url.store_id = {$localeStore->getId()}",
-							array( "{$locale}|parent_url" => 'request_path' ) );
+							array( "{$locale}|parent_url" => 'max(request_path)' ) );
 				}
 			}
 		}
@@ -466,10 +472,10 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 		/** Version */
 		$select->joinLeft(
 			array( 'cl' => $res->getTableName( 'bazaarvoice_product_cl' ) ),
-			'cl.entity_id = p.' . $this->_productIdField,
+			'cl.entity_id = p.entity_id',
 			array( 'version_id' => 'MAX(cl.version_id)' ) );
 
-		$select->where( "p.{$this->_productIdField} IN(?)", $productIds )->group( 'p.' . $this->_productIdField );
+		$select->where( "p.entity_id IN(?)", $productIds )->group( 'p.entity_id' );
 
 		/*$this->_logger->debug($select->__toString());*/
 
@@ -636,7 +642,9 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 				}
 			}
 
-			$index = $this->_objectManager->create( '\Bazaarvoice\Connector\Model\Index' )->loadByStore( $indexData['product_id'], $indexData['store_id'] );
+			/** @var Index $index */
+			$index = $this->_objectManager->create( '\Bazaarvoice\Connector\Model\Index' );
+			$index->loadByStore( $indexData['product_id'], $indexData['store_id'] );
 
 			if ( $index->getId() ) {
 				$indexData['entity_id'] = $index->getId();
@@ -646,7 +654,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
 			if ( count( array_diff( $indexData, $index->getData() ) ) ) {
 				$index->setData( $indexData );
-				$index->save();
+				$index->getResource()->save( $index );
 			}
 			$this->_logger->debug( 'Product Indexed' );
 

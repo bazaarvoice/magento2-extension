@@ -92,7 +92,7 @@ class PurchaseFeed extends Feed
                 )
             );
         }
-        $this->log('Found ' . $orders->count() . ' orders to send.');
+        $this->_logger->debug('Found ' . $orders->count() . ' orders to send.');
 
         /** Build local file name / path */
         $purchaseFeedFilePath = BP . '/var/export/bvfeeds';
@@ -138,7 +138,7 @@ class PurchaseFeed extends Feed
                 )
             );
         }
-        $this->log('Found ' . $orders->count() . ' orders to send.');
+        $this->_logger->debug('Found ' . $orders->count() . ' orders to send.');
 
         /** Build local file name / path */
         $purchaseFeedFilePath = BP . '/var/export/bvfeeds';
@@ -187,7 +187,7 @@ class PurchaseFeed extends Feed
                 )
             );
         }
-        $this->log('Found ' . $orders->count() . ' orders to send.');
+        $this->_logger->debug('Found ' . $orders->count() . ' orders to send.');
 
         /** Build local file name / path */
         $purchaseFeedFilePath = BP . '/var/export/bvfeeds';
@@ -231,7 +231,7 @@ class PurchaseFeed extends Feed
                 )
             );
         }
-        $this->log('Found ' . $orders->count() . ' orders to send.');
+        $this->_logger->debug('Found ' . $orders->count() . ' orders to send.');
 
         /** Build local file name / path */
         $purchaseFeedFilePath = BP . '/var/export/bvfeeds';
@@ -357,7 +357,7 @@ class PurchaseFeed extends Feed
         }
 
         $this->closeFile($writer, $purchaseFeedFileName);
-        $this->log("Wrote file $purchaseFeedFileName");
+        $this->_logger->debug("Wrote file $purchaseFeedFileName");
 
         /** Upload feed */
         $destinationFile = '/ppe/inbox/bv_ppe_tag_feed-magento-' . date('U') . '.xml';
