@@ -366,7 +366,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 AND url.metadata IS NULL
                 AND url.entity_id = p.entity_id
                 AND url.store_id = {$storeId}",
-				array( 'product_page_url' => 'request_path' ) )
+				array( 'product_page_url' => 'url.request_path' ) )
 			->joinLeft(
 				array( 'parent_url' => $res->getTableName( 'url_rewrite' ) ),
 				"parent_url.entity_type = 'product'
@@ -447,14 +447,14 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                             AND {$locale}_url.metadata IS NULL
                             AND {$locale}_url.entity_id = p.entity_id
                             AND {$locale}_url.store_id = {$localeStore->getId()}",
-							array( "{$locale}|product_page_url" => 'request_path' ) )
+							array( "{$locale}|product_page_url" => "{$locale}_url.request_path" ) )
 						->joinLeft(
 							array( "{$locale}_parent_url" => $res->getTableName( 'url_rewrite' ) ),
 							"{$locale}_parent_url.entity_type = 'product'
                             AND {$locale}_parent_url.metadata IS NULL
                             AND {$locale}_parent_url.entity_id = {$locale}_parent.entity_id
                             AND {$locale}_parent_url.store_id = {$localeStore->getId()}",
-							array( "{$locale}|parent_url" => 'max(request_path)' ) );
+							array( "{$locale}|parent_url" => "max({$locale}_parent_url.request_path)" ) );
 				}
 			}
 		}
@@ -796,9 +796,8 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 			);
 			if ( $localeStore->getId() == $storeId ) {
 				$placeholders['default'] = $assetRepo->createAsset( $imageHelper->getPlaceholder( 'image' ), $assetParams )->getUrl();
-			} else {
-				$placeholders[ $locale ] = $assetRepo->createAsset( $imageHelper->getPlaceholder( 'image' ), $assetParams )->getUrl();
 			}
+			$placeholders[ $locale ] = $assetRepo->createAsset( $imageHelper->getPlaceholder( 'image' ), $assetParams )->getUrl();
 
 		}
 
