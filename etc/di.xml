@@ -33,7 +33,6 @@
     </type>
 
     <!--disable core reviews-->
-    <preference for="Magento\Framework\Module\Manager" type="Bazaarvoice\Connector\Plugin\Module\Manager" />
     <type name="Magento\Review\Block\Product\ReviewRenderer">
         <plugin name="bazaarvoice-pdp-render" type="Bazaarvoice\Connector\Block\Disable" sortOrder="100"/>
     </type>
