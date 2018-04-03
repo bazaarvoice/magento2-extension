@@ -52,15 +52,12 @@ class Config implements ObserverInterface
 
 	/**
 	 * @param EventObserver $observer
-	 *
-	 * @throws \Magento\Setup\Exception
 	 */
 	public function execute(EventObserver $observer)
     {
         // @codingStandardsIgnoreEnd
         $this->_logger->debug('Store Config Save Event');
-        $this->_indexer->executeFull();
-        $this->_messageManger->addNotice(__('Bazaarvoice Product Feed Index has been flagged for rebuild.'));
+        $this->_messageManger->addNoticeMessage(__('If you change Bazaarvoice Feed Generation Scope, its feed index must be rebuilt.'));
 
     }
 }
