@@ -570,11 +570,14 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
 			/** Check locales */
 			$productLocales = [];
-			foreach($this->_storeLocales[$storeId] as $locale => $storeLocale) {
-				if(!empty($indexData['locale_entity_id'][$locale]))
-					$productLocales[$locale] = $storeLocale;
-			}
-
+			if(!empty($this->_storeLocales[$storeId])) {
+                foreach ( $this->_storeLocales[ $storeId ] as $locale => $storeLocale ) {
+                    if ( ! empty( $indexData['locale_entity_id'][ $locale ] ) ) {
+                        $productLocales[ $locale ] = $storeLocale;
+                    }
+                }
+            }
+$this->_logger->info($indexData['image_url']);
 			/** Use parent image if appropriate */
 			if ( $indexData['image_url'] == '' || $indexData['image_url'] == 'no_selection' ) {
 				if ( ! empty( $indexData['parent_image'] ) ) {
@@ -638,7 +641,12 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 			}
 
 			/** Add Store base to images */
-			if ( substr( $indexData['image_url'], 0, 4 ) != 'http' ) {
+			if(
+                $indexData['image_url'] == ''
+                || $indexData['image_url'] == 'no_selection'
+            ) {
+			    $indexData['image_url'] = '';
+            } elseif ( substr( $indexData['image_url'], 0, 4 ) != 'http' ) {
 				$indexData['image_url'] = $store->getBaseUrl( \Magento\Framework\UrlInterface::URL_TYPE_MEDIA ) . 'catalog/product' . $indexData['image_url'];
 				if ( isset( $indexData['locale_image_url'] ) && is_array( $indexData['locale_image_url'] ) ) {
 					/** @var Store $storeLocale */
@@ -785,21 +793,23 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 		 * @var string $locale
 		 * @var Store $localeStore
 		 */
-		foreach ( $this->_storeLocales[ $storeId ] as $locale => $localeStore ) {
-			$themeId = $design->getConfigurationDesignTheme( 'frontend', [ 'store' => $localeStore->getId() ] );
-			/** @var \Magento\Theme\Model\Theme $theme */
-			$theme       = $this->_objectManager->create( '\Magento\Theme\Model\Theme' )->load( $themeId );
-			$assetParams = array(
-				'area'   => 'frontend',
-				'theme'  => $theme->getThemePath(),
-				'locale' => $locale
-			);
-			if ( $localeStore->getId() == $storeId ) {
-				$placeholders['default'] = $assetRepo->createAsset( $imageHelper->getPlaceholder( 'image' ), $assetParams )->getUrl();
-			}
-			$placeholders[ $locale ] = $assetRepo->createAsset( $imageHelper->getPlaceholder( 'image' ), $assetParams )->getUrl();
+		if(!empty($this->_storeLocales[ $storeId ])) {
+            foreach ( $this->_storeLocales[ $storeId ] as $locale => $localeStore ) {
+                $themeId = $design->getConfigurationDesignTheme( 'frontend', [ 'store' => $localeStore->getId() ] );
+                /** @var \Magento\Theme\Model\Theme $theme */
+                $theme       = $this->_objectManager->create( '\Magento\Theme\Model\Theme' )->load( $themeId );
+                $assetParams = array(
+                    'area'   => 'frontend',
+                    'theme'  => $theme->getThemePath(),
+                    'locale' => $locale
+                );
+                if ( $localeStore->getId() == $storeId ) {
+                    $placeholders['default'] = $assetRepo->createAsset( $imageHelper->getPlaceholder( 'image' ), $assetParams )->getUrl();
+                }
+                $placeholders[ $locale ] = $assetRepo->createAsset( $imageHelper->getPlaceholder( 'image' ), $assetParams )->getUrl();
 
-		}
+            }
+        }
 
 		return $placeholders;
 	}
