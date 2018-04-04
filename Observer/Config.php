@@ -57,7 +57,7 @@ class Config implements ObserverInterface
     {
         // @codingStandardsIgnoreEnd
         $this->_logger->debug('Store Config Save Event');
-        $this->_messageManger->addNoticeMessage(__('If you change Bazaarvoice Feed Generation Scope, its feed index must be rebuilt.'));
+        $this->_messageManger->addNoticeMessage(__('Some configuration changes require the Bazaarvoice Product Feed Index to be rebuilt.  This can be done by running the bv:index magento command or click Rebuild Index in Catalog > Bazaarvoice Product Feed'));
 
     }
 }
