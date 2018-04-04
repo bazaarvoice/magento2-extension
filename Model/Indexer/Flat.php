@@ -34,7 +34,6 @@ use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Indexer\IndexerInterface;
 use Magento\Framework\ObjectManagerInterface;
-use Magento\Setup\Exception;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 
@@ -332,7 +331,8 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 			               'external_id'     => 'p.sku',
 			               'image_url'       => 'p.small_image',
 			               'visibility'      => 'p.visibility',
-			               'bv_feed_exclude' => 'bv_feed_exclude'
+			               'bv_feed_exclude' => 'bv_feed_exclude',
+			               'bv_category_id'  => 'p.bv_category_id'
 		               ) );
 
 		/** parents */
@@ -366,7 +366,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 AND url.metadata IS NULL
                 AND url.entity_id = p.entity_id
                 AND url.store_id = {$storeId}",
-				array( 'product_page_url' => 'request_path' ) )
+				array( 'product_page_url' => 'url.request_path' ) )
 			->joinLeft(
 				array( 'parent_url' => $res->getTableName( 'url_rewrite' ) ),
 				"parent_url.entity_type = 'product'
@@ -385,6 +385,14 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 				array( 'parent_cat' => $res->getTableName( 'catalog_category_flat' ) . '_store_' . $storeId ),
 				'parent_cat.entity_id = cpp.category_id AND parent_cat.level > 1',
 				array( 'parent_category_external_id' => 'max(parent_cat.url_path)' ) );
+			$select->joinLeft(
+				array( 'bv_cat' => $res->getTableName( 'catalog_category_flat' ) . '_store_' . $storeId ),
+				'bv_cat.entity_id = p.bv_category_id',
+				array( 'bv_category_external_id' => 'bv_cat.url_path' ) );
+			$select->joinLeft(
+				array( 'bv_parent_cat' => $res->getTableName( 'catalog_category_flat' ) . '_store_' . $storeId ),
+				'bv_parent_cat.entity_id = parent.bv_category_id',
+				array( 'bv_parent_category_external_id' => 'bv_parent_cat.url_path' ) );
 		} else {
 			$select->joinLeft(
 				array( 'cat' => $res->getTableName( 'catalog_category_entity' ) ),
@@ -394,6 +402,14 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 				array( 'parent_cat' => $res->getTableName( 'catalog_category_entity' ) ),
 				'parent_cat.entity_id = cpp.category_id AND parent_cat.level > 1',
 				array( 'parent_category_external_id' => 'max(parent_cat.entity_id)' ) );
+			$select->joinLeft(
+				array( 'bv_cat' => $res->getTableName( 'catalog_category_entity' ) ),
+				'bv_cat.entity_id = p.bv_category_id',
+				array( 'bv_category_external_id' => 'bv_cat.entity_id' ) );
+			$select->joinLeft(
+				array( 'bv_parent_cat' => $res->getTableName( 'catalog_category_entity' ) ),
+				'bv_parent_cat.entity_id = parent.bv_category_id',
+				array( 'bv_parent_category_external_id' => 'bv_parent_cat.entity_id' ) );
 		}
 
 		/** Locale Data */
@@ -431,14 +447,14 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                             AND {$locale}_url.metadata IS NULL
                             AND {$locale}_url.entity_id = p.entity_id
                             AND {$locale}_url.store_id = {$localeStore->getId()}",
-							array( "{$locale}|product_page_url" => 'request_path' ) )
+							array( "{$locale}|product_page_url" => "{$locale}_url.request_path" ) )
 						->joinLeft(
 							array( "{$locale}_parent_url" => $res->getTableName( 'url_rewrite' ) ),
 							"{$locale}_parent_url.entity_type = 'product'
                             AND {$locale}_parent_url.metadata IS NULL
                             AND {$locale}_parent_url.entity_id = {$locale}_parent.entity_id
                             AND {$locale}_parent_url.store_id = {$localeStore->getId()}",
-							array( "{$locale}|parent_url" => 'max(request_path)' ) );
+							array( "{$locale}|parent_url" => "max({$locale}_parent_url.request_path)" ) );
 				}
 			}
 		}
@@ -516,6 +532,12 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 				$indexData['family'] = array( $indexData['family'] );
 			}
 
+			/** categories */
+			if($indexData['bv_category_external_id'])
+				$indexData['category_external_id'] = $indexData['bv_category_external_id'];
+			if($indexData['bv_parent_category_external_id'])
+				$indexData['parent_category_external_id'] = $indexData['bv_parent_category_external_id'];
+
 			if ( $this->_helper->getConfig( 'feeds/category_id_use_url_path', $storeId ) ) {
 				$indexData['category_external_id'] = str_replace( '/', '-', $indexData['category_external_id'] );
 				$indexData['category_external_id'] = str_replace( '.html', '', $indexData['category_external_id'] );
@@ -548,11 +570,14 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
 			/** Check locales */
 			$productLocales = [];
-			foreach($this->_storeLocales[$storeId] as $locale => $storeLocale) {
-				if(!empty($indexData['locale_entity_id'][$locale]))
-					$productLocales[$locale] = $storeLocale;
-			}
-
+			if(!empty($this->_storeLocales[$storeId])) {
+                foreach ( $this->_storeLocales[ $storeId ] as $locale => $storeLocale ) {
+                    if ( ! empty( $indexData['locale_entity_id'][ $locale ] ) ) {
+                        $productLocales[ $locale ] = $storeLocale;
+                    }
+                }
+            }
+$this->_logger->info($indexData['image_url']);
 			/** Use parent image if appropriate */
 			if ( $indexData['image_url'] == '' || $indexData['image_url'] == 'no_selection' ) {
 				if ( ! empty( $indexData['parent_image'] ) ) {
@@ -616,7 +641,12 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 			}
 
 			/** Add Store base to images */
-			if ( substr( $indexData['image_url'], 0, 4 ) != 'http' ) {
+			if(
+                $indexData['image_url'] == ''
+                || $indexData['image_url'] == 'no_selection'
+            ) {
+			    $indexData['image_url'] = '';
+            } elseif ( substr( $indexData['image_url'], 0, 4 ) != 'http' ) {
 				$indexData['image_url'] = $store->getBaseUrl( \Magento\Framework\UrlInterface::URL_TYPE_MEDIA ) . 'catalog/product' . $indexData['image_url'];
 				if ( isset( $indexData['locale_image_url'] ) && is_array( $indexData['locale_image_url'] ) ) {
 					/** @var Store $storeLocale */
@@ -763,22 +793,23 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 		 * @var string $locale
 		 * @var Store $localeStore
 		 */
-		foreach ( $this->_storeLocales[ $storeId ] as $locale => $localeStore ) {
-			$themeId = $design->getConfigurationDesignTheme( 'frontend', [ 'store' => $localeStore->getId() ] );
-			/** @var \Magento\Theme\Model\Theme $theme */
-			$theme       = $this->_objectManager->create( '\Magento\Theme\Model\Theme' )->load( $themeId );
-			$assetParams = array(
-				'area'   => 'frontend',
-				'theme'  => $theme->getThemePath(),
-				'locale' => $locale
-			);
-			if ( $localeStore->getId() == $storeId ) {
-				$placeholders['default'] = $assetRepo->createAsset( $imageHelper->getPlaceholder( 'image' ), $assetParams )->getUrl();
-			} else {
-				$placeholders[ $locale ] = $assetRepo->createAsset( $imageHelper->getPlaceholder( 'image' ), $assetParams )->getUrl();
-			}
+		if(!empty($this->_storeLocales[ $storeId ])) {
+            foreach ( $this->_storeLocales[ $storeId ] as $locale => $localeStore ) {
+                $themeId = $design->getConfigurationDesignTheme( 'frontend', [ 'store' => $localeStore->getId() ] );
+                /** @var \Magento\Theme\Model\Theme $theme */
+                $theme       = $this->_objectManager->create( '\Magento\Theme\Model\Theme' )->load( $themeId );
+                $assetParams = array(
+                    'area'   => 'frontend',
+                    'theme'  => $theme->getThemePath(),
+                    'locale' => $locale
+                );
+                if ( $localeStore->getId() == $storeId ) {
+                    $placeholders['default'] = $assetRepo->createAsset( $imageHelper->getPlaceholder( 'image' ), $assetParams )->getUrl();
+                }
+                $placeholders[ $locale ] = $assetRepo->createAsset( $imageHelper->getPlaceholder( 'image' ), $assetParams )->getUrl();
 
-		}
+            }
+        }
 
 		return $placeholders;
 	}
