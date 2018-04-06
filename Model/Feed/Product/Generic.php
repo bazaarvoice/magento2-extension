@@ -68,9 +68,10 @@ class Generic
         return $this->_helper->getConfig('feeds/' . $type . '_code', $store, $scope);
     }
 
-	/**
-	 * @return array
-	 */
+    /**
+     * @return array
+     * @throws \Exception
+     */
     public function getLocales()
     {
         $locales = [];
@@ -121,6 +122,8 @@ class Generic
 					    }
 				    }
 			    }
+			    if($defaultStore == null)
+			        throw new \Exception(__('No valid store found for feed generation'));
 			    $locales[$defaultStore->getId()] = $globalLocales;
 			    unset($globalLocales);
 			    $defaultLocale = $this->_helper->getConfig('general/locale', $defaultStore);
