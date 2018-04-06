@@ -40,7 +40,6 @@
     <type name="Magento\Review\Block\Product\Review">
         <plugin name="bazaarvoice-pdp" type="Bazaarvoice\Connector\Block\Disable" sortOrder="100"/>
     </type>
-    <preference for="Magento\ReviewStaging\Ui\DataProvider\Product\Form\Modifier\Review" type="Bazaarvoice\Connector\Ui\ReviewStaging\Review" />
 
 
     <!-- sftp -->
