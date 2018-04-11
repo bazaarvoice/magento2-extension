@@ -520,7 +520,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 					unset( $indexData[ $key ] );
 				}
 				if ( strpos( $value, '|' ) !== false ) {
-					$indexData[ $key ] = $this->_helper->jsonEncode( explode( '|', $value ) );
+					$indexData[ $key ] = explode( '|', $value );
 				}
 			}
 
@@ -528,10 +528,14 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
 			if ( $indexData['product_type'] == Configurable::TYPE_CODE ) {
 				$indexData['family'] = array( $indexData['external_id'] );
-			} else if ( ! empty( $indexData['family'] ) && ! is_array( $indexData['family'] ) ) {
-				$indexData['family'] = array( $indexData['family'] );
+			} else if ( ! empty( $indexData['family'] ) ) {
+			    if (is_array( $indexData['family'] ) )
+			        $indexData['family'] = $indexData['family'];
+			    else
+    				$indexData['family'] = array( $indexData['family'] );
 			}
-
+			$this->_logger->debug('family');
+$this->_logger->debug($indexData['family']);
 			/** categories */
 			if($indexData['bv_category_external_id'])
 				$indexData['category_external_id'] = $indexData['bv_category_external_id'];

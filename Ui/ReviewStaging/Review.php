@@ -18,7 +18,9 @@
 namespace Bazaarvoice\Connector\Ui\ReviewStaging;
 
 
-class Review extends \Magento\ReviewStaging\Ui\DataProvider\Product\Form\Modifier\Review {
+use Magento\Catalog\Ui\DataProvider\Product\Form\Modifier\AbstractModifier;
+
+class Review extends AbstractModifier {
 
 	/**
 	 * @param array $meta
@@ -28,6 +30,15 @@ class Review extends \Magento\ReviewStaging\Ui\DataProvider\Product\Form\Modifie
 	public function modifyMeta( array $meta ) {
 		return $meta;
 	}
+
+    /**
+     * @param array $data
+     *
+     * @return array
+     */
+    public function modifyData( array $data ) {
+        return $data;
+    }
 
 
 }
