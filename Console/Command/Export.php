@@ -35,10 +35,9 @@ class Export extends Command
         $this->_exporter = $exporter;
     }
 
-
     protected function configure()
     {
-        $this->setName('')->setDescription('Generates Bazaarvoice formatted Magento reviews.');
+        $this->setDescription('Generates Bazaarvoice formatted Magento reviews.');
     }
 
     // @codingStandardsIgnoreStart
