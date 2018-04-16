@@ -53,5 +53,4 @@ class Export extends Command
         }
         echo "\n" . 'Memory usage: ' . memory_get_usage() . "\n";
     }
-
 }
