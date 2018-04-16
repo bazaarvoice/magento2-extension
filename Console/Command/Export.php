@@ -17,31 +17,28 @@
 
 namespace Bazaarvoice\Connector\Console\Command;
 
-use Bazaarvoice\Connector\Model\Feed\Export as FeedExport;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputInterface;
 
 class Export extends Command
 {
-    /**
-     * @var FeedExport
-     */
     protected $_exporter;
 
     /**
      * Export constructor.
      *
-     * @param FeedExport $exporter
+     * @param \Bazaarvoice\Connector\Model\Feed\Export $exporter
      */
-    public function __construct(FeedExport $exporter)
-    {
-        $this->exporter = $exporter;
+    public function __construct( \Bazaarvoice\Connector\Model\Feed\Export $exporter ) {
+        parent::__construct( 'bv:export' );
+        $this->_exporter = $exporter;
     }
+
 
     protected function configure()
     {
-        $this->setName('bv:export')->setDescription('Generates Bazaarvoice formatted Magento reviews.');
+        $this->setName('')->setDescription('Generates Bazaarvoice formatted Magento reviews.');
     }
 
     // @codingStandardsIgnoreStart
