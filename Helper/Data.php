@@ -120,40 +120,6 @@ class Data extends AbstractHelper
 
         return preg_replace_callback('/[^\w\d\*-\-_]/s', create_function('$match', 'return "_bv".ord($match[0])."_";'), $rawId);
     }
-
-
-    /**
-     * Returns the product unless the product visibility is
-     * set to not visible.  In this case, it will try and pull
-     * the parent/associated product from the order item.
-     *
-     * @param \Magento\Sales\Model\Order\Item $item
-     * @return \Magento\Catalog\Model\Product
-     */
-    public function getReviewableProductFromOrderItem($item)
-    {
-        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $product = $objectManager->get('Magento\Catalog\Model\Product');
-        $product->setStoreId($item->getStoreId());
-        $product->load($item->getProductId());
-
-        if ($product->getVisibility() == \Magento\Catalog\Model\Product\Visibility::VISIBILITY_NOT_VISIBLE) {
-            $options = $item->getProductOptions();
-            if (isset($options['super_product_config']['product_id'])) {
-                try
-                {
-                    $parentId = $options['super_product_config']['product_id'];
-                    $product = $objectManager->get('Magento\Catalog\Model\Product');
-                    $product = $product->load($parentId);
-                }
-                catch (\Exception $ex) {
-                    
-                }
-            }
-        }
-
-        return $product;
-    }
     
     public function getExtensionVersion()
     {
