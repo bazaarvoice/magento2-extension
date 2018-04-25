@@ -58,7 +58,6 @@ class Pixel {
         /** @noinspection PhpUnusedParameterInspection */
         $subject, $result
     ) {
-        $memory = memory_get_usage();
         /** @codingStandardsIgnoreEnd */
         if ( $this->helper->getConfig( 'general/enable_bvpixel' ) != true ) {
             return $result;
@@ -156,8 +155,6 @@ class Pixel {
             var transactionData = ' . json_encode( $orderDetails, JSON_UNESCAPED_UNICODE ) . ';
             BV.pixel.trackTransaction(transactionData);
         </script>';
-
-        $result .= 'Memory usage: ' . ( memory_get_usage() - $memory ) . "<br/>";
 
         return $result;
     }
