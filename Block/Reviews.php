@@ -17,12 +17,46 @@
 namespace Bazaarvoice\Connector\Block;
 
 use Bazaarvoice\Connector\Helper\Seosdk;
+use Magento\Framework\App\RequestInterface;
+use Magento\Framework\UrlInterface;
 
 class Reviews extends Product
 {
+    protected $_requestInterface;
+    protected $_urlInterface;
+
+    /**
+     * Reviews constructor.
+     *
+     * @param \Magento\Framework\View\Element\Template\Context $context
+     * @param \Magento\Framework\Registry $registry
+     * @param \Magento\Framework\ObjectManagerInterface $objectManager
+     * @param \Bazaarvoice\Connector\Helper\Data $helper
+     * @param \Bazaarvoice\Connector\Logger\Logger $logger
+     * @param array $data
+     * @param UrlInterface $url
+     * @param RequestInterface $request
+     */
+    public function __construct(
+        \Magento\Framework\View\Element\Template\Context $context,
+        \Magento\Framework\Registry $registry,
+        \Magento\Framework\ObjectManagerInterface $objectManager,
+        \Bazaarvoice\Connector\Helper\Data $helper,
+        \Bazaarvoice\Connector\Logger\Logger $logger,
+        array $data = [],
+        UrlInterface $url,
+        RequestInterface $request
+    ) {
+        $this->_urlInterface = $url;
+        $this->_requestInterface = $request;
+        parent::__construct( $context, $registry, $objectManager, $helper, $logger, $data );
+    }
+
+
     /**
      * Get only aggregate data
      * @return string
+     * @throws \Exception
      */
     public function getAggregateSEOContent()
     {
@@ -31,8 +65,6 @@ class Reviews extends Product
             $params = $this->_getParams();
             $bv = new Seosdk($params);
             $seoContent = $bv->reviews->getAggregateRating();
-            $seoContent .= '
-<!-- BV Aggregate Rating Parameters: ' . print_r($params, 1) . '-->';
             return $seoContent;
         }
         return '';
@@ -41,6 +73,7 @@ class Reviews extends Product
     /**
      * Get complete BV SEO Content
      * @return string
+     * @throws \Exception
      */
     public function getSEOContent()
     {
@@ -76,19 +109,17 @@ class Reviews extends Product
 
         $product = $this->getProduct();
 
-        $urlInterface = \Magento\Framework\App\ObjectManager::getInstance()->get('Magento\Framework\UrlInterface');
-        $productUrl = $urlInterface->getCurrentUrl();
+        $productUrl = $this->_urlInterface->getCurrentUrl();
         $parts = parse_url($productUrl);
         if (isset($parts['query'])) {
             parse_str($parts['query'], $query);
+            $productUrl = $parts['scheme'] . '://' . $parts['host'] . $parts['path'] . '?' . http_build_query($query);
             unset($query['bvrrp']);
 	        unset($query['bvstate']);
             $baseUrl = $parts['scheme'] . '://' . $parts['host'] . $parts['path'] . '?' . http_build_query($query);
         } else {
             $baseUrl = $productUrl;
         }
-
-        $this->logger->debug($baseUrl);
 
         $params = array(
             'seo_sdk_enabled' => TRUE,
@@ -100,9 +131,9 @@ class Reviews extends Product
             'staging' => ($this->getConfig('general/environment') == 'staging' ? TRUE : FALSE)
         );
 
+        $this->logger->debug('SEO Params: ' . print_r($params, 1));
 
-        $requestInterface = \Magento\Framework\App\ObjectManager::getInstance()->get('Magento\Framework\App\RequestInterface');
-        if ($requestInterface->getParam('bvreveal') == 'debug')
+        if ($this->_requestInterface->getParam('bvreveal') == 'debug')
             $params['bvreveal'] = 'debug';
 
         return $params;
