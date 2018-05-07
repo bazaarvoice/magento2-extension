@@ -49,29 +49,23 @@ class Category extends \Magento\Eav\Model\Entity\Attribute\Source\AbstractSource
 		$this->currentProduct = $registry->registry( 'current_product' );
 		if ( $this->currentProduct ) {
 			$collection = $this->currentProduct->getCategoryCollection();
-			$collection->addAttributeToSelect( 'name' );
-			/** @var \Magento\Catalog\Model\Category $category */
-			foreach ( $collection as $category ) {
-				$names = [];
-				foreach ( $category->getParentCategories() as $parent ) {
-					$names[ $parent->getId() ] = $parent->getName();
-				}
-				$names[ $category->getId() ] = $category->getName();
-				$name                        = implode( '/', $names );
-				$this->categories[]          = [
-					'value' => $category->getId(),
-					'label' => $name
-				];
-			}
 		} else {
-			$categoryCollection->addAttributeToSelect( 'name' );
-			foreach ( $categoryCollection as $category ) {
-				$this->categories[] = [
-					'value' => $category->getId(),
-					'label' => $category->getName()
-				];
-			}
+            $collection = $categoryCollection;
 		}
+        $collection->addAttributeToSelect( 'name' );
+        /** @var \Magento\Catalog\Model\Category $category */
+        foreach ( $collection as $category ) {
+            $names = [];
+            foreach ( $category->getParentCategories() as $parent ) {
+                $names[ $parent->getId() ] = $parent->getName();
+            }
+            $names[ $category->getId() ] = $category->getName();
+            $name                        = implode( '/', $names );
+            $this->categories[]          = [
+                'value' => $category->getId(),
+                'label' => $name
+            ];
+        }
 	}
 
 	/**
