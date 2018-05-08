@@ -34,8 +34,6 @@ class Reviews extends Product
      * @param \Bazaarvoice\Connector\Helper\Data $helper
      * @param \Bazaarvoice\Connector\Logger\Logger $logger
      * @param array $data
-     * @param UrlInterface $url
-     * @param RequestInterface $request
      */
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
@@ -43,12 +41,10 @@ class Reviews extends Product
         \Magento\Framework\ObjectManagerInterface $objectManager,
         \Bazaarvoice\Connector\Helper\Data $helper,
         \Bazaarvoice\Connector\Logger\Logger $logger,
-        array $data = [],
-        UrlInterface $url,
-        RequestInterface $request
+        array $data = []
     ) {
-        $this->_urlInterface = $url;
-        $this->_requestInterface = $request;
+        $this->_urlInterface = $context->getUrlBuilder();
+        $this->_requestInterface = $context->getRequest();
         parent::__construct( $context, $registry, $objectManager, $helper, $logger, $data );
     }
 
