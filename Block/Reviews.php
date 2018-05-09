@@ -34,8 +34,6 @@ class Reviews extends Product
      * @param \Bazaarvoice\Connector\Helper\Data $helper
      * @param \Bazaarvoice\Connector\Logger\Logger $logger
      * @param array $data
-     * @param UrlInterface $url
-     * @param RequestInterface $request
      */
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
@@ -43,12 +41,10 @@ class Reviews extends Product
         \Magento\Framework\ObjectManagerInterface $objectManager,
         \Bazaarvoice\Connector\Helper\Data $helper,
         \Bazaarvoice\Connector\Logger\Logger $logger,
-        array $data = [],
-        UrlInterface $url,
-        RequestInterface $request
+        array $data = []
     ) {
-        $this->_urlInterface = $url;
-        $this->_requestInterface = $request;
+        $this->_urlInterface = $context->getUrlBuilder();
+        $this->_requestInterface = $context->getRequest();
         parent::__construct( $context, $registry, $objectManager, $helper, $logger, $data );
     }
 
@@ -83,7 +79,7 @@ class Reviews extends Product
             $bv = new Seosdk($params);
             $seoContent = $bv->reviews->getReviews();
             if($this->getConfig('general/environment') == 'staging')
-	            $seoContent .= '<!-- BV Reviews SEO Parameters: ' . print_r($params, 1) . '-->';
+                $seoContent .= '<!-- BV Reviews SEO Parameters: ' . json_encode($params) . '-->';
             return $seoContent;
         }
         return '';
@@ -113,9 +109,8 @@ class Reviews extends Product
         $parts = parse_url($productUrl);
         if (isset($parts['query'])) {
             parse_str($parts['query'], $query);
-            $productUrl = $parts['scheme'] . '://' . $parts['host'] . $parts['path'] . '?' . http_build_query($query);
             unset($query['bvrrp']);
-	        unset($query['bvstate']);
+            unset($query['bvstate']);
             $baseUrl = $parts['scheme'] . '://' . $parts['host'] . $parts['path'] . '?' . http_build_query($query);
         } else {
             $baseUrl = $productUrl;
@@ -144,5 +139,5 @@ class Reviews extends Product
     {
         return $this->getConfig('general/enable_cloud_seo') && $this->isEnabled();
     }
-    
+
 }
