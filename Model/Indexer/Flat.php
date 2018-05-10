@@ -344,7 +344,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 				array( 'parent' => $res->getTableName( 'catalog_product_flat' ) . '_' . $storeId ),
 				'pp.parent_id = parent.' . $this->_productIdField,
 				array(
-					'family'       => 'GROUP_CONCAT(DISTINCT parent.sku SEPARATOR "|")',
+					'family'       => 'GROUP_CONCAT(DISTINCT parent.sku SEPARATOR "||")',
 					'parent_image' => 'small_image'
 				) )
 			->joinLeft(
@@ -519,8 +519,8 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 					}
 					unset( $indexData[ $key ] );
 				}
-				if ( strpos( $value, '|' ) !== false ) {
-					$indexData[ $key ] = explode( '|', $value );
+				if ( strpos( $value, '||' ) !== false ) {
+					$indexData[ $key ] = explode( '||', $value );
 				}
 			}
 

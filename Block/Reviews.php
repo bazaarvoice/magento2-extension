@@ -17,8 +17,6 @@
 namespace Bazaarvoice\Connector\Block;
 
 use Bazaarvoice\Connector\Helper\Seosdk;
-use Magento\Framework\App\RequestInterface;
-use Magento\Framework\UrlInterface;
 
 class Reviews extends Product
 {
