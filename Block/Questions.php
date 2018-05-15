@@ -35,7 +35,7 @@ class Questions extends Reviews
             $bv = new Seosdk($params);
             $seoContent = $bv->questions->getContent();
             if($this->getConfig('general/environment') == 'staging')
-                $seoContent .= '<!-- BV Reviews SEO Parameters: ' . print_r($params, 1) . '-->';
+                $seoContent .= '<!-- BV Reviews SEO Parameters: ' . json_encode($params) . '-->';
             return $seoContent;
         }
         return '';

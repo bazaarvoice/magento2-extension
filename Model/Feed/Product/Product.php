@@ -17,7 +17,6 @@
 
 namespace Bazaarvoice\Connector\Model\Feed\Product;
 
-use Bazaarvoice\Connector\Model\Feed;
 use Bazaarvoice\Connector\Model\XMLWriter;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Store\Model\Store;
