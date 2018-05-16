@@ -17,6 +17,7 @@
 namespace Bazaarvoice\Connector\Block;
 
 use Bazaarvoice\Connector\Helper\Seosdk;
+use Magento\Catalog\Model\ProductRepository;
 
 class Reviews extends Product
 {
@@ -28,23 +29,26 @@ class Reviews extends Product
      *
      * @param \Magento\Framework\View\Element\Template\Context $context
      * @param \Magento\Framework\Registry $registry
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
      * @param \Bazaarvoice\Connector\Helper\Data $helper
      * @param \Bazaarvoice\Connector\Logger\Logger $logger
+     * @param \Magento\ConfigurableProduct\Helper\Data $configHelper
+     * @param ProductRepository $productRepository
      * @param array $data
      */
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
         \Magento\Framework\Registry $registry,
-        \Magento\Framework\ObjectManagerInterface $objectManager,
         \Bazaarvoice\Connector\Helper\Data $helper,
         \Bazaarvoice\Connector\Logger\Logger $logger,
+        \Magento\ConfigurableProduct\Helper\Data $configHelper,
+        ProductRepository $productRepository,
         array $data = []
     ) {
         $this->_urlInterface = $context->getUrlBuilder();
         $this->_requestInterface = $context->getRequest();
-        parent::__construct( $context, $registry, $objectManager, $helper, $logger, $data );
+        parent::__construct( $context, $registry, $helper, $logger, $configHelper, $productRepository, $data );
     }
+
 
 
     /**
@@ -54,7 +58,7 @@ class Reviews extends Product
      */
     public function getAggregateSEOContent()
     {
-        $this->logger->debug(__CLASS__.' getAggregateSEOContent');
+        $this->_logger->debug( __CLASS__ . ' getAggregateSEOContent');
         if ($this->getIsEnabled()) {
             $params = $this->_getParams();
             $bv = new Seosdk($params);
@@ -71,7 +75,7 @@ class Reviews extends Product
      */
     public function getSEOContent()
     {
-        $this->logger->debug(__CLASS__.' getSEOContent');
+        $this->_logger->debug( __CLASS__ . ' getSEOContent');
         if ($this->getIsEnabled()) {
             $params = $this->_getParams();
             $bv = new Seosdk($params);
@@ -124,7 +128,7 @@ class Reviews extends Product
             'staging' => ($this->getConfig('general/environment') == 'staging' ? TRUE : FALSE)
         );
 
-        $this->logger->debug('SEO Params: ' . print_r($params, 1));
+        $this->_logger->debug( 'SEO Params: ' . print_r($params, 1));
 
         if ($this->_requestInterface->getParam('bvreveal') == 'debug')
             $params['bvreveal'] = 'debug';

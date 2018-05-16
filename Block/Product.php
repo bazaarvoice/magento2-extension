@@ -16,6 +16,9 @@
  */
 
 namespace Bazaarvoice\Connector\Block;
+use Magento\Catalog\Model\ProductRepository;
+use Magento\Framework\Exception\NoSuchEntityException;
+
 /**
  * Class Product
  * @package Bazaarvoice\Connector\Block
@@ -26,38 +29,43 @@ class Product extends \Magento\Framework\View\Element\Template
     protected $_coreRegistry;
 
     /* @var \Bazaarvoice\Connector\Helper\Data */
-    public $helper;
+    public $_helper;
 
     /* @var \Bazaarvoice\Connector\Logger\Logger */
-    public $logger;
+    public $_logger;
 
-    /** @var  \Magento\Framework\ObjectManagerInterface */
-    public $objectManager;
+    /** @var  \Magento\ConfigurableProduct\Helper\Data */
+    public $_configHelper;
+
+    /** @var ProductRepository */
+    protected $_productRepo;
 
 
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
         \Magento\Framework\Registry $registry,
-        \Magento\Framework\ObjectManagerInterface $objectManager,
         \Bazaarvoice\Connector\Helper\Data $helper,
         \Bazaarvoice\Connector\Logger\Logger $logger,
+        \Magento\ConfigurableProduct\Helper\Data $configHelper,
+        ProductRepository $productRepository,
         array $data = [])
     {
-        $this->helper = $helper;
-        $this->logger = $logger;
+        $this->_helper       = $helper;
+        $this->_logger       = $logger;
         $this->_coreRegistry = $registry;
-        $this->objectManager = $objectManager;
+        $this->_configHelper = $configHelper;
+        $this->_productRepo  = $productRepository;
         parent::__construct($context, $data);
     }
 
     public function getHelper()
     {
-        return $this->helper;
+        return $this->_helper;
     }
 
     public function getConfig($path)
     {
-        return $this->helper->getConfig($path);
+        return $this->_helper->getConfig($path);
     }
 
     public function isEnabled()
@@ -89,7 +97,7 @@ class Product extends \Magento\Framework\View\Element\Template
     public function getProductSku()
     {
         if ($this->getProductId())
-            return $this->helper->getProductId($this->getProduct()->getSku());
+            return $this->_helper->getProductId($this->getProduct()->getSku());
         return '';
     }
 
@@ -99,8 +107,10 @@ class Product extends \Magento\Framework\View\Element\Template
     public function getProduct()
     {
         if (is_numeric($this->getProductId())) {
-            $product = $this->objectManager->get('Magento\Catalog\Model\Product')->load($this->getProductId());
-            return $product;
+            try {
+                $product = $this->_productRepo->getById( $this->getProductId() );
+                return $product;
+            } catch ( NoSuchEntityException $e ) { }
         }
         return false;
     }
@@ -110,7 +120,7 @@ class Product extends \Magento\Framework\View\Element\Template
      */
     public function isConfigurable()
     {
-        if ($this->getProduct()) {
+        if ($this->getProduct() && $this->getConfig('rr/children')) {
             return $this->getProduct()->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE;
         }
         return false;
@@ -122,11 +132,11 @@ class Product extends \Magento\Framework\View\Element\Template
     public function getChildrenJson()
     {
         $children = array();
-        if ($this->isConfigurable()) {
+        if ($this->isConfigurable() && $this->getConfig('rr/children')) {
             $product = $this->getProduct();
 
             $childProducts = $product->getTypeInstance()->getUsedProducts($product);
-            $options = $this->objectManager->get('\Magento\ConfigurableProduct\Helper\Data')->getOptions($product, $childProducts);
+            $options = $this->_configHelper->getOptions($product, $childProducts);
 
             /** @var \Magento\Catalog\Model\Product $childProduct */
             foreach ($childProducts as $childProduct) {
@@ -135,7 +145,7 @@ class Product extends \Magento\Framework\View\Element\Template
                 foreach ($attributeValues as $key => $value)
                     $attributeValue .= $key . '_' . $value . '_';
 
-                $children[$attributeValue] = $this->helper->getProductId($childProduct);
+                $children[$attributeValue] = $this->_helper->getProductId($childProduct);
             }
 
         }

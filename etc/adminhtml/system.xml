@@ -71,6 +71,11 @@
                     <label>Show Hidden Content for Reviews (BV.reviews.on)</label>
                     <comment><![CDATA[Some user actions cause Bazaarvoice features to come into view, such as clicking the ★★★★★ icons in the rating summary, which scrolls to ratings and reviews. If this content is hidden behind a tab, however, you must add custom, page-specific code that calls the bvCallback function to show the correct tab or container. See your Bazaarvoice Implementation manual for further information.]]></comment>
                 </field>
+                <field id="children" translate="label" type="select" sortOrder="25" showInDefault="1" showInStore="1" showInWebsite="1">
+                    <label>Filter Reviews on Configurable Product Selection</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[If this feature is enabled, Bazaarvoice Content will display the entire Family unless a Configurable Child Product is selected. If a Child is selected, Reviews, Questions, and Summary will display only for its SKU.]]></comment>
+                </field>
                 <field id="inline_ratings" translate="label" type="multiselect" sortOrder="30" showInDefault="1" showInStore="1" showInWebsite="1">
                     <label>Enable Hosted Inline Ratings</label>
                     <source_model>Bazaarvoice\Connector\Model\Source\ProductList</source_model>
