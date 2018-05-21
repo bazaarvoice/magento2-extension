@@ -77,8 +77,10 @@ class Product extends \Magento\Framework\View\Element\Template
      */
     public function getProductId()
     {
-        $product = $this->_coreRegistry->registry('product');
-        return $product ? $product->getId() : null;
+        if ($this->getProduct()) {
+            return $this->getProduct()->getId();
+        }
+        return null;
     }
 
     public function getContainerUrl()
@@ -94,14 +96,16 @@ class Product extends \Magento\Framework\View\Element\Template
     }
 
     /**
+     * Get product object from core registry object
+     *
      * @return bool|\Magento\Catalog\Model\Product
      */
     public function getProduct()
     {
-        if (is_numeric($this->getProductId())) {
-            $product = $this->objectManager->get('Magento\Catalog\Model\Product')->load($this->getProductId());
-            return $product;
+        if ($this->_coreRegistry->registry('product')) {
+            return $this->_coreRegistry->registry('product');
         }
+
         return false;
     }
 
@@ -142,5 +146,17 @@ class Product extends \Magento\Framework\View\Element\Template
         return json_encode($children, JSON_UNESCAPED_UNICODE);
     }
 
+    /**
+     * Add checking product before render block HTML
+     *
+     * @return string
+     */
+    protected function _toHtml()
+    {
+        if ($this->getProduct()) {
+            return parent::_toHtml();
+        }
 
+        return '';
+    }
 }
