@@ -86,13 +86,11 @@ class Product extends \Magento\Framework\View\Element\Template
      * Get current product id
      *
      * @return null|int
+     * @throws NoSuchEntityException
      */
     public function getProductId()
     {
-        if(isset($this->_productId)) {
-            $this->_productId = !empty($this->getProduct()) ? $this->_product->getId() : null;
-        }
-        return $this->_productId;
+        return $this->getProduct()->getId();
     }
 
     public function getContainerUrl()
@@ -100,20 +98,24 @@ class Product extends \Magento\Framework\View\Element\Template
         return $this->_storeManager->getStore()->getBaseUrl() . 'bazaarvoice/submission/container';
     }
 
+    /**
+     * @return string
+     * @throws NoSuchEntityException
+     */
     public function getProductSku()
     {
-        if ($this->getProductId())
-            return $this->_helper->getProductId($this->getProduct()->getSku());
-        return '';
+        return $this->_helper->getProductId($this->getProduct()->getSku());
     }
 
     /**
      * @return bool|\Magento\Catalog\Model\Product
+     * @throws NoSuchEntityException
      */
     public function getProduct()
     {
-        if(!isset($this->_product)) {
-            $this->_product = $this->_coreRegistry->registry( 'product' );
+        if(empty($this->_product)) {
+            $product = $this->_coreRegistry->registry( 'product' );
+            $this->_product = $this->_productRepo->getById($product->getId());
         }
         return $this->_product;
     }
