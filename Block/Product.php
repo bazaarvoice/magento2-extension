@@ -40,6 +40,10 @@ class Product extends \Magento\Framework\View\Element\Template
     /** @var ProductRepository */
     protected $_productRepo;
 
+    /** @var \Magento\Catalog\Model\Product */
+    protected $_product;
+    protected $_productId;
+
 
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
@@ -85,8 +89,11 @@ class Product extends \Magento\Framework\View\Element\Template
      */
     public function getProductId()
     {
-        $product = $this->_coreRegistry->registry('product');
-        return $product ? $product->getId() : null;
+        if(isset($this->_productId)) {
+            $product = $this->_coreRegistry->registry( 'product' );
+            $this->_productId = $product ? $product->getId() : null;
+        }
+        return $this->_productId;
     }
 
     public function getContainerUrl()
@@ -106,13 +113,16 @@ class Product extends \Magento\Framework\View\Element\Template
      */
     public function getProduct()
     {
-        if (is_numeric($this->getProductId())) {
-            try {
-                $product = $this->_productRepo->getById( $this->getProductId() );
-                return $product;
-            } catch ( NoSuchEntityException $e ) { }
+        if(empty($this->_product)) {
+            if ( is_numeric( $this->getProductId() ) ) {
+                try {
+                    $this->_product = $this->_productRepo->getById( $this->getProductId() );
+                } catch ( NoSuchEntityException $e ) {
+                    $this->_product = false;
+                }
+            }
         }
-        return false;
+        return $this->_product;
     }
 
     /**
@@ -120,7 +130,7 @@ class Product extends \Magento\Framework\View\Element\Template
      */
     public function isConfigurable()
     {
-        if ($this->getProduct() && $this->getConfig('rr/children')) {
+        if ($this->getProductId() && $this->getConfig('rr/children')) {
             return $this->getProduct()->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE;
         }
         return false;
