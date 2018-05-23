@@ -90,8 +90,7 @@ class Product extends \Magento\Framework\View\Element\Template
     public function getProductId()
     {
         if(isset($this->_productId)) {
-            $product = $this->_coreRegistry->registry( 'product' );
-            $this->_productId = $product ? $product->getId() : null;
+            $this->_productId = !empty($this->getProduct()) ? $this->_product->getId() : null;
         }
         return $this->_productId;
     }
@@ -113,14 +112,8 @@ class Product extends \Magento\Framework\View\Element\Template
      */
     public function getProduct()
     {
-        if(empty($this->_product)) {
-            if ( is_numeric( $this->getProductId() ) ) {
-                try {
-                    $this->_product = $this->_productRepo->getById( $this->getProductId() );
-                } catch ( NoSuchEntityException $e ) {
-                    $this->_product = false;
-                }
-            }
+        if(!isset($this->_product)) {
+            $this->_product = $this->_coreRegistry->registry( 'product' );
         }
         return $this->_product;
     }
