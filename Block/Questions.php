@@ -29,7 +29,7 @@ class Questions extends Reviews
      */
     public function getSEOContent()
     {
-        $this->_logger->debug( __CLASS__ . ' getSEOContent');
+        $this->_bvLogger->debug( __CLASS__ . ' getSEOContent');
         if ($this->getIsEnabled()) {
             $params = $this->_getParams();
             $bv = new Seosdk($params);

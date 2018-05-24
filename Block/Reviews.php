@@ -58,7 +58,7 @@ class Reviews extends Product
      */
     public function getAggregateSEOContent()
     {
-        $this->_logger->debug( __CLASS__ . ' getAggregateSEOContent');
+        $this->_bvLogger->debug( __CLASS__ . ' getAggregateSEOContent');
         if ($this->getIsEnabled()) {
             $params = $this->_getParams();
             $bv = new Seosdk($params);
@@ -75,7 +75,7 @@ class Reviews extends Product
      */
     public function getSEOContent()
     {
-        $this->_logger->debug( __CLASS__ . ' getSEOContent');
+        $this->_bvLogger->debug( __CLASS__ . ' getSEOContent');
         if ($this->getIsEnabled()) {
             $params = $this->_getParams();
             $bv = new Seosdk($params);
@@ -128,7 +128,7 @@ class Reviews extends Product
             'staging' => ($this->getConfig('general/environment') == 'staging' ? TRUE : FALSE)
         );
 
-        $this->_logger->debug( 'SEO Params: ' . print_r($params, 1));
+        $this->_bvLogger->debug( 'SEO Params: ' . print_r($params, 1));
 
         if ($this->_requestInterface->getParam('bvreveal') == 'debug')
             $params['bvreveal'] = 'debug';
