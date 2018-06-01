@@ -16,58 +16,66 @@
  */
 
 namespace Bazaarvoice\Connector\Block;
+
+use Magento\Catalog\Model\ProductRepository;
+use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
+
 /**
  * Class Product
  * @package Bazaarvoice\Connector\Block
  */
-class Product extends \Magento\Framework\View\Element\Template
-{
+class Product extends \Magento\Framework\View\Element\Template {
     /* @var \Magento\Framework\Registry */
     protected $_coreRegistry;
 
     /* @var \Bazaarvoice\Connector\Helper\Data */
-    public $helper;
+    public $_helper;
 
     /* @var \Bazaarvoice\Connector\Logger\Logger */
-    public $logger;
+    public $_bvLogger;
 
-    /** @var  \Magento\Framework\ObjectManagerInterface */
-    public $objectManager;
+    /** @var  \Magento\ConfigurableProduct\Helper\Data */
+    public $_configHelper;
+
+    /** @var ProductRepository */
+    protected $_productRepo;
+
+    /** @var \Magento\Catalog\Model\Product */
+    protected $_product;
+    protected $_productId;
 
 
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
         \Magento\Framework\Registry $registry,
-        \Magento\Framework\ObjectManagerInterface $objectManager,
         \Bazaarvoice\Connector\Helper\Data $helper,
         \Bazaarvoice\Connector\Logger\Logger $logger,
-        array $data = [])
-    {
-        $this->helper = $helper;
-        $this->logger = $logger;
+        \Magento\ConfigurableProduct\Helper\Data $configHelper,
+        ProductRepository $productRepository,
+        array $data = []
+    ) {
+        $this->_helper       = $helper;
+        $this->_bvLogger     = $logger;
         $this->_coreRegistry = $registry;
-        $this->objectManager = $objectManager;
-        parent::__construct($context, $data);
+        $this->_configHelper = $configHelper;
+        $this->_productRepo  = $productRepository;
+        parent::__construct( $context, $data );
     }
 
-    public function getHelper()
-    {
-        return $this->helper;
+    public function getHelper() {
+        return $this->_helper;
     }
 
-    public function getConfig($path)
-    {
-        return $this->helper->getConfig($path);
+    public function getConfig( $path ) {
+        return $this->_helper->getConfig( $path );
     }
 
-    public function isEnabled()
-    {
-        return $this->getConfig('general/enable_bv');
+    public function isEnabled() {
+        return $this->getConfig( 'general/enable_bv' );
     }
 
-    public function canShow($type)
-    {
-        return $this->isEnabled() && $this->getConfig($type.'/enable_'.$type);
+    public function canShow( $type ) {
+        return $this->isEnabled() && $this->getConfig( $type . '/enable_' . $type );
     }
 
     /**
@@ -75,24 +83,27 @@ class Product extends \Magento\Framework\View\Element\Template
      *
      * @return null|int
      */
-    public function getProductId()
-    {
-        if ($this->getProduct()) {
+    public function getProductId() {
+        if ( $this->getProduct() ) {
             return $this->getProduct()->getId();
         }
+
         return null;
     }
 
-    public function getContainerUrl()
-    {
+    public function getContainerUrl() {
         return $this->_storeManager->getStore()->getBaseUrl() . 'bazaarvoice/submission/container';
     }
 
-    public function getProductSku()
-    {
-        if ($this->getProductId())
-            return $this->helper->getProductId($this->getProduct()->getSku());
-        return '';
+    /**
+     * @return string
+     */
+    public function getProductSku() {
+        if ( $this->getProduct() ) {
+            return $this->_helper->getProductId( $this->getProduct()->getSku() );
+        }
+
+        return null;
     }
 
     /**
@@ -100,50 +111,67 @@ class Product extends \Magento\Framework\View\Element\Template
      *
      * @return bool|\Magento\Catalog\Model\Product
      */
-    public function getProduct()
-    {
-        if ($this->_coreRegistry->registry('product')) {
-            return $this->_coreRegistry->registry('product');
+    public function getProduct() {
+        if ( empty( $this->_product ) ) {
+            try {
+                $product        = $this->_coreRegistry->registry( 'product' );
+                $this->_product = $this->_productRepo->getById( $product->getId() );
+            } Catch ( \Exception $e ) {
+                $this->_bvLogger->crit( $e->getMessage() . "\n" . $e->getTraceAsString() );
+
+                return false;
+            }
         }
 
-        return false;
+        return $this->_product;
     }
 
     /**
      * @return Boolean
      */
-    public function isConfigurable()
-    {
-        if ($this->getProduct()) {
-            return $this->getProduct()->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE;
+    public function isConfigurable() {
+        try {
+
+            if ( $this->getProductId() && $this->getConfig( 'rr/children' ) ) {
+                return $this->getProduct()->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE;
+            }
+        } Catch ( \Exception $e ) {
+            $this->_bvLogger->crit( $e->getMessage() . "\n" . $e->getTraceAsString() );
         }
+
         return false;
     }
 
     /**
      * @return String
      */
-    public function getChildrenJson()
-    {
+    public function getChildrenJson() {
         $children = array();
-        if ($this->isConfigurable()) {
+        if ( $this->isConfigurable() && $this->getConfig( 'rr/children' ) ) {
             $product = $this->getProduct();
 
-            $childProducts = $product->getTypeInstance()->getUsedProducts($product);
-            $options = $this->objectManager->get('\Magento\ConfigurableProduct\Helper\Data')->getOptions($product, $childProducts);
+            /** @var Configurable $typeInstance */
+            $typeInstance    = $product->getTypeInstance();
+            $childProducts   = $typeInstance->getUsedProductCollection( $product );
+            $allowAttributes = $typeInstance->getConfigurableAttributes( $product );
 
             /** @var \Magento\Catalog\Model\Product $childProduct */
-            foreach ($childProducts as $childProduct) {
-                $attributeValues = $options['index'][$childProduct->getId()];
-                $attributeValue = '';
-                foreach ($attributeValues as $key => $value)
-                    $attributeValue .= $key . '_' . $value . '_';
+            foreach ( $childProducts as $childProduct ) {
+                $key       = '';
+                foreach ( $allowAttributes as $attribute ) {
+                    $productAttribute   = $attribute->getProductAttribute();
+                    $productAttributeId = $productAttribute->getId();
+                    $attributeValue     = $childProduct->getData( $productAttribute->getAttributeCode() );
 
-                $children[$attributeValue] = $this->helper->getProductId($childProduct);
+                    $key .= $productAttributeId . '_' . $attributeValue . '_';
+                }
+                $children[ $key ] = $this->_helper->getProductId( $childProduct );
             }
 
         }
-        return json_encode($children, JSON_UNESCAPED_UNICODE);
+        $this->_bvLogger->info( $children );
+
+        return json_encode( $children, JSON_UNESCAPED_UNICODE );
     }
 
     /**
