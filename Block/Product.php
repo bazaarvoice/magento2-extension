@@ -107,6 +107,8 @@ class Product extends \Magento\Framework\View\Element\Template {
     }
 
     /**
+     * Get product object from core registry object
+     *
      * @return bool|\Magento\Catalog\Model\Product
      */
     public function getProduct() {
@@ -172,5 +174,17 @@ class Product extends \Magento\Framework\View\Element\Template {
         return json_encode( $children, JSON_UNESCAPED_UNICODE );
     }
 
+    /**
+     * Add checking product before render block HTML
+     *
+     * @return string
+     */
+    protected function _toHtml()
+    {
+        if ($this->getProduct()) {
+            return parent::_toHtml();
+        }
 
+        return '';
+    }
 }
