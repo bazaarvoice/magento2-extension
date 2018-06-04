@@ -213,26 +213,34 @@ class Category extends Generic
         $writer->writeElement('CategoryPageUrl', htmlspecialchars($category['url'], ENT_QUOTES, 'UTF-8', false), true);
 
         /** Write out localized <Names> */
-        $writer->startElement('Names');
-        /* @var $curCategory \Magento\Catalog\Model\Category */
-        foreach ($category['names'] as $locale => $name) {
-            $writer->startElement('Name');
-            $writer->writeAttribute('locale', $locale);
-            $writer->writeRaw(htmlspecialchars($name, ENT_QUOTES, 'UTF-8', false), true);
-            $writer->endElement(); /** Name */
+        if(is_array($category['names']) && !empty($category['names'])) {
+            $writer->startElement( 'Names' );
+            /* @var $curCategory \Magento\Catalog\Model\Category */
+            foreach ( $category['names'] as $locale => $name ) {
+                $writer->startElement( 'Name' );
+                $writer->writeAttribute( 'locale', $locale );
+                $writer->writeRaw( htmlspecialchars( $name, ENT_QUOTES, 'UTF-8', false ), true );
+                $writer->endElement();
+                /** Name */
+            }
+            $writer->endElement();
+            /** Names */
         }
-        $writer->endElement(); /** Names */
 
-        /** Write out localized <CategoryPageUrls> */
-        $writer->startElement('CategoryPageUrls');
-        /* @var $curCategory \Magento\Catalog\Model\Category */
-        foreach ($category['urls'] as $locale => $url) {
-            $writer->startElement('CategoryPageUrl');
-            $writer->writeAttribute('locale', $locale);
-            $writer->writeRaw(htmlspecialchars($url, ENT_QUOTES, 'UTF-8', false), true);
-            $writer->endElement(); /** CategoryPageUrl */
+        if(is_array($category['urls']) && !empty($category['urls'])) {
+            /** Write out localized <CategoryPageUrls> */
+            $writer->startElement( 'CategoryPageUrls' );
+            /* @var $curCategory \Magento\Catalog\Model\Category */
+            foreach ( $category['urls'] as $locale => $url ) {
+                $writer->startElement( 'CategoryPageUrl' );
+                $writer->writeAttribute( 'locale', $locale );
+                $writer->writeRaw( htmlspecialchars( $url, ENT_QUOTES, 'UTF-8', false ), true );
+                $writer->endElement();
+                /** CategoryPageUrl */
+            }
+            $writer->endElement();
+            /** CategoryPageUrls */
         }
-        $writer->endElement(); /** CategoryPageUrls */
 
         $writer->endElement(); /** Category */
     }
