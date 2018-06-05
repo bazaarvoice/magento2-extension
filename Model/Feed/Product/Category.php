@@ -67,7 +67,8 @@ class Category extends Generic
 	 */
 	public function processCategoriesForStore(XMLWriter $writer, Store $store)
     {
-        $this->processCategories($writer, $store);
+        $locales = $this->getLocales();
+        $this->processCategories($writer, $store, $locales);
     }
 
 	/**
