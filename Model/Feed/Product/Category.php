@@ -129,10 +129,7 @@ class Category extends Generic
      */
     protected function processCategories(XMLWriter $writer, $defaultStore, $localeStores = array())
     {
-    	if($this->_generationScope == Scope::SCOPE_GLOBAL)
-		    $defaultCollection = $this->getProductCollection();
-    	else
-	        $defaultCollection = $this->getProductCollection($defaultStore);
+        $defaultCollection = $this->getProductCollection($defaultStore);
 
         $baseUrl = $defaultStore->getBaseUrl();
         $categories = array();
