@@ -102,7 +102,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 	public function canIndex() {
 		if ( $this->_scopeConfig->getValue( 'catalog/frontend/flat_catalog_product' ) == false
 		     || $this->_scopeConfig->getValue( 'catalog/frontend/flat_catalog_category' ) == false ) {
-			throw new Exception( 'Bazaarvoice Product feed requires Catalog Flat Tables to be enabled. Please check your Store Config.' );
+			throw new \Exception( 'Bazaarvoice Product feed requires Catalog Flat Tables to be enabled. Please check your Store Config.' );
 		}
 
 		return true;

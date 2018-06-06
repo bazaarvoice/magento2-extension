@@ -30,8 +30,10 @@ class Product extends Generic
 
     /**
      * Product constructor.
+     *
      * @param \Bazaarvoice\Connector\Logger\Logger $logger
      * @param \Bazaarvoice\Connector\Helper\Data $helper
+     * @param StoreManagerInterface $storeManager
      * @param \Magento\Framework\ObjectManagerInterface $objectManager
      */
     public function __construct(
