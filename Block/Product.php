@@ -19,6 +19,7 @@ namespace Bazaarvoice\Connector\Block;
 
 use Magento\Catalog\Model\ProductRepository;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
+use Magento\Framework\Exception\NoSuchEntityException;
 
 /**
  * Class Product
@@ -115,6 +116,8 @@ class Product extends \Magento\Framework\View\Element\Template {
         if ( empty( $this->_product ) ) {
             try {
                 $product        = $this->_coreRegistry->registry( 'product' );
+                if($product == null)
+                    throw new NoSuchEntityException();
                 $this->_product = $this->_productRepo->getById( $product->getId() );
             } Catch ( \Exception $e ) {
                 $this->_bvLogger->crit( $e->getMessage() . "\n" . $e->getTraceAsString() );
