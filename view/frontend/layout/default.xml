@@ -14,7 +14,7 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceContainer name="after.body.start">
-            <block class="Bazaarvoice\Connector\Block\Reviews" name="bazaarvoice.header" as="bv_header" template="Bazaarvoice_Connector::header.phtml" />
+            <block class="Bazaarvoice\Connector\Block\Header" name="bazaarvoice.header" as="bv_header" template="Bazaarvoice_Connector::header.phtml" />
         </referenceContainer>
     </body>
 </page>

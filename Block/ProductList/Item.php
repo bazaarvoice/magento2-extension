@@ -49,7 +49,7 @@ class Item extends \Bazaarvoice\Connector\Block\Product
     {
         // @codingStandardsIgnoreEnd
         if ($this->isEnabled()) {
-            $productIdentifier = $this->_helper->getProductId($this->_product);
+            $productIdentifier = $this->helper->getProductId($this->_product);
             $productUrl = $this->_product->getProductUrl();
             $result = '
             <div data-bv-show="inline_rating"
