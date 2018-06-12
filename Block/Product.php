@@ -19,6 +19,7 @@ namespace Bazaarvoice\Connector\Block;
 
 use Magento\Catalog\Model\ProductRepository;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
+use Magento\Framework\Exception\NoSuchEntityException;
 
 /**
  * Class Product
@@ -29,13 +30,13 @@ class Product extends \Magento\Framework\View\Element\Template {
     protected $_coreRegistry;
 
     /* @var \Bazaarvoice\Connector\Helper\Data */
-    public $_helper;
+    public $helper;
 
     /* @var \Bazaarvoice\Connector\Logger\Logger */
-    public $_bvLogger;
+    public $bvLogger;
 
     /** @var  \Magento\ConfigurableProduct\Helper\Data */
-    public $_configHelper;
+    public $configHelper;
 
     /** @var ProductRepository */
     protected $_productRepo;
@@ -54,20 +55,20 @@ class Product extends \Magento\Framework\View\Element\Template {
         ProductRepository $productRepository,
         array $data = []
     ) {
-        $this->_helper       = $helper;
-        $this->_bvLogger     = $logger;
+        $this->helper        = $helper;
+        $this->bvLogger      = $logger;
         $this->_coreRegistry = $registry;
-        $this->_configHelper = $configHelper;
+        $this->configHelper  = $configHelper;
         $this->_productRepo  = $productRepository;
         parent::__construct( $context, $data );
     }
 
     public function getHelper() {
-        return $this->_helper;
+        return $this->helper;
     }
 
     public function getConfig( $path ) {
-        return $this->_helper->getConfig( $path );
+        return $this->helper->getConfig( $path );
     }
 
     public function isEnabled() {
@@ -100,7 +101,7 @@ class Product extends \Magento\Framework\View\Element\Template {
      */
     public function getProductSku() {
         if ( $this->getProduct() ) {
-            return $this->_helper->getProductId( $this->getProduct()->getSku() );
+            return $this->helper->getProductId( $this->getProduct()->getSku() );
         }
 
         return null;
@@ -115,9 +116,11 @@ class Product extends \Magento\Framework\View\Element\Template {
         if ( empty( $this->_product ) ) {
             try {
                 $product        = $this->_coreRegistry->registry( 'product' );
+                if($product == null)
+                    throw new NoSuchEntityException();
                 $this->_product = $this->_productRepo->getById( $product->getId() );
             } Catch ( \Exception $e ) {
-                $this->_bvLogger->crit( $e->getMessage() . "\n" . $e->getTraceAsString() );
+                $this->bvLogger->crit( $e->getMessage() . "\n" . $e->getTraceAsString() );
 
                 return false;
             }
@@ -136,7 +139,7 @@ class Product extends \Magento\Framework\View\Element\Template {
                 return $this->getProduct()->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE;
             }
         } Catch ( \Exception $e ) {
-            $this->_bvLogger->crit( $e->getMessage() . "\n" . $e->getTraceAsString() );
+            $this->bvLogger->crit( $e->getMessage() . "\n" . $e->getTraceAsString() );
         }
 
         return false;
@@ -165,11 +168,11 @@ class Product extends \Magento\Framework\View\Element\Template {
 
                     $key .= $productAttributeId . '_' . $attributeValue . '_';
                 }
-                $children[ $key ] = $this->_helper->getProductId( $childProduct );
+                $children[ $key ] = $this->helper->getProductId( $childProduct );
             }
 
         }
-        $this->_bvLogger->info( $children );
+        $this->bvLogger->info( $children );
 
         return json_encode( $children, JSON_UNESCAPED_UNICODE );
     }

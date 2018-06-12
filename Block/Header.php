@@ -8,16 +8,29 @@
  * of StoreFront Consulting, Inc.
  *
  * @category  SFC
- * @package   Bazaarvoice_Ext
+ * @package   bvmage2
  * @author    Dennis Rogers <dennis@storefrontconsulting.com>
- * @copyright 2016 StoreFront Consulting, Inc
+ * @copyright 2018 StoreFront Consulting, Inc
  * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
  * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
  */
-/** @var Bazaarvoice\Connector\Block\Reviews $this */
-?>
-<?php if ($this->isEnabled()) : ?>
-<?php $bvApiUrl = $this->helper->getBvApiHostUrl(true); ?>
-    <!--suppress HtmlUnknownTarget -->
-    <script async type="text/javascript" src="<?php echo $bvApiUrl ?>"></script>
-<?php endif;
+
+namespace Bazaarvoice\Connector\Block;
+
+
+class Header extends Reviews {
+
+    /**
+     * Bypass product checking from Product block
+     *
+     * @return string
+     * @throws \Magento\Framework\Exception\ValidatorException
+     */
+    protected function _toHtml() {
+        if (!$this->getTemplate()) {
+            return '';
+        }
+        return $this->fetchView($this->getTemplateFile());
+    }
+
+}
