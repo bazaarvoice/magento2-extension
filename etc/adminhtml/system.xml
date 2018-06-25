@@ -169,6 +169,11 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Yes (Default) Setting to determine whether simple products show reviews and ratings for their entire product family.]]></comment>
                 </field>
+                <field id="bvfamilies_inherit" translate="label" type="select" sortOrder="178" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Agregate Custom Attributes</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Yes (Default) Setting to determine whether configurable (family) products will contain aggregated values from their member products for UPC, EAN, ISBN, Model Number and MPN.]]></comment>
+                </field>
                 <field id="category_id_use_url_path" translate="label" type="select" sortOrder="180" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Use category URL path as category id</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>

@@ -17,16 +17,22 @@
 
 namespace Bazaarvoice\Connector\Model\Feed\Product;
 
+use Bazaarvoice\Connector\Model\Index;
 use Bazaarvoice\Connector\Model\XMLWriter;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
+use Magento\Framework\Model\ResourceModel\Iterator;
 use Magento\Store\Model\Store;
 use Bazaarvoice\Connector\Model\ResourceModel\Index\Collection;
 use Magento\Store\Model\StoreManagerInterface;
+use Bazaarvoice\Connector\Model\ResourceModel\Index\Collection\Factory;
 
 class Product extends Generic
 {
     /** @var  XMLWriter $_writer */
     protected $_writer;
+    protected $_index;
+    protected $_indexFactory;
+    protected $_iterator;
 
     /**
      * Product constructor.
@@ -34,16 +40,22 @@ class Product extends Generic
      * @param \Bazaarvoice\Connector\Logger\Logger $logger
      * @param \Bazaarvoice\Connector\Helper\Data $helper
      * @param StoreManagerInterface $storeManager
-     * @param \Magento\Framework\ObjectManagerInterface $objectManager
+     * @param Iterator $iterator
+     * @param Index $index
+     * @param Factory $factory
      */
     public function __construct(
         \Bazaarvoice\Connector\Logger\Logger $logger,
         \Bazaarvoice\Connector\Helper\Data $helper,
         StoreManagerInterface $storeManager,
-        \Magento\Framework\ObjectManagerInterface $objectManager
-    )
-    {
-        parent::__construct($logger, $helper, $storeManager, $objectManager);
+        Iterator $iterator,
+        Index $index,
+        Factory $factory
+    ) {
+        $this->_iterator;
+        $this->_index = $index;
+        $this->_indexFactory = $factory;
+        parent::__construct($logger, $helper, $storeManager);
     }
 
     /**
@@ -54,31 +66,56 @@ class Product extends Generic
     {
         $this->_writer = $writer;
         $this->_writer->startElement('Products');
-        $productCollection = $this->getProductCollection();
+        $indexCollection = $this->getIndexCollection();
 
         if($store->getId())
-            $productCollection->setStore($store);
+            $indexCollection->setStore($store);
 
-        $this->_logger->info($productCollection->count() . ' products found to export.');
+        foreach($indexCollection as $product)
+            $this->writeProduct($product);
 
-        /** @var \Magento\Framework\Model\ResourceModel\Iterator $iterator */
-        $iterator = $this->_objectManager->create('\Magento\Framework\Model\ResourceModel\Iterator');
-        $iterator
-            ->walk($productCollection->getSelect(), array(array($this, 'writeProduct')));
+        $this->_logger->info($indexCollection->count() . ' products found to export.');
 
         $this->_writer->endElement(); /** Products */
     }
 
     /**
-     * @param array $args
+     * @param Index $product
      */
-    public function writeProduct($args)
+    public function writeProduct($product)
     {
-        /** @var \Bazaarvoice\Connector\Model\Index $product */
-        $product = $this->_objectManager->create('\Bazaarvoice\Connector\Model\Index');
-        $product->setData($args['row']);
-
         $this->_logger->debug('Write product '.$product->getData('product_id'));
+
+        /** Load parent value if product value is blank */
+        if($product->getData('product_type') == 'configurable'
+           && $this->_helper->getConfig('feeds/bvfamilies_inherit')
+        ) {
+            $this->_logger->debug('inherit child values');
+            $children = $this->_indexFactory->create();
+            $children->addFieldToFilter('family', ['like' => '%"' . $product->getData('external_id') . '"%']);
+            $childrenValues = [];
+            foreach($children as $child) {
+                $this->_logger->debug($child->getExternalId());
+                foreach($product->customAttributes as $attribute) {
+                    $this->_logger->debug($attribute);
+                    $attribute = strtolower($attribute).'s';
+                    if($child->getData($attribute)) {
+                        $value = $child->getData($attribute);
+                        if(is_string($value) && strpos($value, ',')) {
+                            $values = explode( ',', $value );
+                            $childrenValues[ $attribute ] = array_merge( $childrenValues[ $attribute ], $values );
+                        } else {
+                            $childrenValues[$attribute][] = $value;
+                        }
+                    }
+                }
+            }
+            $this->_logger->debug($childrenValues);
+            foreach($childrenValues as $attribute => $values) {
+                if(!is_array($values) || empty($values)) continue;
+                $product->setData($attribute, $values);
+            }
+        }
 
         foreach ($product->getData() as $key => $value) {
             if (is_string($value)
@@ -196,11 +233,9 @@ class Product extends Generic
     /**
      * @return Collection
      */
-    protected function getProductCollection()
+    protected function getIndexCollection()
     {
-        /** @var Collection\Factory $indexFactory */
-        $indexFactory = $this->_objectManager->get('\Bazaarvoice\Connector\Model\ResourceModel\Index\Collection\Factory');
-        $collection = $indexFactory->create();
+        $collection = $this->_indexFactory->create();
         $collection->addFieldToFilter('status', Status::STATUS_ENABLED);
 
         return $collection;

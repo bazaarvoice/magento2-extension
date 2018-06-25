@@ -534,8 +534,10 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 			    else
     				$indexData['family'] = array( $indexData['family'] );
 			}
+
 			$this->_logger->debug('family');
-$this->_logger->debug($indexData['family']);
+            $this->_logger->debug($indexData['family']);
+
 			/** categories */
 			if($indexData['bv_category_external_id'])
 				$indexData['category_external_id'] = $indexData['bv_category_external_id'];
