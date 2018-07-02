@@ -24,7 +24,7 @@
         var bvSelected = "<?php echo $this->getProductSku() ?>";
         require(["jquery"], function ($) {
             function bindBvSwatches() {
-                $('#product-options-wrapper').on('mouseout', '.swatch-option', function () {
+                $('#product-options-wrapper').on('click', '.swatch-option', function () {
                     var bvCurrent = '';
                     $('.swatch-attribute').each(function () {
                         bvCurrent = bvCurrent
