@@ -87,12 +87,12 @@ class Product extends Generic
         $this->_logger->debug('Write product '.$product->getData('product_id'));
 
         /** Load parent value if product value is blank */
-        if($product->getData('product_type') == 'configurable'
+        if($product->getData('family') !== null
            && $this->_helper->getConfig('feeds/bvfamilies_inherit')
         ) {
-            $this->_logger->debug('inherit child values');
+            $this->_logger->debug('inherit family values');
             $children = $this->_indexFactory->create();
-            $children->addFieldToFilter('family', ['like' => '%"' . $product->getData('external_id') . '"%']);
+            $children->addFieldToFilter('family', $product->getData('family'));
             $childrenValues = [];
             foreach($children as $child) {
                 $this->_logger->debug($child->getExternalId());
