@@ -18,13 +18,13 @@
 <?php /** @var Bazaarvoice\Connector\Block\Product $this */ ?>
 
 <?php if ($this->isEnabled()) : ?>
-<?php if ($this->isConfigurable()) : ?>
+<?php if ($this->isConfigurable() && $this->getConfig( 'rr/children' )) : ?>
     <script type="text/javascript">
         var bvChildren = <?php echo $this->getChildrenJson(); ?>;
         var bvSelected = "<?php echo $this->getProductSku() ?>";
         require(["jquery"], function ($) {
             function bindBvSwatches() {
-                $('#product-options-wrapper').on('mouseout', '.swatch-option', function () {
+                $('#product-options-wrapper').on('click', '.swatch-option', function () {
                     var bvCurrent = '';
                     $('.swatch-attribute').each(function () {
                         bvCurrent = bvCurrent

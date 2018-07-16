@@ -19,7 +19,6 @@ namespace Bazaarvoice\Connector\Model\Feed\Product;
 use Bazaarvoice\Connector\Helper\Data;
 use Bazaarvoice\Connector\Logger\Logger;
 use Bazaarvoice\Connector\Model\Source\Scope;
-use Magento\Framework\ObjectManagerInterface;
 use Magento\Store\Model\Group;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
@@ -30,25 +29,23 @@ class Generic
 
     protected $_logger;
     protected $_helper;
-    protected $_objectManager;
 	protected $_generationScope;
 	protected $_storeManager;
 
-	/**
+    /**
      * Generic constructor.
+     *
      * @param Logger $logger
      * @param Data $helper
-     * @param ObjectManagerInterface $objectManager
+     * @param StoreManagerInterface $storeManager
      */
     public function __construct(
     	Logger $logger,
 	    Data $helper,
-	    StoreManagerInterface $storeManager,
-	    ObjectManagerInterface $objectManager
+	    StoreManagerInterface $storeManager
     ) {
         $this->_logger = $logger;
         $this->_helper = $helper;
-        $this->_objectManager = $objectManager;
 	    $this->_storeManager = $storeManager;
 
 	    $this->_generationScope = $helper->getConfig('feeds/generation_scope');

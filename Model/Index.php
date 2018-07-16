@@ -29,6 +29,7 @@ class Index
     /** Custom Attributes */
     public $customAttributes = array('UPC', 'ManufacturerPartNumber', 'EAN', 'ISBN', 'ModelNumber');
     protected $_generationScope;
+    protected $_helper;
 
     /**
      * @param \Magento\Framework\Model\Context $context
@@ -49,6 +50,7 @@ class Index
         // @codingStandardsIgnoreEnd
         $this->_init('Bazaarvoice\Connector\Model\ResourceModel\Index');
         $this->_generationScope = $helper->getConfig('feeds/generation_scope');
+        $this->_helper = $helper;
         parent::__construct($context, $registry, $resource, $resourceCollection);
     }
 
@@ -86,5 +88,26 @@ class Index
             $this->setData($index);
 
         return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasParent() {
+        if($this->_helper->getConfig('feeds/families')) {
+            if(!empty($this->getData('family')))
+                return true;
+        }
+        return false;
+    }
+
+    /**
+     * @return array|mixed
+     */
+    public function getParents() {
+        if($this->hasParent()) {
+            return $this->_helper->jsonDecode($this->getData('family'));
+        }
+        return [];
     }
 }

@@ -16,17 +16,40 @@
  */
 namespace Bazaarvoice\Connector\Model\Feed\Product;
 
-use \Bazaarvoice\Connector\Model\Feed;
+use Bazaarvoice\Connector\Helper\Data;
+use Bazaarvoice\Connector\Logger\Logger;
 use \Bazaarvoice\Connector\Model\XMLWriter;
 use \Magento\Store\Api\Data\StoreInterface;
 use \Magento\Store\Model\Group;
 use \Magento\Store\Model\Store;
-use \Magento\Store\Model\StoreManagerInterface;
+use Magento\Store\Model\StoreManagerInterface;
 use \Magento\Store\Model\Website;
+use \Magento\Catalog\Model\ResourceModel\Eav\Attribute;
 
 class Brand extends Generic
 {
-	/**
+    protected $_attribute;
+
+    /**
+     * Brand constructor.
+     *
+     * @param Logger $logger
+     * @param Data $helper
+     * @param StoreManagerInterface $storeManager
+     * @param Attribute $attribute
+     */
+    public function __construct(
+        Logger $logger,
+        Data $helper,
+        StoreManagerInterface $storeManager,
+        Attribute $attribute
+    ) {
+        $this->_attribute = $attribute;
+        parent::__construct( $logger, $helper, $storeManager );
+    }
+
+
+    /**
 	 * @param XMLWriter $writer
 	 * @param $store
 	 *
@@ -123,7 +146,7 @@ class Brand extends Generic
             return;
         }
 
-        $storesList = $this->_objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStores();
+        $storesList = $this->_storeManager->getStores();
         $stores = [];
         /** @var StoreInterface $store */
         foreach ($storesList as $store) {
@@ -133,9 +156,7 @@ class Brand extends Generic
         $brandsByLocale = $this->getOptionsByLocale($attributeCode, $stores);
 
         /** Using admin store for now */
-        /** @var StoreManagerInterface $storeManager */
-        $storeManager = $this->_objectManager->get('Magento\Store\Model\StoreManagerInterface');
-        $store = $storeManager->getStore(0);
+        $store = $this->_storeManager->getStore(0);
         $defaultBrands = $this->getOptionsForStore($attributeCode, $store);
 
         $writer->startElement('Brands');
@@ -206,9 +227,7 @@ class Brand extends Generic
     {
         $storeId = $store instanceof Store ? $store->getId() : $store;
         /** Lookup the attribute options for this store */
-        /** @var \Magento\Catalog\Model\ResourceModel\Eav\Attribute $attribute */
-        $attribute = $this->_objectManager->get('\Magento\Catalog\Model\ResourceModel\Eav\Attribute');
-        $attribute->loadByCode(\Magento\Catalog\Model\Product::ENTITY, $code);
+        $attribute = $this->_attribute->loadByCode(\Magento\Catalog\Model\Product::ENTITY, $code);
         $attribute->setStoreId($storeId);
         $attributeOptions = $attribute->getSource()->getAllOptions();
         /** Reformat array */
@@ -217,6 +236,7 @@ class Brand extends Generic
             if (!empty($attributeOption['value']))
                 $processedOptions[$attributeOption['value']] = $attributeOption['label'];
         }
+        $this->_attribute->clearInstance();
         return $processedOptions;
     }
 

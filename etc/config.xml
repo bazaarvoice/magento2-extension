@@ -24,6 +24,7 @@
                 <product_filename>productfeed.xml</product_filename>
                 <product_path>/import-inbox</product_path>
                 <bvfamilies_expand>1</bvfamilies_expand>
+                <bvfamilies_inherit>1</bvfamilies_inherit>
                 <category_id_use_url_path>0</category_id_use_url_path>
             </feeds>
         </bazaarvoice>
