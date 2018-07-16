@@ -172,7 +172,7 @@
                 <field id="bvfamilies_inherit" translate="label" type="select" sortOrder="178" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Agregate Custom Attributes</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment><![CDATA[Yes (Default) Setting to determine whether family products will contain aggregated values from their related products for UPC, EAN, ISBN, Model Number and MPN.]]></comment>
+                    <comment><![CDATA[Product Family Syndication: Please <strong>carefully read the documentation before enabling.</strong> This setting affects how reviews will display on syndicated sites and should only be used under certain circumstances.]]></comment>
                 </field>
                 <field id="category_id_use_url_path" translate="label" type="select" sortOrder="180" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Use category URL path as category id</label>
