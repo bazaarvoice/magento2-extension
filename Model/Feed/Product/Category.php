@@ -16,7 +16,6 @@
  */
 namespace Bazaarvoice\Connector\Model\Feed\Product;
 
-use Bazaarvoice\Connector\Model\Feed;
 use Bazaarvoice\Connector\Model\Source\Scope;
 use Bazaarvoice\Connector\Model\XMLWriter;
 use Bazaarvoice\Connector\Logger\Logger;
@@ -28,7 +27,6 @@ use Magento\Store\Model\Group;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Store\Model\Website;
-use Magento\Framework\ObjectManagerInterface;
 
 class Category extends Generic
 {
@@ -39,9 +37,10 @@ class Category extends Generic
 
     /**
      * Category constructor.
+     *
      * @param Logger $logger
      * @param Data $helper
-     * @param ObjectManagerInterface $objectManager
+     * @param StoreManagerInterface $storeManager
      * @param CategoryFactory $categoryFactory
      * @param ResourceConnection $resourceConnection
      */
@@ -49,14 +48,13 @@ class Category extends Generic
         Logger $logger,
         Data $helper,
         StoreManagerInterface $storeManager,
-        ObjectManagerInterface $objectManager,
         CategoryFactory $categoryFactory,
         ResourceConnection $resourceConnection
     )
     {
         $this->_categoryFactory = $categoryFactory;
         $this->_resourceConnection = $resourceConnection;
-        parent::__construct($logger, $helper, $storeManager, $objectManager);
+        parent::__construct($logger, $helper, $storeManager);
     }
 
 	/**
@@ -103,7 +101,7 @@ class Category extends Generic
 	 */
     public function processCategoriesForGlobal(XMLWriter $writer)
     {
-        $storesList = $this->_objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStores();
+        $storesList = $this->_storeManager->getStores();
         ksort($storesList);
         $stores = [];
         $defaultStore = null;
