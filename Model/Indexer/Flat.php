@@ -348,15 +348,15 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 					'parent_image' => 'small_image'
 				) )
 			->joinLeft(
-				array( 'cp' => $res->getTableName( 'catalog_category_product_index' ) ),
-				"cp.product_id = p.entity_id" .
-				($this->_generationScope == Scope::SCOPE_GLOBAL ? '' : " AND cp.store_id = {$storeId}"),
-				'' )
+				array( 'cp' => $res->getTableName( $this->_generationScope == Scope::SCOPE_GLOBAL ? 'catalog_category_product' : "catalog_category_product_index_store{$storeId}" ) ),
+				"cp.product_id = p.entity_id",
+                "category_id"
+                )
 			->joinLeft(
-				array( 'cpp' => $res->getTableName( 'catalog_category_product_index' ) ),
-				"cpp.product_id = parent.entity_id" .
-				($this->_generationScope == Scope::SCOPE_GLOBAL ? '' : " AND cpp.store_id = {$storeId}"),
-				'' );
+				array( 'cpp' => $res->getTableName( $this->_generationScope == Scope::SCOPE_GLOBAL ? 'catalog_category_product' : "catalog_category_product_index_store{$storeId}" ) ),
+				"cpp.product_id = parent.entity_id",
+                "category_id"
+                );
 
 		/** urls */
 		$select
@@ -493,7 +493,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
 		$select->where( "p.entity_id IN(?)", $productIds )->group( 'p.entity_id' );
 
-		/*$this->_logger->debug($select->__toString());*/
+		$this->_logger->debug($select->__toString());
 
 		try {
 			$rows = $select->query();
