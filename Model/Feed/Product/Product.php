@@ -92,7 +92,10 @@ class Product extends Generic
         ) {
             $this->_logger->debug('inherit family values');
             $children = $this->_indexFactory->create();
-            $children->addFieldToFilter('family', $product->getData('family'));
+            $children
+                ->addFieldToFilter('family', $product->getData('family'))
+                ->addFieldToFilter('store_id', $product->getData('store_id'))
+            ;
             $childrenValues = [];
             foreach($children as $child) {
                 $this->_logger->debug($child->getExternalId());
