@@ -26,8 +26,7 @@ use Bazaarvoice\Connector\Model\ResourceModel\Index\Collection;
 use Magento\Store\Model\StoreManagerInterface;
 use Bazaarvoice\Connector\Model\ResourceModel\Index\Collection\Factory;
 
-class Product extends Generic
-{
+class Product extends Generic {
     /** @var  XMLWriter $_writer */
     protected $_writer;
     protected $_index;
@@ -53,197 +52,212 @@ class Product extends Generic
         Factory $factory
     ) {
         $this->_iterator;
-        $this->_index = $index;
+        $this->_index        = $index;
         $this->_indexFactory = $factory;
-        parent::__construct($logger, $helper, $storeManager);
+        parent::__construct( $logger, $helper, $storeManager );
     }
 
     /**
      * @param XMLWriter $writer
      * @param $store
      */
-    public function processProducts(XMLWriter $writer, Store $store)
-    {
+    public function processProducts( XMLWriter $writer, Store $store ) {
         $this->_writer = $writer;
-        $this->_writer->startElement('Products');
+        $this->_writer->startElement( 'Products' );
         $indexCollection = $this->getIndexCollection();
 
-        if($store->getId())
-            $indexCollection->setStore($store);
+        if ( $store->getId() ) {
+            $indexCollection->setStore( $store );
+        }
 
-        foreach($indexCollection as $product)
-            $this->writeProduct($product);
+        foreach ( $indexCollection as $product ) {
+            $this->writeProduct( $product );
+        }
 
-        $this->_logger->info($indexCollection->count() . ' products found to export.');
+        $this->_logger->info( $indexCollection->count() . ' products found to export.' );
 
-        $this->_writer->endElement(); /** Products */
+        $this->_writer->endElement();
+        /** Products */
     }
 
     /**
      * @param Index $product
      */
-    public function writeProduct($product)
-    {
-        $this->_logger->debug('Write product '.$product->getData('product_id'));
+    public function writeProduct( $product ) {
+        $this->_logger->debug( 'Write product ' . $product->getData( 'product_id' ) );
 
         /** Load parent value if product value is blank */
-        if($product->getData('family') !== null
-           && $this->_helper->getConfig('feeds/bvfamilies_inherit')
+        if ( $product->getData( 'family' ) !== null
+             && $this->_helper->getConfig( 'feeds/bvfamilies_inherit' )
         ) {
-            $this->_logger->debug('inherit family values');
+            $this->_logger->debug( 'inherit family values' );
             $children = $this->_indexFactory->create();
             $children
-                ->addFieldToFilter('family', $product->getData('family'))
-                ->addFieldToFilter('store_id', $product->getData('store_id'))
-            ;
+                ->addFieldToFilter( 'family', $product->getData( 'family' ) )
+                ->addFieldToFilter( 'store_id', $product->getData( 'store_id' ) );
             $childrenValues = [];
-            foreach($children as $child) {
-                $this->_logger->debug($child->getExternalId());
-                foreach($product->customAttributes as $attribute) {
-                    $this->_logger->debug($attribute);
-                    $attribute = strtolower($attribute).'s';
-                    if($child->getData($attribute)) {
-                        $value = $child->getData($attribute);
-                        if(is_string($value) && strpos($value, ',')) {
-                            $values = explode( ',', $value );
+            foreach ( $children as $child ) {
+                $this->_logger->debug( $child->getExternalId() );
+                foreach ( $product->customAttributes as $attribute ) {
+                    $this->_logger->debug( $attribute );
+                    $attribute = strtolower( $attribute ) . 's';
+                    if ( $child->getData( $attribute ) ) {
+                        $value = $child->getData( $attribute );
+                        if ( is_string( $value ) && strpos( $value, ',' ) ) {
+                            $values                       = explode( ',', $value );
                             $childrenValues[ $attribute ] = array_merge( $childrenValues[ $attribute ], $values );
                         } else {
-                            $childrenValues[$attribute][] = $value;
+                            $childrenValues[ $attribute ][] = $value;
                         }
                     }
                 }
             }
-            $this->_logger->debug($childrenValues);
-            foreach($childrenValues as $attribute => $values) {
-                if(!is_array($values) || empty($values)) continue;
-                $product->setData($attribute, $values);
+            $this->_logger->debug( $childrenValues );
+            foreach ( $childrenValues as $attribute => $values ) {
+                if ( ! is_array( $values ) || empty( $values ) ) {
+                    continue;
+                }
+                $product->setData( $attribute, $values );
             }
         }
 
-        foreach ($product->getData() as $key => $value) {
-            if (is_string($value)
-                && (substr($value, 0, 1) == '[' || substr($value, 0, 1) == '{'))
-                $product->setData($key, $this->_helper->jsonDecode($value));
-        }
-
-        $this->_writer->startElement('Product');
-
-        $this->_writer->writeElement('ExternalId', $product->getData('external_id'));
-        $this->_writer->writeElement('Name', $product->getData('name'), true);
-        $localeName = $product->getData('locale_name');
-        if (is_array($localeName) && count($localeName)) {
-            $this->_writer->startElement('Names');
-            foreach ($localeName as $locale => $name) {
-                $this->_writer->startElement('Name');
-                $this->_writer->writeAttribute('locale', $locale);
-                $this->_writer->writeRaw($name, true);
-                $this->_writer->endElement(); /** Name */
+        foreach ( $product->getData() as $key => $value ) {
+            if ( is_string( $value )
+                 && ( substr( $value, 0, 1 ) == '[' || substr( $value, 0, 1 ) == '{' ) ) {
+                $product->setData( $key, $this->_helper->jsonDecode( $value ) );
             }
-            $this->_writer->endElement(); /** Names */
         }
 
-        $this->_writer->writeElement('Description', $product->getData('description'), true);
-        $localeDescription = $product->getData('locale_description');
-        if (is_array($localeDescription) && count($localeDescription)) {
-            $this->_writer->startElement('Descriptions');
-            foreach ($localeDescription as $locale => $description) {
-                $this->_writer->startElement('Description');
-                $this->_writer->writeAttribute('locale', $locale);
-                $this->_writer->writeRaw($description, true);
-                $this->_writer->endElement(); /** Description */
+        $this->_writer->startElement( 'Product' );
+
+        $this->_writer->writeElement( 'ExternalId', $product->getData( 'external_id' ) );
+        $this->_writer->writeElement( 'Name', $product->getData( 'name' ), true );
+        $localeName = $product->getData( 'locale_name' );
+        if ( is_array( $localeName ) && count( $localeName ) ) {
+            $this->_writer->startElement( 'Names' );
+            foreach ( $localeName as $locale => $name ) {
+                $this->_writer->startElement( 'Name' );
+                $this->_writer->writeAttribute( 'locale', $locale );
+                $this->_writer->writeRaw( $name, true );
+                $this->_writer->endElement();
+                /** Name */
             }
-            $this->_writer->endElement(); /** Descriptions */
+            $this->_writer->endElement();
+            /** Names */
         }
 
-        $this->_writer->writeElement('CategoryExternalId', $product->getData('category_external_id'));
-
-        $this->_writer->writeElement('ProductPageUrl', $product->getData('product_page_url'), true);
-        $localeUrls = $product->getData('locale_product_page_url');
-        if (is_array($localeUrls) && count($localeUrls)) {
-            $this->_writer->startElement('ProductPageUrls');
-            foreach ($localeUrls as $locale => $url) {
-                $this->_writer->startElement('ProductPageUrl');
-                $this->_writer->writeAttribute('locale', $locale);
-                $this->_writer->writeRaw($url, true);
-                $this->_writer->endElement(); /** ProductPageUrl */
+        $this->_writer->writeElement( 'Description', $product->getData( 'description' ), true );
+        $localeDescription = $product->getData( 'locale_description' );
+        if ( is_array( $localeDescription ) && count( $localeDescription ) ) {
+            $this->_writer->startElement( 'Descriptions' );
+            foreach ( $localeDescription as $locale => $description ) {
+                $this->_writer->startElement( 'Description' );
+                $this->_writer->writeAttribute( 'locale', $locale );
+                $this->_writer->writeRaw( $description, true );
+                $this->_writer->endElement();
+                /** Description */
             }
-            $this->_writer->endElement(); /** ProductPageUrls */
+            $this->_writer->endElement();
+            /** Descriptions */
         }
 
-        $this->_writer->writeElement('ImageUrl', $product->getData('image_url'), true);
-        $localeImage = $product->getData('locale_image_url');
-        if (is_array($localeImage) && count($localeImage)) {
-            $this->_writer->startElement('ImageUrls');
-            foreach ($localeImage as $locale => $image) {
-                $this->_writer->startElement('ImageUrl');
-                $this->_writer->writeAttribute('locale', $locale);
-                $this->_writer->writeRaw($image, true);
-                $this->_writer->endElement(); /** ImageUrl */
+        $this->_writer->writeElement( 'CategoryExternalId', $product->getData( 'category_external_id' ) );
+
+        $this->_writer->writeElement( 'ProductPageUrl', $product->getData( 'product_page_url' ), true );
+        $localeUrls = $product->getData( 'locale_product_page_url' );
+        if ( is_array( $localeUrls ) && count( $localeUrls ) ) {
+            $this->_writer->startElement( 'ProductPageUrls' );
+            foreach ( $localeUrls as $locale => $url ) {
+                $this->_writer->startElement( 'ProductPageUrl' );
+                $this->_writer->writeAttribute( 'locale', $locale );
+                $this->_writer->writeRaw( $url, true );
+                $this->_writer->endElement();
+                /** ProductPageUrl */
             }
-            $this->_writer->endElement(); /** ImageUrls */
+            $this->_writer->endElement();
+            /** ProductPageUrls */
         }
 
-        if ($product->getData('brand_external_id'))
-            $this->_writer->writeElement('BrandExternalId', $product->getData('brand_external_id'));
+        $this->_writer->writeElement( 'ImageUrl', $product->getData( 'image_url' ), true );
+        $localeImage = $product->getData( 'locale_image_url' );
+        if ( is_array( $localeImage ) && count( $localeImage ) ) {
+            $this->_writer->startElement( 'ImageUrls' );
+            foreach ( $localeImage as $locale => $image ) {
+                $this->_writer->startElement( 'ImageUrl' );
+                $this->_writer->writeAttribute( 'locale', $locale );
+                $this->_writer->writeRaw( $image, true );
+                $this->_writer->endElement();
+                /** ImageUrl */
+            }
+            $this->_writer->endElement();
+            /** ImageUrls */
+        }
 
-        foreach ($product->customAttributes as $label) {
-            $code = strtolower($label) . 's';
-            $values = $product->getData($code);
-            if (!empty($values)) {
-                $this->_writer->startElement($label . 's');
-                if(is_string($values) && strpos($values, ','))
-                    $values = explode(',', $values);
-                if (is_array($values)) {
-                    foreach ($values as $value) {
-                        $this->_writer->writeElement($label, $value, true);
+        if ( $product->getData( 'brand_external_id' ) ) {
+            $this->_writer->writeElement( 'BrandExternalId', $product->getData( 'brand_external_id' ) );
+        }
+
+        foreach ( $product->customAttributes as $label ) {
+            $code   = strtolower( $label ) . 's';
+            $values = $product->getData( $code );
+            if ( ! empty( $values ) ) {
+                $this->_writer->startElement( $label . 's' );
+                if ( is_string( $values ) && strpos( $values, ',' ) ) {
+                    $values = explode( ',', $values );
+                }
+                if ( is_array( $values ) ) {
+                    foreach ( $values as $value ) {
+                        $this->_writer->writeElement( $label, $value, true );
                     }
                 } else {
-                    $this->_writer->writeElement($label, $values, true);
+                    $this->_writer->writeElement( $label, $values, true );
                 }
                 $this->_writer->endElement();
             }
         }
 
-        if ($this->_helper->getConfig('general/families')) {
-            if ($product->getData('family') && count($product->getData('family'))) {
-                $this->_writer->startElement('Attributes');
+        if ( $this->_helper->getConfig( 'general/families' ) ) {
+            if ( $product->getData( 'family' ) && count( $product->getData( 'family' ) ) ) {
+                $this->_writer->startElement( 'Attributes' );
 
-                foreach ($product->getData('family') as $familyId) {
-                    if ($familyId) {
-                        $this->_writer->startElement('Attribute');
-                        $this->_writer->writeAttribute('id', 'BV_FE_FAMILY');
-                        $this->_writer->writeElement('Value', $familyId);
-                        $this->_writer->endElement(); /** Attribute */
+                foreach ( $product->getData( 'family' ) as $familyId ) {
+                    if ( $familyId ) {
+                        $this->_writer->startElement( 'Attribute' );
+                        $this->_writer->writeAttribute( 'id', 'BV_FE_FAMILY' );
+                        $this->_writer->writeElement( 'Value', $familyId );
+                        $this->_writer->endElement();
+                        /** Attribute */
 
                         if (
-                        	$this->_helper->getConfig('feeds/bvfamilies_expand')
-                            && $product->getData('product_type') != 'simple'
+                            $this->_helper->getConfig( 'feeds/bvfamilies_expand' )
+                            && $product->getData( 'product_type' ) != 'simple'
                         ) {
-                            $this->_writer->startElement('Attribute');
-                            $this->_writer->writeAttribute('id', 'BV_FE_EXPAND');
-                            $this->_writer->writeElement('Value', 'BV_FE_FAMILY:' . $familyId);
-                            $this->_writer->endElement(); /** Attribute */
+                            $this->_writer->startElement( 'Attribute' );
+                            $this->_writer->writeAttribute( 'id', 'BV_FE_EXPAND' );
+                            $this->_writer->writeElement( 'Value', 'BV_FE_FAMILY:' . $familyId );
+                            $this->_writer->endElement();
+                            /** Attribute */
                         }
                     }
                 }
-                $this->_writer->endElement(); /** Attributes */
+                $this->_writer->endElement();
+                /** Attributes */
             }
         }
 
-        $this->_writer->endElement(); /** Product */
+        $this->_writer->endElement();
+        /** Product */
     }
 
     /**
      * @return Collection
      */
-    protected function getIndexCollection()
-    {
+    protected function getIndexCollection() {
         $collection = $this->_indexFactory->create();
-        $collection->addFieldToFilter('status', Status::STATUS_ENABLED);
+        $collection->addFieldToFilter( 'status', Status::STATUS_ENABLED );
 
         return $collection;
     }
-
 
 
 }
