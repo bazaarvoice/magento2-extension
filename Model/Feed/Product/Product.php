@@ -228,9 +228,8 @@ class Product extends Generic {
                         $this->_writer->endElement();
                         /** Attribute */
 
-                        if (
+                        if($product->getData( 'product_type' ) != 'simple' ||
                             $this->_helper->getConfig( 'feeds/bvfamilies_expand' )
-                            && $product->getData( 'product_type' ) != 'simple'
                         ) {
                             $this->_writer->startElement( 'Attribute' );
                             $this->_writer->writeAttribute( 'id', 'BV_FE_EXPAND' );
