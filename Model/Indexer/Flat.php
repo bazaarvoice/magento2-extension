@@ -121,13 +121,13 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
      */
     public function executeFull() {
         $this->canIndex();
-        $this->_logger->info( 'Full Product Feed Index' );
+        $this->_logger->debug( 'Full Product Feed Index' );
         try {
             /** @var Collection $incompleteIndex */
             $incompleteIndex = $this->_collectionFactory->create()->addFieldToFilter( 'version_id', 0 );
 
             if ( $incompleteIndex->count() == 0 ) {
-                $this->_logger->info( __( 'Bazaarvoice Product Feed Index has been flushed for rebuild.' ) );
+                $this->_logger->debug( __( 'Bazaarvoice Product Feed Index has been flushed for rebuild.' ) );
                 $this->flushIndex();
             } else {
                 $this->execute( array() );
@@ -151,7 +151,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
     public function execute( $ids = array() ) {
         $this->canIndex();
         try {
-            $this->_logger->info( 'Partial Product Feed Index' );
+            $this->_logger->debug( 'Partial Product Feed Index' );
 
             if ( empty( $ids ) ) {
                 $idCollection = $this->_collectionFactory->create()->addFieldToFilter( 'version_id', 0 );
@@ -159,7 +159,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 $ids = $idCollection->getColumnValues( 'product_id' );
             }
 
-            $this->_logger->info( 'Found ' . count( $ids ) . ' products to update.' );
+            $this->_logger->debug( 'Found ' . count( $ids ) . ' products to update.' );
 
             /** Break ids into pages */
             $productIdSets = array_chunk( $ids, 50 );
@@ -312,7 +312,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
     public function reindexProductsForStore( $productIds, $store ) {
         /** Check for scope change */
         if ( $this->hasBadScopeIndex() ) {
-            $this->_logger->info( 'Index entries found with wrong scope. This usually means scope has changed in admin. Flagging entire index for rebuild.' );
+            $this->_logger->debug( 'Index entries found with wrong scope. This usually means scope has changed in admin. Flagging entire index for rebuild.' );
             $this->executeFull();
 
             return false;
@@ -568,7 +568,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 }
             }
 
-            $this->_logger->debug( 'family' );
+            $this->_logger->debug( 'Family Info' );
             $this->_logger->debug( $indexData['family'] );
 
             /** categories */
@@ -618,7 +618,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                     }
                 }
             }
-            $this->_logger->info( $indexData['image_url'] );
+            //$this->_logger->debug( $indexData['image_url'] );
             /** Use parent image if appropriate */
             if ( $indexData['image_url'] == '' || $indexData['image_url'] == 'no_selection' ) {
                 if ( ! empty( $indexData['parent_image'] ) ) {
@@ -649,7 +649,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
             if ( $indexData['category_external_id'] == '' ) {
                 $indexData['status'] = Status::STATUS_DISABLED;
-                $this->_logger->info( 'Product marked disabled because no category found.' );
+                $this->_logger->debug( 'Product marked disabled because no category found.' );
             } else {
                 $this->_logger->debug( "Category '{$indexData['category_external_id']}'" );
             }
@@ -678,6 +678,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
             $this->_logger->debug( "URL {$indexData['product_page_url']}" );
             if ( isset( $indexData['locale_product_page_url'] ) ) {
+                $this->_logger->debug( 'Locale URLs' );
                 $this->_logger->debug( $indexData['locale_product_page_url'] );
             }
 
