@@ -6,9 +6,9 @@
     <type name="Magento\Catalog\Block\Product\ListProduct">
         <plugin name="bazaarvoice-category" type="Bazaarvoice\Connector\Block\ProductList\Category" sortOrder="100"/>
     </type>
-    <type name="Magento\CatalogSearch\Block\SearchResult\ListProduct">
+    <virtualType name="Magento\CatalogSearch\Block\SearchResult\ListProduct">
         <plugin name="bazaarvoice-search" type="Bazaarvoice\Connector\Block\ProductList\Search" sortOrder="100"/>
-    </type>
+    </virtualType>
     <type name="Magento\Catalog\Block\Product\ProductList\Upsell">
         <plugin name="bazaarvoice-upsell" type="Bazaarvoice\Connector\Block\ProductList\Upsell" sortOrder="100"/>
     </type>

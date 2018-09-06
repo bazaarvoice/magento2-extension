@@ -35,11 +35,7 @@ class ProductList
             ),
             array(
                 'value' => self::CATEGORY,
-                'label' => __('Category Pages')
-            ),
-            array(
-                'value' => self::SEARCH,
-                'label' => __('Search Result Pages')
+                'label' => __('Category and Search Result Pages')
             ),
             array(
                 'value' => self::UPSELL,
