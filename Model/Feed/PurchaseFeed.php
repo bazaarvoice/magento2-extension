@@ -36,14 +36,22 @@ class PurchaseFeed extends Feed
     protected $_typeId = 'purchase';
     protected $_numDaysLookback;
     protected $_triggeringEvent;
+    protected $_imageHelper;
 
     /**
      * Constructor
+     *
+     * @param \Magento\Framework\App\State $state
+     * @param \Magento\Catalog\Helper\Image $imageHelper
      * @param \Bazaarvoice\Connector\Logger\Logger $logger
      * @param \Bazaarvoice\Connector\Helper\Data $helper
      * @param \Magento\Framework\ObjectManagerInterface $objectManager
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function __construct(
+        \Magento\Framework\App\State $state,
+        \Magento\Catalog\Helper\Image $imageHelper,
         \Bazaarvoice\Connector\Logger\Logger $logger,
         \Bazaarvoice\Connector\Helper\Data $helper,
         \Magento\Framework\ObjectManagerInterface $objectManager
@@ -51,6 +59,12 @@ class PurchaseFeed extends Feed
     {
         parent::__construct($logger, $helper, $objectManager);
 
+        try {
+            $state->getAreaCode();
+        } Catch (\Exception $e) {
+            $state->setAreaCode(\Magento\Framework\App\Area::AREA_FRONTEND);
+        }
+        $this->_imageHelper = $imageHelper;
         $this->_triggeringEvent =
             $helper->getConfig('feeds/triggering_event') === Trigger::SHIPPING
                 ? self::TRIGGER_EVENT_SHIP
@@ -307,7 +321,7 @@ class PurchaseFeed extends Feed
                 $writer->writeElement('ExternalId', $this->_helper->getProductId($product));
                 $writer->writeElement('Name', $product->getName());
 
-                $imageUrl = $product->getImage();
+                $imageUrl = $this->_imageHelper->init( $product, 'product_small_image' )->setImageFile( $product->getSmallImage() )->getUrl();
                 $originalPrice = $item->getOriginalPrice();
 
                 if ($item->getParentItem()) {
@@ -318,21 +332,16 @@ class PurchaseFeed extends Feed
                     $originalPrice = $parentItem->getOriginalPrice();
 
                     if ($this->_families) {
-                        /** @var Product $parent */
-                        $parent = $parentItem->getProduct();
-
-                        if ($product->getImage() == 'no_selection') {
+                        if ( strpos( $imageUrl, 'placeholder/image.jpg' ) ) {
                             /** if product families are enabled and product has no image, use configurable image */
-                            $imageUrl = $parent->getImage();
+                            try {
+                                $parent                  = $parentItem->getProduct();
+                                $itemDetails['imageURL'] = $this->_imageHelper->init( $parent, 'product_small_image' )->setImageFile( $parent->getSmallImage() )->getUrl();
+                            } catch ( \Exception $e ) { }
                         }
+                        /** also get price from parent item */
+                        $itemDetails['price'] = number_format( $item->getParentItem()->getPrice(), 2, '.', '' );
                     }
-                }
-
-                if ($imageUrl == '' || $imageUrl == 'no_selection') {
-                    $placeholders = $this->_objectManager->create('\Bazaarvoice\Connector\Model\Indexer\Flat')->getPlaceholderUrls($store->getId());
-                    $imageUrl = $placeholders['default'];
-                } else {
-                    $imageUrl = $baseMediaUrl . $imageUrl;
                 }
 
                 $writer->writeElement('ImageUrl', $imageUrl);
