@@ -109,7 +109,7 @@ class Pixel {
             /** 'category' is not included.  Mage products can be in 0 - many categories.  Should we try to include it? */
             $itemDetails['price']    = number_format( $item->getPrice(), 2, '.', '' );
             $itemDetails['quantity'] = number_format( $item->getQtyOrdered(), 0 );
-            $itemDetails['imageURL'] = $this->imageHelper->init( $product, 'product_page_image_small' )->setImageFile( $product->getImage() )->getUrl();
+            $itemDetails['imageURL'] = $this->imageHelper->init( $product, 'product_small_image' )->setImageFile( $product->getSmallImage() )->getUrl();
 
             if ( $this->helper->getConfig( 'general/families' ) && $item->getParentItem() ) {
                 if ( strpos( $itemDetails['imageURL'], 'placeholder/image.jpg' ) ) {
@@ -117,7 +117,7 @@ class Pixel {
                     $parentId = $item->getParentItem()->getProductId();
                     try {
                         $parent                  = $this->productRepo->getById( $parentId );
-                        $itemDetails['imageURL'] = $this->imageHelper->init( $parent, 'product_page_image_small' )->setImageFile( $parent->getImage() )->getUrl();
+                        $itemDetails['imageURL'] = $this->imageHelper->init( $parent, 'product_small_image' )->setImageFile( $parent->getSmallImage() )->getUrl();
                     } catch ( NoSuchEntityException $e ) {
                     }
                 }
