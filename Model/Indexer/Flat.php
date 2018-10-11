@@ -886,9 +886,10 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
      */
     protected function getProductIdFieldName() {
         $connection = $this->_resourceConnection->getConnection( 'core_read' );
-        $indexList  = $connection->getIndexList( Product::ENTITY . '_entity' );
+        $table = $this->_resourceConnection->getTableName('catalog_product_entity');
+        $indexList = $connection->getIndexList($table);
 
-        return $indexList[ $connection->getPrimaryKeyName( Product::ENTITY . '_entity' ) ]['COLUMNS_LIST'][0];
+        return $indexList[ $connection->getPrimaryKeyName( $table ) ]['COLUMNS_LIST'][0];
     }
 
 }
