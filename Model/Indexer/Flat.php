@@ -585,15 +585,26 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 $indexData['category_external_id'] = $this->_helper->replaceIllegalCharacters( $indexData['category_external_id'] );
             }
 
+            /** Check locales */
+            $productLocales = [];
+            if ( ! empty( $this->_storeLocales[ $storeId ] ) ) {
+                foreach ( $this->_storeLocales[ $storeId ] as $locale => $storeLocale ) {
+                    if ( ! empty( $indexData['locale_entity_id'][ $locale ] ) ) {
+                        $productLocales[ $locale ] = $storeLocale;
+                    }
+                }
+            }
+
             /** Use parent URLs/categories if appropriate */
             if ( $indexData['visibility'] == Visibility::VISIBILITY_NOT_VISIBLE ) {
                 $this->_logger->debug( 'Not visible' );
                 if ( ! empty( $indexData['parent_url'] ) ) {
                     $indexData['product_page_url'] = $indexData['parent_url'];
                     $this->_logger->debug( 'Using Parent URL' );
-                    if ( isset( $indexData['locale_product_page_url'] )
-                         && is_array( $indexData['locale_product_page_url'] ) ) {
-                        foreach ( $indexData['locale_product_page_url'] as $locale => $localeUrl ) {
+                    if ( ! empty( $this->_storeLocales[ $storeId ] ) ) {
+                        if(empty($indexData['locale_product_page_url']))
+                            $indexData['locale_product_page_url'] = [];
+                        foreach ( $this->_storeLocales[ $storeId ] as $locale => $storeLocale ) {
                             if ( ! empty( $indexData['locale_parent_url'][ $locale ] ) ) {
                                 $indexData['locale_product_page_url'][ $locale ] = $indexData['locale_parent_url'][ $locale ];
                             }
@@ -609,15 +620,6 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 }
             }
 
-            /** Check locales */
-            $productLocales = [];
-            if ( ! empty( $this->_storeLocales[ $storeId ] ) ) {
-                foreach ( $this->_storeLocales[ $storeId ] as $locale => $storeLocale ) {
-                    if ( ! empty( $indexData['locale_entity_id'][ $locale ] ) ) {
-                        $productLocales[ $locale ] = $storeLocale;
-                    }
-                }
-            }
             //$this->_logger->debug( $indexData['image_url'] );
             /** Use parent image if appropriate */
             if ( $indexData['image_url'] == '' || $indexData['image_url'] == 'no_selection' ) {
@@ -884,9 +886,10 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
      */
     protected function getProductIdFieldName() {
         $connection = $this->_resourceConnection->getConnection( 'core_read' );
-        $indexList  = $connection->getIndexList( Product::ENTITY . '_entity' );
+        $table = $this->_resourceConnection->getTableName('catalog_product_entity');
+        $indexList = $connection->getIndexList($table);
 
-        return $indexList[ $connection->getPrimaryKeyName( Product::ENTITY . '_entity' ) ]['COLUMNS_LIST'][0];
+        return $indexList[ $connection->getPrimaryKeyName( $table ) ]['COLUMNS_LIST'][0];
     }
 
 }
