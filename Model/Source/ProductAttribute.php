@@ -66,7 +66,8 @@ class ProductAttribute
         /** @var \Magento\Framework\DB\Adapter\AdapterInterface $read */
         $read = $attributes->getConnection();
         try {
-            $columnResults = $read->query('DESCRIBE `' . $read->getTableName('catalog_product_flat') . '_' . $defaultStore->getId() . '`;');
+            $tblName = $this->_objectManager->get('\Magento\Framework\App\ResourceConnection')->getTableName('catalog_product_flat');
+            $columnResults = $read->query(sprintf('DESCRIBE `%s_%s`;', $tblName, $defaultStore->getId()));
             $flatColumns = array();
             while ($row = $columnResults->fetch()) {
                 $flatColumns[] = $row['Field'];
