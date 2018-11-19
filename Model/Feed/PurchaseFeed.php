@@ -125,10 +125,11 @@ class PurchaseFeed extends Feed
         $orderFactory = $this->_objectManager->get('\Magento\Sales\Model\OrderFactory');
         /* @var \Magento\Sales\Model\ResourceModel\Order\Collection $orders */
         $orders = $orderFactory->create()->getCollection();
+        $storeTable = $this->_objectManager->get('\Magento\Framework\App\ResourceConnection')->getTableName('store');
 
         /** Add filter to limit orders to this store group */
         $orders->getSelect()
-            ->joinLeft(['store_table' => 'store'], 'main_table.store_id = store_table.store_id', 'store_table.group_id')
+            ->joinLeft(['store_table' => $storeTable], 'main_table.store_id = store_table.store_id', 'store_table.group_id')
             ->where('store_table.group_id = ' . $storeGroup->getId());
         /** Status is 'complete' or 'closed' */
         if ($this->_test == false) {
@@ -174,10 +175,11 @@ class PurchaseFeed extends Feed
         $orderFactory = $this->_objectManager->get('\Magento\Sales\Model\OrderFactory');
         /* @var \Magento\Sales\Model\ResourceModel\Order\Collection $orders */
         $orders = $orderFactory->create()->getCollection();
+        $storeTable = $this->_objectManager->get('\Magento\Framework\App\ResourceConnection')->getTableName('store');
 
         /** Add filter to limit orders to this website */
         $orders->getSelect()
-            ->joinLeft(['store_table' => 'store'], 'main_table.store_id = store_table.store_id', 'store_table.website_id')
+            ->joinLeft(['store_table' => $storeTable], 'main_table.store_id = store_table.store_id', 'store_table.website_id')
             ->where('store_table.website_id = ' . $website->getId());
         /** Status is 'complete' or 'closed' */
         if ($this->_test == false) {
