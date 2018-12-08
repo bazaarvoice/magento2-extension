@@ -105,7 +105,10 @@ class Product extends Generic {
                         $value = $child->getData( $attribute );
                         if ( is_string( $value ) && strpos( $value, ',' ) ) {
                             $values                       = explode( ',', $value );
-                            $childrenValues[ $attribute ] = array_merge( $childrenValues[ $attribute ], $values );
+                            if(!empty($childrenValues[ $attribute ]))
+                                $childrenValues[ $attribute ] = $values;
+                            else
+                                $childrenValues[ $attribute ] = array_merge( $childrenValues[ $attribute ], $values );
                         } else {
                             $childrenValues[ $attribute ][] = $value;
                         }
