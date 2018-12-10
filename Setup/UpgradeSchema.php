@@ -73,7 +73,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                   `manufacturerpartnumbers` text NULL,  
                   `modelnumbers` text NULL,
                   
-                  `scope` enum('".Scope::SCOPE_GLOBAL."','".Scope::WEBSITE."','".Scope::STORE_GROUP."','".Scope::STORE_VIEW."') NULL,
+                  `scope` varchar(255) NULL,
                   `store_id` int(11) NOT NULL default '0',  
                   `status` int(2) unsigned NOT NULL DEFAULT '".Status::STATUS_ENABLED."',
                   `version_id` bigint(20) unsigned default '0',
