@@ -334,7 +334,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                            'name'            => 'p.name',
                            'product_type'    => 'p.type_id',
                            'product_id'      => 'p.entity_id',
-                           'description'     => 'p.short_description',
+                           'description'     => 'p.description',
                            'external_id'     => 'p.sku',
                            'image_url'       => 'p.small_image',
                            'visibility'      => 'p.visibility',
