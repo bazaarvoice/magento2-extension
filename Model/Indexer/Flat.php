@@ -174,7 +174,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
 
                 $productIds = array_pop( $productIdSets );
                 if (
-                    $productIds == null
+                    !is_array($productIds)
                     || count( $productIds ) == 0
                 ) {
                     break;
