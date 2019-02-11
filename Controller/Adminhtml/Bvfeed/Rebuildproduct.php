@@ -44,7 +44,7 @@ class Rebuildproduct extends \Magento\Backend\App\Action
     {
         $result = $this->_indexer->executeFull();
         if ($result)
-            $this->messageManager->addSuccessMessage(__('Product Feed Index has been rebuilt.'));
+            $this->messageManager->addSuccessMessage(__('Product Feed Index is being rebuilt.'));
 
         $this->_redirect('adminhtml/bvindex/index');
     }
