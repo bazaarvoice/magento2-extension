@@ -126,10 +126,11 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         try {
             $incompleteIndex = $this->_collectionFactory->create()->addFieldToFilter('version_id', 0);
             if ($incompleteIndex->count() == 0) {
+                $this->_logger->debug(__('Bazaarvoice Product Feed Index has been flushed for rebuild.'));
                 $this->flushIndex();
             }
             $this->execute();
-            $this->_logger->debug(__('Bazaarvoice Product Feed Index has been rebuilt.'));
+            $this->_logger->debug(__('Bazaarvoice Product Feed Index is being rebuilt.'));
         } catch (\Exception $e) {
             $this->_logger->err($e->getMessage()."\n".$e->getTraceAsString());
         }
