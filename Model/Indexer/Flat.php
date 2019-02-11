@@ -25,7 +25,6 @@ use Bazaarvoice\Connector\Model\Index;
 use Bazaarvoice\Connector\Model\ResourceModel\Index\Collection;
 use Bazaarvoice\Connector\Model\Source\Scope;
 use Magento\Catalog\Helper\Image;
-use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
@@ -118,22 +117,21 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
      * @return mixed
      * @throws \Exception
      */
-    public function executeFull() {
+    public function executeFull()
+    {
+        /** @var Collection $incompleteIndex */
+
         $this->canIndex();
-        $this->_logger->debug( 'Full Product Feed Index' );
+        $this->_logger->debug('Full Product Feed Index');
         try {
-            /** @var Collection $incompleteIndex */
-            $incompleteIndex = $this->_collectionFactory->create()->addFieldToFilter( 'version_id', 0 );
-
-            if ( $incompleteIndex->count() == 0 ) {
-                $this->_logger->debug( __( 'Bazaarvoice Product Feed Index has been flushed for rebuild.' ) );
+            $incompleteIndex = $this->_collectionFactory->create()->addFieldToFilter('version_id', 0);
+            if ($incompleteIndex->count() == 0) {
                 $this->flushIndex();
-            } else {
-                $this->execute( array() );
             }
-
-        } Catch ( \Exception $e ) {
-            $this->_logger->err( $e->getMessage() . "\n" . $e->getTraceAsString() );
+            $this->execute();
+            $this->_logger->debug(__('Bazaarvoice Product Feed Index has been rebuilt.'));
+        } catch (\Exception $e) {
+            $this->_logger->err($e->getMessage()."\n".$e->getTraceAsString());
         }
 
         return true;
