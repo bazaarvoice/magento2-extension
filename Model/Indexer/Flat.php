@@ -579,11 +579,9 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 $indexData['parent_category_external_id'] = $indexData['bv_parent_category_external_id'];
             }
 
-            if ( $this->_helper->getConfig( 'feeds/category_id_use_url_path', $storeId ) ) {
-                $indexData['category_external_id'] = str_replace( '/', '-', $indexData['category_external_id'] );
-                $indexData['category_external_id'] = str_replace( '.html', '', $indexData['category_external_id'] );
-                $indexData['category_external_id'] = $this->_helper->replaceIllegalCharacters( $indexData['category_external_id'] );
-            }
+            $indexData['category_external_id'] = str_replace( '/', '-', $indexData['category_external_id'] );
+            $indexData['category_external_id'] = str_replace( '.html', '', $indexData['category_external_id'] );
+            $indexData['category_external_id'] = $this->_helper->replaceIllegalCharacters( $indexData['category_external_id'] );
 
             /** Check locales */
             $productLocales = [];
