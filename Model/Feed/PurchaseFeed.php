@@ -308,8 +308,22 @@ class PurchaseFeed extends Feed
                 $items = $order->getAllVisibleItems();
             }
             foreach ($items as $item) {
-                if ($this->_families && $item->getProductType() == Type\Configurable::TYPE_CODE)
+                if ($this->_families && $item->getProductType() == Type\Configurable::TYPE_CODE) {
                     continue;
+                }
+
+                //product has been deleted or disabled
+                if (!$item->getProduct() || $item->getProduct()->getStatus() == Status::STATUS_DISABLED) {
+                    continue;
+                }
+
+                //parent product has been deleted or disabled
+                if ($item->getParentItem()
+                    && (!$item->getParentItem()->getProduct()
+                        || $item->getParentItem()->getProduct()->getStatus() == Status::STATUS_DISABLED)
+                ) {
+                    continue;
+                }
 
                 /* @var Order\Item $item */
                 $writer->startElement('Product');

@@ -25,7 +25,6 @@ use Bazaarvoice\Connector\Model\Index;
 use Bazaarvoice\Connector\Model\ResourceModel\Index\Collection;
 use Bazaarvoice\Connector\Model\Source\Scope;
 use Magento\Catalog\Helper\Image;
-use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
@@ -118,22 +117,22 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
      * @return mixed
      * @throws \Exception
      */
-    public function executeFull() {
+    public function executeFull()
+    {
+        /** @var Collection $incompleteIndex */
+
         $this->canIndex();
-        $this->_logger->debug( 'Full Product Feed Index' );
+        $this->_logger->debug('Full Product Feed Index');
         try {
-            /** @var Collection $incompleteIndex */
-            $incompleteIndex = $this->_collectionFactory->create()->addFieldToFilter( 'version_id', 0 );
-
-            if ( $incompleteIndex->count() == 0 ) {
-                $this->_logger->debug( __( 'Bazaarvoice Product Feed Index has been flushed for rebuild.' ) );
+            $incompleteIndex = $this->_collectionFactory->create()->addFieldToFilter('version_id', 0);
+            if ($incompleteIndex->count() == 0) {
+                $this->_logger->debug(__('Bazaarvoice Product Feed Index has been flushed for rebuild.'));
                 $this->flushIndex();
-            } else {
-                $this->execute( array() );
             }
-
-        } Catch ( \Exception $e ) {
-            $this->_logger->err( $e->getMessage() . "\n" . $e->getTraceAsString() );
+            $this->execute();
+            $this->_logger->debug(__('Bazaarvoice Product Feed Index is being rebuilt.'));
+        } catch (\Exception $e) {
+            $this->_logger->err($e->getMessage()."\n".$e->getTraceAsString());
         }
 
         return true;
@@ -581,12 +580,6 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 $indexData['parent_category_external_id'] = $indexData['bv_parent_category_external_id'];
             }
 
-            if ( $this->_helper->getConfig( 'feeds/category_id_use_url_path', $storeId ) ) {
-                $indexData['category_external_id'] = str_replace( '/', '-', $indexData['category_external_id'] );
-                $indexData['category_external_id'] = str_replace( '.html', '', $indexData['category_external_id'] );
-                $indexData['category_external_id'] = $this->_helper->replaceIllegalCharacters( $indexData['category_external_id'] );
-            }
-
             /** Check locales */
             $productLocales = [];
             if ( ! empty( $this->_storeLocales[ $storeId ] ) ) {
@@ -621,6 +614,10 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                     $this->_logger->debug( 'Using Parent Category' );
                 }
             }
+
+            $indexData['category_external_id'] = str_replace( '/', '-', $indexData['category_external_id'] );
+            $indexData['category_external_id'] = str_replace( '.html', '', $indexData['category_external_id'] );
+            $indexData['category_external_id'] = $this->_helper->replaceIllegalCharacters( $indexData['category_external_id'] );
 
             //$this->_logger->debug( $indexData['image_url'] );
             /** Use parent image if appropriate */
