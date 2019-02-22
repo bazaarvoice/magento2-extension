@@ -193,9 +193,4 @@ class ProductFeed extends Feed
                            $this->_helper->getConfig('feeds/product_filename', $store->getId());
         $this->uploadFeed($productFeedFileName, $destinationFile, $store);
     }
-
-
 }
-
-
-
