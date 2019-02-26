@@ -147,6 +147,8 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
      * @throws \Exception
      */
     public function execute( $ids = array() ) {
+        /** @var $idCollection \Bazaarvoice\Connector\Model\ResourceModel\Index\Collection */
+
         $this->canIndex();
         try {
             $this->_logger->debug( 'Partial Product Feed Index' );
@@ -154,6 +156,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
             if ( empty( $ids ) ) {
                 $idCollection = $this->_collectionFactory->create()->addFieldToFilter( 'version_id', 0 );
                 $idCollection->getSelect()->group( 'product_id' );
+                $idCollection->addFieldToSelect('product_id');
                 $ids = $idCollection->getColumnValues( 'product_id' );
             }
 
