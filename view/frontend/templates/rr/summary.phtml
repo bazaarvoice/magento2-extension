@@ -18,7 +18,7 @@
 <?php /** @var \Bazaarvoice\Connector\Block\Reviews $this */ ?>
 <?php if ($this->isEnabled()) : ?>
     <div data-bv-show="rating_summary"
-         data-bv-productId="<?php echo $this->getProductSku() ?>">
+         data-bv-product-id="<?php echo $this->getProductSku() ?>">
         <?php echo $this->getAggregateSEOContent() ?>
     </div>
 <?php endif;

@@ -43,7 +43,7 @@ class Widget extends Item
 			$productUrl = $this->_product->getProductUrl();
 			$result = '
             <div data-bv-show="inline_rating"
-				 data-bv-productId="' . $productIdentifier . '"
+				 data-bv-product-id="' . $productIdentifier . '"
 				 data-bv-redirect-url="' . $productUrl . '"></div>' . $result;
 		}
 		return $result;
