@@ -164,6 +164,11 @@
                     <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
                     <comment><![CDATA[This attribute code will be used to locate the Model Number of products which are sent in the product feed. <strong>Attribute must be set to 'Use in Product Listing.'</strong>]]></comment>
                 </field>
+                <field id="bvfamilies_code" translate="label" type="select" sortOrder="173" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Family Attribute</label>
+                    <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
+                    <comment><![CDATA[If set, this attribute code will be used instead of configurable product SKU to populate family data. <strong>Attribute must be set to 'Use in Product Listing.'</strong>]]></comment>
+                </field>
                 <field id="bvfamilies_expand" translate="label" type="select" sortOrder="175" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Expand Families in Product Feed</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>

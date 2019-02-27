@@ -347,6 +347,8 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                        ) );
 
         /** parents */
+        $bvFamiliesAttributeConfig = $this->_helper->getConfig( 'feeds/bvfamilies_code', $storeId );
+        $bvFamiliesAttribute = $bvFamiliesAttributeConfig ? $bvFamiliesAttributeConfig : 'sku';
         $select
             ->joinLeft(
                 array( 'pp' => $res->getTableName( 'catalog_product_super_link' ) ),
@@ -355,7 +357,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
                 array( 'parent' => $res->getTableName( 'catalog_product_flat' ) . '_' . $storeId ),
                 'pp.parent_id = parent.' . $this->_productIdField,
                 array(
-                    'family'       => 'GROUP_CONCAT(DISTINCT parent.sku SEPARATOR "||")',
+                    'family'       => 'GROUP_CONCAT(DISTINCT parent.' . $bvFamiliesAttribute . ' SEPARATOR "||")',
                     'parent_image' => 'small_image'
                 ) );
 
@@ -565,7 +567,11 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
             $indexData['status'] = $indexData[ ProductFeed::INCLUDE_IN_FEED_FLAG ] ? Status::STATUS_ENABLED : Status::STATUS_DISABLED;
 
             if ( $indexData['product_type'] == Configurable::TYPE_CODE ) {
-                $indexData['family'] = array( $indexData['external_id'] );
+                if ($bvFamiliesAttributeConfig && isset($indexData[$bvFamiliesAttributeConfig.'s'])) {
+                    $indexData['family'] = array( $indexData[$bvFamiliesAttributeConfig.'s'] );
+                } else {
+                    $indexData['family'] = array( $indexData['external_id'] );
+                }
             } else if ( ! empty( $indexData['family'] ) ) {
                 if ( ! is_array( $indexData['family'] ) ) {
                     $indexData['family'] = array( $indexData['family'] );
