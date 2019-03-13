@@ -106,4 +106,6 @@
             </argument>
         </arguments>
     </type>
+
+    <preference for="Bazaarvoice\Connector\Model\IndexInterface" type="Bazaarvoice\Connector\Model\Index"/>
 </config>

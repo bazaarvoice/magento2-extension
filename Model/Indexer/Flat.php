@@ -1,19 +1,4 @@
 <?php
-/**
- * StoreFront Bazaarvoice Extension for Magento
- *
- * PHP Version 5
- *
- * LICENSE: This source file is subject to commercial source code license
- * of StoreFront Consulting, Inc.
- *
- * @category  SFC
- * @package   Bazaarvoice_Ext
- * @author    Dennis Rogers <dennis@storefrontconsulting.com>
- * @copyright 2016 StoreFront Consulting, Inc
- * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
- * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
- */
 
 namespace Bazaarvoice\Connector\Model\Indexer;
 
@@ -22,6 +7,7 @@ use Bazaarvoice\Connector\Logger\Logger;
 use Bazaarvoice\Connector\Model\Feed\Product\Generic;
 use Bazaarvoice\Connector\Model\Feed\ProductFeed;
 use Bazaarvoice\Connector\Model\Index;
+use Bazaarvoice\Connector\Model\IndexInterfaceFactory;
 use Bazaarvoice\Connector\Model\ResourceModel\Index\Collection;
 use Bazaarvoice\Connector\Model\Source\Scope;
 use Magento\Catalog\Helper\Image;
@@ -32,42 +18,49 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ProductMetadata;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Select;
+use Magento\Framework\Indexer\ActionInterface as IndexerActionInterface;
 use Magento\Framework\Indexer\IndexerInterface;
+use Magento\Framework\Mview\ActionInterface as MviewActionInterface;
 use Magento\Framework\ObjectManagerInterface;
+use Magento\Framework\UrlInterface;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 
-/**
- * Class Flat
- * @package Bazaarvoice\Connector\Model\Indexer
- */
-class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Framework\Mview\ActionInterface {
+class Flat implements IndexerActionInterface, MviewActionInterface
+{
     protected $_helper;
     protected $_logger;
     protected $_indexer;
     protected $_generationScope;
     protected $_storeManager;
     protected $_objectManager;
-    protected $_collectionFactory;
+    protected $_bvIndexCollectionFactory;
     protected $_resourceConnection;
     protected $_storeLocales;
     protected $_scopeConfig;
     protected $_productIdField;
     protected $_mageVersion;
+    /**
+     * @var \Bazaarvoice\Connector\Model\IndexInterfaceFactory
+     */
+    protected $bvIndexFactory;
+    protected $productIndexes;
 
     /**
      * Indexer constructor.
      *
-     * @param Logger $logger
-     * @param Data $helper
-     * @param IndexerInterface $indexerInterface
-     * @param ObjectManagerInterface $objectManager
-     * @param StoreManagerInterface $storeManager
-     * @param Collection\Factory $collectionFactory
-     * @param ResourceConnection $resourceConnection
-     * @param ScopeConfigInterface $scopeConfig
-     * @param Generic $feed
-     * @param ProductMetadata $productMetadata
+     * @param Logger                                             $logger
+     * @param Data                                               $helper
+     * @param IndexerInterface                                   $indexerInterface
+     * @param ObjectManagerInterface                             $objectManager
+     * @param StoreManagerInterface                              $storeManager
+     * @param Collection\Factory                                 $collectionFactory
+     * @param ResourceConnection                                 $resourceConnection
+     * @param ScopeConfigInterface                               $scopeConfig
+     * @param Generic                                            $feed
+     * @param ProductMetadata                                    $productMetadata
+     *
+     * @param \Bazaarvoice\Connector\Model\IndexInterfaceFactory $bvIndexFactory
      *
      * @throws \Exception
      */
@@ -81,22 +74,22 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         ResourceConnection $resourceConnection,
         ScopeConfigInterface $scopeConfig,
         Generic $feed,
-        ProductMetadata $productMetadata
+        ProductMetadata $productMetadata,
+        IndexInterfaceFactory $bvIndexFactory
     ) {
-        $this->_logger             = $logger;
-        $this->_helper             = $helper;
-        $this->_storeManager       = $storeManager;
-        $this->_objectManager      = $objectManager;
-        $this->_indexer            = $indexerInterface->load( 'bazaarvoice_product' );
-        $this->_collectionFactory  = $collectionFactory;
+        $this->_logger = $logger;
+        $this->_helper = $helper;
+        $this->_storeManager = $storeManager;
+        $this->_objectManager = $objectManager;
+        $this->_indexer = $indexerInterface->load('bazaarvoice_product');
+        $this->_bvIndexCollectionFactory = $collectionFactory;
         $this->_resourceConnection = $resourceConnection;
-        $this->_scopeConfig        = $scopeConfig;
-        $this->_productIdField     = $this->getProductIdFieldName();
-        $this->_mageVersion        = $productMetadata->getVersion();
-
-        $this->_generationScope = $helper->getConfig( 'feeds/generation_scope' );
-
+        $this->_scopeConfig = $scopeConfig;
+        $this->_productIdField = $this->getProductIdFieldName();
+        $this->_mageVersion = $productMetadata->getVersion();
+        $this->_generationScope = $helper->getConfig('feeds/generation_scope');
         $this->_storeLocales = $feed->getLocales();
+        $this->bvIndexFactory = $bvIndexFactory;
     }
 
     /**
@@ -104,10 +97,11 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
      *
      * @return bool
      */
-    public function canIndex() {
-        if ( $this->_scopeConfig->getValue( 'catalog/frontend/flat_catalog_product' ) == false
-             || $this->_scopeConfig->getValue( 'catalog/frontend/flat_catalog_category' ) == false ) {
-            $this->_logger->error( 'Bazaarvoice Product feed requires Catalog Flat Tables to be enabled. Please check your Store Config.' );
+    public function canIndex()
+    {
+        if ($this->_scopeConfig->getValue('catalog/frontend/flat_catalog_product') == false
+            || $this->_scopeConfig->getValue('catalog/frontend/flat_catalog_category') == false) {
+            $this->_logger->error('Bazaarvoice Product feed requires Catalog Flat Tables to be enabled. Please check your Store Config.');
         }
 
         return true;
@@ -124,7 +118,7 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
         $this->canIndex();
         $this->_logger->debug('Full Product Feed Index');
         try {
-            $incompleteIndex = $this->_collectionFactory->create()->addFieldToFilter('version_id', 0);
+            $incompleteIndex = $this->_bvIndexCollectionFactory->create()->addFieldToFilter('version_id', 0);
             if ($incompleteIndex->count() == 0) {
                 $this->_logger->debug(__('Bazaarvoice Product Feed Index has been flushed for rebuild.'));
                 $this->flushIndex();
@@ -146,59 +140,60 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
      * @return mixed
      * @throws \Exception
      */
-    public function execute( $ids = array() ) {
+    public function execute($ids = array())
+    {
         /** @var $idCollection \Bazaarvoice\Connector\Model\ResourceModel\Index\Collection */
 
         $this->canIndex();
         try {
-            $this->_logger->debug( 'Partial Product Feed Index' );
+            $this->_logger->debug('Partial Product Feed Index');
 
-            if ( empty( $ids ) ) {
-                $idCollection = $this->_collectionFactory->create()->addFieldToFilter( 'version_id', 0 );
-                $idCollection->getSelect()->group( 'product_id' );
+            if (empty($ids)) {
+                $idCollection = $this->_bvIndexCollectionFactory->create()->addFieldToFilter('version_id', 0);
+                $idCollection->getSelect()->group('product_id');
                 $idCollection->addFieldToSelect('product_id');
-                $ids = $idCollection->getColumnValues( 'product_id' );
+                $ids = $idCollection->getColumnValues('product_id');
             }
 
-            $this->_logger->debug( 'Found ' . count( $ids ) . ' products to update.' );
+            $this->_logger->debug('Found '.count($ids).' products to update.');
 
             /** Break ids into pages */
-            $productIdSets = array_chunk( $ids, 50 );
+            $productIdSets = array_chunk($ids, 50);
 
             /** Time throttling */
-            $limit   = ( $this->_helper->getConfig( 'feeds/limit' ) * 60 ) - 10;
-            $stop    = time() + $limit;
+            $limit = ($this->_helper->getConfig('feeds/limit') * 60) - 10;
+            $stop = time() + $limit;
             $counter = 0;
             do {
-                if ( time() > $stop ) {
+                if (time() > $stop) {
                     break;
                 }
 
-                $productIds = array_pop( $productIdSets );
+                $productIds = array_pop($productIdSets);
                 if (
                     !is_array($productIds)
-                    || count( $productIds ) == 0
+                    || count($productIds) == 0
                 ) {
                     break;
                 }
 
-                $this->_logger->debug( 'Updating product ids ' . implode( ',', $productIds ) );
+                $this->_logger->debug('Updating product ids '.implode(',', $productIds));
 
-                $this->reindexProducts( $productIds );
-                $counter += count( $productIds );
-            } while ( 1 );
+                $this->reindexProducts($productIds);
+                $counter += count($productIds);
+            } while (1);
 
-            if ( $counter ) {
-                if ( $counter < count( $ids ) ) {
-                    $changelogTable = $this->_resourceConnection->getTableName( 'bazaarvoice_product_cl' );
-                    $indexTable     = $this->_resourceConnection->getTableName( 'bazaarvoice_index_product' );
-                    $this->_resourceConnection->getConnection( 'core_write' )
-                                              ->query( "INSERT INTO `$changelogTable` (`entity_id`) SELECT `product_id` FROM `$indexTable` WHERE `version_id` = 0;" );
+            if ($counter) {
+                if ($counter < count($ids)) {
+                    $changelogTable = $this->_resourceConnection->getTableName('bazaarvoice_product_cl');
+                    $indexTable = $this->_resourceConnection->getTableName('bazaarvoice_index_product');
+                    $this->_resourceConnection->getConnection('core_write')
+                        ->query("INSERT INTO `$changelogTable` (`entity_id`) SELECT `product_id` FROM `$indexTable` WHERE `version_id` = 0;");
                 }
                 $this->logStats();
             }
-        } Catch ( \Exception $e ) {
-            $this->_logger->crit( $e->getMessage() . "\n" . $e->getTraceAsString() );
+        } Catch (\Exception $e) {
+            $this->_logger->crit($e->getMessage()."\n".$e->getTraceAsString());
         }
 
         return true;
@@ -211,16 +206,16 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
      *
      * @throws \Exception
      */
-    protected function reindexProducts( $productIds ) {
-
-        switch ( $this->_generationScope ) {
+    protected function reindexProducts($productIds)
+    {
+        switch ($this->_generationScope) {
             case Scope::SCOPE_GLOBAL:
                 $stores = $this->_storeManager->getStores();
-                ksort( $stores );
+                ksort($stores);
                 /** @var \Magento\Store\Model\Store $store */
-                foreach ( $stores as $store ) {
-                    if ( $this->_helper->canSendFeed( $store->getId() ) ) {
-                        $this->reindexProductsForStore( $productIds, $store );
+                foreach ($stores as $store) {
+                    if ($this->_helper->canSendFeed($store->getId())) {
+                        $this->reindexProductsForStore($productIds, $store);
                         break;
                     }
                 }
@@ -228,14 +223,14 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
             case Scope::WEBSITE:
                 $websites = $this->_storeManager->getWebsites();
                 /** @var \Magento\Store\Model\Website $website */
-                foreach ( $websites as $website ) {
+                foreach ($websites as $website) {
                     $defaultStore = $website->getDefaultStore();
-                    if ( $defaultStore->getId() ) {
-                        $this->reindexProductsForStore( $productIds, $defaultStore );
+                    if ($defaultStore->getId()) {
+                        $this->reindexProductsForStore($productIds, $defaultStore);
                     } else {
-                        throw new \Exception( 'Website %s has no default store!', $website->getCode() );
+                        throw new \Exception('Website %s has no default store!', $website->getCode());
                     }
-                    if ( $this->_generationScope == Scope::SCOPE_GLOBAL ) {
+                    if ($this->_generationScope == Scope::SCOPE_GLOBAL) {
                         break;
                     }
                 }
@@ -243,526 +238,557 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
             case Scope::STORE_GROUP:
                 $groups = $this->_storeManager->getGroups();
                 /** @var \Magento\Store\Model\Group $group */
-                foreach ( $groups as $group ) {
+                foreach ($groups as $group) {
                     $defaultStore = $group->getDefaultStore();
-                    if ( $defaultStore->getId() ) {
-                        $this->reindexProductsForStore( $productIds, $defaultStore );
+                    if ($defaultStore->getId()) {
+                        $this->reindexProductsForStore($productIds, $defaultStore);
                     } else {
-                        throw new \Exception( 'Store Group %s has no default store!', $group->getName() );
+                        throw new \Exception('Store Group %s has no default store!', $group->getName());
                     }
                 }
                 break;
             case Scope::STORE_VIEW:
                 $stores = $this->_storeManager->getStores();
                 /** @var \Magento\Store\Model\Store $store */
-                foreach ( $stores as $store ) {
-                    if ( $store->getId() ) {
-                        $this->reindexProductsForStore( $productIds, $store );
+                foreach ($stores as $store) {
+                    if ($store->getId()) {
+                        $this->reindexProductsForStore($productIds, $store);
                     } else {
-                        throw new \Exception( 'Store %s not found!', $store->getCode() );
+                        throw new \Exception('Store %s not found!', $store->getCode());
                     }
                 }
                 break;
         }
-        $this->_purgeUnversioned( $productIds );
+        $this->_purgeUnversioned($productIds);
     }
 
     /**
      * Prepare for full reindex
+     *
      * @throws \Exception
      * @throws \Zend_Db_Statement_Exception
      */
-    protected function flushIndex() {
+    protected function flushIndex()
+    {
         $this->canIndex();
         /** Set indexer to use mview */
-        $this->_indexer->setScheduled( true );
+        $this->_indexer->setScheduled(true);
 
-        $writeAdapter = $this->_resourceConnection->getConnection( 'core_write' );
+        $writeAdapter = $this->_resourceConnection->getConnection('core_write');
 
         /** Flush all old data */
-        $indexTable = $this->_resourceConnection->getTableName( 'bazaarvoice_index_product' );
-        $writeAdapter->truncateTable( $indexTable );
-        $changelogTable = $this->_resourceConnection->getTableName( 'bazaarvoice_product_cl' );
-        $writeAdapter->truncateTable( $changelogTable );
+        $indexTable = $this->_resourceConnection->getTableName('bazaarvoice_index_product');
+        $writeAdapter->truncateTable($indexTable);
+        $changelogTable = $this->_resourceConnection->getTableName('bazaarvoice_product_cl');
+        $writeAdapter->truncateTable($changelogTable);
 
         /** Setup dummy rows */
-        $productTable = $this->_resourceConnection->getTableName( 'catalog_product_entity' );
-        $writeAdapter->query( "INSERT INTO `$indexTable` (`product_id`, `version_id`) SELECT DISTINCT `entity_id`, '0' FROM `$productTable`;" );
-        $writeAdapter->query( "INSERT INTO `$changelogTable` (`entity_id`) SELECT DISTINCT `entity_id` FROM `$productTable`;" );
+        $productTable = $this->_resourceConnection->getTableName('catalog_product_entity');
+        $writeAdapter->query("INSERT INTO `$indexTable` (`product_id`, `version_id`) SELECT DISTINCT `entity_id`, '0' FROM `$productTable`;");
+        $writeAdapter->query("INSERT INTO `$changelogTable` (`entity_id`) SELECT DISTINCT `entity_id` FROM `$productTable`;");
 
         /** Reset mview version */
-        $mviewTable = $this->_resourceConnection->getTableName( 'mview_state' );
-        $writeAdapter->query( "UPDATE `$mviewTable` SET `version_id` = NULL, `status` = 'idle' WHERE `view_id` = 'bazaarvoice_product';" );
+        $mviewTable = $this->_resourceConnection->getTableName('mview_state');
+        $writeAdapter->query("UPDATE `$mviewTable` SET `version_id` = NULL, `status` = 'idle' WHERE `view_id` = 'bazaarvoice_product';");
         $indexCheck = $writeAdapter
-            ->query( "SELECT COUNT(1) indexIsThere FROM INFORMATION_SCHEMA.STATISTICS
-                    WHERE table_schema=DATABASE() AND table_name='{$changelogTable}' AND index_name='entity_id';" );
+            ->query("SELECT COUNT(1) indexIsThere FROM INFORMATION_SCHEMA.STATISTICS
+                    WHERE table_schema=DATABASE() AND table_name='{$changelogTable}' AND index_name='entity_id';");
         $indexCheck = $indexCheck->fetchObject();
-        if ( $indexCheck->indexIsThere == 0 ) {
-            $writeAdapter->query( "ALTER TABLE `{$changelogTable}` ADD INDEX (`entity_id`);" );
+        if ($indexCheck->indexIsThere == 0) {
+            $writeAdapter->query("ALTER TABLE `{$changelogTable}` ADD INDEX (`entity_id`);");
         }
-
     }
-
 
     /**
      * Mass update process, uses flat tables.
      *
-     * @param array $productIds
+     * @param array     $productIds
      * @param int|Store $store
      *
      * @return bool
      * @throws \Exception
      */
-    public function reindexProductsForStore( $productIds, $store ) {
+    public function reindexProductsForStore($productIds, $store)
+    {
         /** Check for scope change */
-        if ( $this->hasBadScopeIndex() ) {
-            $this->_logger->debug( 'Index entries found with wrong scope. This usually means scope has changed in admin. Flagging entire index for rebuild.' );
+        if ($this->hasBadScopeIndex()) {
+            $this->_logger->debug('Index entries found with wrong scope. This usually means scope has changed in admin. Flagging entire index for rebuild.');
             $this->executeFull();
-
             return false;
         }
 
-        /** @var \Bazaarvoice\Connector\Model\Index $index */
-        $index = $this->_objectManager->get( '\Bazaarvoice\Connector\Model\Index' );
-        if ( is_int( $store ) ) {
-            $store = $this->_objectManager->get( '\Magento\Store\Model\Store' )->load( $store );
-        }
-        $storeId = $store->getId();
-
-        /** Database Resources */
-        $res  = $this->_resourceConnection;
-        $read = $res->getConnection( 'core_read' );
-        /** Core Data  */
-        $select = $read->select()
-                       ->from( array( 'p' => $res->getTableName( 'catalog_product_flat' ) . '_' . $storeId ), array(
-                           'name'            => 'p.name',
-                           'product_type'    => 'p.type_id',
-                           'product_id'      => 'p.entity_id',
-                           'description'     => 'p.short_description',
-                           'external_id'     => 'p.sku',
-                           'image_url'       => 'p.small_image',
-                           'visibility'      => 'p.visibility',
-                           'bv_feed_exclude' => 'bv_feed_exclude',
-                           'bv_category_id'  => 'p.bv_category_id'
-                       ) );
-
-        /** parents */
-        $bvFamiliesAttributeConfig = $this->_helper->getConfig( 'feeds/bvfamilies_code', $storeId );
-        $bvFamiliesAttribute = $bvFamiliesAttributeConfig ? $bvFamiliesAttributeConfig : 'sku';
-        $select
-            ->joinLeft(
-                array( 'pp' => $res->getTableName( 'catalog_product_super_link' ) ),
-                'pp.product_id = p.entity_id', '' )
-            ->joinLeft(
-                array( 'parent' => $res->getTableName( 'catalog_product_flat' ) . '_' . $storeId ),
-                'pp.parent_id = parent.' . $this->_productIdField,
-                array(
-                    'family'       => 'GROUP_CONCAT(DISTINCT parent.' . $bvFamiliesAttribute . ' SEPARATOR "||")',
-                    'parent_image' => 'small_image'
-                ) );
-
-        if ( $this->_generationScope == Scope::SCOPE_GLOBAL ) {
-            $cppTable = $res->getTableName( 'catalog_category_product' );
-        } else {
-            $cppTable = $res->getTableName( "catalog_category_product_index_store{$storeId}" );
-        }
-
-        if ( version_compare($this->_mageVersion, '2.2.5', '<') ) {
-            $select
-                ->joinLeft(
-                    array( 'cp' => $res->getTableName( 'catalog_category_product_index' ) ),
-                    "cp.product_id = p.entity_id AND cp.store_id = {$storeId}",
-                    'category_id'
-                )
-                ->joinLeft(
-                    array( 'cpp' => $res->getTableName( 'catalog_category_product_index' ) ),
-                    "cpp.product_id = parent.entity_id AND cpp.store_id = {$storeId}",
-                    'category_id'
-                );
-        } else {
-            $select
-                ->joinLeft(
-                    array( 'cp' => $cppTable ),
-                    "cp.product_id = p.entity_id",
-                    "category_id"
-                )
-                ->joinLeft(
-                    array( 'cpp' => $cppTable ),
-                    "cpp.product_id = parent.entity_id",
-                    "category_id"
-                );
-        }
-
-        /** urls */
-        $select
-            ->joinLeft(
-                array( 'url' => $res->getTableName( 'url_rewrite' ) ),
-                "url.entity_type = 'product'
-                AND url.metadata IS NULL
-                AND url.entity_id = p.entity_id
-                AND url.store_id = {$storeId}",
-                array( 'product_page_url' => 'url.request_path' ) )
-            ->joinLeft(
-                array( 'parent_url' => $res->getTableName( 'url_rewrite' ) ),
-                "parent_url.entity_type = 'product'
-                AND parent_url.metadata IS NULL
-                AND parent_url.entity_id = parent.entity_id
-                AND parent_url.store_id = {$storeId}",
-                array( 'parent_url' => 'max(parent_url.request_path)' ) );
-
-        /** category */
-        if ( $this->_helper->getConfig( 'feeds/category_id_use_url_path', $storeId ) ) {
-            $select->joinLeft(
-                array( 'cat' => $res->getTableName( 'catalog_category_flat' ) . '_store_' . $storeId ),
-                'cat.entity_id = cp.category_id AND cat.level > 1',
-                array( 'category_external_id' => 'max(cat.url_path)' ) );
-            $select->joinLeft(
-                array( 'parent_cat' => $res->getTableName( 'catalog_category_flat' ) . '_store_' . $storeId ),
-                'parent_cat.entity_id = cpp.category_id AND parent_cat.level > 1',
-                array( 'parent_category_external_id' => 'max(parent_cat.url_path)' ) );
-            $select->joinLeft(
-                array( 'bv_cat' => $res->getTableName( 'catalog_category_flat' ) . '_store_' . $storeId ),
-                'bv_cat.entity_id = p.bv_category_id',
-                array( 'bv_category_external_id' => 'bv_cat.url_path' ) );
-            $select->joinLeft(
-                array( 'bv_parent_cat' => $res->getTableName( 'catalog_category_flat' ) . '_store_' . $storeId ),
-                'bv_parent_cat.entity_id = parent.bv_category_id',
-                array( 'bv_parent_category_external_id' => 'bv_parent_cat.url_path' ) );
-        } else {
-            $select->joinLeft(
-                array( 'cat' => $res->getTableName( 'catalog_category_entity' ) ),
-                'cat.entity_id = cp.category_id AND cat.level > 1',
-                array( 'category_external_id' => 'max(cat.entity_id)' ) );
-            $select->joinLeft(
-                array( 'parent_cat' => $res->getTableName( 'catalog_category_entity' ) ),
-                'parent_cat.entity_id = cpp.category_id AND parent_cat.level > 1',
-                array( 'parent_category_external_id' => 'max(parent_cat.entity_id)' ) );
-            $select->joinLeft(
-                array( 'bv_cat' => $res->getTableName( 'catalog_category_entity' ) ),
-                'bv_cat.entity_id = p.bv_category_id',
-                array( 'bv_category_external_id' => 'bv_cat.entity_id' ) );
-            $select->joinLeft(
-                array( 'bv_parent_cat' => $res->getTableName( 'catalog_category_entity' ) ),
-                'bv_parent_cat.entity_id = parent.bv_category_id',
-                array( 'bv_parent_category_external_id' => 'bv_parent_cat.entity_id' ) );
-        }
-
-        /** Locale Data */
-        $localeColumns = array(
-            'entity_id'   => 'entity_id',
-            'name'        => 'name',
-            'description' => 'short_description',
-            'image_url'   => 'small_image'
-        );
-        if ( isset( $this->_storeLocales[ $storeId ] ) ) {
-            /** @var Store $localeStore */
-            foreach ( $this->_storeLocales[ $storeId ] as $locale => $localeStore ) {
-                if ( $localeStore->getId() == $storeId ) {
-                    $columns = array();
-                    foreach ( $localeColumns as $dest => $source ) {
-                        $columns["{$locale}|{$dest}"] = 'p.' . $source;
-                    }
-                    $columns["{$locale}|product_page_url"] = 'url.request_path';
-                    $columns["{$locale}|parent_url"]       = 'max(parent_url.request_path)';
-                    $columns["{$locale}|parent_image"]     = 'parent.small_image';
-                    $select->columns( $columns );
-                } else {
-                    $columns = array();
-                    foreach ( $localeColumns as $dest => $source ) {
-                        $columns["{$locale}|{$dest}"] = "{$locale}.{$source}";
-                    }
-
-                    $select
-                        ->joinLeft(
-                            array( $locale => $res->getTableName( 'catalog_product_flat' ) . '_' . $localeStore->getId() ),
-                            $locale . '.entity_id = p.entity_id',
-                            $columns )
-                        ->joinLeft(
-                            array( "{$locale}_parent" => $res->getTableName( 'catalog_product_flat' ) . '_' . $localeStore->getId() ),
-                            "pp.parent_id = {$locale}_parent.{$this->_productIdField}",
-                            array( "{$locale}|parent_image" => 'small_image' ) )
-                        ->joinLeft(
-                            array( "{$locale}_url" => $res->getTableName( 'url_rewrite' ) ),
-                            "{$locale}_url.entity_type = 'product'
-                            AND {$locale}_url.metadata IS NULL
-                            AND {$locale}_url.entity_id = p.entity_id
-                            AND {$locale}_url.store_id = {$localeStore->getId()}",
-                            array( "{$locale}|product_page_url" => "{$locale}_url.request_path" ) )
-                        ->joinLeft(
-                            array( "{$locale}_parent_url" => $res->getTableName( 'url_rewrite' ) ),
-                            "{$locale}_parent_url.entity_type = 'product'
-                            AND {$locale}_parent_url.metadata IS NULL
-                            AND {$locale}_parent_url.entity_id = {$locale}_parent.entity_id
-                            AND {$locale}_parent_url.store_id = {$localeStore->getId()}",
-                            array( "{$locale}|parent_url" => "max({$locale}_parent_url.request_path)" ) );
-                }
+        $this->productIndexes = [];
+        $this->populateIndexStoreData($productIds, $store);
+        $this->populateIndexLocaleData($productIds, $store);
+        /** @var \Bazaarvoice\Connector\Model\Index $bvIndex */
+        foreach ($this->productIndexes as $bvIndex) {
+            try {
+                $bvIndex->save();
+            } catch (\Exception $e) {
+                $this->_logger->crit($e->getMessage()."\n".$e->getTraceAsString());
             }
-        }
-
-        /** Brands and other Attributes */
-        $columnResults = $read->query( 'DESCRIBE `' . $res->getTableName( 'catalog_product_flat' ) . '_' . $storeId . '`;' );
-        $flatColumns   = array();
-        while ( $row = $columnResults->fetch() ) {
-            $flatColumns[] = $row['Field'];
-        }
-        $brandAttr = $this->_helper->getConfig( 'feeds/brand_code', $storeId );
-        if ( $brandAttr ) {
-            if ( in_array( $brandAttr, $flatColumns ) ) {
-                $select->columns( array( 'brand_external_id' => $brandAttr ) );
-            }
-        }
-        foreach ( $index->customAttributes as $label ) {
-            $code = strtolower( $label );
-            $attr = $this->_helper->getConfig( "feeds/{$code}_code", $storeId );
-            if ( $attr ) {
-                if ( in_array( "{$attr}_value", $flatColumns ) ) {
-                    $this->_logger->debug( "using {$attr}_value for {$code}" );
-                    $select->columns( array( "{$code}s" => "{$attr}_value" ) );
-                } else if ( in_array( $attr, $flatColumns ) ) {
-                    $this->_logger->debug( "using {$attr} for {$code}" );
-                    $select->columns( array( "{$code}s" => $attr ) );
-                }
-            }
-        }
-
-        /** Version */
-        $select->joinLeft(
-            array( 'cl' => $res->getTableName( 'bazaarvoice_product_cl' ) ),
-            'cl.entity_id = p.entity_id',
-            array( 'version_id' => 'MAX(cl.version_id)' ) );
-
-        $select->where( "p.entity_id IN(?)", $productIds )->group( 'p.entity_id' );
-
-        //$this->_logger->debug($select->__toString());
-
-        try {
-            $rows = $select->query();
-        } Catch ( \Exception $e ) {
-            $this->_logger->crit( $e->getMessage() . "\n" . $e->getTraceAsString() );
-
-            return true;
-        }
-
-        /** Get placeholders */
-        $placeholders = $this->getPlaceholderUrls( $storeId );
-
-        /** Iterate through results, clean up values, and write index. */
-        while ( ( $indexData = $rows->fetch() ) !== false ) {
-
-            $this->_logger->debug( 'Processing product ' . $indexData['product_id'] );
-
-            foreach ( $indexData as $key => $value ) {
-                if ( strpos( $key, '|' ) !== false ) {
-                    $newKey = explode( '|', $key );
-                    if ( strlen( $value ) ) {
-                        $indexData[ 'locale_' . $newKey[1] ][ $newKey[0] ] = $value;
-                    }
-                    unset( $indexData[ $key ] );
-                }
-                if ( strpos( $value, '||' ) !== false ) {
-                    $indexData[ $key ] = explode( '||', $value );
-                }
-            }
-
-            $indexData['status'] = $indexData[ ProductFeed::INCLUDE_IN_FEED_FLAG ] ? Status::STATUS_ENABLED : Status::STATUS_DISABLED;
-
-            if ( $indexData['product_type'] == Configurable::TYPE_CODE ) {
-                if ($bvFamiliesAttributeConfig && isset($indexData[$bvFamiliesAttributeConfig.'s'])) {
-                    $indexData['family'] = array( $indexData[$bvFamiliesAttributeConfig.'s'] );
-                } else {
-                    $indexData['family'] = array( $indexData['external_id'] );
-                }
-            } else if ( ! empty( $indexData['family'] ) ) {
-                if ( ! is_array( $indexData['family'] ) ) {
-                    $indexData['family'] = array( $indexData['family'] );
-                }
-            }
-
-            $this->_logger->debug( 'Family Info' );
-            $this->_logger->debug( $indexData['family'] );
-
-            /** categories */
-            if ( $indexData['bv_category_external_id'] ) {
-                $indexData['category_external_id'] = $indexData['bv_category_external_id'];
-            }
-            if ( $indexData['bv_parent_category_external_id'] ) {
-                $indexData['parent_category_external_id'] = $indexData['bv_parent_category_external_id'];
-            }
-
-            /** Check locales */
-            $productLocales = [];
-            if ( ! empty( $this->_storeLocales[ $storeId ] ) ) {
-                foreach ( $this->_storeLocales[ $storeId ] as $locale => $storeLocale ) {
-                    if ( ! empty( $indexData['locale_entity_id'][ $locale ] ) ) {
-                        $productLocales[ $locale ] = $storeLocale;
-                    }
-                }
-            }
-
-            /** Use parent URLs/categories if appropriate */
-            if ( $indexData['visibility'] == Visibility::VISIBILITY_NOT_VISIBLE ) {
-                $this->_logger->debug( 'Not visible' );
-                if ( ! empty( $indexData['parent_url'] ) ) {
-                    $indexData['product_page_url'] = $indexData['parent_url'];
-                    $this->_logger->debug( 'Using Parent URL' );
-                    if ( ! empty( $this->_storeLocales[ $storeId ] ) ) {
-                        if(empty($indexData['locale_product_page_url']))
-                            $indexData['locale_product_page_url'] = [];
-                        foreach ( $this->_storeLocales[ $storeId ] as $locale => $storeLocale ) {
-                            if ( ! empty( $indexData['locale_parent_url'][ $locale ] ) ) {
-                                $indexData['locale_product_page_url'][ $locale ] = $indexData['locale_parent_url'][ $locale ];
-                            }
-                        }
-                    }
-                } else {
-                    $this->_logger->debug( 'Product marked disabled because no parent URL found' );
-                    $indexData['status'] = Status::STATUS_DISABLED;
-                }
-                if ( ! empty( $indexData['parent_category_external_id'] ) ) {
-                    $indexData['category_external_id'] = $indexData['parent_category_external_id'];
-                    $this->_logger->debug( 'Using Parent Category' );
-                }
-            }
-
-            $indexData['category_external_id'] = str_replace( '/', '-', $indexData['category_external_id'] );
-            $indexData['category_external_id'] = str_replace( '.html', '', $indexData['category_external_id'] );
-            $indexData['category_external_id'] = $this->_helper->replaceIllegalCharacters( $indexData['category_external_id'] );
-
-            //$this->_logger->debug( $indexData['image_url'] );
-            /** Use parent image if appropriate */
-            if ( $indexData['image_url'] == '' || $indexData['image_url'] == 'no_selection' ) {
-                if ( ! empty( $indexData['parent_image'] ) ) {
-                    $indexData['image_url'] = $indexData['parent_image'];
-                    $this->_logger->debug( 'Using Parent image' );
-                    if ( isset( $indexData['locale_image_url'] )
-                         && is_array( $indexData['locale_image_url'] ) ) {
-                        foreach ( $indexData['locale_image_url'] as $locale => $localeUrl ) {
-                            if ( ! empty( $indexData['locale_parent_image'][ $locale ] ) ) {
-                                $indexData['locale_image_url'][ $locale ] = $indexData['locale_parent_image'][ $locale ];
-                            } else {
-                                unset( $indexData['locale_image_url'][ $locale ] );
-                            }
-                        }
-                    }
-                } else {
-                    $this->_logger->debug( 'Product has no parent and no image' );
-                    if ( isset( $placeholders['default'] ) ) {
-                        $indexData['image_url'] = $placeholders['default'];
-                    }
-                    foreach ( $productLocales as $locale => $storeLocale ) {
-                        if ( isset( $placeholders[ $locale ] ) ) {
-                            $indexData['locale_image_url'][ $locale ] = $placeholders[ $locale ];
-                        }
-                    }
-                }
-            }
-
-            if ( $indexData['category_external_id'] == '' ) {
-                $indexData['status'] = Status::STATUS_DISABLED;
-                $this->_logger->debug( 'Product marked disabled because no category found.' );
-            } else {
-                $this->_logger->debug( "Category '{$indexData['category_external_id']}'" );
-            }
-
-            /** Handle missing rewrites */
-            $standardUrl = 'catalog/product/view/id/' . $indexData['product_id'];
-
-            /** Add Store base to URLs */
-            $indexData['product_page_url'] = $this->getStoreUrl( $store->getBaseUrl(),
-                $indexData['product_page_url'] == '' ? $standardUrl : $indexData['product_page_url'] );
-
-            $localeUrls = [];
-            /** @var Store $storeLocale */
-            foreach ( $productLocales as $locale => $storeLocale ) {
-                $urlPath               = isset( $indexData['locale_product_page_url'][ $locale ] )
-                    ? $indexData['locale_product_page_url'][ $locale ]
-                    : $standardUrl;
-                $localeUrls[ $locale ] = $this->getStoreUrl(
-                    $storeLocale->getBaseUrl(),
-                    $urlPath,
-                    $storeLocale->getCode(),
-                    $localeUrls );
-            }
-            $indexData['locale_product_page_url'] = $localeUrls;
-            unset( $localeUrls );
-
-            $this->_logger->debug( "URL {$indexData['product_page_url']}" );
-            if ( isset( $indexData['locale_product_page_url'] ) ) {
-                $this->_logger->debug( 'Locale URLs' );
-                $this->_logger->debug( $indexData['locale_product_page_url'] );
-            }
-
-            /** Add Store base to images */
-            if (
-                $indexData['image_url'] == ''
-                || $indexData['image_url'] == 'no_selection'
-            ) {
-                $indexData['image_url'] = '';
-            } elseif ( substr( $indexData['image_url'], 0, 4 ) != 'http' ) {
-                $indexData['image_url'] = $store->getBaseUrl( \Magento\Framework\UrlInterface::URL_TYPE_MEDIA ) . 'catalog/product' . $indexData['image_url'];
-                if ( isset( $indexData['locale_image_url'] ) && is_array( $indexData['locale_image_url'] ) ) {
-                    /** @var Store $storeLocale */
-                    foreach ( $productLocales as $locale => $storeLocale ) {
-                        if ( isset( $indexData['locale_image_url'][ $locale ] ) ) {
-                            $indexData['locale_image_url'][ $locale ] =
-                                $storeLocale->getBaseUrl( \Magento\Framework\UrlInterface::URL_TYPE_MEDIA )
-                                . 'catalog/product'
-                                . $indexData['locale_image_url'][ $locale ];
-                        }
-                    }
-                }
-            }
-            $this->_logger->debug( "Image {$indexData['image_url']}" );
-
-            $indexData['external_id'] = $this->_helper->getProductId( $indexData['external_id'] );
-            $indexData['scope']       = $this->_generationScope;
-            $indexData['store_id']    = $storeId;
-
-            foreach ( $indexData as $key => $value ) {
-                if ( is_array( $value ) ) {
-                    $indexData[ $key ] = $this->_helper->jsonEncode( $value );
-                }
-            }
-
-            /** @var Index $index */
-            $index = $this->_objectManager->create( '\Bazaarvoice\Connector\Model\Index' );
-            $index->loadByStore( $indexData['product_id'], $indexData['store_id'] );
-
-            if ( $index->getId() ) {
-                $indexData['entity_id'] = $index->getId();
-            } else {
-                $indexData['entity_id'] = null;
-            }
-
-            if ( count( array_diff( $indexData, $index->getData() ) ) ) {
-                $index->setData( $indexData );
-                $index->getResource()->save( $index );
-            }
-            $this->_logger->debug( 'Product Indexed' );
-
-            $index->clearInstance();
-            unset( $indexData );
         }
 
         return true;
     }
 
     /**
-     * @param string $storeUrl
-     * @param string $urlPath
+     * @param $productIds
+     * @param $store
+     *
+     * @return void
+     * @throws \Zend_Db_Statement_Exception
+     */
+    private function populateIndexStoreData($productIds, $store)
+    {
+        if (is_int($store)) {
+            $store = $this->_objectManager->get('\Magento\Store\Model\Store')->load($store);
+        }
+        $storeId = $store->getId();
+
+        /** Database Resources */
+        $res = $this->_resourceConnection;
+        $read = $res->getConnection('core_read');
+        $select = $this->getBaseSelect($read, $storeId, $res);
+        $this->joinParent($select, $storeId, $res);
+
+        if ($this->_generationScope == Scope::SCOPE_GLOBAL) {
+            $cppTable = $res->getTableName('catalog_category_product');
+        } else {
+            $cppTable = $res->getTableName("catalog_category_product_index_store{$storeId}");
+        }
+
+        if (version_compare($this->_mageVersion, '2.2.5', '<')) {
+            $select
+                ->joinLeft(
+                    array('cp' => $res->getTableName('catalog_category_product_index')),
+                    "cp.product_id = p.entity_id AND cp.store_id = {$storeId}",
+                    'category_id'
+                )
+                ->joinLeft(
+                    array('cpp' => $res->getTableName('catalog_category_product_index')),
+                    "cpp.product_id = parent.entity_id AND cpp.store_id = {$storeId}",
+                    'category_id'
+                );
+        } else {
+            $select
+                ->joinLeft(
+                    array('cp' => $cppTable),
+                    "cp.product_id = p.entity_id",
+                    "category_id"
+                )
+                ->joinLeft(
+                    array('cpp' => $cppTable),
+                    "cpp.product_id = parent.entity_id",
+                    "category_id"
+                );
+        }
+        $this->joinUrlRewrite($select, $storeId, $res);
+
+        /** category */
+        if ($this->_helper->getConfig('feeds/category_id_use_url_path', $storeId)) {
+            $select->joinLeft(
+                array('cat' => $res->getTableName('catalog_category_flat').'_store_'.$storeId),
+                'cat.entity_id = cp.category_id AND cat.level > 1',
+                array('category_external_id' => 'max(cat.url_path)'));
+            $select->joinLeft(
+                array('parent_cat' => $res->getTableName('catalog_category_flat').'_store_'.$storeId),
+                'parent_cat.entity_id = cpp.category_id AND parent_cat.level > 1',
+                array('parent_category_external_id' => 'max(parent_cat.url_path)'));
+            $select->joinLeft(
+                array('bv_cat' => $res->getTableName('catalog_category_flat').'_store_'.$storeId),
+                'bv_cat.entity_id = p.bv_category_id',
+                array('bv_category_external_id' => 'bv_cat.url_path'));
+            $select->joinLeft(
+                array('bv_parent_cat' => $res->getTableName('catalog_category_flat').'_store_'.$storeId),
+                'bv_parent_cat.entity_id = parent.bv_category_id',
+                array('bv_parent_category_external_id' => 'bv_parent_cat.url_path'));
+        } else {
+            $select->joinLeft(
+                array('cat' => $res->getTableName('catalog_category_entity')),
+                'cat.entity_id = cp.category_id AND cat.level > 1',
+                array('category_external_id' => 'max(cat.entity_id)'));
+            $select->joinLeft(
+                array('parent_cat' => $res->getTableName('catalog_category_entity')),
+                'parent_cat.entity_id = cpp.category_id AND parent_cat.level > 1',
+                array('parent_category_external_id' => 'max(parent_cat.entity_id)'));
+            $select->joinLeft(
+                array('bv_cat' => $res->getTableName('catalog_category_entity')),
+                'bv_cat.entity_id = p.bv_category_id',
+                array('bv_category_external_id' => 'bv_cat.entity_id'));
+            $select->joinLeft(
+                array('bv_parent_cat' => $res->getTableName('catalog_category_entity')),
+                'bv_parent_cat.entity_id = parent.bv_category_id',
+                array('bv_parent_category_external_id' => 'bv_parent_cat.entity_id'));
+        }
+
+        /** Brands and other Attributes */
+        $columnResults = $read->query('DESCRIBE `'.$res->getTableName('catalog_product_flat').'_'.$storeId.'`;');
+        $flatColumns = array();
+        while ($row = $columnResults->fetch()) {
+            $flatColumns[] = $row['Field'];
+        }
+        $brandAttr = $this->_helper->getConfig('feeds/brand_code', $storeId);
+        if ($brandAttr) {
+            if (in_array($brandAttr, $flatColumns)) {
+                $select->columns(array('brand_external_id' => $brandAttr));
+            }
+        }
+        foreach (Index::CUSTOM_ATTRIBUTES as $label) {
+            $code = strtolower($label);
+            $attr = $this->_helper->getConfig("feeds/{$code}_code", $storeId);
+            if ($attr) {
+                if (in_array("{$attr}_value", $flatColumns)) {
+                    $this->_logger->debug("using {$attr}_value for {$code}");
+                    $select->columns(array("{$code}s" => "{$attr}_value"));
+                } else {
+                    if (in_array($attr, $flatColumns)) {
+                        $this->_logger->debug("using {$attr} for {$code}");
+                        $select->columns(array("{$code}s" => $attr));
+                    }
+                }
+            }
+        }
+
+        /** Version */
+        $select->joinLeft(
+            array('cl' => $res->getTableName('bazaarvoice_product_cl')),
+            'cl.entity_id = p.entity_id',
+            array('version_id' => 'MAX(cl.version_id)'));
+
+        $this->filterByProducts($select, $productIds);
+
+        //$this->_logger->debug($select->__toString());
+
+        try {
+            $rows = $select->query();
+        } catch (\Exception $e) {
+            $this->_logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+            throw new \Exception($e);
+        }
+
+        while (($indexData = $rows->fetch()) !== false) {
+            $this->_logger->debug('Processing product '.$indexData['product_id']);
+            foreach ($indexData as $key => $value) {
+                if (strpos($value, '||') !== false) {
+                    $indexData[$key] = explode('||', $value);
+                }
+            }
+
+            $indexData['status'] = $indexData[ProductFeed::INCLUDE_IN_FEED_FLAG] ? Status::STATUS_ENABLED
+                : Status::STATUS_DISABLED;
+
+            $bvFamiliesAttributeConfig = $this->getBvFamiliesAttributeConfig($storeId);
+            if ($indexData['product_type'] == Configurable::TYPE_CODE) {
+                if ($bvFamiliesAttributeConfig && isset($indexData[$bvFamiliesAttributeConfig.'s'])) {
+                    $indexData['family'] = array($indexData[$bvFamiliesAttributeConfig.'s']);
+                } else {
+                    $indexData['family'] = array($indexData['external_id']);
+                }
+            } else {
+                if (!empty($indexData['family'])) {
+                    if (!is_array($indexData['family'])) {
+                        $indexData['family'] = array($indexData['family']);
+                    }
+                }
+            }
+
+            $this->_logger->debug('Family Info');
+            $this->_logger->debug($indexData['family']);
+
+            /** categories */
+            if ($indexData['bv_category_external_id']) {
+                $indexData['category_external_id'] = $indexData['bv_category_external_id'];
+            }
+            if ($indexData['bv_parent_category_external_id']) {
+                $indexData['parent_category_external_id'] = $indexData['bv_parent_category_external_id'];
+            }
+
+            /** Use parent URLs/categories if appropriate */
+            if ($indexData['visibility'] == Visibility::VISIBILITY_NOT_VISIBLE) {
+                $this->_logger->debug('Not visible');
+                if (!empty($indexData['parent_url'])) {
+                    $indexData['product_page_url'] = $indexData['parent_url'];
+                    $this->_logger->debug('Using Parent URL');
+                } else {
+                    $this->_logger->debug('Product marked disabled because no parent URL found');
+                    $indexData['status'] = Status::STATUS_DISABLED;
+                }
+                if (!empty($indexData['parent_category_external_id'])) {
+                    $indexData['category_external_id'] = $indexData['parent_category_external_id'];
+                    $this->_logger->debug('Using Parent Category');
+                }
+            }
+
+            $indexData['category_external_id'] = str_replace('/', '-', $indexData['category_external_id']);
+            $indexData['category_external_id'] = str_replace('.html', '', $indexData['category_external_id']);
+            $indexData['category_external_id']
+                = $this->_helper->replaceIllegalCharacters($indexData['category_external_id']);
+
+            if ($indexData['category_external_id'] == '') {
+                $indexData['status'] = Status::STATUS_DISABLED;
+                $this->_logger->debug('Product marked disabled because no category found.');
+            } else {
+                $this->_logger->debug("Category '{$indexData['category_external_id']}'");
+            }
+            $standardUrl = static::getStandardUrl($indexData['product_id']);
+
+            /** Add Store base to URLs */
+            $indexData['product_page_url'] = $this->getStoreUrl($store->getBaseUrl(),
+                $indexData['product_page_url'] == '' ? $standardUrl : $indexData['product_page_url']);
+            $this->_logger->debug("URL {$indexData['product_page_url']}");
+            $indexData['image_url'] = $this->getImageUrl($store, $indexData);
+
+            $this->_logger->debug("Image {$indexData['image_url']}");
+
+            $indexData['external_id'] = $this->_helper->getProductId($indexData['external_id']);
+            $indexData['scope'] = $this->_generationScope;
+            $indexData['store_id'] = $storeId;
+
+            foreach ($indexData as $key => $value) {
+                if (is_array($value)) {
+                    $indexData[$key] = $this->_helper->jsonEncode($value);
+                }
+            }
+
+            /** @var \Bazaarvoice\Connector\Model\Index $index */
+            $index = $this->bvIndexFactory->create();
+            $index->setData($indexData);
+
+            $this->productIndexes[] = $index;
+        }
+    }
+
+    /**
+     * @param $productIds
+     * @param $store
+     *
+     * @return $this
+     */
+    private function populateIndexLocaleData($productIds, $store)
+    {
+        $storeId = $store->getId();
+        if (isset($this->_storeLocales[$storeId])) {
+            /** Locale Data */
+            $localeColumns = array(
+                'entity_id'   => 'entity_id',
+                'name'        => 'name',
+                'description' => 'short_description',
+                'image_url'   => 'small_image',
+            );
+
+            $res = $this->_resourceConnection;
+            $read = $res->getConnection('core_read');
+
+            /** @var Store $localeStore */
+            foreach ($this->_storeLocales[$storeId] as $locale => $localeStore) {
+                /** Core Data  */
+                $select = $this->getBaseSelect($read, $localeStore->getId(), $res);
+
+                $this->joinParent($select, $localeStore->getId(), $res);
+                $this->joinUrlRewrite($select, $localeStore->getId(), $res);
+                $this->filterByProducts($select, $productIds);
+
+                $columns = array();
+                foreach ($localeColumns as $dest => $source) {
+                    $columns["{$dest}"] = 'p.'.$source;
+                }
+                $columns["product_page_url"] = 'url.request_path';
+                $columns["parent_url"] = 'max(parent_url.request_path)';
+                $columns["parent_image"] = 'parent.small_image';
+                $select->columns($columns);
+
+                try {
+                    $rows = $select->query();
+                    while (($indexData = $rows->fetch()) !== false) {
+                        /** @var Index $productIndex */
+
+                        foreach ($this->productIndexes as $productIndex) {
+                            if ($productIndex->getProductId() == $indexData['product_id'] && $productIndex->getStoreId() == $storeId) {
+                                break;
+                            }
+                        }
+
+                        /** @var Store $localeStore */
+                        $urlPath = isset($indexData['product_page_url'])
+                            ? $indexData['product_page_url']
+                            : $this->getStandardUrl($indexData['product_id']);
+                        $localeUrl = $this->getStoreUrl(
+                            $localeStore->getBaseUrl(),
+                            $urlPath,
+                            $localeStore->getCode());
+                        $indexData['product_page_url'] = $localeUrl;
+
+                        if (isset($indexData['product_page_url'])) {
+                            $this->_logger->debug('Locale URL');
+                            $this->_logger->debug($indexData['product_page_url']);
+                        }
+
+                        $indexData['image_url'] = $this->getImageUrl($localeStore, $indexData);
+
+                        /** Use parent URLs/categories if appropriate */
+                        if ($indexData['visibility'] == Visibility::VISIBILITY_NOT_VISIBLE) {
+                            $this->_logger->debug('Locale not visible');
+                            if (!empty($indexData['parent_url'])) {
+                                $indexData['product_page_url'] = $this->getStoreUrl(
+                                    $localeStore->getBaseUrl(),
+                                    $indexData['parent_url'],
+                                    $localeStore->getCode());
+                                $this->_logger->debug('Locale using Parent URL');
+                            }
+                        }
+
+                        if (isset($indexData['description'])) {
+                            $productIndex->addLocaleDescription([$locale => $indexData['description']]);
+                        }
+
+                        if (isset($indexData['image_url'])) {
+                            $productIndex->addLocaleImageUrl([$locale => $indexData['image_url']]);
+                        }
+
+                        if (isset($indexData['name'])) {
+                            $productIndex->addLocaleName([$locale => $indexData['name']]);
+                        }
+
+                        if (isset($indexData['product_page_url'])) {
+                            $productIndex->addLocaleProductPageUrl([$locale => $indexData['product_page_url']]);
+                        }
+                    }
+                } catch (\Exception $e) {
+                    $this->_logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param                                           $read
+     * @param                                           $storeId
+     *
+     * @param \Magento\Framework\App\ResourceConnection $res
+     *
+     * @return mixed
+     */
+    private function getBaseSelect($read, $storeId, ResourceConnection $res)
+    {
+        $select = $read->select()
+            ->from(array('p' => $res->getTableName('catalog_product_flat').'_'.$storeId), array(
+                'name'            => 'p.name',
+                'product_type'    => 'p.type_id',
+                'product_id'      => 'p.entity_id',
+                'description'     => 'p.short_description',
+                'external_id'     => 'p.sku',
+                'image_url'       => 'p.small_image',
+                'visibility'      => 'p.visibility',
+                'bv_feed_exclude' => 'bv_feed_exclude',
+                'bv_category_id'  => 'p.bv_category_id',
+            ));
+
+        return $select;
+    }
+
+    /**
+     * @param \Magento\Framework\DB\Select              $select
+     * @param                                           $storeId
+     * @param \Magento\Framework\App\ResourceConnection $res
+     *
+     * @return mixed
+     */
+    private function joinParent(Select $select, $storeId, ResourceConnection $res)
+    {
+        /** parents */
+        $bvFamiliesAttributeConfig = $this->getBvFamiliesAttributeConfig($storeId);
+        $bvFamiliesAttribute = $bvFamiliesAttributeConfig ? $bvFamiliesAttributeConfig : 'sku';
+
+        return $select
+            ->joinLeft(
+                array('pp' => $res->getTableName('catalog_product_super_link')),
+                'pp.product_id = p.entity_id', '')
+            ->joinLeft(
+                array('parent' => $res->getTableName('catalog_product_flat').'_'.$storeId),
+                'pp.parent_id = parent.'.$this->_productIdField,
+                array(
+                    'family'       => 'GROUP_CONCAT(DISTINCT parent.'.$bvFamiliesAttribute.' SEPARATOR "||")',
+                    'parent_image' => 'small_image',
+                ));
+    }
+
+    /**
+     * @param $storeId
+     *
+     * @return mixed
+     */
+    private function getBvFamiliesAttributeConfig($storeId)
+    {
+        $bvFamiliesAttributeConfig = $this->_helper->getConfig('feeds/bvfamilies_code', $storeId);
+
+        return $bvFamiliesAttributeConfig;
+    }
+
+    /**
+     * @param \Magento\Framework\DB\Select              $select
+     * @param                                           $storeId
+     *
+     * @param \Magento\Framework\App\ResourceConnection $res
+     *
+     * @return \Magento\Framework\DB\Select
+     */
+    private function joinUrlRewrite(Select $select, $storeId, ResourceConnection $res)
+    {
+        /** urls */
+        return $select
+            ->joinLeft(
+                array('url' => $res->getTableName('url_rewrite')),
+                "url.entity_type = 'product'
+                AND url.metadata IS NULL
+                AND url.entity_id = p.entity_id
+                AND url.store_id = {$storeId}",
+                array('product_page_url' => 'url.request_path'))
+            ->joinLeft(
+                array('parent_url' => $res->getTableName('url_rewrite')),
+                "parent_url.entity_type = 'product'
+                AND parent_url.metadata IS NULL
+                AND parent_url.entity_id = parent.entity_id
+                AND parent_url.store_id = {$storeId}",
+                array('parent_url' => 'max(parent_url.request_path)'));
+    }
+
+    /**
+     * @param $select
+     * @param $productIds
+     */
+    private function filterByProducts($select, $productIds)
+    {
+        $select->where("p.entity_id IN(?)", $productIds)->group('p.entity_id');
+    }
+
+    /**
+     * @param $productId
+     *
+     * @return string
+     */
+    private static function getStandardUrl($productId)
+    {
+        /** Handle missing rewrites */
+        $standardUrl = 'catalog/product/view/id/'.$productId;
+
+        return $standardUrl;
+    }
+
+    /**
+     * @param string      $storeUrl
+     * @param string      $urlPath
      * @param string|null $storeCode
-     * @param null $currentUrls
      *
      * @return string string
      */
-    protected function getStoreUrl( $storeUrl, $urlPath, $storeCode = null, $currentUrls = null ) {
-        $url = $storeUrl . $urlPath;
-
-        if (
-            is_array( $currentUrls )
-            && in_array( $url, $currentUrls )
-        ) {
-            $url .= '?___store=' . $storeCode;
+    protected function getStoreUrl($storeUrl, $urlPath, $storeCode = null)
+    {
+        $url = $storeUrl.$urlPath;
+        if ($storeCode) {
+            $url .= '?___store='.$storeCode;
         }
 
         return $url;
@@ -771,36 +797,39 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
     /**
      * @param array $productIds
      */
-    protected function _purgeUnversioned( $productIds ) {
+    protected function _purgeUnversioned($productIds)
+    {
         /** Database Resources */
-        $write = $this->_resourceConnection->getConnection( 'core_write' );
+        $write = $this->_resourceConnection->getConnection('core_write');
 
-        $indexTable = $this->_resourceConnection->getTableName( 'bazaarvoice_index_product' );
+        $indexTable = $this->_resourceConnection->getTableName('bazaarvoice_index_product');
 
-        $delete = $write->deleteFromSelect( $write->select()->from( $indexTable )->where( 'product_id IN(?)', $productIds )->where( 'store_id = 0' ), $indexTable );
-        $write->query( $delete );
+        $delete = $write->deleteFromSelect($write->select()->from($indexTable)->where('product_id IN(?)', $productIds)
+            ->where('store_id = 0'), $indexTable);
+        $write->query($delete);
     }
 
     /**
      * @throws \Zend_Db_Statement_Exception
      */
-    protected function logStats() {
+    protected function logStats()
+    {
         /** @var Select $select */
-        $select = $this->_resourceConnection->getConnection( 'core_read' )
-                                            ->select()
-                                            ->from( array(
-                                                'source' => $this->_resourceConnection->getTableName( 'bazaarvoice_index_product' )
-                                            ) );
+        $select = $this->_resourceConnection->getConnection('core_read')
+            ->select()
+            ->from(array(
+                'source' => $this->_resourceConnection->getTableName('bazaarvoice_index_product'),
+            ));
 
-        $select->columns( array( 'store_id', 'total' => 'count(*)' ) );
-        $select->group( 'store_id' );
+        $select->columns(array('store_id', 'total' => 'count(*)'));
+        $select->group('store_id');
         $result = $select->query();
 
-        while ( $row = $result->fetch() ) {
-            if ( $row['store_id'] == 0 ) {
-                $this->_logger->debug( "{$row['total']} Products left to Index" );
+        while ($row = $result->fetch()) {
+            if ($row['store_id'] == 0) {
+                $this->_logger->debug("{$row['total']} Products left to Index");
             } else {
-                $this->_logger->debug( "{$row['total']} Products Indexed for Store {$row['store_id']}" );
+                $this->_logger->debug("{$row['total']} Products Indexed for Store {$row['store_id']}");
             }
         }
     }
@@ -812,7 +841,8 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
      *
      * @return mixed
      */
-    public function executeList( array $ids ) {
+    public function executeList(array $ids)
+    {
         return true;
     }
 
@@ -823,66 +853,86 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
      *
      * @return mixed
      */
-    public function executeRow( $id ) {
+    public function executeRow($id)
+    {
         return true;
     }
 
     /**
-     * @param int $storeId
+     * @param $store
+     * @param $indexData
      *
-     * @return array
+     * @return mixed
      */
-    public function getPlaceholderUrls( $storeId ) {
-        /** @var Image $imageHelper */
-        $imageHelper = $this->_objectManager->get( '\Magento\Catalog\Helper\Image' );
-        /** @var \Magento\Framework\View\Asset\Repository $assetRepo */
-        $assetRepo = $this->_objectManager->get( '\Magento\Framework\View\Asset\Repository' );
-        /** @var \Magento\Framework\View\DesignInterface $design */
-        $design = $this->_objectManager->create( '\Magento\Framework\View\DesignInterface' );
-
-        $placeholders = array();
-        /**
-         * @var string $locale
-         * @var Store $localeStore
-         */
-        if ( ! empty( $this->_storeLocales[ $storeId ] ) ) {
-            foreach ( $this->_storeLocales[ $storeId ] as $locale => $localeStore ) {
-                $themeId = $design->getConfigurationDesignTheme( 'frontend', [ 'store' => $localeStore->getId() ] );
-                /** @var \Magento\Theme\Model\Theme $theme */
-                $theme       = $this->_objectManager->create( '\Magento\Theme\Model\Theme' )->load( $themeId );
-                $assetParams = array(
-                    'area'   => 'frontend',
-                    'theme'  => $theme->getThemePath(),
-                    'locale' => $locale
-                );
-                if ( $localeStore->getId() == $storeId ) {
-                    $placeholders['default'] = $assetRepo->createAsset( $imageHelper->getPlaceholder( 'image' ), $assetParams )->getUrl();
-                }
-                $placeholders[ $locale ] = $assetRepo->createAsset( $imageHelper->getPlaceholder( 'image' ), $assetParams )->getUrl();
-
+    private function getImageUrl($store, $indexData)
+    {
+        /** Use parent image if appropriate */
+        if ($indexData['image_url'] == '' || $indexData['image_url'] == 'no_selection') {
+            if (!empty($indexData['parent_image'])) {
+                $indexData['image_url'] = $indexData['parent_image'];
+                $this->_logger->debug('Using Parent image');
+            } else {
+                $this->_logger->debug('Product has no parent and no image');
+                $indexData['image_url'] = $this->getPlaceholderUrl($store);
             }
         }
 
-        return $placeholders;
+        if ($indexData['image_url'] == '' || $indexData['image_url'] == 'no_selection') {
+            return '';
+        } elseif (substr($indexData['image_url'], 0, 4) != 'http') {
+            return $store->getBaseUrl(UrlInterface::URL_TYPE_MEDIA).'catalog/product'
+                .$indexData['image_url'];
+        }
+
+        return $indexData['image_url'];
+    }
+
+    /**
+     * @return string|false
+     */
+    public function getPlaceholderUrl($store)
+    {
+        /** @var Image $imageHelper */
+        /** @var \Magento\Framework\View\Asset\Repository $assetRepo */
+        /** @var \Magento\Framework\View\DesignInterface $design */
+        /** @var Store $localeStore */
+        /** @var string $locale */
+        /** @var \Magento\Theme\Model\Theme $theme */
+
+        $imageHelper = $this->_objectManager->get('\Magento\Catalog\Helper\Image');
+        $assetRepo = $this->_objectManager->get('\Magento\Framework\View\Asset\Repository');
+        $design = $this->_objectManager->create('\Magento\Framework\View\DesignInterface');
+        $localeCode = $this->_helper->getConfig( 'general/locale', $store->getId() );
+        $themeId = $design->getConfigurationDesignTheme('frontend', ['store' => $store->getId()]);
+        $theme = $this->_objectManager->create('\Magento\Theme\Model\Theme')->load($themeId);
+        $assetParams = array(
+            'area'   => 'frontend',
+            'theme'  => $theme->getThemePath(),
+            'locale' => $localeCode,
+        );
+
+        return $assetRepo->createAsset($imageHelper->getPlaceholder('image'), $assetParams)
+            ->getUrl();
     }
 
     /**
      * @return bool
      * @throws \Zend_Db_Statement_Exception
      */
-    protected function hasBadScopeIndex() {
+    protected function hasBadScopeIndex()
+    {
         /** @var Select $select */
-        $select = $this->_resourceConnection->getConnection( 'core_read' )
-                                            ->select()
-                                            ->from( array(
-                                                'source' => $this->_resourceConnection->getTableName( 'bazaarvoice_index_product' )
-                                            ) );
+        $select = $this->_resourceConnection->getConnection('core_read')
+            ->select()
+            ->from(array(
+                'source' => $this->_resourceConnection->getTableName('bazaarvoice_index_product'),
+            ));
 
-        $select->columns( array( 'total' => 'count(*)' ) );
-        $select->where( "scope IS NOT NULL AND scope != '{$this->_generationScope}'" );
+        $select->columns(array('total' => 'count(*)'));
+        $select->where("scope IS NOT NULL AND scope != '{$this->_generationScope}'");
         $result = $select->query();
 
-        while ( $row = $result->fetch() ) {
+        while ($row = $result->fetch()) {
             return $row['total'] > 0;
         }
 
@@ -892,12 +942,13 @@ class Flat implements \Magento\Framework\Indexer\ActionInterface, \Magento\Frame
     /**
      * @return string
      */
-    protected function getProductIdFieldName() {
-        $connection = $this->_resourceConnection->getConnection( 'core_read' );
+    protected function getProductIdFieldName()
+    {
+        $connection = $this->_resourceConnection->getConnection('core_read');
         $table = $this->_resourceConnection->getTableName('catalog_product_entity');
         $indexList = $connection->getIndexList($table);
 
-        return $indexList[ $connection->getPrimaryKeyName( $table ) ]['COLUMNS_LIST'][0];
+        return $indexList[$connection->getPrimaryKeyName($table)]['COLUMNS_LIST'][0];
     }
 
 }

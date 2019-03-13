@@ -98,7 +98,7 @@ class Product extends Generic {
             $childrenValues = [];
             foreach ( $children as $child ) {
                 $this->_logger->debug( $child->getExternalId() );
-                foreach ( $product->customAttributes as $attribute ) {
+                foreach ( Index::CUSTOM_ATTRIBUTES as $attribute ) {
                     $this->_logger->debug( $attribute );
                     $attribute = strtolower( $attribute ) . 's';
                     if ( $child->getData( $attribute ) ) {
@@ -200,7 +200,7 @@ class Product extends Generic {
             $this->_writer->writeElement( 'BrandExternalId', $product->getData( 'brand_external_id' ) );
         }
 
-        foreach ( $product->customAttributes as $label ) {
+        foreach ( Index::CUSTOM_ATTRIBUTES as $label ) {
             $code   = strtolower( $label ) . 's';
             $values = $product->getData( $code );
             if ( ! empty( $values ) ) {

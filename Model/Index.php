@@ -1,33 +1,19 @@
 <?php
-/**
- * StoreFront Bazaarvoice Extension for Magento
- *
- * PHP Version 5
- *
- * LICENSE: This source file is subject to commercial source code license
- * of StoreFront Consulting, Inc.
- *
- * @category  SFC
- * @package   Bazaarvoice_Ext
- * @author    Dennis Rogers <dennis@storefrontconsulting.com>
- * @copyright 2016 StoreFront Consulting, Inc
- * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
- * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
- */
 
 namespace Bazaarvoice\Connector\Model;
 
 use Bazaarvoice\Connector\Helper\Data;
 use Bazaarvoice\Connector\Model\ResourceModel\Index\Collection;
+use Magento\Framework\App\ObjectManager;
+use Magento\Framework\DataObject\IdentityInterface;
+use Magento\Framework\Model\AbstractModel;
+use Magento\Framework\Serialize\SerializerInterface;
 
-class Index
-    extends \Magento\Framework\Model\AbstractModel
-    implements \Bazaarvoice\Connector\Model\IndexInterface, \Magento\Framework\DataObject\IdentityInterface
+class Index extends AbstractModel implements IndexInterface, IdentityInterface
 {
     const CACHE_TAG = 'bazaarvoice_product_index';
 
-    /** Custom Attributes */
-    public $customAttributes = array('UPC', 'ManufacturerPartNumber', 'EAN', 'ISBN', 'ModelNumber');
+    const CUSTOM_ATTRIBUTES = array('UPC', 'ManufacturerPartNumber', 'EAN', 'ISBN', 'ModelNumber');
     protected $_generationScope;
     protected $_helper;
 
@@ -59,14 +45,14 @@ class Index
         return [self::CACHE_TAG . '_' . $this->getId()];
     }
 
-	/**
-	 * @param \Magento\Catalog\Model\Product|int $productId
-	 * @param \Magento\Store\Model\Store|int $storeId
-	 * @param $scope
-	 *
-	 * @return Index
-	 * @throws \Magento\Framework\Exception\LocalizedException
-	 */
+    /**
+     * @param      $productId
+     * @param      $storeId
+     * @param null $scope
+     *
+     * @return $this
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     public function loadByStore($productId, $storeId, $scope = null)
     {
         if (is_object($productId))
@@ -109,5 +95,99 @@ class Index
             return $this->_helper->jsonDecode($this->getData('family'));
         }
         return [];
+    }
+
+    public function setLocaleDescription($localeDescription)
+    {
+        return $this->setJsonField('locale_description', $localeDescription);
+    }
+
+    public function setLocaleImageUrl($localeImageUrl)
+    {
+        return $this->setJsonField('locale_image_url', $localeImageUrl);
+    }
+
+    public function setLocaleName($localeName)
+    {
+        return $this->setJsonField('locale_name', $localeName);
+    }
+
+    public function setLocaleProductPageUrl($localeProductPageUrl)
+    {
+        return $this->setJsonField('locale_product_page_url', $localeProductPageUrl);
+    }
+
+    public function getLocaleDescription()
+    {
+        return $this->getJsonField('locale_description');
+    }
+
+    public function getLocaleImageUrl()
+    {
+        return $this->getJsonField('locale_image_url');
+    }
+
+    public function getLocaleProductPageUrl()
+    {
+        return $this->getJsonField('locale_product_page_url');
+    }
+
+    public function getLocaleName()
+    {
+        return $this->getJsonField('locale_name');
+    }
+
+    public function addLocaleDescription($value)
+    {
+        return $this->addJsonField('locale_description', $value);
+    }
+    
+    public function addLocaleImageUrl($value)
+    {
+        return $this->addJsonField('locale_image_url', $value);
+    }
+
+    public function addLocaleProductPageUrl($value)
+    {
+        return $this->addJsonField('locale_product_page_url', $value);
+    }
+
+    public function addLocaleName($value)
+    {
+        return $this->addJsonField('locale_name', $value);
+    }
+    
+    public function addJsonField($field, $value)
+    {
+        $fieldData = $this->getJsonField($field);
+        if (isset($value)) {
+            if (!$fieldData) {
+                $fieldData = [];
+            }
+            $fieldData = array_merge($fieldData, $value);
+            $this->setJsonField($field, $fieldData);
+        }
+        
+        return $this;
+    }
+
+    private function setJsonField($field, $value)
+    {
+        if (is_array($value)) {
+            $this->setData($field, $this->_helper->jsonEncode($value));
+        } else {
+            $this->setData($field, $value);
+        }
+
+        return $this;
+    }
+
+    private function getJsonField($field)
+    {
+        $value = $this->getData($field);
+        if (!is_array($value)) {
+            return $this->_helper->jsonDecode($value);
+        }
+        return $value;
     }
 }
