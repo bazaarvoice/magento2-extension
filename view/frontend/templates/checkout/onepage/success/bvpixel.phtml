@@ -1,0 +1,10 @@
+<?php /** @var $block \Bazaarvoice\Connector\Block\Pixel */ ?>
+<?php if ($block->getBvPixelEnabled()): ?>
+    <?php if ($block->canShowDebugDetails()): ?>
+        <!--<?= $block->getDebugDetails(); ?>-->
+    <?php endif; ?>
+    <script type="text/javascript">
+        var transactionData = <?= $block->getJsonOrderDetails(); ?>;
+        BV.pixel.trackTransaction(transactionData);
+    </script>
+<?php endif; ?>

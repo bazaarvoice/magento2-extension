@@ -27,10 +27,6 @@
     <type name="Magento\CatalogWidget\Block\Product\ProductsList">
         <plugin name="bazaarvoice-widget" type="Bazaarvoice\Connector\Block\ProductList\Widget" sortOrder="100"/>
     </type>
-    <!-- success page -->
-    <type name="Magento\Checkout\Block\Registration">
-        <plugin name="bazaarvoice-bvpixel" type="Bazaarvoice\Connector\Block\Pixel" sortOrder="100"/>
-    </type>
 
     <!--disable core reviews-->
     <type name="Magento\Review\Block\Product\ReviewRenderer">
