@@ -3,13 +3,7 @@
   "description": "Bazaarvoice Magento 2 Integration Extension",
   "type": "magento2-module",
   "license": [ "MIT" ],
-  "authors": [
-    {
-      "name": "Dennis Rogers",
-      "email": "dennis@storefrontconsulting.com"
-    }
-  ],
-  "version": "7.1.16",
+  "version": "7.2.0",
   "autoload": {
     "files": [
       "registration.php"
