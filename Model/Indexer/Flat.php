@@ -119,9 +119,13 @@ class Flat implements IndexerActionInterface, MviewActionInterface
         $this->_logger->debug('Full Product Feed Index');
         try {
             $incompleteIndex = $this->_bvIndexCollectionFactory->create()->addFieldToFilter('version_id', 0);
-            if ($incompleteIndex->count() == 0) {
-                $this->_logger->debug(__('Bazaarvoice Product Feed Index has been flushed for rebuild.'));
+            $indexHasBadScope = $this->hasBadScopeIndex();
+            if ($incompleteIndex->count() == 0 || $indexHasBadScope) {
+                if ($indexHasBadScope) {
+                    $this->_logger->debug('Index entries found with wrong scope. This usually means scope has changed in admin. Flagging entire index for rebuild.');
+                }
                 $this->flushIndex();
+                $this->_logger->debug(__('Bazaarvoice Product Feed Index has been flushed for rebuild.'));
             }
             $this->execute();
             $this->_logger->debug(__('Bazaarvoice Product Feed Index is being rebuilt.'));
@@ -310,13 +314,6 @@ class Flat implements IndexerActionInterface, MviewActionInterface
      */
     public function reindexProductsForStore($productIds, $store)
     {
-        /** Check for scope change */
-        if ($this->hasBadScopeIndex()) {
-            $this->_logger->debug('Index entries found with wrong scope. This usually means scope has changed in admin. Flagging entire index for rebuild.');
-            $this->executeFull();
-            return false;
-        }
-
         $this->productIndexes = [];
         $this->populateIndexStoreData($productIds, $store);
         $this->populateIndexLocaleData($productIds, $store);
