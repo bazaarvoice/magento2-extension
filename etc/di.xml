@@ -103,5 +103,6 @@
         </arguments>
     </type>
 
-    <preference for="Bazaarvoice\Connector\Model\IndexInterface" type="Bazaarvoice\Connector\Model\Index"/>
+    <preference for="Bazaarvoice\Connector\Api\Data\IndexInterface" type="Bazaarvoice\Connector\Model\Index"/>
+    <preference for="Bazaarvoice\Connector\Api\IndexRepositoryInterface" type="Bazaarvoice\Connector\Model\IndexRepository"/>
 </config>

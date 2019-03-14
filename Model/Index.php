@@ -2,12 +2,11 @@
 
 namespace Bazaarvoice\Connector\Model;
 
+use Bazaarvoice\Connector\Api\Data\IndexInterface;
 use Bazaarvoice\Connector\Helper\Data;
 use Bazaarvoice\Connector\Model\ResourceModel\Index\Collection;
-use Magento\Framework\App\ObjectManager;
 use Magento\Framework\DataObject\IdentityInterface;
 use Magento\Framework\Model\AbstractModel;
-use Magento\Framework\Serialize\SerializerInterface;
 
 class Index extends AbstractModel implements IndexInterface, IdentityInterface
 {
@@ -18,11 +17,11 @@ class Index extends AbstractModel implements IndexInterface, IdentityInterface
     protected $_helper;
 
     /**
-     * @param \Magento\Framework\Model\Context $context
-     * @param \Magento\Framework\Registry $registry
+     * @param \Magento\Framework\Model\Context                 $context
+     * @param \Magento\Framework\Registry                      $registry
      * @param \Bazaarvoice\Connector\Model\ResourceModel\Index $resource
-     * @param Collection $resourceCollection
-     * @param Data $helper
+     * @param Collection                                       $resourceCollection
+     * @param Data                                             $helper
      */
     // @codingStandardsIgnoreStart
     public function __construct(
@@ -31,8 +30,7 @@ class Index extends AbstractModel implements IndexInterface, IdentityInterface
         \Bazaarvoice\Connector\Model\ResourceModel\Index $resource = null,
         Collection $resourceCollection = null,
         Data $helper
-    )
-    {
+    ) {
         // @codingStandardsIgnoreEnd
         $this->_init('Bazaarvoice\Connector\Model\ResourceModel\Index');
         $this->_generationScope = $helper->getConfig('feeds/generation_scope');
@@ -42,7 +40,7 @@ class Index extends AbstractModel implements IndexInterface, IdentityInterface
 
     public function getIdentities()
     {
-        return [self::CACHE_TAG . '_' . $this->getId()];
+        return [self::CACHE_TAG.'_'.$this->getId()];
     }
 
     /**
@@ -50,16 +48,17 @@ class Index extends AbstractModel implements IndexInterface, IdentityInterface
      * @param      $storeId
      * @param null $scope
      *
-     * @return $this
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @return $this|mixed
      */
     public function loadByStore($productId, $storeId, $scope = null)
     {
-        if (is_object($productId))
+        if (is_object($productId)) {
             $productId = $productId->getId();
+        }
 
-        if (is_object($storeId))
+        if (is_object($storeId)) {
             $storeId = $storeId->getId();
+        }
 
         $scope = $scope ? $scope : $this->_generationScope;
 
@@ -67,39 +66,57 @@ class Index extends AbstractModel implements IndexInterface, IdentityInterface
         $resource = $this->getResource();
         $index = $resource->loadBy(array(
             'product_id' => $productId,
-            'scope' => $scope,
-            'store_id' => $storeId));
+            'scope'      => $scope,
+            'store_id'   => $storeId,
+        ));
 
-        if ($index)
+        if ($index) {
             $this->setData($index);
+        }
 
         return $this;
     }
 
     /**
-     * @return bool
+     * @return array|mixed
      */
-    public function hasParent() {
-        if($this->_helper->getConfig('feeds/families')) {
-            if(!empty($this->getData('family')))
-                return true;
+    public function getParents()
+    {
+        if ($this->hasParent()) {
+            return $this->_helper->jsonDecode($this->getData('family'));
         }
-        return false;
+
+        return [];
     }
 
     /**
-     * @return array|mixed
+     * @return bool
      */
-    public function getParents() {
-        if($this->hasParent()) {
-            return $this->_helper->jsonDecode($this->getData('family'));
+    public function hasParent()
+    {
+        if ($this->_helper->getConfig('feeds/families')) {
+            if (!empty($this->getData('family'))) {
+                return true;
+            }
         }
-        return [];
+
+        return false;
     }
 
     public function setLocaleDescription($localeDescription)
     {
         return $this->setJsonField('locale_description', $localeDescription);
+    }
+
+    private function setJsonField($field, $value)
+    {
+        if (is_array($value)) {
+            $this->setData($field, $this->_helper->jsonEncode($value));
+        } else {
+            $this->setData($field, $value);
+        }
+
+        return $this;
     }
 
     public function setLocaleImageUrl($localeImageUrl)
@@ -122,6 +139,16 @@ class Index extends AbstractModel implements IndexInterface, IdentityInterface
         return $this->getJsonField('locale_description');
     }
 
+    private function getJsonField($field)
+    {
+        $value = $this->getData($field);
+        if (!is_array($value)) {
+            return $this->_helper->jsonDecode($value);
+        }
+
+        return $value;
+    }
+
     public function getLocaleImageUrl()
     {
         return $this->getJsonField('locale_image_url');
@@ -141,7 +168,21 @@ class Index extends AbstractModel implements IndexInterface, IdentityInterface
     {
         return $this->addJsonField('locale_description', $value);
     }
-    
+
+    public function addJsonField($field, $value)
+    {
+        $fieldData = $this->getJsonField($field);
+        if (isset($value)) {
+            if (!$fieldData) {
+                $fieldData = [];
+            }
+            $fieldData = array_merge($fieldData, $value);
+            $this->setJsonField($field, $fieldData);
+        }
+
+        return $this;
+    }
+
     public function addLocaleImageUrl($value)
     {
         return $this->addJsonField('locale_image_url', $value);
@@ -155,39 +196,5 @@ class Index extends AbstractModel implements IndexInterface, IdentityInterface
     public function addLocaleName($value)
     {
         return $this->addJsonField('locale_name', $value);
-    }
-    
-    public function addJsonField($field, $value)
-    {
-        $fieldData = $this->getJsonField($field);
-        if (isset($value)) {
-            if (!$fieldData) {
-                $fieldData = [];
-            }
-            $fieldData = array_merge($fieldData, $value);
-            $this->setJsonField($field, $fieldData);
-        }
-        
-        return $this;
-    }
-
-    private function setJsonField($field, $value)
-    {
-        if (is_array($value)) {
-            $this->setData($field, $this->_helper->jsonEncode($value));
-        } else {
-            $this->setData($field, $value);
-        }
-
-        return $this;
-    }
-
-    private function getJsonField($field)
-    {
-        $value = $this->getData($field);
-        if (!is_array($value)) {
-            return $this->_helper->jsonDecode($value);
-        }
-        return $value;
     }
 }

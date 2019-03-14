@@ -1,6 +1,6 @@
 <?php
 
-namespace Bazaarvoice\Connector\Model;
+namespace Bazaarvoice\Connector\Api\Data;
 
 interface IndexInterface
 {
@@ -9,7 +9,7 @@ interface IndexInterface
      * @param      $storeId
      * @param null $scope
      *
-     * @return mixed
+     * @return \Bazaarvoice\Connector\Api\Data\IndexInterface
      */
     public function loadByStore($productId, $storeId, $scope = null);
 }
