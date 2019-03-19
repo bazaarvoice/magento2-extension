@@ -29,23 +29,46 @@
                 });
             }
 
-            $(document).ready(bindBvSwatches());
-        });
-    </script>
+                $(document).ready(bindBvSwatches());
+            });
+        </script>
     <?php endif; ?>
-<?php
-$rrDoShowContentJs = $this->getConfig('rr/do_show_content_js');
-$qaDoShowContentJs = $this->getConfig('qa/do_show_content_js');
-?>
+    <?php
+    $rrDoShowContentJs = $this->getConfig( 'rr/do_show_content_js' );
+    $qaDoShowContentJs = $this->getConfig( 'qa/do_show_content_js' );
 
-<script async type="text/javascript">
-    window.bvCallback = function (BV) {
-        BV.reviews.on('show', function () {
-            <?php echo $rrDoShowContentJs ?>
-        });
-        BV.questions.on('show', function () {
-            <?php echo $qaDoShowContentJs ?>
-        });
-    };
-</script>
+    $configData = $this->getBvConfigData();
+    ?>
+    <!-- <?php print_r( json_decode( $configData ) ) ?> -->
+
+    <script async type="text/javascript">
+
+        window.bvDCC = {
+            catalogData: {
+                locale: "<?php echo $this->getConfig( 'general/locale' ) ?>",
+                catalogProducts: <?php echo $configData ?>
+            }
+        };
+
+        const eventClass = "CatalogUpdate";
+
+        window.bvCallback = function (BV) {
+            BV.reviews.on('show', function () {
+                <?php echo $rrDoShowContentJs ?>
+            });
+            BV.questions.on('show', function () {
+                <?php echo $qaDoShowContentJs ?>
+            });
+
+            for (var i = 0, len = window.bvDCC.catalogData.catalogProducts.length; i < len; ++i) {
+                BV.pixel.trackEvent(eventClass, {
+                    type: 'Product',
+                    locale: window.bvDCC.catalogData.locale,
+                    catalogProducts: [window.bvDCC.catalogData.catalogProducts[i]]
+                });
+            }
+        };
+
+
+    </script>
 <?php endif; ?>

@@ -17,6 +17,7 @@
 
 namespace Bazaarvoice\Connector\Block;
 
+use Magento\Catalog\Model\CategoryRepository;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -26,6 +27,9 @@ use Magento\Framework\Exception\NoSuchEntityException;
  * @package Bazaarvoice\Connector\Block
  */
 class Product extends \Magento\Framework\View\Element\Template {
+
+    protected $_customAttributes = [ 'UPC', 'ManufacturerPartNumber', 'EAN', 'ISBN', 'ModelNumber' ];
+
     /* @var \Magento\Framework\Registry */
     protected $_coreRegistry;
 
@@ -44,6 +48,7 @@ class Product extends \Magento\Framework\View\Element\Template {
     /** @var \Magento\Catalog\Model\Product */
     protected $_product;
     protected $_productId;
+    protected $_categoryRepo;
 
 
     public function __construct(
@@ -53,6 +58,7 @@ class Product extends \Magento\Framework\View\Element\Template {
         \Bazaarvoice\Connector\Logger\Logger $logger,
         \Magento\ConfigurableProduct\Helper\Data $configHelper,
         ProductRepository $productRepository,
+        CategoryRepository $categoryRepository,
         array $data = []
     ) {
         $this->helper        = $helper;
@@ -60,6 +66,7 @@ class Product extends \Magento\Framework\View\Element\Template {
         $this->_coreRegistry = $registry;
         $this->configHelper  = $configHelper;
         $this->_productRepo  = $productRepository;
+        $this->_categoryRepo = $categoryRepository;
         parent::__construct( $context, $data );
     }
 
@@ -115,9 +122,10 @@ class Product extends \Magento\Framework\View\Element\Template {
     public function getProduct() {
         if ( empty( $this->_product ) ) {
             try {
-                $product        = $this->_coreRegistry->registry( 'product' );
-                if($product == null)
+                $product = $this->_coreRegistry->registry( 'product' );
+                if ( $product == null ) {
                     throw new NoSuchEntityException();
+                }
                 $this->_product = $this->_productRepo->getById( $product->getId() );
             } Catch ( \Exception $e ) {
                 $this->bvLogger->crit( $e->getMessage() . "\n" . $e->getTraceAsString() );
@@ -160,7 +168,7 @@ class Product extends \Magento\Framework\View\Element\Template {
 
             /** @var \Magento\Catalog\Model\Product $childProduct */
             foreach ( $childProducts as $childProduct ) {
-                $key       = '';
+                $key = '';
                 foreach ( $allowAttributes as $attribute ) {
                     $productAttribute   = $attribute->getProductAttribute();
                     $productAttributeId = $productAttribute->getId();
@@ -178,13 +186,126 @@ class Product extends \Magento\Framework\View\Element\Template {
     }
 
     /**
+     * @return string
+     */
+    public function getBvConfigData() {
+        $product    = $this->getProduct();
+        $parentData = $this->getBvConfigProduct( $product );
+        if (
+            $product->getTypeId() == Configurable::TYPE_CODE
+            && $this->getConfig( 'general/families' )
+        ) {
+            $family                 = $this->helper->getProductId( $product );
+            //$family                 = [[ 'id' => $family, 'expand' => true, 'members' => [ $family ] ]];
+            $parentData['family'] = $family;
+            $productData            = [ $parentData ];
+            $gtinData               = $this->getGTIN( $parentData );
+            $children               = $product->getTypeInstance()->getUsedProducts( $product );
+            foreach ( $children as $child ) {
+                $childData = $this->getBvConfigProduct( $child );
+                if ( ! empty( $parentData['brandName'] ) ) {
+                    $childData['brandName'] = $parentData['brandName'];
+                }
+                $childData['family'] = $family;
+                $gtinData              = $this->getGTIN( $childData, $gtinData );
+                $productData[]         = $childData;
+            }
+            foreach ( $productData as $key => $productItem ) {
+                foreach ( $this->_customAttributes as $attribute ) {
+                    if ( ! empty( $gtinData[ $attribute . 's' ] ) ) {
+                        $productItem[ $attribute . 's' ] = $gtinData[ $attribute . 's' ];
+                    }
+                }
+                $productData[ $key ] = $productItem;
+            }
+        } else {
+            $productData = [ $parentData ];
+        }
+
+        return json_encode( $productData, JSON_UNESCAPED_UNICODE );
+    }
+
+    protected function getGTIN( $data, $currentData = [] ) {
+        $gtin = [];
+        foreach ( $this->_customAttributes as $attribute ) {
+            $values = ! empty( $data[ $attribute . 's' ] ) ? $data[ $attribute . 's' ] : [];
+            if ( ! empty( $currentData[ $attribute . 's' ] ) ) {
+                if ( ! empty( $values ) ) {
+                    $gtin[ $attribute . 's' ] = array_merge( $currentData[ $attribute . 's' ], $values );
+                } else {
+                    $gtin[ $attribute . 's' ] = $currentData[ $attribute . 's' ];
+                }
+            } else {
+                if ( ! empty( $values ) ) {
+                    $gtin[ $attribute . 's' ] = $values;
+                }
+            }
+        }
+
+        return $gtin;
+    }
+
+    public function getBvConfigProduct( $product ) {
+        $brandAttr = $this->helper->getConfig( 'feeds/brand_code' );
+        $data      = [
+            "productId"      => $this->helper->getProductId( $product ),
+            "productName"    => $product->getName(),
+            "imageURL"       => $this->getUrl( 'pub/media/catalog' ) . 'product' . $product->getImage(),
+            "productPageURL" => $product->getProductUrl()
+        ];
+
+        if ( $brand = $product->getAttributeText( $brandAttr ) ) {
+            $data['brandName'] = $brand;
+        }
+
+        if ( $product->getData( 'bv_category_external_id' ) ) {
+            $categoryId = $product->getData( 'bv_category_external_id' );
+        } else {
+            $categoryIds = $product->getCategoryIds();
+            $categoryId  = array_pop( $categoryIds );
+        }
+
+        if ( $categoryId ) {
+            $category     = $this->_categoryRepo->get( $categoryId );
+            $categoryTree = $category->getPath();
+            $categoryTree = explode( '/', $categoryTree );
+            array_shift( $categoryTree );
+            foreach ( $categoryTree as $key => $treeId ) {
+                $parent               = $this->_categoryRepo->get( $treeId );
+                $categoryTree[ $key ] = $parent->getName();
+            }
+            $data['categoryNamePath'] = $categoryTree;
+        }
+
+        foreach ( $this->_customAttributes as $customAttribute ) {
+            $code = strtolower( $customAttribute );
+            $attr = $this->helper->getConfig( "feeds/{$code}_code" );
+            if ( $attr ) {
+                $value = $product->getAttributeText( $attr );
+                if ( empty( $value ) ) {
+                    $value = $product->getData( $attr );
+                }
+                if ( ! empty( $value ) ) {
+                    if ( is_string( $value ) && strpos( $value, ',' ) ) {
+                        $value = $this->helper->explodeAndTrim( ',', $value );
+                    } else {
+                        $value = [ $value ];
+                    }
+                    $data[ $customAttribute . 's' ] = $value;
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    /**
      * Add checking product before render block HTML
      *
      * @return string
      */
-    protected function _toHtml()
-    {
-        if ($this->getProduct()) {
+    protected function _toHtml() {
+        if ( $this->getProduct() ) {
             return parent::_toHtml();
         }
 

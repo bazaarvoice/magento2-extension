@@ -151,5 +151,13 @@ class Data extends AbstractHelper
             return $value;
         return $result;
     }
-    
+
+    public function explodeAndTrim( $delimeter, $string ) {
+        $data = explode($delimeter, $string);
+        foreach($data as $k => $v) {
+            $data[$k] = trim($v);
+        }
+        return $data;
+    }
+
 }

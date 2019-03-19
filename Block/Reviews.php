@@ -17,6 +17,7 @@
 namespace Bazaarvoice\Connector\Block;
 
 use Bazaarvoice\Connector\Helper\Seosdk;
+use Magento\Catalog\Model\CategoryRepository;
 use Magento\Catalog\Model\ProductRepository;
 
 class Reviews extends Product
@@ -42,11 +43,12 @@ class Reviews extends Product
         \Bazaarvoice\Connector\Logger\Logger $logger,
         \Magento\ConfigurableProduct\Helper\Data $configHelper,
         ProductRepository $productRepository,
+        CategoryRepository $categoryRepository,
         array $data = []
     ) {
         $this->_urlInterface = $context->getUrlBuilder();
         $this->_requestInterface = $context->getRequest();
-        parent::__construct( $context, $registry, $helper, $logger, $configHelper, $productRepository, $data );
+        parent::__construct( $context, $registry, $helper, $logger, $configHelper, $productRepository, $categoryRepository, $data );
     }
 
 
