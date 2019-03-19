@@ -250,7 +250,7 @@ class Product extends \Magento\Framework\View\Element\Template {
         $data      = [
             "productId"      => $this->helper->getProductId( $product ),
             "productName"    => $product->getName(),
-            "imageURL"       => $this->getUrl( 'pub/media/catalog' ) . 'product' . $product->getImage(),
+            "productImageURL"       => $this->getUrl( 'pub/media/catalog' ) . 'product' . $product->getImage(),
             "productPageURL" => $product->getProductUrl()
         ];
 
@@ -274,7 +274,7 @@ class Product extends \Magento\Framework\View\Element\Template {
                 $parent               = $this->_categoryRepo->get( $treeId );
                 $categoryTree[ $key ] = $parent->getName();
             }
-            $data['categoryNamePath'] = $categoryTree;
+            $data['categoryPath'] = $categoryTree;
         }
 
         foreach ( $this->_customAttributes as $customAttribute ) {
