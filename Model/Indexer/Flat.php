@@ -205,6 +205,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 $idCollection = $this->bvIndexCollectionFactory->create()->addFieldToFilter('version_id', 0);
                 $idCollection->getSelect()->group('product_id');
                 $idCollection->addFieldToSelect('product_id');
+//$idCollection->addFieldToFilter('product_id', ['in' => [2001,2002,1996]]);
                 $ids = $idCollection->getColumnValues('product_id');
             }
 
@@ -492,7 +493,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
         $bvFamiliesAttributeConfig = $this->getBvFamiliesAttributeConfig($storeId);
         if ($bvFamiliesAttributeConfig) {
             $this->logger->debug("using $bvFamiliesAttributeConfig for configurable product family data");
-            $select->columns(array($bvFamiliesAttributeConfig));
+            $select->columns(array('parent_bvfamily' => $bvFamiliesAttributeConfig));
         }
 
         /** Version */
@@ -524,8 +525,8 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 : Status::STATUS_DISABLED;
 
             if ($indexData['product_type'] == Configurable::TYPE_CODE) {
-                if ($bvFamiliesAttributeConfig && isset($indexData[$bvFamiliesAttributeConfig])) {
-                    $indexData['family'] = array($indexData[$bvFamiliesAttributeConfig]);
+                if ($bvFamiliesAttributeConfig && isset($indexData['parent_bvfamily'])) {
+                    $indexData['family'] = array($indexData['parent_bvfamily']);
                 } else {
                     $indexData['family'] = array($indexData['external_id']);
                 }
