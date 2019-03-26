@@ -270,11 +270,12 @@ class Product extends \Magento\Framework\View\Element\Template {
             $categoryTree = $category->getPath();
             $categoryTree = explode( '/', $categoryTree );
             array_shift( $categoryTree );
+            $categoryPaths = [];
             foreach ( $categoryTree as $key => $treeId ) {
                 $parent               = $this->_categoryRepo->get( $treeId );
-                $categoryTree[ $key ] = $parent->getName();
+                $categoryPaths[] = ['Name' => $parent->getName()];
             }
-            $data['categoryPath'] = $categoryTree;
+            $data['categoryPath'] = $categoryPaths;
         }
 
         foreach ( $this->_customAttributes as $customAttribute ) {
