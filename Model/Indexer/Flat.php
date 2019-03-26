@@ -743,7 +743,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
     {
         /** parents */
         $bvFamiliesAttributeConfig = $this->getBvFamiliesAttributeConfig($storeId);
-        $bvFamiliesAttribute = $bvFamiliesAttributeConfig ? $bvFamiliesAttributeConfig : 'sku';
+        $bvFamiliesAttribute = $bvFamiliesAttributeConfig ? 'parent.'.$bvFamiliesAttributeConfig : 'null';
 
         return $select
             ->joinLeft(
@@ -753,7 +753,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 array('parent' => $res->getTableName('catalog_product_flat').'_'.$storeId),
                 'pp.parent_id = parent.'.$this->productIdField,
                 array(
-                    'family'       => 'GROUP_CONCAT(DISTINCT parent.'.$bvFamiliesAttribute.' SEPARATOR "||")',
+                    'family'       => "GROUP_CONCAT(DISTINCT coalesce($bvFamiliesAttribute,parent.sku) SEPARATOR '||')",
                     'parent_image' => 'small_image',
                 ));
     }
