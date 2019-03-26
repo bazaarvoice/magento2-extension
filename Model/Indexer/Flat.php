@@ -489,6 +489,12 @@ class Flat implements IndexerActionInterface, MviewActionInterface
             }
         }
 
+        $bvFamiliesAttributeConfig = $this->getBvFamiliesAttributeConfig($storeId);
+        if ($bvFamiliesAttributeConfig) {
+            $this->logger->debug("using $bvFamiliesAttributeConfig for configurable product family data");
+            $select->columns(array($bvFamiliesAttributeConfig));
+        }
+
         /** Version */
         $select->joinLeft(
             array('cl' => $res->getTableName('bazaarvoice_product_cl')),
@@ -517,10 +523,9 @@ class Flat implements IndexerActionInterface, MviewActionInterface
             $indexData['status'] = $indexData[ProductFeed::INCLUDE_IN_FEED_FLAG] ? Status::STATUS_ENABLED
                 : Status::STATUS_DISABLED;
 
-            $bvFamiliesAttributeConfig = $this->getBvFamiliesAttributeConfig($storeId);
             if ($indexData['product_type'] == Configurable::TYPE_CODE) {
-                if ($bvFamiliesAttributeConfig && isset($indexData[$bvFamiliesAttributeConfig.'s'])) {
-                    $indexData['family'] = array($indexData[$bvFamiliesAttributeConfig.'s']);
+                if ($bvFamiliesAttributeConfig && isset($indexData[$bvFamiliesAttributeConfig])) {
+                    $indexData['family'] = array($indexData[$bvFamiliesAttributeConfig]);
                 } else {
                     $indexData['family'] = array($indexData['external_id']);
                 }
