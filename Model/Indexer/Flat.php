@@ -205,7 +205,6 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 $idCollection = $this->bvIndexCollectionFactory->create()->addFieldToFilter('version_id', 0);
                 $idCollection->getSelect()->group('product_id');
                 $idCollection->addFieldToSelect('product_id');
-//$idCollection->addFieldToFilter('product_id', ['in' => [2001,2002,1996]]);
                 $ids = $idCollection->getColumnValues('product_id');
             }
 
