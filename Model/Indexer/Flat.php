@@ -279,7 +279,9 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 foreach ($websites as $website) {
                     $defaultStore = $website->getDefaultStore();
                     if ($defaultStore->getId()) {
-                        $this->reindexProductsForStore($productIds, $defaultStore);
+                        if ($this->helper->canSendFeed($defaultStore->getId())) {
+                            $this->reindexProductsForStore($productIds, $defaultStore);
+                        }
                     } else {
                         throw new \Exception('Website %s has no default store!', $website->getCode());
                     }
@@ -294,7 +296,9 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 foreach ($groups as $group) {
                     $defaultStore = $group->getDefaultStore();
                     if ($defaultStore->getId()) {
-                        $this->reindexProductsForStore($productIds, $defaultStore);
+                        if ($this->helper->canSendFeed($defaultStore->getId())) {
+                            $this->reindexProductsForStore($productIds, $defaultStore);
+                        }
                     } else {
                         throw new \Exception('Store Group %s has no default store!', $group->getName());
                     }
@@ -305,7 +309,9 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 /** @var \Magento\Store\Model\Store $store */
                 foreach ($stores as $store) {
                     if ($store->getId()) {
-                        $this->reindexProductsForStore($productIds, $store);
+                        if ($this->helper->canSendFeed($store->getId())) {
+                            $this->reindexProductsForStore($productIds, $store);
+                        }
                     } else {
                         throw new \Exception('Store %s not found!', $store->getCode());
                     }
