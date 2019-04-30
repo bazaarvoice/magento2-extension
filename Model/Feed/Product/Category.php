@@ -284,16 +284,17 @@ class Category extends Generic
          * Do this by filtering on 'path' attribute, based on root category path found above
          * Include the root category itself in the feed
          */
-        $collection
-            ->addAttributeToFilter('level', array('gt' => 1))
-            ->addAttributeToFilter('is_active', 1)
-            ->addAttributeToSelect('name')
-            ->addAttributeToSelect('parent_id');
         if($store) {
         	if($this->_generationScope != Scope::SCOPE_GLOBAL)
 		        $collection->addAttributeToFilter( 'path', array( 'like' => $rootCategoryPath . '/%' ) );
 	        $collection->setStore( $store );
         }
+
+        $collection
+            ->addAttributeToFilter('level', array('gt' => 1))
+            ->addAttributeToFilter('is_active', 1)
+            ->addAttributeToSelect('name')
+            ->addAttributeToSelect('parent_id');
 
         $collection->getSelect()
 	        ->distinct(true)

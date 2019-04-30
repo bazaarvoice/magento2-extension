@@ -279,7 +279,9 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 foreach ($websites as $website) {
                     $defaultStore = $website->getDefaultStore();
                     if ($defaultStore->getId()) {
-                        $this->reindexProductsForStore($productIds, $defaultStore);
+                        if ($this->helper->canSendFeed($defaultStore->getId())) {
+                            $this->reindexProductsForStore($productIds, $defaultStore);
+                        }
                     } else {
                         throw new \Exception('Website %s has no default store!', $website->getCode());
                     }
@@ -294,7 +296,9 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 foreach ($groups as $group) {
                     $defaultStore = $group->getDefaultStore();
                     if ($defaultStore->getId()) {
-                        $this->reindexProductsForStore($productIds, $defaultStore);
+                        if ($this->helper->canSendFeed($defaultStore->getId())) {
+                            $this->reindexProductsForStore($productIds, $defaultStore);
+                        }
                     } else {
                         throw new \Exception('Store Group %s has no default store!', $group->getName());
                     }
@@ -305,7 +309,9 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 /** @var \Magento\Store\Model\Store $store */
                 foreach ($stores as $store) {
                     if ($store->getId()) {
-                        $this->reindexProductsForStore($productIds, $store);
+                        if ($this->helper->canSendFeed($store->getId())) {
+                            $this->reindexProductsForStore($productIds, $store);
+                        }
                     } else {
                         throw new \Exception('Store %s not found!', $store->getCode());
                     }
@@ -489,6 +495,12 @@ class Flat implements IndexerActionInterface, MviewActionInterface
             }
         }
 
+        $bvFamiliesAttributeConfig = $this->getBvFamiliesAttributeConfig($storeId);
+        if ($bvFamiliesAttributeConfig) {
+            $this->logger->debug("using $bvFamiliesAttributeConfig for configurable product family data");
+            $select->columns(array('parent_bvfamily' => $bvFamiliesAttributeConfig));
+        }
+
         /** Version */
         $select->joinLeft(
             array('cl' => $res->getTableName('bazaarvoice_product_cl')),
@@ -517,10 +529,9 @@ class Flat implements IndexerActionInterface, MviewActionInterface
             $indexData['status'] = $indexData[ProductFeed::INCLUDE_IN_FEED_FLAG] ? Status::STATUS_ENABLED
                 : Status::STATUS_DISABLED;
 
-            $bvFamiliesAttributeConfig = $this->getBvFamiliesAttributeConfig($storeId);
             if ($indexData['product_type'] == Configurable::TYPE_CODE) {
-                if ($bvFamiliesAttributeConfig && isset($indexData[$bvFamiliesAttributeConfig.'s'])) {
-                    $indexData['family'] = array($indexData[$bvFamiliesAttributeConfig.'s']);
+                if ($bvFamiliesAttributeConfig && isset($indexData['parent_bvfamily'])) {
+                    $indexData['family'] = array($indexData['parent_bvfamily']);
                 } else {
                     $indexData['family'] = array($indexData['external_id']);
                 }
@@ -738,7 +749,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
     {
         /** parents */
         $bvFamiliesAttributeConfig = $this->getBvFamiliesAttributeConfig($storeId);
-        $bvFamiliesAttribute = $bvFamiliesAttributeConfig ? $bvFamiliesAttributeConfig : 'sku';
+        $bvFamiliesAttribute = $bvFamiliesAttributeConfig ? 'parent.'.$bvFamiliesAttributeConfig : 'null';
 
         return $select
             ->joinLeft(
@@ -748,7 +759,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 array('parent' => $res->getTableName('catalog_product_flat').'_'.$storeId),
                 'pp.parent_id = parent.'.$this->productIdField,
                 array(
-                    'family'       => 'GROUP_CONCAT(DISTINCT parent.'.$bvFamiliesAttribute.' SEPARATOR "||")',
+                    'family'       => "GROUP_CONCAT(DISTINCT coalesce($bvFamiliesAttribute,parent.sku) SEPARATOR '||')",
                     'parent_image' => 'small_image',
                 ));
     }
