@@ -118,7 +118,7 @@ class Data extends AbstractHelper
          * Example encoded = qwerty_bv36__bv37__bv64__bv35_asdf
          */
 
-        return preg_replace_callback('/[^\w\d\*-\-_]/s', function($match) {return "_bv".ord($match[0])."_";}, $rawId);
+        return preg_replace_callback('/[^\w\d\*\-_]/s', function($match) {return "_bv".ord($match[0])."_";}, $rawId);
     }
     
     public function getExtensionVersion()
