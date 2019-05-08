@@ -11,11 +11,14 @@
             <block class="Bazaarvoice\Connector\Block\Reviews" name="bazaarvoice.reviews.tab" as="bv_reviews" template="Bazaarvoice_Connector::rr/reviews.phtml" group="detailed_info" after="reviews">
                 <arguments>
                     <argument translate="true" name="title" xsi:type="string">Reviews</argument>
+                    <argument name="sort_order" xsi:type="string">100</argument>
+
                 </arguments>
             </block>
             <block class="Bazaarvoice\Connector\Block\Questions" name="bazaarvoice.questions.tab" as="bv_questions" template="Bazaarvoice_Connector::qa/questions.phtml" group="detailed_info" after="bv_reviews">
                 <arguments>
                     <argument translate="true" name="title" xsi:type="string">Questions</argument>
+                    <argument name="sort_order" xsi:type="string">110</argument>
                 </arguments>
             </block>
         </referenceBlock>
