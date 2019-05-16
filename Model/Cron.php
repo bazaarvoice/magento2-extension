@@ -1,66 +1,69 @@
 <?php
-/**
- * StoreFront Bazaarvoice Extension for Magento
- *
- * PHP Version 5
- *
- * LICENSE: This source file is subject to commercial source code license
- * of StoreFront Consulting, Inc.
- *
- * @category  SFC
- * @package   Bazaarvoice_Ext
- * @author    Dennis Rogers <dennis@storefrontconsulting.com>
- * @copyright 2016 StoreFront Consulting, Inc
- * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
- * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
- */
+declare(strict_types=1);
 
 namespace Bazaarvoice\Connector\Model;
 
-use Bazaarvoice\Connector\Helper\Data;
+use Bazaarvoice\Connector\Api\ConfigProviderInterface;
 use Bazaarvoice\Connector\Logger\Logger;
-use Magento\Framework\ObjectManagerInterface;
+use Bazaarvoice\Connector\Model\Feed\ProductFeed;
+use Bazaarvoice\Connector\Model\Feed\PurchaseFeed;
 
+/**
+ * Class Cron
+ *
+ * @package Bazaarvoice\Connector\Model
+ */
 class Cron
 {
-    /** @var Data $_helper */
-    protected $_helper;
-    /** @var Logger $_logger */
-    protected $_logger;
-    /** @var  ObjectManagerInterface $_objectManager */
-    protected $_objectManager;
+    /** @var Logger $logger */
+    private $logger;
 
-    CONST JOB_CODE = 'bazaarvoice_send_orders';
+    const JOB_CODE = 'bazaarvoice_send_orders';
+    /**
+     * @var ConfigProviderInterface
+     */
+    private $configProvider;
+    /**
+     * @var \Bazaarvoice\Connector\Model\Feed\PurchaseFeed
+     */
+    private $purchaseFeed;
+    /**
+     * @var \Bazaarvoice\Connector\Model\Feed\ProductFeed
+     */
+    private $productFeed;
 
     /**
      * Cron constructor.
-     * @param Logger $logger
-     * @param Data $helper
-     * @param ObjectManagerInterface $objectManager
+     *
+     * @param Logger                                         $logger
+     * @param ConfigProviderInterface                        $configProvider
+     * @param \Bazaarvoice\Connector\Model\Feed\PurchaseFeed $purchaseFeed
+     * @param \Bazaarvoice\Connector\Model\Feed\ProductFeed  $productFeed
      */
-    public function __construct(Logger $logger, Data $helper, ObjectManagerInterface $objectManager)
-    {
-        $this->_logger = $logger;
-        $this->_helper = $helper;
-        $this->_objectManager = $objectManager;
+    public function __construct(
+        Logger $logger,
+        ConfigProviderInterface $configProvider,
+        PurchaseFeed $purchaseFeed,
+        ProductFeed $productFeed
+    ) {
+        $this->logger = $logger;
+        $this->configProvider = $configProvider;
+        $this->purchaseFeed = $purchaseFeed;
+        $this->productFeed = $productFeed;
     }
 
     public function sendPurchaseFeed()
     {
-        $this->_logger->info('Begin Purchase Feed Cron');
+        $this->logger->info('Begin Purchase Feed Cron');
+        $this->purchaseFeed->generateFeed();
 
-        $this->_objectManager->create('\Bazaarvoice\Connector\Model\Feed\PurchaseFeed')->generateFeed();
-
-        $this->_logger->info('End Purchase Feed Cron');
+        $this->logger->info('End Purchase Feed Cron');
     }
 
     public function sendProductFeed()
     {
-        $this->_logger->info('Begin Product Feed Cron');
-
-        $this->_objectManager->create('\Bazaarvoice\Connector\Model\Feed\ProductFeed')->generateFeed();
-
-        $this->_logger->info('End Product Feed Cron');
+        $this->logger->info('Begin Product Feed Cron');
+        $this->productFeed->generateFeed();
+        $this->logger->info('End Product Feed Cron');
     }
-
 }

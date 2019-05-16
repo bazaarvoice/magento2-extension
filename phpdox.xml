@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpdox xmlns="http://xml.phpdox.net/config">
- <project name="bazaarvoice_mage2_ext" source="." workdir="build/phpdox">
-  <collector publiconly="false">
-   <include mask="*.php" />
-  </collector>
-
-  <generator output="build">
-   <build engine="html" enabled="true" output="api"/>
-  </generator>
- </project>
+    <project name="bazaarvoice_mage2_ext" source="." workdir="build/phpdox">
+        <collector publiconly="false">
+            <include mask="*.php"/>
+        </collector>
+        <generator output="build">
+            <build engine="html" enabled="true" output="api"/>
+        </generator>
+    </project>
 </phpdox>

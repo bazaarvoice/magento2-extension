@@ -1,13 +1,14 @@
 <?php
+// phpcs:ignoreFile
 //Please provide cloud_key and bv_root_folder
 require('bvseosdk.php');
 
-$bv = new BV(array(
+$bv = new BV([
     'bv_root_folder' => '',
-    'cloud_key' => '',
-    'page_url' => '',
-    'subject_id' => 'seller'
-));
+    'cloud_key'      => '',
+    'page_url'       => '',
+    'subject_id'     => 'seller',
+]);
 ?><!DOCTYPE html>
 <html>
 <head>

@@ -1,10 +1,16 @@
 <?php
+declare(strict_types=1);
 
 namespace Bazaarvoice\Connector\Api;
 
 use Bazaarvoice\Connector\Api\Data\IndexInterface;
 use Magento\Framework\Api\SearchCriteriaInterface;
 
+/**
+ * Interface IndexRepositoryInterface
+ *
+ * @package Bazaarvoice\Connector\Api
+ */
 interface IndexRepositoryInterface
 {
     /**

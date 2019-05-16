@@ -1,243 +1,219 @@
 <?php
-/**
- * StoreFront Bazaarvoice Extension for Magento
- *
- * PHP Version 5
- *
- * LICENSE: This source file is subject to commercial source code license
- * of StoreFront Consulting, Inc.
- *
- * @category  SFC
- * @package   Bazaarvoice_Ext
- * @author    Dennis Rogers <dennis@storefrontconsulting.com>
- * @copyright 2016 StoreFront Consulting, Inc
- * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
- * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
- */
+declare(strict_types=1);
+
 namespace Bazaarvoice\Connector\Model\Feed\Product;
 
-use Bazaarvoice\Connector\Helper\Data;
+use Bazaarvoice\Connector\Api\ConfigProviderInterface;
 use Bazaarvoice\Connector\Logger\Logger;
-use \Bazaarvoice\Connector\Model\XMLWriter;
-use \Magento\Store\Api\Data\StoreInterface;
-use \Magento\Store\Model\Group;
-use \Magento\Store\Model\Store;
+use Bazaarvoice\Connector\Model\XMLWriter;
+use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
+use Magento\Store\Api\Data\StoreInterface;
+use Magento\Store\Model\Group;
+use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
-use \Magento\Store\Model\Website;
-use \Magento\Catalog\Model\ResourceModel\Eav\Attribute;
+use Magento\Store\Model\Website;
 
-class Brand extends Generic
+/**
+ * Class Brand
+ *
+ * @package Bazaarvoice\Connector\Model\Feed\Product
+ */
+class Brand
 {
-    protected $_attribute;
+    /**
+     * @var \Magento\Catalog\Model\ResourceModel\Eav\Attribute
+     */
+    protected $attribute;
+    /**
+     * @var ConfigProviderInterface
+     */
+    private $configProvider;
+    /**
+     * @var \Magento\Store\Model\StoreManagerInterface
+     */
+    private $storeManager;
 
     /**
      * Brand constructor.
      *
-     * @param Logger $logger
-     * @param Data $helper
-     * @param StoreManagerInterface $storeManager
-     * @param Attribute $attribute
+     * @param Logger                                     $logger
+     * @param ConfigProviderInterface                    $configProvider
+     * @param Attribute                                  $attribute
+     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      */
     public function __construct(
         Logger $logger,
-        Data $helper,
-        StoreManagerInterface $storeManager,
-        Attribute $attribute
+        ConfigProviderInterface $configProvider,
+        Attribute $attribute,
+        StoreManagerInterface $storeManager
     ) {
-        $this->_attribute = $attribute;
-        parent::__construct( $logger, $helper, $storeManager );
+        $this->attribute = $attribute;
+        $this->configProvider = $configProvider;
+        $this->storeManager = $storeManager;
     }
 
-
     /**
-	 * @param XMLWriter $writer
-	 * @param $store
-	 *
-	 * @throws \Magento\Framework\Exception\LocalizedException
-	 */
+     * @param XMLWriter $writer
+     * @param           $store
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     public function processBrandsForStore(XMLWriter $writer, Store $store)
     {
         /** Lookup the configured attribute code for "Brand" */
-        $attributeCode = $this->getAttributeCode('brand', $store);
+        $attributeCode = $this->configProvider->getAttributeCode('brand', $store->getId());
         /** If there is no attribute code for store, then bail */
         if (!strlen(trim($attributeCode))) {
             return;
         }
-        
         $writer->startElement('Brands');
-
-            $brands = $this->getOptionsForStore($attributeCode, $store);
-
-            foreach ($brands as $brandId => $brandValue) {
-                $writer->startElement('Brand');
-
-                $writer->writeElement('ExternalId', $brandId);
-                $writer->writeElement('Name', $brandValue, true);
-
-                $writer->endElement(); /** Brand */
-            }
-
-        $writer->endElement(); /** Brands */
+        $brands = $this->getOptionsForStore($attributeCode, $store);
+        foreach ($brands as $brandId => $brandValue) {
+            $writer->startElement('Brand');
+            $writer->writeElement('ExternalId', $brandId);
+            $writer->writeElement('Name', $brandValue, true);
+            $writer->endElement(); //End Brand
+        }
+        $writer->endElement(); //End Brands
     }
 
-	/**
-	 * @param XMLWriter $writer
-	 * @param Group $storeGroup
-	 *
-	 * @throws \Magento\Framework\Exception\LocalizedException
-	 */
+    /**
+     * @param XMLWriter $writer
+     * @param Group     $storeGroup
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     public function processBrandsForStoreGroup(XMLWriter $writer, Group $storeGroup)
     {
         /** Lookup the configured attribute code for "Brand" */
-        $attributeCode = $this->getAttributeCode('brand', $storeGroup->getDefaultStore());
+        $attributeCode = $this->configProvider->getAttributeCode('brand', $storeGroup->getDefaultStore()->getId());
         /** If there is no attribute code for store, then bail */
         if (!strlen(trim($attributeCode))) {
             return;
         }
-
         $brandsByLocale = $this->getOptionsByLocale($attributeCode, $storeGroup->getStoreIds());
-
         $defaultBrands = $this->getOptionsForStore($attributeCode, $storeGroup->getDefaultStore());
-
         $writer->startElement('Brands');
-
         $this->writeBrandsByLocale($writer, $defaultBrands, $brandsByLocale);
-
-        $writer->endElement(); /** Brands */
+        $writer->endElement(); //End Brands
     }
 
-	/**
-	 * @param XMLWriter $writer
-	 * @param Website $website
-	 *
-	 * @throws \Magento\Framework\Exception\LocalizedException
-	 */
+    /**
+     * @param XMLWriter $writer
+     * @param Website   $website
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     public function processBrandsForWebsite(XMLWriter $writer, Website $website)
     {
         /** Lookup the configured attribute code for "Brand" */
-        $attributeCode = $this->getAttributeCode('brand', $website->getDefaultStore());
+        $attributeCode = $this->configProvider->getAttributeCode('brand', $website->getDefaultStore()->getId());
         /** If there is no attribute code for store, then bail */
         if (!strlen(trim($attributeCode))) {
             return;
         }
 
         $brandsByLocale = $this->getOptionsByLocale($attributeCode, $website->getStoreIds());
-
         $defaultBrands = $this->getOptionsForStore($attributeCode, $website->getDefaultStore());
-
         $writer->startElement('Brands');
-
         $this->writeBrandsByLocale($writer, $defaultBrands, $brandsByLocale);
-
-        $writer->endElement(); /** Brands */
+        $writer->endElement(); //End Brands
     }
 
-	/**
-	 * @param XMLWriter $writer
-	 *
-	 * @throws \Magento\Framework\Exception\LocalizedException
-	 */
+    /**
+     * @param XMLWriter $writer
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     public function processBrandsForGlobal(XMLWriter $writer)
     {
         /** Lookup the configured attribute code for "Brand" */
-        $attributeCode = $this->getAttributeCode('brand');
+        $attributeCode = $this->configProvider->getAttributeCode('brand');
         /** If there is no attribute code for store, then bail */
         if (!strlen(trim($attributeCode))) {
             return;
         }
-
-        $storesList = $this->_storeManager->getStores();
+        $storesList = $this->storeManager->getStores();
         $stores = [];
         /** @var StoreInterface $store */
         foreach ($storesList as $store) {
-        	if($this->_helper->getConfig('general/enable_bv', $store->getId()))
-	            $stores[] = $store->getId();
+            if ($this->configProvider->isBvEnabled($store->getId())) {
+                $stores[] = $store->getId();
+            }
         }
         $brandsByLocale = $this->getOptionsByLocale($attributeCode, $stores);
-
         /** Using admin store for now */
-        $store = $this->_storeManager->getStore(0);
+        $store = $this->storeManager->getStore(0);
         $defaultBrands = $this->getOptionsForStore($attributeCode, $store);
-
         $writer->startElement('Brands');
-
         $this->writeBrandsByLocale($writer, $defaultBrands, $brandsByLocale);
-
-        $writer->endElement(); /** Brands */
-    }    
+        $writer->endElement(); //End Brands
+    }
 
     /**
      * @param XMLWriter $writer
-     * @param array $defaultBrands
-     * @param array $brandsByLocale
+     * @param array     $defaultBrands
+     * @param array     $brandsByLocale
      */
     protected function writeBrandsByLocale(XMLWriter $writer, $defaultBrands, $brandsByLocale)
     {
         foreach ($defaultBrands as $brandId => $brandDefaultValue) {
-
             $writer->startElement('Brand');
-
             $writer->writeElement('ExternalId', $brandId);
             $writer->writeElement('Name', $brandDefaultValue, true);
-
             $writer->startElement('Names');
-
             foreach ($brandsByLocale as $locale => $brands) {
                 if (isset($brands[$brandId])) {
                     $writer->startElement('Name');
                     $writer->writeAttribute('locale', $locale);
                     $writer->writeRaw($brands[$brandId], true);
-                    $writer->endElement(); /** Name */
+                    $writer->endElement(); //End Name
                 }
             }
-
-            $writer->endElement(); /** Names */
-
-            $writer->endElement(); /** Brand */
-
+            $writer->endElement(); //End Names
+            $writer->endElement(); //End Brand
         }
     }
 
-	/**
-	 * @param string $code
-	 * @param array $storeIds
-	 *
-	 * @return array
-	 * @throws \Magento\Framework\Exception\LocalizedException
-	 */
+    /**
+     * @param string $code
+     * @param array  $storeIds
+     *
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     protected function getOptionsByLocale($code, $storeIds)
     {
-        $brandsByLocale = array();
+        $brandsByLocale = [];
         foreach ($storeIds as $storeId) {
-            $locale = $this->_helper->getConfig('general/locale', $storeId);
+            $locale = $this->configProvider->getLocale($storeId);
             $brandsByLocale[$locale] = $this->getOptionsForStore($code, $storeId);
         }
         return $brandsByLocale;
     }
 
-
-	/**
-	 * @param string $code
-	 * @param mixed $store
-	 *
-	 * @return array
-	 * @throws \Magento\Framework\Exception\LocalizedException
-	 */
+    /**
+     * @param string $code
+     * @param mixed  $store
+     *
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     protected function getOptionsForStore($code, $store)
     {
         $storeId = $store instanceof Store ? $store->getId() : $store;
         /** Lookup the attribute options for this store */
-        $attribute = $this->_attribute->loadByCode(\Magento\Catalog\Model\Product::ENTITY, $code);
+        $attribute = $this->attribute->loadByCode(\Magento\Catalog\Model\Product::ENTITY, $code);
         $attribute->setStoreId($storeId);
         $attributeOptions = $attribute->getSource()->getAllOptions();
         /** Reformat array */
-        $processedOptions = array();
+        $processedOptions = [];
         foreach ($attributeOptions as $attributeOption) {
-            if (!empty($attributeOption['value']))
+            if (!empty($attributeOption['value'])) {
                 $processedOptions[$attributeOption['value']] = $attributeOption['label'];
+            }
         }
-        $this->_attribute->clearInstance();
+        $this->attribute->clearInstance();
         return $processedOptions;
     }
-
 }

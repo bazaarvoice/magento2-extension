@@ -6,7 +6,6 @@
             <tab>general</tab>
             <!-- resource tag name which we have to defined in the acl.xml -->
             <resource>Bazaarvoice_Connector::config_bazaarvoice</resource>
-            
             <group id="general" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>General</label>
                 <field id="enable_bv" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -35,9 +34,12 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Turn on the BV SEO solution.  This will include SEO-friendly content (located in the BV SEO cloud) in your product pages.  See documentation for additional steps that must be completed for this feature to take effect.]]></comment>
                 </field>
-                <field id="cloud_seo_key" translate="label" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">    
+                <field id="cloud_seo_key" translate="label" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Cloud SEO Key</label>
                     <comment><![CDATA[SEO Cloud key value as defined in your BV platform account.  This key is only required if Cloud SEO is enabled.]]></comment>
+                    <depends>
+                        <field id="enable_cloud_seo">1</field>
+                    </depends>
                 </field>
                 <field id="enable_bvpixel" translate="label" type="select" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enable BV Pixel</label>
@@ -94,45 +96,77 @@
                     <comment><![CDATA[Some user actions cause Bazaarvoice features to come into view, such as clicking the ★★★★★ icons in the rating summary, which scrolls to ratings and reviews. If this content is hidden behind a tab, however, you must add custom, page-specific code that calls the bvCallback function to show the correct tab or container. See your Bazaarvoice Implementation manual for further information.]]></comment>
                 </field>
             </group>
-
             <group id="feeds" translate="label" type="text" sortOrder="500" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Feeds</label>
+                <field id="enable_dcc" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Dynamic Catalog Collection (DCC)</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Turn on Dynamic Catalog Collection (DCC). This sends product data to Bazaarvoice when each product detail page is visited. Either this or the Product Feed should be enabled, but not both.]]></comment>
+                </field>
                 <field id="enable_product_feed" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enable Product Feed</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment><![CDATA[Turn on Product Feed generation. This will enable generation of a product feed to be sent to the BV SFTP server.  See documentation for additional steps to setup a scheduled job in Magento for this feature to take effect. <strong>Product feed requires 'Catalog Flat Tables' to be enabled for Products and Categories.</strong>]]></comment>
+                    <comment><![CDATA[Turn on Product Feed generation. This will enable generation of a product feed to be sent to the BV SFTP server. See documentation for additional steps to setup a scheduled job in Magento for this feature to take effect. Either this or DCC should be enabled, but not both. <strong>Product feed requires 'Catalog Flat Tables' to be enabled for Products and Categories.</strong>]]></comment>
                 </field>
-                <field id="limit" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Cronjob Frequency (Minutes)</label>
-                    <comment><![CDATA[This should be set to match the frequency you are running the system level Magento cron.  The extension will populate the Bazaarvoice Product Feed Index for this many minutes in batches of 50 products.]]></comment>
-                </field>
-                <field id="generation_scope" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="generation_scope" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Feed Generation Scope</label>
                     <source_model>Bazaarvoice\Connector\Model\Source\Scope</source_model>
-                    <comment><![CDATA[This determines whether separate feed files will be generated and sent to BV for each website, store or store view.]]></comment>
+                    <comment><![CDATA[This determines whether separate feed files will be generated and sent to BV for each website, store or store view. Also used to determine the product and category prefixes, if they are enabled.]]></comment>
+                </field>
+                <field id="enable_product_prefix" translate="label" type="select" sortOrder="25" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Product Prefix</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[If enabled, prefixes product ID and product name with the website/store group/store view code, depending on Feed Generation Scope. Should only be enabled for some Bazaarvoice accounts that are using multiple catalog sources.</strong>]]></comment>
+                </field>
+                <field id="enable_category_prefix" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Category Prefix</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[If enabled, prefixes category ID and category name with the website/store group/store view code, depending on Feed Generation Scope. Should only be enabled for some Bazaarvoice accounts that are using multiple catalog sources.</strong>]]></comment>
+                </field>
+                <field id="limit" translate="label" type="text" sortOrder="35" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Cronjob Frequency (Minutes)</label>
+                    <comment><![CDATA[This should be set to match the frequency you are running the system level Magento cron.  The extension will populate the Bazaarvoice Product Feed Index for this many minutes in batches of 50 products.]]></comment>
+                    <depends>
+                        <field id="enable_product_feed">1</field>
+                    </depends>
                 </field>
                 <field id="sftp_username" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>SFTP Username</label>
                     <comment><![CDATA[SFTP Connection Username. If this is left blank, the above Client Name will be used.]]></comment>
+                    <depends>
+                        <field id="enable_product_feed">1</field>
+                    </depends>
                 </field>
                 <field id="sftp_password" translate="label" type="password" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>SFTP Password</label>
                     <comment><![CDATA[Password used to access the BV SFTP server for feed upload/download processes.]]></comment>
+                    <depends>
+                        <field id="enable_product_feed">1</field>
+                    </depends>
                 </field>
                 <field id="sftp_host_name" translate="label" type="select" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>SFTP Host Name</label>
                     <source_model>Bazaarvoice\Connector\Model\Source\SftpHost</source_model>
                     <comment><![CDATA[SFTP Connection Host. ]]></comment>
+                    <depends>
+                        <field id="enable_product_feed">1</field>
+                    </depends>
                 </field>
                 <field id="product_filename" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Product Feed Filename</label>
                     <comment><![CDATA[If blank 'productfeed.xml' will be used.]]></comment>
                     <backend_model>Bazaarvoice\Connector\Model\Backend\Remote</backend_model>
+                    <depends>
+                        <field id="enable_product_feed">1</field>
+                    </depends>
                 </field>
                 <field id="product_path" translate="label" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Product Feed Export Path</label>
                     <comment><![CDATA[If blank '/import-inbox' will be used.]]></comment>
                     <backend_model>Bazaarvoice\Connector\Model\Backend\Remote</backend_model>
+                    <depends>
+                        <field id="enable_product_feed">1</field>
+                    </depends>
                 </field>
                 <field id="brand_code" translate="label" type="select" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Brand Attribute</label>
@@ -164,13 +198,13 @@
                     <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
                     <comment><![CDATA[This attribute code will be used to locate the Model Number of products which are sent in the product feed. <strong>Attribute must be set to 'Use in Product Listing.'</strong>]]></comment>
                 </field>
-                <field id="bvfamilies_code" translate="label" type="select" sortOrder="173" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Family Attribute</label>
+                <field id="bvfamilies_code" translate="label" type="multiselect" sortOrder="173" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Family Attributes</label>
                     <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
-                    <comment><![CDATA[If set, this attribute code will be used instead of configurable product SKU to populate family data. <strong>Attribute must be set to 'Use in Product Listing.'</strong>]]></comment>
+                    <comment><![CDATA[If set, these attribute code(s) will be used in addition to the configurable product SKU to populate family data. <strong>Attribute must be set to 'Use in Product Listing' to display.</strong>]]></comment>
                 </field>
                 <field id="bvfamilies_expand" translate="label" type="select" sortOrder="175" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Expand Families in Product Feed</label>
+                    <label>Expand Families in DCC/Product Feed</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Yes (Default) Setting to determine whether simple products show reviews and ratings for their entire product family.]]></comment>
                 </field>
@@ -183,14 +217,19 @@
                     <label>Use category URL path as category id</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[No (Default) If true, use Magento category URL path as category id, otherwise use Mage category entity primary key.]]></comment>
+                    <depends>
+                        <field id="enable_product_feed">1</field>
+                    </depends>
                 </field>
-                <field id="run_product" translate="button_label" type="button"  sortOrder="190" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="run_product" translate="button_label" type="button" sortOrder="190" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label/>
                     <button_label><![CDATA[Run Bazaarvoice Product Feed Now]]></button_label>
                     <button_url>*/bvfeed/runproduct</button_url>
                     <frontend_model>Bazaarvoice\Connector\Block\System\Config\Button</frontend_model>
+                    <depends>
+                        <field id="enable_product_feed">1</field>
+                    </depends>
                 </field>
-
                 <field id="enable_purchase_feed" translate="label" type="select" sortOrder="200" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enable Purchase Feed</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
@@ -199,18 +238,27 @@
                 <field id="lookback" translate="label" type="text" sortOrder="210" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Purchase Feed Lookback</label>
                     <comment><![CDATA[Number of days back to begin looking for orders.]]></comment>
+                    <depends>
+                        <field id="enable_purchase_feed">1</field>
+                    </depends>
                 </field>
                 <field id="triggering_event" translate="label" type="select" sortOrder="220" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Purchase Feed Triggering Event</label>
                     <source_model>Bazaarvoice\Connector\Model\Source\Trigger</source_model>
                     <comment><![CDATA[This determines whether to use the purchase date or ship date when calculating which purchases to include in the purchase feed.]]></comment>
+                    <depends>
+                        <field id="enable_purchase_feed">1</field>
+                    </depends>
                 </field>
-                <field id="run_pie" translate="button_label" type="button"  sortOrder="290" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="run_pie" translate="button_label" type="button" sortOrder="290" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label/>
                     <button_label><![CDATA[Run Bazaarvoice Purchase Feed Now]]></button_label>
                     <button_url>*/bvfeed/runpurchase</button_url>
                     <frontend_model>Bazaarvoice\Connector\Block\System\Config\Button</frontend_model>
                     <comment><![CDATA[<strong>WARNING Do not run in production until emails have been tested.</strong>]]></comment>
+                    <depends>
+                        <field id="enable_purchase_feed">1</field>
+                    </depends>
                 </field>
             </group>
         </section>

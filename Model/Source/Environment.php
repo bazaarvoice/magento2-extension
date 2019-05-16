@@ -1,38 +1,34 @@
 <?php
-/**
- * StoreFront Bazaarvoice Extension for Magento
- *
- * PHP Version 5
- *
- * LICENSE: This source file is subject to commercial source code license
- * of StoreFront Consulting, Inc.
- *
- * @category  SFC
- * @package   Bazaarvoice_Ext
- * @author    Dennis Rogers <dennis@storefrontconsulting.com>
- * @copyright 2016 StoreFront Consulting, Inc
- * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
- * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
- */
+declare(strict_types=1);
 
 namespace Bazaarvoice\Connector\Model\Source;
 
-class Environment
+use Magento\Framework\Data\OptionSourceInterface;
+
+/**
+ * Class Environment
+ *
+ * @package Bazaarvoice\Connector\Model\Source
+ */
+class Environment implements OptionSourceInterface
 {
     const STAGING = 'staging';
     const PRODUCTION = 'production';
 
+    /**
+     * @return array
+     */
     public function toOptionArray()
     {
-        return array(
-            array(
+        return [
+            [
                 'value' => self::STAGING,
-                'label' => __('Staging')
-            ),
-            array(
+                'label' => __('Staging'),
+            ],
+            [
                 'value' => self::PRODUCTION,
-                'label' => __('Production')
-            ),
-        );
+                'label' => __('Production'),
+            ],
+        ];
     }
 }

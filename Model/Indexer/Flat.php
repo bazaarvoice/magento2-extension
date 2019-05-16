@@ -1,16 +1,19 @@
 <?php
+declare(strict_types=1);
 
 namespace Bazaarvoice\Connector\Model\Indexer;
 
+use Bazaarvoice\Connector\Api\ConfigProviderInterface;
 use Bazaarvoice\Connector\Api\Data\IndexInterfaceFactory;
 use Bazaarvoice\Connector\Api\IndexRepositoryInterface;
-use Bazaarvoice\Connector\Helper\Data;
+use Bazaarvoice\Connector\Api\StringFormatterInterface;
 use Bazaarvoice\Connector\Logger\Logger;
-use Bazaarvoice\Connector\Model\Feed\Product\Generic;
 use Bazaarvoice\Connector\Model\Feed\ProductFeed;
 use Bazaarvoice\Connector\Model\Index;
 use Bazaarvoice\Connector\Model\ResourceModel\Index\Collection;
+use Bazaarvoice\Connector\Model\ResourceModel\Index\CollectionFactory;
 use Bazaarvoice\Connector\Model\Source\Scope;
+use Exception;
 use Magento\Catalog\Helper\Image;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
@@ -20,6 +23,7 @@ use Magento\Framework\App\ProductMetadata;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Indexer\ActionInterface as IndexerActionInterface;
 use Magento\Framework\Indexer\IndexerInterface;
 use Magento\Framework\Mview\ActionInterface as MviewActionInterface;
@@ -28,12 +32,13 @@ use Magento\Framework\UrlInterface;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 
+/**
+ * Class Flat
+ *
+ * @package Bazaarvoice\Connector\Model\Indexer
+ */
 class Flat implements IndexerActionInterface, MviewActionInterface
 {
-    /**
-     * @var \Bazaarvoice\Connector\Helper\Data
-     */
-    private $helper;
     /**
      * @var \Bazaarvoice\Connector\Logger\Logger
      */
@@ -43,10 +48,6 @@ class Flat implements IndexerActionInterface, MviewActionInterface
      */
     private $indexer;
     /**
-     * @var
-     */
-    private $generationScope;
-    /**
      * @var \Magento\Store\Model\StoreManagerInterface
      */
     private $storeManager;
@@ -55,17 +56,13 @@ class Flat implements IndexerActionInterface, MviewActionInterface
      */
     private $objectManager;
     /**
-     * @var \Bazaarvoice\Connector\Model\ResourceModel\Index\Collection\Factory
+     * @var \Bazaarvoice\Connector\Model\ResourceModel\Index\CollectionFactory
      */
     private $bvIndexCollectionFactory;
     /**
      * @var \Magento\Framework\App\ResourceConnection
      */
     private $resourceConnection;
-    /**
-     * @var
-     */
-    private $storeLocales;
     /**
      * @var \Magento\Framework\App\Config\ScopeConfigInterface
      */
@@ -90,43 +87,46 @@ class Flat implements IndexerActionInterface, MviewActionInterface
      * @var \Bazaarvoice\Connector\Api\IndexRepositoryInterface
      */
     private $indexRepository;
+    /**
+     * @var ConfigProviderInterface
+     */
+    private $configProvider;
+    /**
+     * @var StringFormatterInterface
+     */
+    private $stringFormatter;
 
     /**
-     * Indexer constructor.
+     * Flat constructor.
      *
-     * @param Logger                                                $logger
-     * @param Data                                                  $helper
-     * @param IndexerInterface                                      $indexerInterface
-     * @param ObjectManagerInterface                                $objectManager
-     * @param StoreManagerInterface                                 $storeManager
-     * @param Collection\Factory                                    $collectionFactory
-     * @param ResourceConnection                                    $resourceConnection
-     * @param ScopeConfigInterface                                  $scopeConfig
-     * @param Generic                                               $feed
-     * @param ProductMetadata                                       $productMetadata
-     *
-     * @param \Bazaarvoice\Connector\Api\Data\IndexInterfaceFactory $bvIndexFactory
-     *
-     * @param \Bazaarvoice\Connector\Api\IndexRepositoryInterface   $indexRepository
-     *
-     * @throws \Exception
+     * @param \Bazaarvoice\Connector\Logger\Logger                               $logger
+     * @param \Bazaarvoice\Connector\Api\ConfigProviderInterface                 $configProvider
+     * @param \Bazaarvoice\Connector\Api\StringFormatterInterface                $stringFormatter
+     * @param \Magento\Framework\Indexer\IndexerInterface                        $indexerInterface
+     * @param \Magento\Framework\ObjectManagerInterface                          $objectManager
+     * @param \Magento\Store\Model\StoreManagerInterface                         $storeManager
+     * @param \Bazaarvoice\Connector\Model\ResourceModel\Index\CollectionFactory $collectionFactory
+     * @param \Magento\Framework\App\ResourceConnection                          $resourceConnection
+     * @param \Magento\Framework\App\Config\ScopeConfigInterface                 $scopeConfig
+     * @param \Magento\Framework\App\ProductMetadata                             $productMetadata
+     * @param \Bazaarvoice\Connector\Api\Data\IndexInterfaceFactory              $bvIndexFactory
+     * @param \Bazaarvoice\Connector\Api\IndexRepositoryInterface                $indexRepository
      */
     public function __construct(
         Logger $logger,
-        Data $helper,
+        ConfigProviderInterface $configProvider,
+        StringFormatterInterface $stringFormatter,
         IndexerInterface $indexerInterface,
         ObjectManagerInterface $objectManager,
         StoreManagerInterface $storeManager,
-        Collection\Factory $collectionFactory,
+        CollectionFactory $collectionFactory,
         ResourceConnection $resourceConnection,
         ScopeConfigInterface $scopeConfig,
-        Generic $feed,
         ProductMetadata $productMetadata,
         IndexInterfaceFactory $bvIndexFactory,
         IndexRepositoryInterface $indexRepository
     ) {
         $this->logger = $logger;
-        $this->helper = $helper;
         $this->storeManager = $storeManager;
         $this->objectManager = $objectManager;
         $this->indexer = $indexerInterface->load('bazaarvoice_product');
@@ -135,10 +135,10 @@ class Flat implements IndexerActionInterface, MviewActionInterface
         $this->scopeConfig = $scopeConfig;
         $this->productIdField = $this->getProductIdFieldName();
         $this->mageVersion = $productMetadata->getVersion();
-        $this->generationScope = $helper->getConfig('feeds/generation_scope');
-        $this->storeLocales = $feed->getLocales();
         $this->bvIndexFactory = $bvIndexFactory;
         $this->indexRepository = $indexRepository;
+        $this->configProvider = $configProvider;
+        $this->stringFormatter = $stringFormatter;
     }
 
     /**
@@ -176,9 +176,9 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 $this->flushIndex();
                 $this->logger->debug(__('Bazaarvoice Product Feed Index has been flushed for rebuild.'));
             }
-            $this->execute();
             $this->logger->debug(__('Bazaarvoice Product Feed Index is being rebuilt.'));
-        } catch (\Exception $e) {
+            $this->execute();
+        } catch (Exception $e) {
             $this->logger->err($e->getMessage()."\n".$e->getTraceAsString());
         }
 
@@ -193,7 +193,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
      * @return mixed
      * @throws \Exception
      */
-    public function execute($ids = array())
+    public function execute($ids = [])
     {
         /** @var $idCollection \Bazaarvoice\Connector\Model\ResourceModel\Index\Collection */
 
@@ -214,7 +214,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
             $productIdSets = array_chunk($ids, 50);
 
             /** Time throttling */
-            $limit = ($this->helper->getConfig('feeds/limit') * 60) - 10;
+            $limit = ($this->configProvider->getCronjobDurationLimit() * 60) - 10;
             $stop = time() + $limit;
             $counter = 0;
             do {
@@ -223,8 +223,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 }
 
                 $productIds = array_pop($productIdSets);
-                if (
-                    !is_array($productIds)
+                if (!is_array($productIds)
                     || count($productIds) == 0
                 ) {
                     break;
@@ -245,7 +244,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 }
                 $this->logStats();
             }
-        } Catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
         }
 
@@ -261,13 +260,13 @@ class Flat implements IndexerActionInterface, MviewActionInterface
      */
     protected function reindexProducts($productIds)
     {
-        switch ($this->generationScope) {
+        switch ($this->configProvider->getFeedGenerationScope()) {
             case Scope::SCOPE_GLOBAL:
                 $stores = $this->storeManager->getStores();
                 ksort($stores);
                 /** @var \Magento\Store\Model\Store $store */
                 foreach ($stores as $store) {
-                    if ($this->helper->canSendFeed($store->getId())) {
+                    if ($this->configProvider->canSendProductFeed($store->getId())) {
                         $this->reindexProductsForStore($productIds, $store);
                         break;
                     }
@@ -279,14 +278,11 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 foreach ($websites as $website) {
                     $defaultStore = $website->getDefaultStore();
                     if ($defaultStore->getId()) {
-                        if ($this->helper->canSendFeed($defaultStore->getId())) {
+                        if ($this->configProvider->canSendProductFeed($defaultStore->getId())) {
                             $this->reindexProductsForStore($productIds, $defaultStore);
                         }
                     } else {
-                        throw new \Exception('Website %s has no default store!', $website->getCode());
-                    }
-                    if ($this->generationScope == Scope::SCOPE_GLOBAL) {
-                        break;
+                        throw new NoSuchEntityException(__('Website %s has no default store!', $website->getCode()));
                     }
                 }
                 break;
@@ -296,11 +292,11 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 foreach ($groups as $group) {
                     $defaultStore = $group->getDefaultStore();
                     if ($defaultStore->getId()) {
-                        if ($this->helper->canSendFeed($defaultStore->getId())) {
+                        if ($this->configProvider->canSendProductFeed($defaultStore->getId())) {
                             $this->reindexProductsForStore($productIds, $defaultStore);
                         }
                     } else {
-                        throw new \Exception('Store Group %s has no default store!', $group->getName());
+                        throw new NoSuchEntityException(__('Store Group %s has no default store!', $group->getName()));
                     }
                 }
                 break;
@@ -309,11 +305,11 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 /** @var \Magento\Store\Model\Store $store */
                 foreach ($stores as $store) {
                     if ($store->getId()) {
-                        if ($this->helper->canSendFeed($store->getId())) {
+                        if ($this->configProvider->canSendProductFeed($store->getId())) {
                             $this->reindexProductsForStore($productIds, $store);
                         }
                     } else {
-                        throw new \Exception('Store %s not found!', $store->getCode());
+                        throw new NoSuchEntityException(__('Store %s not found!', $store->getCode()));
                     }
                 }
                 break;
@@ -378,17 +374,14 @@ class Flat implements IndexerActionInterface, MviewActionInterface
     }
 
     /**
-     * @param $productIds
-     * @param $store
+     * @param       $productIds
+     * @param Store $store
      *
-     * @return void
      * @throws \Zend_Db_Statement_Exception
+     * @throws \Exception
      */
     private function populateIndexStoreData($productIds, $store)
     {
-        if (is_int($store)) {
-            $store = $this->objectManager->get('\Magento\Store\Model\Store')->load($store);
-        }
         $storeId = $store->getId();
 
         /** Database Resources */
@@ -397,7 +390,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
         $select = $this->getBaseSelect($read, $storeId, $res);
         $this->joinParent($select, $storeId, $res);
 
-        if ($this->generationScope == Scope::SCOPE_GLOBAL) {
+        if ($this->configProvider->getFeedGenerationScope() == Scope::SCOPE_GLOBAL) {
             $cppTable = $res->getTableName('catalog_category_product');
         } else {
             $cppTable = $res->getTableName("catalog_category_product_index_store{$storeId}");
@@ -406,24 +399,24 @@ class Flat implements IndexerActionInterface, MviewActionInterface
         if (version_compare($this->mageVersion, '2.2.5', '<')) {
             $select
                 ->joinLeft(
-                    array('cp' => $res->getTableName('catalog_category_product_index')),
+                    ['cp' => $res->getTableName('catalog_category_product_index')],
                     "cp.product_id = p.entity_id AND cp.store_id = {$storeId}",
                     'category_id'
                 )
                 ->joinLeft(
-                    array('cpp' => $res->getTableName('catalog_category_product_index')),
+                    ['cpp' => $res->getTableName('catalog_category_product_index')],
                     "cpp.product_id = parent.entity_id AND cpp.store_id = {$storeId}",
                     'category_id'
                 );
         } else {
             $select
                 ->joinLeft(
-                    array('cp' => $cppTable),
+                    ['cp' => $cppTable],
                     "cp.product_id = p.entity_id",
                     "category_id"
                 )
                 ->joinLeft(
-                    array('cpp' => $cppTable),
+                    ['cpp' => $cppTable],
                     "cpp.product_id = parent.entity_id",
                     "category_id"
                 );
@@ -431,81 +424,97 @@ class Flat implements IndexerActionInterface, MviewActionInterface
         $this->joinUrlRewrite($select, $storeId, $res);
 
         /** category */
-        if ($this->helper->getConfig('feeds/category_id_use_url_path', $storeId)) {
+        if ($this->configProvider->isCategoryIdUseUrlPathEnabled($storeId)) {
             $select->joinLeft(
-                array('cat' => $res->getTableName('catalog_category_flat').'_store_'.$storeId),
+                ['cat' => $res->getTableName('catalog_category_flat').'_store_'.$storeId],
                 'cat.entity_id = cp.category_id AND cat.level > 1',
-                array('category_external_id' => 'max(cat.url_path)'));
+                ['category_external_id' => 'max(cat.url_path)']
+            );
             $select->joinLeft(
-                array('parent_cat' => $res->getTableName('catalog_category_flat').'_store_'.$storeId),
+                ['parent_cat' => $res->getTableName('catalog_category_flat').'_store_'.$storeId],
                 'parent_cat.entity_id = cpp.category_id AND parent_cat.level > 1',
-                array('parent_category_external_id' => 'max(parent_cat.url_path)'));
+                ['parent_category_external_id' => 'max(parent_cat.url_path)']
+            );
             $select->joinLeft(
-                array('bv_cat' => $res->getTableName('catalog_category_flat').'_store_'.$storeId),
+                ['bv_cat' => $res->getTableName('catalog_category_flat').'_store_'.$storeId],
                 'bv_cat.entity_id = p.bv_category_id',
-                array('bv_category_external_id' => 'bv_cat.url_path'));
+                ['bv_category_external_id' => 'bv_cat.url_path']
+            );
             $select->joinLeft(
-                array('bv_parent_cat' => $res->getTableName('catalog_category_flat').'_store_'.$storeId),
+                ['bv_parent_cat' => $res->getTableName('catalog_category_flat').'_store_'.$storeId],
                 'bv_parent_cat.entity_id = parent.bv_category_id',
-                array('bv_parent_category_external_id' => 'bv_parent_cat.url_path'));
+                ['bv_parent_category_external_id' => 'bv_parent_cat.url_path']
+            );
         } else {
             $select->joinLeft(
-                array('cat' => $res->getTableName('catalog_category_entity')),
+                ['cat' => $res->getTableName('catalog_category_entity')],
                 'cat.entity_id = cp.category_id AND cat.level > 1',
-                array('category_external_id' => 'max(cat.entity_id)'));
+                ['category_external_id' => 'max(cat.entity_id)']
+            );
             $select->joinLeft(
-                array('parent_cat' => $res->getTableName('catalog_category_entity')),
+                ['parent_cat' => $res->getTableName('catalog_category_entity')],
                 'parent_cat.entity_id = cpp.category_id AND parent_cat.level > 1',
-                array('parent_category_external_id' => 'max(parent_cat.entity_id)'));
+                ['parent_category_external_id' => 'max(parent_cat.entity_id)']
+            );
             $select->joinLeft(
-                array('bv_cat' => $res->getTableName('catalog_category_entity')),
+                ['bv_cat' => $res->getTableName('catalog_category_entity')],
                 'bv_cat.entity_id = p.bv_category_id',
-                array('bv_category_external_id' => 'bv_cat.entity_id'));
+                ['bv_category_external_id' => 'bv_cat.entity_id']
+            );
             $select->joinLeft(
-                array('bv_parent_cat' => $res->getTableName('catalog_category_entity')),
+                ['bv_parent_cat' => $res->getTableName('catalog_category_entity')],
                 'bv_parent_cat.entity_id = parent.bv_category_id',
-                array('bv_parent_category_external_id' => 'bv_parent_cat.entity_id'));
+                ['bv_parent_category_external_id' => 'bv_parent_cat.entity_id']
+            );
         }
 
         /** Brands and other Attributes */
         $columnResults = $read->query('DESCRIBE `'.$res->getTableName('catalog_product_flat').'_'.$storeId.'`;');
-        $flatColumns = array();
+        $flatColumns = [];
         while ($row = $columnResults->fetch()) {
             $flatColumns[] = $row['Field'];
         }
-        $brandAttr = $this->helper->getConfig('feeds/brand_code', $storeId);
+        $brandAttr = $this->configProvider->getAttributeCode('brand', $storeId);
         if ($brandAttr) {
             if (in_array($brandAttr, $flatColumns)) {
-                $select->columns(array('brand_external_id' => $brandAttr));
+                $select->columns(['brand_external_id' => $brandAttr]);
             }
         }
         foreach (Index::CUSTOM_ATTRIBUTES as $label) {
             $code = strtolower($label);
-            $attr = $this->helper->getConfig("feeds/{$code}_code", $storeId);
+            $attr = $this->configProvider->getAttributeCode($code, $storeId);
             if ($attr) {
                 if (in_array("{$attr}_value", $flatColumns)) {
                     $this->logger->debug("using {$attr}_value for {$code}");
-                    $select->columns(array("{$code}s" => "{$attr}_value"));
+                    $select->columns(["{$code}s" => "{$attr}_value"]);
                 } else {
                     if (in_array($attr, $flatColumns)) {
                         $this->logger->debug("using {$attr} for {$code}");
-                        $select->columns(array("{$code}s" => $attr));
+                        $select->columns(["{$code}s" => $attr]);
                     }
                 }
             }
         }
 
-        $bvFamiliesAttributeConfig = $this->getBvFamiliesAttributeConfig($storeId);
-        if ($bvFamiliesAttributeConfig) {
-            $this->logger->debug("using $bvFamiliesAttributeConfig for configurable product family data");
-            $select->columns(array('parent_bvfamily' => $bvFamiliesAttributeConfig));
+        if ($this->configProvider->isFamiliesEnabled($storeId)) {
+            $familyFields = '';
+            $familyAttributes = $this->configProvider->getFormattedFamilyAttributes($storeId);
+            if ($familyAttributes) {
+                $familyFields = '';
+                foreach ($familyAttributes as $familyAttribute) {
+                    $familyFields .= 'p.'.$familyAttribute.',';
+                }
+            }
+
+            $select->columns(['family' => "GROUP_CONCAT(DISTINCT CONCAT_WS('||', {$familyFields}p.sku))"]);
         }
 
         /** Version */
         $select->joinLeft(
-            array('cl' => $res->getTableName('bazaarvoice_product_cl')),
+            ['cl' => $res->getTableName('bazaarvoice_product_cl')],
             'cl.entity_id = p.entity_id',
-            array('version_id' => 'MAX(cl.version_id)'));
+            ['version_id' => 'MAX(cl.version_id)']
+        );
 
         $this->filterByProducts($select, $productIds);
 
@@ -513,15 +522,15 @@ class Flat implements IndexerActionInterface, MviewActionInterface
 
         try {
             $rows = $select->query();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
-            throw new \Exception($e);
+            throw new Exception($e);
         }
 
         while (($indexData = $rows->fetch()) !== false) {
             $this->logger->debug('Processing product '.$indexData['product_id']);
             foreach ($indexData as $key => $value) {
-                if (strpos($value, '||') !== false) {
+                if ($value && strpos($value, '||') !== false) {
                     $indexData[$key] = explode('||', $value);
                 }
             }
@@ -529,22 +538,15 @@ class Flat implements IndexerActionInterface, MviewActionInterface
             $indexData['status'] = $indexData[ProductFeed::INCLUDE_IN_FEED_FLAG] ? Status::STATUS_ENABLED
                 : Status::STATUS_DISABLED;
 
-            if ($indexData['product_type'] == Configurable::TYPE_CODE) {
-                if ($bvFamiliesAttributeConfig && isset($indexData['parent_bvfamily'])) {
-                    $indexData['family'] = array($indexData['parent_bvfamily']);
-                } else {
-                    $indexData['family'] = array($indexData['external_id']);
-                }
-            } else {
-                if (!empty($indexData['family'])) {
-                    if (!is_array($indexData['family'])) {
-                        $indexData['family'] = array($indexData['family']);
+            if ($this->configProvider->isFamiliesEnabled($storeId)) {
+                if ($indexData['product_type'] != Configurable::TYPE_CODE) {
+                    if (!empty($indexData['parent_bvfamily'])) {
+                        $indexData['family'] = $indexData['parent_bvfamily'];
                     }
                 }
+                $this->logger->debug('Family Info');
+                $this->logger->debug($indexData['family']);
             }
-
-            $this->logger->debug('Family Info');
-            $this->logger->debug($indexData['family']);
 
             /** categories */
             if ($indexData['bv_category_external_id']) {
@@ -573,7 +575,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
             $indexData['category_external_id'] = str_replace('/', '-', $indexData['category_external_id']);
             $indexData['category_external_id'] = str_replace('.html', '', $indexData['category_external_id']);
             $indexData['category_external_id']
-                = $this->helper->replaceIllegalCharacters($indexData['category_external_id']);
+                = $this->stringFormatter->replaceIllegalCharacters($indexData['category_external_id']);
 
             if ($indexData['category_external_id'] == '') {
                 $indexData['status'] = Status::STATUS_DISABLED;
@@ -581,23 +583,25 @@ class Flat implements IndexerActionInterface, MviewActionInterface
             } else {
                 $this->logger->debug("Category '{$indexData['category_external_id']}'");
             }
-            $standardUrl = static::getStandardUrl($indexData['product_id']);
+            $standardUrl = $this->getStandardUrl($indexData['product_id']);
 
             /** Add Store base to URLs */
-            $indexData['product_page_url'] = $this->getStoreUrl($store->getBaseUrl(),
-                $indexData['product_page_url'] == '' ? $standardUrl : $indexData['product_page_url']);
+            $indexData['product_page_url'] = $this->getStoreUrl(
+                $store->getBaseUrl(),
+                $indexData['product_page_url'] == '' ? $standardUrl : $indexData['product_page_url']
+            );
             $this->logger->debug("URL {$indexData['product_page_url']}");
             $indexData['image_url'] = $this->getImageUrl($store, $indexData);
 
             $this->logger->debug("Image {$indexData['image_url']}");
 
-            $indexData['external_id'] = $this->helper->getProductId($indexData['external_id']);
-            $indexData['scope'] = $this->generationScope;
+            $indexData['external_id'] = $this->stringFormatter->getFormattedProductSku($indexData['external_id']);
+            $indexData['scope'] = $this->configProvider->getFeedGenerationScope();
             $indexData['store_id'] = $storeId;
 
             foreach ($indexData as $key => $value) {
                 if (is_array($value)) {
-                    $indexData[$key] = $this->helper->jsonEncode($value);
+                    $indexData[$key] = $this->stringFormatter->jsonEncode($value);
                 }
             }
 
@@ -610,27 +614,29 @@ class Flat implements IndexerActionInterface, MviewActionInterface
 
     /**
      * @param $productIds
-     * @param $store
+     * @param Store $store
      *
      * @return $this
+     * @throws \Exception
      */
     private function populateIndexLocaleData($productIds, $store)
     {
         $storeId = $store->getId();
-        if (isset($this->storeLocales[$storeId])) {
+        $locales = $this->configProvider->getLocales();
+        if (isset($locales[$storeId])) {
             /** Locale Data */
-            $localeColumns = array(
+            $localeColumns = [
                 'entity_id'   => 'entity_id',
                 'name'        => 'name',
                 'description' => 'short_description',
                 'image_url'   => 'small_image',
-            );
+            ];
 
             $res = $this->resourceConnection;
             $read = $res->getConnection('core_read');
 
             /** @var Store $localeStore */
-            foreach ($this->storeLocales[$storeId] as $locale => $localeStore) {
+            foreach ($locales[$storeId] as $locale => $localeStore) {
                 /** Core Data  */
                 $select = $this->getBaseSelect($read, $localeStore->getId(), $res);
 
@@ -638,7 +644,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 $this->joinUrlRewrite($select, $localeStore->getId(), $res);
                 $this->filterByProducts($select, $productIds);
 
-                $columns = array();
+                $columns = [];
                 foreach ($localeColumns as $dest => $source) {
                     $columns["{$dest}"] = 'p.'.$source;
                 }
@@ -653,7 +659,8 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                         /** @var Index $productIndex */
 
                         foreach ($this->productIndexes as $productIndex) {
-                            if ($productIndex->getProductId() == $indexData['product_id'] && $productIndex->getStoreId() == $storeId) {
+                            if ($productIndex->getProductId() == $indexData['product_id']
+                                && $productIndex->getStoreId() == $storeId) {
                                 break;
                             }
                         }
@@ -665,7 +672,8 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                         $localeUrl = $this->getStoreUrl(
                             $localeStore->getBaseUrl(),
                             $urlPath,
-                            $localeStore->getCode());
+                            $localeStore->getCode()
+                        );
                         $indexData['product_page_url'] = $localeUrl;
 
                         if (isset($indexData['product_page_url'])) {
@@ -682,7 +690,8 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                                 $indexData['product_page_url'] = $this->getStoreUrl(
                                     $localeStore->getBaseUrl(),
                                     $indexData['parent_url'],
-                                    $localeStore->getCode());
+                                    $localeStore->getCode()
+                                );
                                 $this->logger->debug('Locale using Parent URL');
                             }
                         }
@@ -703,7 +712,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                             $productIndex->addLocaleProductPageUrl([$locale => $indexData['product_page_url']]);
                         }
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
                 }
             }
@@ -713,17 +722,17 @@ class Flat implements IndexerActionInterface, MviewActionInterface
     }
 
     /**
-     * @param                                           $read
-     * @param                                           $storeId
+     * @param \Magento\Framework\DB\Adapter\AdapterInterface $read
+     * @param int                                            $storeId
      *
-     * @param \Magento\Framework\App\ResourceConnection $res
+     * @param \Magento\Framework\App\ResourceConnection      $res
      *
-     * @return mixed
+     * @return \Magento\Framework\DB\Select
      */
     private function getBaseSelect($read, $storeId, ResourceConnection $res)
     {
         $select = $read->select()
-            ->from(array('p' => $res->getTableName('catalog_product_flat').'_'.$storeId), array(
+            ->from(['p' => $res->getTableName('catalog_product_flat').'_'.$storeId], [
                 'name'            => 'p.name',
                 'product_type'    => 'p.type_id',
                 'product_id'      => 'p.entity_id',
@@ -733,7 +742,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 'visibility'      => 'p.visibility',
                 'bv_feed_exclude' => 'bv_feed_exclude',
                 'bv_category_id'  => 'p.bv_category_id',
-            ));
+            ]);
 
         return $select;
     }
@@ -747,33 +756,29 @@ class Flat implements IndexerActionInterface, MviewActionInterface
      */
     private function joinParent(Select $select, $storeId, ResourceConnection $res)
     {
-        /** parents */
-        $bvFamiliesAttributeConfig = $this->getBvFamiliesAttributeConfig($storeId);
-        $bvFamiliesAttribute = $bvFamiliesAttributeConfig ? 'parent.'.$bvFamiliesAttributeConfig : 'null';
+        $familyFields = '';
+        $familyAttributes = $this->configProvider->getFormattedFamilyAttributes($storeId);
+        if ($familyAttributes) {
+            $familyFields = '';
+            foreach ($familyAttributes as $familyAttribute) {
+                $familyFields .= 'parent.'.$familyAttribute.',';
+            }
+        }
 
         return $select
             ->joinLeft(
-                array('pp' => $res->getTableName('catalog_product_super_link')),
-                'pp.product_id = p.entity_id', '')
+                ['pp' => $res->getTableName('catalog_product_super_link')],
+                'pp.product_id = p.entity_id',
+                ''
+            )
             ->joinLeft(
-                array('parent' => $res->getTableName('catalog_product_flat').'_'.$storeId),
+                ['parent' => $res->getTableName('catalog_product_flat').'_'.$storeId],
                 'pp.parent_id = parent.'.$this->productIdField,
-                array(
-                    'family'       => "GROUP_CONCAT(DISTINCT coalesce($bvFamiliesAttribute,parent.sku) SEPARATOR '||')",
+                [
+                    'parent_bvfamily' => "GROUP_CONCAT(DISTINCT CONCAT_WS('||', {$familyFields}parent.sku))",
                     'parent_image' => 'small_image',
-                ));
-    }
-
-    /**
-     * @param $storeId
-     *
-     * @return mixed
-     */
-    private function getBvFamiliesAttributeConfig($storeId)
-    {
-        $bvFamiliesAttributeConfig = $this->helper->getConfig('feeds/bvfamilies_code', $storeId);
-
-        return $bvFamiliesAttributeConfig;
+                ]
+            );
     }
 
     /**
@@ -789,24 +794,26 @@ class Flat implements IndexerActionInterface, MviewActionInterface
         /** urls */
         return $select
             ->joinLeft(
-                array('url' => $res->getTableName('url_rewrite')),
+                ['url' => $res->getTableName('url_rewrite')],
                 "url.entity_type = 'product'
                 AND url.metadata IS NULL
                 AND url.entity_id = p.entity_id
                 AND url.store_id = {$storeId}",
-                array('product_page_url' => 'url.request_path'))
+                ['product_page_url' => 'url.request_path']
+            )
             ->joinLeft(
-                array('parent_url' => $res->getTableName('url_rewrite')),
+                ['parent_url' => $res->getTableName('url_rewrite')],
                 "parent_url.entity_type = 'product'
                 AND parent_url.metadata IS NULL
                 AND parent_url.entity_id = parent.entity_id
                 AND parent_url.store_id = {$storeId}",
-                array('parent_url' => 'max(parent_url.request_path)'));
+                ['parent_url' => 'max(parent_url.request_path)']
+            );
     }
 
     /**
-     * @param $select
-     * @param $productIds
+     * @param \Magento\Framework\DB\Select $select
+     * @param array $productIds
      */
     private function filterByProducts($select, $productIds)
     {
@@ -818,7 +825,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
      *
      * @return string
      */
-    private static function getStandardUrl($productId)
+    private function getStandardUrl($productId)
     {
         /** Handle missing rewrites */
         $standardUrl = 'catalog/product/view/id/'.$productId;
@@ -833,7 +840,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
      *
      * @return string string
      */
-    protected function getStoreUrl($storeUrl, $urlPath, $storeCode = null)
+    private function getStoreUrl($storeUrl, $urlPath, $storeCode = null)
     {
         $url = $storeUrl.$urlPath;
         if ($storeCode) {
@@ -846,7 +853,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
     /**
      * @param array $productIds
      */
-    protected function _purgeUnversioned($productIds)
+    private function _purgeUnversioned($productIds)
     {
         /** Database Resources */
         $write = $this->resourceConnection->getConnection('core_write');
@@ -861,16 +868,16 @@ class Flat implements IndexerActionInterface, MviewActionInterface
     /**
      * @throws \Zend_Db_Statement_Exception
      */
-    protected function logStats()
+    private function logStats()
     {
         /** @var Select $select */
         $select = $this->resourceConnection->getConnection('core_read')
             ->select()
-            ->from(array(
+            ->from([
                 'source' => $this->resourceConnection->getTableName('bazaarvoice_index_product'),
-            ));
+            ]);
 
-        $select->columns(array('store_id', 'total' => 'count(*)'));
+        $select->columns(['store_id', 'total' => 'count(*)']);
         $select->group('store_id');
         $result = $select->query();
 
@@ -937,6 +944,8 @@ class Flat implements IndexerActionInterface, MviewActionInterface
     }
 
     /**
+     * @param $store
+     *
      * @return string|false
      */
     public function getPlaceholderUrl($store)
@@ -951,14 +960,14 @@ class Flat implements IndexerActionInterface, MviewActionInterface
         $imageHelper = $this->objectManager->get('\Magento\Catalog\Helper\Image');
         $assetRepo = $this->objectManager->get('\Magento\Framework\View\Asset\Repository');
         $design = $this->objectManager->create('\Magento\Framework\View\DesignInterface');
-        $localeCode = $this->helper->getConfig( 'general/locale', $store->getId() );
+        $localeCode = $this->configProvider->getLocale($store->getId());
         $themeId = $design->getConfigurationDesignTheme('frontend', ['store' => $store->getId()]);
         $theme = $this->objectManager->create('\Magento\Theme\Model\Theme')->load($themeId);
-        $assetParams = array(
+        $assetParams = [
             'area'   => 'frontend',
             'theme'  => $theme->getThemePath(),
             'locale' => $localeCode,
-        );
+        ];
 
         return $assetRepo->createAsset($imageHelper->getPlaceholder('image'), $assetParams)
             ->getUrl();
@@ -973,12 +982,12 @@ class Flat implements IndexerActionInterface, MviewActionInterface
         /** @var Select $select */
         $select = $this->resourceConnection->getConnection('core_read')
             ->select()
-            ->from(array(
+            ->from([
                 'source' => $this->resourceConnection->getTableName('bazaarvoice_index_product'),
-            ));
+            ]);
 
-        $select->columns(array('total' => 'count(*)'));
-        $select->where("scope IS NOT NULL AND scope != '{$this->generationScope}'");
+        $select->columns(['total' => 'count(*)']);
+        $select->where("scope IS NOT NULL AND scope != '{$this->configProvider->getFeedGenerationScope()}'");
         $result = $select->query();
 
         while ($row = $result->fetch()) {
@@ -1016,13 +1025,12 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                     );
                     $existingIndex->addData($bvIndex->getData());
                     $this->indexRepository->save($existingIndex);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
             }
         }
     }
-
 }

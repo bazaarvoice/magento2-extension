@@ -1,42 +1,40 @@
 <?php
-/**
- * StoreFront Bazaarvoice Extension for Magento
- *
- * PHP Version 5
- *
- * LICENSE: This source file is subject to commercial source code license
- * of StoreFront Consulting, Inc.
- *
- * @category  SFC
- * @package   Bazaarvoice_Ext
- * @author    Dennis Rogers <dennis@storefrontconsulting.com>
- * @copyright 2016 StoreFront Consulting, Inc
- * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
- * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
- */
+declare(strict_types=1);
 
 namespace Bazaarvoice\Connector\Controller\Adminhtml\Bvindex;
 
-use \Magento\Backend\App\Action\Context;
-use \Magento\Framework\View\Result\PageFactory;
-use \Magento\Backend\Model\View\Result\Page;
+use Magento\Backend\App\Action;
+use Magento\Backend\App\Action\Context;
+use Magento\Backend\Model\View\Result\Page;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\View\Result\PageFactory;
 
-class Index extends \Magento\Backend\App\Action
+/**
+ * Class Index
+ *
+ * @package Bazaarvoice\Connector\Controller\Adminhtml\Bvindex
+ */
+class Index extends Action
 {
+    /**
+     * @var \Magento\Framework\App\Config\ScopeConfigInterface
+     */
     protected $_scopeConfig;
+    /**
+     * @var \Magento\Framework\View\Result\PageFactory
+     */
     protected $_resultPageFactory;
 
     /**
-     * @param Context $context
-     * @param PageFactory $resultPageFactory
+     * @param Context                                            $context
+     * @param PageFactory                                        $resultPageFactory
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      */
     public function __construct(
-        \Magento\Backend\App\Action\Context $context,
-        \Magento\Framework\View\Result\PageFactory $resultPageFactory,
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-    )
-    {
+        Context $context,
+        PageFactory $resultPageFactory,
+        ScopeConfigInterface $scopeConfig
+    ) {
         $this->_scopeConfig = $scopeConfig;
         $this->_resultPageFactory = $resultPageFactory;
         parent::__construct($context);
@@ -45,7 +43,7 @@ class Index extends \Magento\Backend\App\Action
     /**
      * Index action
      *
-     * @return \Magento\Framework\Controller\ResultInterface
+     * @return \Magento\Backend\Model\View\Result\Page
      */
     public function execute()
     {
