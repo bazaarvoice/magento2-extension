@@ -1,34 +1,23 @@
 <?php
-/**
- * StoreFront Bazaarvoice Extension for Magento
- *
- * PHP Version 5
- *
- * LICENSE: This source file is subject to commercial source code license
- * of StoreFront Consulting, Inc.
- *
- * @category  SFC
- * @package   Bazaarvoice_Ext
- * @author    Dennis Rogers <dennis@storefrontconsulting.com>
- * @copyright 2016 StoreFront Consulting, Inc
- * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
- * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
- */
+declare(strict_types=1);
 
 namespace Bazaarvoice\Connector\Setup;
 
-use Bazaarvoice\Connector\Model\Source\Scope;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
 use Magento\Framework\Setup\UpgradeSchemaInterface;
 
+/**
+ * Class UpgradeSchema
+ *
+ * @package Bazaarvoice\Connector\Setup
+ */
 class UpgradeSchema implements UpgradeSchemaInterface
 {
     /**
-     * @param SchemaSetupInterface $setup
-     * @param ModuleContextInterface $context
-     * @return mixed
+     * @param \Magento\Framework\Setup\SchemaSetupInterface   $setup
+     * @param \Magento\Framework\Setup\ModuleContextInterface $context
      */
     public function upgrade(SchemaSetupInterface $setup, ModuleContextInterface $context)
     {
@@ -85,7 +74,5 @@ class UpgradeSchema implements UpgradeSchemaInterface
         }
 
         $setup->endSetup();
-        return;
     }
-
 }

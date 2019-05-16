@@ -7,13 +7,13 @@
                     <resource id="Magento_Backend::stores_settings">
                         <resource id="Magento_Config::config">
                             <!-- this resource id we can use in system.xml for section -->
-                            <resource id="Bazaarvoice_Connector::config_bazaarvoice" title="Bazaarvoice Connector" sortOrder="80" />
+                            <resource id="Bazaarvoice_Connector::config_bazaarvoice" title="Bazaarvoice Connector" sortOrder="80"/>
                         </resource>
                     </resource>
                 </resource>
             </resource>
             <resource id="Magento_Catalog::index" title="Catalog" sortOrder="40">
-                <resource id="Bazaarvoice_Connector::index" title="Bazaarvoice Product Feed" sortOrder="10" />
+                <resource id="Bazaarvoice_Connector::index" title="Bazaarvoice Product Feed" sortOrder="10"/>
             </resource>
         </resources>
     </acl>

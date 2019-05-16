@@ -2,7 +2,9 @@
   "name": "bazaarvoice/bazaarvoice-magento2-ext",
   "description": "Bazaarvoice Magento 2 Integration Extension",
   "type": "magento2-module",
-  "license": [ "MIT" ],
+  "license": [
+    "MIT"
+  ],
   "version": "7.2.2",
   "autoload": {
     "files": [

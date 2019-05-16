@@ -1,50 +1,45 @@
 <?php
-/**
- * StoreFront Bazaarvoice Extension for Magento
- *
- * PHP Version 5
- *
- * LICENSE: This source file is subject to commercial source code license
- * of StoreFront Consulting, Inc.
- *
- * @category  SFC
- * @package   Bazaarvoice_Ext
- * @author    Dennis Rogers <dennis@storefrontconsulting.com>
- * @copyright 2016 StoreFront Consulting, Inc
- * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
- * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
- */
+declare(strict_types=1);
+
 namespace Bazaarvoice\Connector\Controller\Adminhtml\Bvfeed;
 
 use Bazaarvoice\Connector\Model\Indexer\Flat;
+use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 
-class Rebuildproduct extends \Magento\Backend\App\Action
+/**
+ * Class Rebuildproduct
+ *
+ * @package Bazaarvoice\Connector\Controller\Adminhtml\Bvfeed
+ */
+class Rebuildproduct extends Action
 {
 
-    /** @var  Flat $_indexer */
-    protected $_indexer;
+    /** @var  Flat $indexer */
+    protected $indexer;
 
     /**
      * Runproduct constructor.
+     *
      * @param Context $context
-     * @param Flat $indexer
+     * @param Flat    $indexer
      */
     public function __construct(Context $context, Flat $indexer)
     {
         parent::__construct($context);
-        $this->_indexer = $indexer;
+        $this->indexer = $indexer;
     }
 
-	/**
-	 * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface|void
-	 * @throws \Magento\Setup\Exception
-	 */
-	public function execute()
+    /**
+     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface|void
+     * @throws \Exception
+     */
+    public function execute()
     {
-        $result = $this->_indexer->executeFull();
-        if ($result)
+        $result = $this->indexer->executeFull();
+        if ($result) {
             $this->messageManager->addSuccessMessage(__('Product Feed Index is being rebuilt.'));
+        }
 
         $this->_redirect('adminhtml/bvindex/index');
     }

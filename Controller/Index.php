@@ -1,38 +1,44 @@
 <?php
-/**
- * StoreFront Bazaarvoice Extension for Magento
- *
- * PHP Version 5
- *
- * LICENSE: This source file is subject to commercial source code license
- * of StoreFront Consulting, Inc.
- *
- * @category  SFC
- * @package   Bazaarvoice_Ext
- * @author    Dennis Rogers <dennis@storefrontconsulting.com>
- * @copyright 2016 StoreFront Consulting, Inc
- * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
- * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
- */
+declare(strict_types=1);
 
 namespace Bazaarvoice\Connector\Controller;
 
-use Magento\Framework\View\Result\PageFactory;
+use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
+use Magento\Framework\View\Result\PageFactory;
 
-class Index extends \Magento\Framework\App\Action\Action
+/**
+ * Class Index
+ *
+ * @package Bazaarvoice\Connector\Controller
+ */
+class Index extends Action
 {
+    /**
+     * @var \Magento\Framework\View\Result\PageFactory
+     */
     protected $_pageFactory;
 
+    /**
+     * Index constructor.
+     *
+     * @param \Magento\Framework\App\Action\Context      $context
+     * @param \Magento\Framework\View\Result\PageFactory $pageFactory
+     */
     public function __construct(Context $context, PageFactory $pageFactory)
     {
         $this->_pageFactory = $pageFactory;
+
         return parent::__construct($context);
     }
 
+    /**
+     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface|\Magento\Framework\View\Result\Page
+     */
     public function execute()
     {
         $page = $this->_pageFactory->create();
+
         return $page;
     }
 }

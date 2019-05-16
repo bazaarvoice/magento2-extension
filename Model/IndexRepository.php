@@ -1,18 +1,25 @@
 <?php
+declare(strict_types=1);
 
 namespace Bazaarvoice\Connector\Model;
 
 use Bazaarvoice\Connector\Api\Data\IndexInterface;
 use Bazaarvoice\Connector\Api\IndexRepositoryInterface;
 use Bazaarvoice\Connector\Model\ResourceModel\Index\CollectionFactory;
+use Exception;
 use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Framework\Api\SearchResultsInterfaceFactory;
+use Magento\Framework\Api\SortOrder;
 use Magento\Framework\Exception\CouldNotDeleteException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
 
-class IndexRepository
-    implements IndexRepositoryInterface
+/**
+ * Class IndexRepository
+ *
+ * @package Bazaarvoice\Connector\Model
+ */
+class IndexRepository implements IndexRepositoryInterface
 {
     /**
      * @var \Bazaarvoice\Connector\Model\IndexFactory
@@ -53,7 +60,6 @@ class IndexRepository
         $this->resourceModel = $resourceModel;
     }
 
-
     /**
      * @param \Bazaarvoice\Connector\Api\Data\IndexInterface $object
      *
@@ -63,8 +69,9 @@ class IndexRepository
     public function save(IndexInterface $object)
     {
         try {
+            /** @noinspection PhpParamsInspection */
             $this->resourceModel->save($object);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new CouldNotSaveException(__($e->getMessage()));
         }
 
@@ -92,8 +99,9 @@ class IndexRepository
     public function delete(IndexInterface $object)
     {
         try {
+            /** @noinspection PhpParamsInspection */
             $this->resourceModel->delete($object);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             throw new CouldNotDeleteException(__($exception->getMessage()));
         }
 
@@ -111,8 +119,10 @@ class IndexRepository
         $object = $this->objectFactory->create();
         $object->load($id);
         if (!$object->getId()) {
-            throw new NoSuchEntityException(__('Object with id "%1" does not exist.',
-                $id));
+            throw new NoSuchEntityException(__(
+                'Object with id "%1" does not exist.',
+                $id
+            ));
         }
 
         return $object;
@@ -179,6 +189,7 @@ class IndexRepository
      * @param $scope
      *
      * @return mixed
+     * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getByProductIdStoreIdScope($productId, $storeId, $scope)
@@ -186,8 +197,12 @@ class IndexRepository
         $object = $this->objectFactory->create();
         $object->loadByStore($productId, $storeId, $scope);
         if (!$object->getId()) {
-            throw new NoSuchEntityException(__('Object with product ID "%1", store ID "%2", scope "%3" does not exist.',
-                $productId, $storeId, $scope));
+            throw new NoSuchEntityException(__(
+                'Object with product ID "%1", store ID "%2", scope "%3" does not exist.',
+                $productId,
+                $storeId,
+                $scope
+            ));
         }
 
         return $object;

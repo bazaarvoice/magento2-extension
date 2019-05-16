@@ -1,48 +1,44 @@
 <?php
-/**
- * StoreFront Bazaarvoice Extension for Magento
- *
- * PHP Version 5
- *
- * LICENSE: This source file is subject to commercial source code license
- * of StoreFront Consulting, Inc.
- *
- * @category  SFC
- * @package   Bazaarvoice_Ext
- * @author    Dennis Rogers <dennis@storefrontconsulting.com>
- * @copyright 2016 StoreFront Consulting, Inc
- * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
- * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
- */
+declare(strict_types=1);
 
 namespace Bazaarvoice\Connector\Model\Source;
 
-class Scope
+use Magento\Framework\Data\OptionSourceInterface;
+
+/**
+ * Class Scope
+ *
+ * @package Bazaarvoice\Connector\Model\Source
+ */
+class Scope implements OptionSourceInterface
 {
     const SCOPE_GLOBAL = 'global';
     const WEBSITE = 'website';
     const STORE_GROUP = 'group';
     const STORE_VIEW = 'view';
 
+    /**
+     * @return array
+     */
     public function toOptionArray()
     {
-        return array(
-            array(
+        return [
+            [
                 'value' => self::SCOPE_GLOBAL,
-                'label' => __('Global')
-            ),
-            array(
+                'label' => __('Global'),
+            ],
+            [
                 'value' => self::WEBSITE,
-                'label' => __('Magento Website')
-            ),
-            array(
+                'label' => __('Magento Website'),
+            ],
+            [
                 'value' => self::STORE_GROUP,
-                'label' => __('Magento Store / Store Group')
-            ),
-            array(
+                'label' => __('Magento Store / Store Group'),
+            ],
+            [
                 'value' => self::STORE_VIEW,
-                'label' => __('Magento Store View')
-            ),
-        );
+                'label' => __('Magento Store View'),
+            ],
+        ];
     }
 }
