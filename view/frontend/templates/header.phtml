@@ -1,6 +1,9 @@
-<?php /** @var Bazaarvoice\Connector\Block\Reviews $this */ ?>
-<?php if ($this->isEnabled()) : ?>
-<?php $bvApiUrl = $this->helper->getBvApiHostUrl(true); ?>
+<?php /** @var Magento\Framework\View\Element\Template $block */ ?>
+<?php /** @var Bazaarvoice\Connector\ViewModel\Header $viewModel */ ?>
+<?php $viewModel = $block->getViewModel(); ?>
+
+<?php if ($viewModel->isBvEnabled()): ?>
+    <?php $bvApiUrl = $viewModel->getConfigProvider()->getBvApiHostUrl(); ?>
     <!--suppress HtmlUnknownTarget -->
-    <script async type="text/javascript" src="<?php echo $bvApiUrl ?>"></script>
-<?php endif;
+    <script async type="text/javascript" src="<?= $bvApiUrl; ?>"></script>
+<?php endif; ?>

@@ -6,24 +6,14 @@ namespace Bazaarvoice\Connector\Plugin\ProductList;
 use Bazaarvoice\Connector\Model\Source\ProductList;
 
 /**
- * StoreFront Bazaarvoice Extension for Magento
+ * Class Crosssell
  *
- * PHP Version 5
- *
- * LICENSE: This source file is subject to commercial source code license
- * of StoreFront Consulting, Inc.
- *
- * @category  SFC
- * @package   Bazaarvoice_Ext
- * @author    Dennis Rogers <dennis@storefrontconsulting.com>
- * @copyright 2016 StoreFront Consulting, Inc
- * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
- * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
+ * @package Bazaarvoice\Connector\Plugin\ProductList
  */
-
-namespace Bazaarvoice\Connector\Block\ProductList;
-
 class Crosssell extends Item
 {
-    protected $_type = \Bazaarvoice\Connector\Model\Source\ProductList::CROSSSELL;
+    /**
+     * @var string
+     */
+    protected $type = ProductList::CROSSSELL;
 }

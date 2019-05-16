@@ -6,14 +6,14 @@ namespace Bazaarvoice\Connector\Plugin\ProductList;
 use Bazaarvoice\Connector\Model\Source\ProductList;
 
 /**
- * Class Related
+ * Class Search
  *
  * @package Bazaarvoice\Connector\Plugin\ProductList
  */
-class Related extends Item
+class Search extends Item
 {
     /**
      * @var string
      */
-    protected $type = ProductList::RELATED;
+    protected $type = ProductList::CATEGORY;
 }

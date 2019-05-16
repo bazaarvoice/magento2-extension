@@ -1,8 +1,11 @@
 <?php
+declare(strict_types=1);
 
-namespace Bazaarvoice\Connector\Block;
+namespace Bazaarvoice\Connector\ViewModel;
 
-use Bazaarvoice\Connector\Helper\Data;
+use Bazaarvoice\Connector\Api\ConfigProviderInterface;
+use Bazaarvoice\Connector\Api\StringFormatterInterface;
+use Exception;
 use Magento\Catalog\Helper\Image;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\Catalog\Model\ProductRepository;
@@ -10,56 +13,90 @@ use Magento\Checkout\Model\Session;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Directory\Model\Region;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\View\Element\Template;
-use Magento\Framework\View\Element\Template\Context;
+use Magento\Framework\View\Element\Block\ArgumentInterface;
 
-class Pixel extends Template
+/**
+ * Class Pixel
+ *
+ * @package Bazaarvoice\Connector\ViewModel
+ */
+class Pixel implements ArgumentInterface
 {
-    protected $helper;
-    protected $checkoutSession;
-    protected $imageHelper;
-    protected $region;
-    protected $productRepository;
+
+    /**
+     * @var \Magento\Checkout\Model\Session
+     */
+    private $checkoutSession;
+    /**
+     * @var \Magento\Catalog\Helper\Image
+     */
+    private $imageHelper;
+    /**
+     * @var \Magento\Directory\Model\Region
+     */
+    private $region;
+    /**
+     * @var \Magento\Catalog\Model\ProductRepository
+     */
+    private $productRepository;
+    /**
+     * @var
+     */
     private $orderDetails;
+    /**
+     * @var ConfigProviderInterface
+     */
+    private $configProvider;
+    /**
+     * @var StringFormatterInterface
+     */
+    private $stringFormatter;
 
     /**
      * Pixel constructor.
      *
-     * @param \Magento\Framework\View\Element\Template\Context $context
-     * @param \Bazaarvoice\Connector\Helper\Data               $helper
-     * @param \Magento\Catalog\Helper\Image                    $imageHelper
-     * @param \Magento\Checkout\Model\Session                  $checkoutSession
-     * @param \Magento\Directory\Model\Region                  $region
-     * @param \Magento\Catalog\Model\ProductRepository         $productRepo
-     * @param array                                            $data
+     * @param ConfigProviderInterface                  $configProvider
+     * @param StringFormatterInterface                 $stringFormatter
+     * @param \Magento\Catalog\Helper\Image            $imageHelper
+     * @param \Magento\Checkout\Model\Session          $checkoutSession
+     * @param \Magento\Directory\Model\Region          $region
+     * @param \Magento\Catalog\Model\ProductRepository $productRepository
      */
     public function __construct(
-        Context $context,
-        Data $helper,
+        ConfigProviderInterface $configProvider,
+        StringFormatterInterface $stringFormatter,
         Image $imageHelper,
         Session $checkoutSession,
         Region $region,
-        ProductRepository $productRepo,
-        array $data = []
+        ProductRepository $productRepository
     ) {
-        $this->helper = $helper;
         $this->checkoutSession = $checkoutSession;
         $this->imageHelper = $imageHelper;
         $this->region = $region;
-        $this->productRepository = $productRepo;
-        parent::__construct($context, $data);
+        $this->productRepository = $productRepository;
+        $this->configProvider = $configProvider;
+        $this->stringFormatter = $stringFormatter;
     }
 
+    /**
+     * @return mixed
+     */
     public function getBvPixelEnabled()
     {
-        return $this->helper->getConfig('general/enable_bvpixel');
+        return $this->configProvider->isBvPixelEnabled();
     }
 
+    /**
+     * @return false|string
+     */
     public function getJsonOrderDetails()
     {
         return json_encode($this->getOrderDetails(), JSON_UNESCAPED_UNICODE);
     }
 
+    /**
+     * @return mixed
+     */
     public function getOrderDetails()
     {
         /** @var \Magento\Sales\Model\Order $order */
@@ -83,9 +120,9 @@ class Pixel extends Template
         $this->orderDetails['state'] = $this->region->load($address->getRegionId())->getCode();
         $this->orderDetails['country'] = $address->getCountryId();
 
-        $this->orderDetails['items'] = array();
+        $this->orderDetails['items'] = [];
         /** if families are enabled, get all items */
-        if ($this->helper->getConfig('general/families')) {
+        if ($this->configProvider->isFamiliesEnabled()) {
             $items = $order->getAllItems();
         } else {
             $items = $order->getAllVisibleItems();
@@ -97,24 +134,26 @@ class Pixel extends Template
                 continue;
             }
             /** skip configurable items if families are enabled */
-            if (
-                $this->helper->getConfig('general/families')
+            if ($this->configProvider->isFamiliesEnabled()
                 && $product->getTypeId() == Configurable::TYPE_CODE) {
                 continue;
             }
 
-            $itemDetails = array();
-            $itemDetails['sku'] = $this->helper->getProductId($product);
+            $itemDetails = [];
+            $itemDetails['sku'] = $this->stringFormatter->getFormattedProductSku($product);
 
             $itemDetails['name'] = $item->getName();
-            /** 'category' is not included.  Mage products can be in 0 - many categories.  Should we try to include it? */
+            /** 'category' is not included.
+             * Mage products can be in 0 - many categories.
+             * Should we try to include it?
+             */
             $itemDetails['price'] = number_format($item->getPrice(), 2, '.', '');
             $itemDetails['quantity'] = number_format($item->getQtyOrdered(), 0);
             $itemDetails['imageURL'] = $this->imageHelper->init($product, 'product_small_image')
                 ->setImageFile($product->getSmallImage())->getUrl();
 
-            if ($this->helper->getConfig('general/families') && $item->getParentItem()) {
-                if (strpos($itemDetails['imageURL'], 'placeholder/image.jpg')) {
+            if ($this->configProvider->isFamiliesEnabled() && $item->getParentItem()) {
+                if (strpos($itemDetails['imageURL'], 'placeholder/image.jpg') !== false) {
                     /** if product families are enabled and product has no image, use configurable image */
                     $parentId = $item->getParentItem()->getProductId();
                     try {
@@ -141,12 +180,15 @@ class Pixel extends Template
             ? $order->getCustomerFirstname()
             : $order->getBillingAddress()->getFirstname();
         /** There is no 'deliveryDate' yet */
-        $this->orderDetails['locale'] = $this->helper->getConfig('general/locale', $order->getStoreId());
+        $this->orderDetails['locale'] = $this->configProvider->getLocale($order->getStoreId());
 
         /** Add partnerSource field */
-        $this->orderDetails['partnerSource'] = 'Magento Extension r'.$this->helper->getExtensionVersion();
-        $this->orderDetails['deploymentZone'] = strtolower(str_replace(' ', '_',
-            $this->helper->getConfig('general/deployment_zone')));
+        $this->orderDetails['partnerSource'] = 'Magento Extension r'.$this->configProvider->getExtensionVersion();
+        $this->orderDetails['deploymentZone'] = strtolower(str_replace(
+            ' ',
+            '_',
+            $this->configProvider->getDeploymentZone()
+        ));
 
         return $this->orderDetails;
     }
@@ -172,7 +214,7 @@ class Pixel extends Template
                 try {
                     $parentId = $options['super_product_config']['product_id'];
                     $product = $this->productRepository->getById($parentId);
-                } catch (\Exception $ex) {
+                } catch (Exception $ex) {
                 }
             }
         }
@@ -180,11 +222,17 @@ class Pixel extends Template
         return $product;
     }
 
+    /**
+     * @return bool
+     */
     public function canShowDebugDetails()
     {
-        return ($this->helper->getConfig('general/environment') == 'staging');
+        return ($this->configProvider->getEnvironment() == 'staging');
     }
 
+    /**
+     * @return mixed
+     */
     public function getDebugDetails()
     {
         return print_r($this->getOrderDetails(), true);

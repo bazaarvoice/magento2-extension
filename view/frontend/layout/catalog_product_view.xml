@@ -2,20 +2,32 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceContainer name="after.body.start">
-            <block class="Bazaarvoice\Connector\Block\Reviews" name="bazaarvoice.product.header" as="bv_productheader" template="Bazaarvoice_Connector::productheader.phtml" />
-        </referenceContainer>
-        <referenceContainer name="product.info.main">
-            <block class="Bazaarvoice\Connector\Block\Reviews" name="bazaarvoice.reviews.summary" as="bv_summary" template="Bazaarvoice_Connector::rr/summary.phtml" after="product.info.price" />
-        </referenceContainer>
-        <referenceBlock name="product.info.details">
-            <block class="Bazaarvoice\Connector\Block\Reviews" name="bazaarvoice.reviews.tab" as="bv_reviews" template="Bazaarvoice_Connector::rr/reviews.phtml" group="detailed_info" after="reviews">
+            <block class="Magento\Framework\View\Element\Template" name="bazaarvoice.product.header" as="bv_productheader" template="Bazaarvoice_Connector::productheader.phtml">
                 <arguments>
-                    <argument translate="true" name="title" xsi:type="string">Reviews</argument>
+                    <argument name="view_model" xsi:type="object">Bazaarvoice\Connector\ViewModel\Product</argument>
                 </arguments>
             </block>
-            <block class="Bazaarvoice\Connector\Block\Questions" name="bazaarvoice.questions.tab" as="bv_questions" template="Bazaarvoice_Connector::qa/questions.phtml" group="detailed_info" after="bv_reviews">
+        </referenceContainer>
+        <referenceContainer name="product.info.main">
+            <block class="Magento\Framework\View\Element\Template" name="bazaarvoice.reviews.summary" as="bv_summary" template="Bazaarvoice_Connector::rr/summary.phtml" after="product.info.price">
                 <arguments>
+                    <argument name="view_model" xsi:type="object">Bazaarvoice\Connector\ViewModel\Reviews</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+        <referenceBlock name="product.info.details">
+            <block class="Magento\Framework\View\Element\Template" name="bazaarvoice.reviews.tab" as="bv_reviews" template="Bazaarvoice_Connector::rr/reviews.phtml" group="detailed_info" after="reviews">
+                <arguments>
+                    <argument name="view_model" xsi:type="object">Bazaarvoice\Connector\ViewModel\Reviews</argument>
+                    <argument translate="true" name="title" xsi:type="string">Reviews</argument>
+                    <argument name="sort_order" xsi:type="string">100</argument>
+                </arguments>
+            </block>
+            <block class="Magento\Framework\View\Element\Template" name="bazaarvoice.questions.tab" as="bv_questions" template="Bazaarvoice_Connector::qa/questions.phtml" group="detailed_info" after="bv_reviews">
+                <arguments>
+                    <argument name="view_model" xsi:type="object">Bazaarvoice\Connector\ViewModel\Questions</argument>
                     <argument translate="true" name="title" xsi:type="string">Questions</argument>
+                    <argument name="sort_order" xsi:type="string">110</argument>
                 </arguments>
             </block>
         </referenceBlock>
