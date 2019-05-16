@@ -110,4 +110,15 @@
 
     <preference for="Bazaarvoice\Connector\Api\Data\IndexInterface" type="Bazaarvoice\Connector\Model\Index"/>
     <preference for="Bazaarvoice\Connector\Api\IndexRepositoryInterface" type="Bazaarvoice\Connector\Model\IndexRepository"/>
+    <preference for="Bazaarvoice\Connector\Api\DccBuilderInterface" type="Bazaarvoice\Connector\Model\DccBuilder"/>
+    <preference for="Bazaarvoice\Connector\Api\Data\Dcc\CatalogDataInterface" type="Bazaarvoice\Connector\Model\Dcc\CatalogData"/>
+    <preference for="Bazaarvoice\Connector\Api\Data\Dcc\CatalogDataBuilderInterface" type="Bazaarvoice\Connector\Model\Dcc\CatalogDataBuilder"/>
+    <preference for="Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProductInterface" type="Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProduct"/>
+    <preference for="Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProductBuilderInterface" type="Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProductBuilder"/>
+    <preference for="Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct\CategoryPathInterface" type="Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProduct\CategoryPath"/>
+    <preference for="Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct\CategoryPathBuilderInterface" type="Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProduct\CategoryPathBuilder"/>
+    <preference for="Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct\FamilyInterface" type="Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProduct\Family"/>
+    <preference for="Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct\FamilyBuilderInterface" type="Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProduct\FamilyBuilder"/>
+    <preference for="Bazaarvoice\Connector\Api\StringFormatterInterface" type="Bazaarvoice\Connector\Model\StringFormatter"/>
+    <preference for="Bazaarvoice\Connector\Api\ConfigProviderInterface" type="Bazaarvoice\Connector\Model\ConfigProvider"/>
 </config>
