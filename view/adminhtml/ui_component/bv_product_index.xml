@@ -14,7 +14,8 @@
                 <item name="class" xsi:type="string">primary</item>
                 <item name="confirm" xsi:type="array">
                     <item name="title" xsi:type="string" translate="true">Rebuild Index</item>
-                    <item name="message" xsi:type="string" translate="true">Are you you want to rebuild the product feed index?</item>
+                    <item name="message" xsi:type="string" translate="true">Are you you want to rebuild the product feed index?
+                    </item>
                 </item>
             </item>
         </item>
@@ -40,18 +41,17 @@
             </item>
         </argument>
     </dataSource>
-
     <listingToolbar name="listing_top">
-		<argument name="data" xsi:type="array">
-			<item name="config" xsi:type="array">
-				<item name="sticky" xsi:type="boolean">true</item>
-			</item>
-		</argument>
-		<bookmark name="bookmark"/>
-		<columnsControls name="columns_controls"/>
-		<filters name="listing_filters"/>
-		<paging name="listing_paging"/>
-	</listingToolbar>
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="sticky" xsi:type="boolean">true</item>
+            </item>
+        </argument>
+        <bookmark name="bookmark"/>
+        <columnsControls name="columns_controls"/>
+        <filters name="listing_filters"/>
+        <paging name="listing_paging"/>
+    </listingToolbar>
     <columns name="bv_product_index_columns">
         <column name="entity_id">
             <argument name="data" xsi:type="array">

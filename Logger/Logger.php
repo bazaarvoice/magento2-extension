@@ -1,87 +1,90 @@
 <?php
-/**
- * StoreFront Bazaarvoice Extension for Magento
- *
- * PHP Version 5
- *
- * LICENSE: This source file is subject to commercial source code license
- * of StoreFront Consulting, Inc.
- *
- * @category  SFC
- * @package   Bazaarvoice_Ext
- * @author    Dennis Rogers <dennis@storefrontconsulting.com>
- * @copyright 2016 StoreFront Consulting, Inc
- * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
- * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
- */
+declare(strict_types=1);
 
 namespace Bazaarvoice\Connector\Logger;
 
-use Bazaarvoice\Connector\Helper\Data;
+use Bazaarvoice\Connector\Api\ConfigProviderInterface;
+use Exception;
 use Magento\Framework\App\State;
 
+/**
+ * Class Logger
+ *
+ * @package Bazaarvoice\Connector\Logger
+ */
 class Logger extends \Monolog\Logger
 {
-    protected $_helper;
-	protected $admin = false;
+    /**
+     * @var bool
+     */
+    protected $admin = false;
+    /**
+     * @var ConfigProviderInterface
+     */
+    private $configProvider;
 
-	/**
-	 * Logger constructor.
-	 *
-	 * @param string $name
-	 * @param array|\Monolog\Handler\HandlerInterface[] $handlers
-	 * @param Data $helper
-	 * @param State $state
-	 *
-	 * @codingStandardsIgnoreStart
-	 */
+    /**
+     * Logger constructor.
+     *
+     * @param string                                    $name
+     * @param ConfigProviderInterface                   $configProvider
+     * @param State                                     $state
+     *
+     * @param array|\Monolog\Handler\HandlerInterface[] $handlers
+     *
+     * @codingStandardsIgnoreStart
+     */
     public function __construct(
-    	$name,
-	    array $handlers = array(),
-	    Data $helper,
-		State $state
+        $name,
+        ConfigProviderInterface $configProvider,
+        State $state,
+        array $handlers = array()
     ) {
-        /** @codingStandardsIgnoreEnd */
-        $this->_helper = $helper;
         try {
-	        $this->admin = $state->getAreaCode() === 'adminhtml';
-        } Catch (\Exception $e) { }
+            $this->admin = $state->getAreaCode() === 'adminhtml';
+        } catch (Exception $e) {
+        }
         parent::__construct($name, $handlers);
+        $this->configProvider = $configProvider;
+        /** @codingStandardsIgnoreEnd */
     }
 
     /**
      * @param string|array $message
-     * @param array $context
+     * @param array        $context
+     *
      * @return bool
      */
-    public function debug($message, array $context = array())
+    public function debug($message, array $context = [])
     {
-        if ($this->_helper->getConfig('general/debug') == true)
+        if ($this->configProvider->isDebugEnabled()) {
             return $this->addRecord(static::DEBUG, $message, $context);
+        }
 
         return true;
     }
 
     /**
-     * @param int $level
+     * @param int    $level
      * @param string $message
-     * @param array $context
+     * @param array  $context
+     *
      * @return bool
      */
-    public function addRecord($level, $message, array $context = array())
+    public function addRecord($level, $message, array $context = [])
     {
-        if (is_array($message))
-            $message = print_r($message, 1);
+        if (is_array($message)) {
+            // phpcs:ignore
+            $message = print_r($message, $return = true);
+        }
 
-        if (
-        	php_sapi_name() == "cli"
-	        || $this->admin
+        if (php_sapi_name() == "cli"
+            || $this->admin
         ) {
+            // phpcs:ignore
             echo $message."\n";
         }
 
         return parent::addRecord($level, $message, $context);
     }
-
-
 }

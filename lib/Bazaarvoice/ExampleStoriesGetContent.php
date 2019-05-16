@@ -1,25 +1,26 @@
 <?php
+// phpcs:ignoreFile
 //Please provide cloud_key, bv_root_folder and subject_id
 require('bvseosdk.php');
-$bv = new BV(array(
-  'bv_root_folder' => '',
-  'subject_id' => '',
-  'cloud_key' => '',
-  // either STORIES_LIST or STORIES_GRID
-  'content_sub_type' => 'stories_grid',
-  'staging' => TRUE
-));
+$bv = new BV([
+    'bv_root_folder'   => '',
+    'subject_id'       => '',
+    'cloud_key'        => '',
+    // either STORIES_LIST or STORIES_GRID
+    'content_sub_type' => 'stories_grid',
+    'staging'          => true,
+]);
 ?><!DOCTYPE html>
 <html>
-  <head>
+<head>
     <title>BV SDK PHP Example - GetContent</title>
-  </head>
-  <body>
-    This is a test page for Stories: getContent() <br>
-    GetContent() will return stories_grid content <br><br>
+</head>
+<body>
+This is a test page for Stories: getContent() <br>
+GetContent() will return stories_grid content <br><br>
 
-    <div id="BVRRContainer">
-      <?php echo $bv->stories->getContent(); ?>
-    </div>
-  </body>
+<div id="BVRRContainer">
+    <?php echo $bv->stories->getContent(); ?>
+</div>
+</body>
 </html>

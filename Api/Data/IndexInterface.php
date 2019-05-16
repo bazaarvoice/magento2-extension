@@ -1,7 +1,13 @@
 <?php
+declare(strict_types=1);
 
 namespace Bazaarvoice\Connector\Api\Data;
 
+/**
+ * Interface IndexInterface
+ *
+ * @package Bazaarvoice\Connector\Api\Data
+ */
 interface IndexInterface
 {
     /**

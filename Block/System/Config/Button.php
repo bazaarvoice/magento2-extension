@@ -1,37 +1,28 @@
 <?php
-/**
- * StoreFront Bazaarvoice Extension for Magento
- *
- * PHP Version 5
- *
- * LICENSE: This source file is subject to commercial source code license
- * of StoreFront Consulting, Inc.
- *
- * @category  SFC
- * @package   Bazaarvoice_Ext
- * @author    Dennis Rogers <dennis@storefrontconsulting.com>
- * @copyright 2016 StoreFront Consulting, Inc
- * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
- * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
- */
+declare(strict_types=1);
 
 namespace Bazaarvoice\Connector\Block\System\Config;
+
+use Magento\Config\Block\System\Config\Form\Field;
+use Magento\Framework\Data\Form\Element\AbstractElement;
+
 /**
  * Class Export
  */
-class Button extends \Magento\Config\Block\System\Config\Form\Field
+class Button extends Field
 {
     /**
      * Retrieve element HTML markup
      *
      * @param \Magento\Framework\Data\Form\Element\AbstractElement $element
+     *
      * @return string
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    protected function _getElementHtml(\Magento\Framework\Data\Form\Element\AbstractElement $element)
+    protected function _getElementHtml(AbstractElement $element)
     {
-        /** @var \Magento\Backend\Block\Widget\Button $buttonBlock  */
-        $buttonBlock = $this->getForm()->getLayout()->createBlock('Magento\Backend\Block\Widget\Button');
+        /** @var \Magento\Backend\Block\Widget\Button $buttonBlock */
+        $buttonBlock = $this->getForm()->getLayout()->createBlock(\Magento\Backend\Block\Widget\Button::class);
 
         $originalData = $element->getOriginalData();
 
@@ -41,13 +32,13 @@ class Button extends \Magento\Config\Block\System\Config\Form\Field
         $url = $this->getUrl($url);
 
         $data = [
-            'id' => $buttonId,
-            'label' => $buttonLabel,
-            'onclick' => "window.open('" . $url . "')",
+            'id'      => $buttonId,
+            'label'   => $buttonLabel,
+            'onclick' => "window.open('".$url."')",
         ];
 
         $html = $buttonBlock->setData($data)->toHtml();
+
         return $html;
     }
-    
 }

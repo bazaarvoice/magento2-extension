@@ -1,25 +1,19 @@
 <?php
-/**
- * StoreFront Bazaarvoice Extension for Magento
- *
- * PHP Version 5
- *
- * LICENSE: This source file is subject to commercial source code license
- * of StoreFront Consulting, Inc.
- *
- * @category  SFC
- * @package   Bazaarvoice_Connector
- * @author    Dennis Rogers <dennis@storefrontconsulting.com>
- * @copyright 2016 StoreFront Consulting, Inc
- * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
- * @link      http://www.StoreFrontConsulting.com/
- */
-
+// phpcs:ignoreFile
+declare(strict_types=1);
 
 namespace Bazaarvoice\Connector\Helper;
 
-require_once __DIR__ . '/../lib/Bazaarvoice/bvseosdk.php';
+use BV;
 
-class Seosdk extends \BV
+// phpcs:ignore
+require_once __DIR__.'/../lib/Bazaarvoice/bvseosdk.php';
+
+/**
+ * Class Seosdk
+ *
+ * @package Bazaarvoice\Connector\Helper
+ */
+class Seosdk extends BV
 {
 }

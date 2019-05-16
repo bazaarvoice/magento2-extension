@@ -1,45 +1,43 @@
 <?php
-/**
- * StoreFront Bazaarvoice Extension for Magento
- *
- * PHP Version 5
- *
- * LICENSE: This source file is subject to commercial source code license
- * of StoreFront Consulting, Inc.
- *
- * @category  SFC
- * @package   Bazaarvoice_Ext
- * @author    Dennis Rogers <dennis@storefrontconsulting.com>
- * @copyright 2016 StoreFront Consulting, Inc
- * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
- * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
- */
+declare(strict_types=1);
 
 namespace Bazaarvoice\Connector\Controller\Adminhtml\Bvfeed;
 
 use Bazaarvoice\Connector\Model\Feed\ProductFeed;
+use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 
-class Runproduct extends \Magento\Backend\App\Action
+/**
+ * Class Runproduct
+ *
+ * @package Bazaarvoice\Connector\Controller\Adminhtml\Bvfeed
+ */
+class Runproduct extends Action
 {
-
-    /** @var  ProductFeed $_productFeed */
-    protected $_productFeed;
+    /**
+     * @var \Bazaarvoice\Connector\Model\Feed\ProductFeed
+     */
+    private $productFeed;
 
     /**
      * Runproduct constructor.
-     * @param Context $context
+     *
+     * @param Context       $context
      * @param ProductFeed $productFeed
      */
     public function __construct(Context $context, ProductFeed $productFeed)
     {
+        $this->productFeed = $productFeed;
         parent::__construct($context);
-        $this->_productFeed = $productFeed;
     }
 
+    /**
+     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface|void
+     */
     public function execute()
     {
+        // phpcs:ignore
         echo '<pre>';
-        $this->_productFeed->generateFeed(false, true);
+        $this->productFeed->setForce(true)->generateFeed();
     }
 }

@@ -1,34 +1,25 @@
 <?php
-/**
- * StoreFront Bazaarvoice Extension for Magento
- *
- * PHP Version 5
- *
- * LICENSE: This source file is subject to commercial source code license
- * of StoreFront Consulting, Inc.
- *
- * @category  SFC
- * @package   Bazaarvoice_Ext
- * @author    Dennis Rogers <dennis@storefrontconsulting.com>
- * @copyright 2016 StoreFront Consulting, Inc
- * @license   http://www.storefrontconsulting.com/media/downloads/ExtensionLicense.pdf StoreFront Consulting Commercial License
- * @link      http://www.StoreFrontConsulting.com/bazaarvoice-extension/
- */
+declare(strict_types=1);
 
 namespace Bazaarvoice\Connector\Setup;
 
-use Magento\Framework\App\State;
-use Magento\Framework\Setup;
-use Magento\Framework\ObjectManagerInterface;
 use Bazaarvoice\Connector;
-use Magento\Sales\Setup\SalesSetup;
-use Magento\Sales\Setup\SalesSetupFactory;
+use Magento\Catalog\Model\Product;
 use Magento\Catalog\Setup\CategorySetup;
 use Magento\Catalog\Setup\CategorySetupFactory;
+use Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface;
+use Magento\Eav\Model\Entity\Attribute\Source\Boolean;
+use Magento\Framework\DB\Ddl\Table;
+use Magento\Framework\Setup;
 use Magento\Sales\Model\Order;
-use Magento\Catalog\Model\Product;
+use Magento\Sales\Setup\SalesSetup;
+use Magento\Sales\Setup\SalesSetupFactory;
 
-
+/**
+ * Class InstallData
+ *
+ * @package Bazaarvoice\Connector\Setup
+ */
 class InstallData implements Setup\InstallDataInterface
 {
     /** @var SalesSetupFactory */
@@ -38,7 +29,7 @@ class InstallData implements Setup\InstallDataInterface
     protected $categorySetupFactory;
 
     /**
-     * @param SalesSetupFactory $salesSetupFactory
+     * @param SalesSetupFactory    $salesSetupFactory
      * @param CategorySetupFactory $categorySetupFactory
      */
     public function __construct(
@@ -62,10 +53,10 @@ class InstallData implements Setup\InstallDataInterface
             Order::ENTITY,
             Connector\Model\Feed\PurchaseFeed::ALREADY_SENT_IN_FEED_FLAG,
             [
-                'type' =>  \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
-                'visible' => false,
+                'type'     => Table::TYPE_INTEGER,
+                'visible'  => false,
                 'required' => false,
-                'default' => 0
+                'default'  => 0,
             ]
         );
 
@@ -76,29 +67,29 @@ class InstallData implements Setup\InstallDataInterface
             Product::ENTITY,
             Connector\Model\Feed\ProductFeed::INCLUDE_IN_FEED_FLAG,
             [
-                'group' => 'Product Details',
-                'type' =>  'int',
-                'frontend' => '',
-                'label' => 'Send in Bazaarvoice Product Feed',
-                'input' => 'boolean',
-                'class' => '',
-                'source' => 'Magento\Eav\Model\Entity\Attribute\Source\Boolean',
-                'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_STORE,
-                'visible' => true,
-                'required' => false,
-                'user_defined' => false,
-                'default' => \Magento\Eav\Model\Entity\Attribute\Source\Boolean::VALUE_NO,
-                'apply_to' => '',
-                'visible_on_front' => false,
-                'is_used_in_grid' => true,
-                'is_visible_in_grid' => false,
-                'is_filterable_in_grid' => false,
-                'used_in_product_listing' => true
+                'group'                   => 'Product Details',
+                'type'                    => 'int',
+                'frontend'                => '',
+                'label'                   => 'Send in Bazaarvoice Product Feed',
+                'input'                   => 'boolean',
+                'class'                   => '',
+                'source'                  => 'Magento\Eav\Model\Entity\Attribute\Source\Boolean',
+                'global'                  => ScopedAttributeInterface::SCOPE_STORE,
+                'visible'                 => true,
+                'required'                => false,
+                'user_defined'            => false,
+                'default'                 => Boolean::VALUE_NO,
+                'apply_to'                => '',
+                'visible_on_front'        => false,
+                'is_used_in_grid'         => true,
+                'is_visible_in_grid'      => false,
+                'is_filterable_in_grid'   => false,
+                'used_in_product_listing' => true,
             ]
         );
 
         $groupName = 'Autosettings';
-        $entityTypeId = $eavSetup->getEntityTypeId(\Magento\Catalog\Model\Product::ENTITY);
+        $entityTypeId = $eavSetup->getEntityTypeId(Product::ENTITY);
         $attributeSetId = $eavSetup->getAttributeSetId($entityTypeId, 'Default');
 
         $attribute = $eavSetup->getAttribute($entityTypeId, Connector\Model\Feed\ProductFeed::INCLUDE_IN_FEED_FLAG);

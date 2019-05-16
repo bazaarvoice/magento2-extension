@@ -1,4 +1,10 @@
 <?php
+declare(strict_types=1);
+
+namespace Bazaarvoice\Connector\Plugin\ProductList;
+
+use Bazaarvoice\Connector\Model\Source\ProductList;
+
 /**
  * StoreFront Bazaarvoice Extension for Magento
  *
@@ -17,7 +23,7 @@
 
 namespace Bazaarvoice\Connector\Block\ProductList;
 
-class Crosssell extends Item
+class Related extends Item
 {
-    protected $_type = \Bazaarvoice\Connector\Model\Source\ProductList::CROSSSELL;
+    protected $_type = \Bazaarvoice\Connector\Model\Source\ProductList::RELATED;
 }
