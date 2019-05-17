@@ -82,7 +82,7 @@ class Reviews implements ArgumentInterface
      */
     public function getSeoContent()
     {
-        return $this->seoContent->getRrSeoContent();
+        return $this->seoContent->getRatingsReviewsSeoContent();
     }
 
     /**

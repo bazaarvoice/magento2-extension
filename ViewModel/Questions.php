@@ -66,7 +66,7 @@ class Questions implements ArgumentInterface
      */
     public function getSeoContent()
     {
-        return $this->seoContent->getQaSeoContent();
+        return $this->seoContent->getQuestionAnswerSeoContent();
     }
 
     /**
