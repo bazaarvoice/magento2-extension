@@ -3,7 +3,14 @@ declare(strict_types=1);
 
 namespace Bazaarvoice\Connector\Plugin\ProductList;
 
+use Bazaarvoice\Connector\Model\Source\ProductList;
+
+/**
+ * Class Related
+ *
+ * @package Bazaarvoice\Connector\Plugin\ProductList
+ */
 class Related extends Item
 {
-    protected $_type = \Bazaarvoice\Connector\Model\Source\ProductList::RELATED;
+    protected $type = ProductList::RELATED;
 }

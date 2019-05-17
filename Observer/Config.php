@@ -52,6 +52,6 @@ class Config implements ObserverInterface
     public function execute(EventObserver $observer)
     {
         // @codingStandardsIgnoreEnd
-        $this->messageManger->addNoticeMessage(__('Some configuration changes require the Bazaarvoice Product Feed Index to be rebuilt.  This can be done by running the bv:index magento command or click Rebuild Index in Catalog > Bazaarvoice Product Feed'));
+        $this->messageManger->addNoticeMessage(__('Some configuration changes may require rebuilding the Bazaarvoice Product Feed Index.  This can be done by running the bv:index magento command or clicking Rebuild Index in Catalog > Bazaarvoice Product Feed'));
     }
 }
