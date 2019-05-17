@@ -51,7 +51,7 @@ class Category extends AbstractSource
      */
     public function toOptionArray()
     {
-        return array_merge([['value' => '', 'label' => __('Please Select...')]], $this->getCategories());
+        return array_merge([['value' => '', 'label' => __('-- Please Select --')]], $this->getCategories());
     }
 
     /**
@@ -81,30 +81,26 @@ class Category extends AbstractSource
 
     /**
      * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     private function getCategories()
     {
         if (!$this->categories) {
-            try {
-                $this->categories = [];
-                $this->categoryCollection->addAttributeToSelect('name');
-                $this->categoryCollection->addAttributeToFilter('level', ['gt' => 1]);
-                /** @var \Magento\Catalog\Model\Category $category */
-                foreach ($this->categoryCollection as $category) {
-                    $names = [];
-                    foreach ($category->getParentCategories() as $parent) {
-                        $names[$parent->getId()] = $parent->getName();
-                    }
-                    $names[$category->getId()] = $category->getName();
-                    $name = implode('/', $names);
-                    $this->categories[] = [
-                        'value' => $category->getId(),
-                        'label' => $name,
-                    ];
+            $this->categories = [];
+            $this->categoryCollection->addAttributeToSelect('name');
+            $this->categoryCollection->addAttributeToFilter('level', ['gt' => 1]);
+            /** @var \Magento\Catalog\Model\Category $category */
+            foreach ($this->categoryCollection as $category) {
+                $names = [];
+                foreach ($category->getParentCategories() as $parent) {
+                    $names[$parent->getId()] = $parent->getName();
                 }
-                //phpcs:ignore
-            } catch (LocalizedException $e) {
-                //no-op
+                $names[$category->getId()] = $category->getName();
+                $name = implode('/', $names);
+                $this->categories[] = [
+                    'value' => $category->getId(),
+                    'label' => $name,
+                ];
             }
         }
 

@@ -1,7 +1,10 @@
-<?php /** @var \Bazaarvoice\Connector\Block\Reviews $this */ ?>
-<?php if ($this->isEnabled()) : ?>
+<?php /** @var Magento\Framework\View\Element\Template $block */ ?>
+<?php /** @var Bazaarvoice\Connector\ViewModel\Reviews $viewModel */ ?>
+<?php $viewModel = $block->getViewModel(); ?>
+
+<?php if ($viewModel->canShow()) : ?>
     <div data-bv-show="rating_summary"
-         data-bv-product-id="<?php echo $this->getProductSku() ?>">
-        <?php echo $this->getAggregateSEOContent() ?>
+         data-bv-product-id="<?= $viewModel->getProductSku() ?>">
+        <?= $viewModel->getAggregateSEOContent() ?>
     </div>
 <?php endif;

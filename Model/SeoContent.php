@@ -6,6 +6,7 @@ use Bazaarvoice\Connector\Api\ConfigProviderInterface;
 use Bazaarvoice\Connector\Api\StringFormatterInterface;
 use Bazaarvoice\Connector\Helper\Seosdk;
 use Bazaarvoice\Connector\Logger\Logger;
+use Bazaarvoice\Connector\Model\Source\Environment;
 use Exception;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\UrlInterface;
@@ -75,7 +76,7 @@ class SeoContent
     /**
      * @return string
      */
-    public function getQaSeoContent()
+    public function getQuestionAnswerSeoContent()
     {
         $bv = $this->getSeosdk();
         if ($bv) {
@@ -103,7 +104,7 @@ class SeoContent
     /**
      * @return false|string
      */
-    public function getRrSeoContent()
+    public function getRatingsReviewsSeoContent()
     {
         $bv = $this->getSeosdk();
         if ($bv) {
@@ -137,7 +138,7 @@ class SeoContent
      */
     private function getDebugSeoParams()
     {
-        if ($this->configProvider->getEnvironment() == 'staging') {
+        if ($this->configProvider->getEnvironment() == Environment::STAGING) {
             $params = $this->getParams();
             return '<!-- BV Reviews SEO Parameters: ' . json_encode($params) . '-->';
         }
@@ -186,7 +187,7 @@ class SeoContent
             /** BV provided value */
             'base_url'        => $baseUrl,
             'page_url'        => $productUrl,
-            'staging'         => ($this->configProvider->getEnvironment() == 'staging' ? true : false),
+            'staging'         => ($this->configProvider->getEnvironment() == Environment::STAGING ? true : false),
         ];
 
         $this->logger->debug('SEO Params: '.print_r($params, $return = true));

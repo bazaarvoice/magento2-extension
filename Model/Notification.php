@@ -45,32 +45,6 @@ class Notification implements MessageInterface
          * for this to be reliable. Find another way to track it.
          */
         return false;
-        /** @var \Magento\Cron\Model\ResourceModel\Schedule\Collection $schedule
-         * $schedule = $this->_scheduleFactory->create()->getCollection();
-         * $schedule->addFieldToFilter('job_code', Cron::JOB_CODE)->setOrder('executed_at', 'desc');
-         * if ($schedule->count() == 0) {
-         * return true;
-         * }
-         * /** @var Schedule $last
-         * $last = $schedule->getFirstItem();
-         * if (
-         * $last->getExecutedAt() == null ||
-         * $last->getFinishedAt() == null
-         * )
-         * return true;
-         *
-         * $now = new \DateTime();
-         * $executed = new \DateTime($last->getExecutedAt());
-         * $finished = new \DateTime($last->getFinishedAt());
-         *
-         * if (
-         * $now->diff($executed)->format('%a') > 10 ||
-         * $now->diff($finished)->format('%a') > 10
-         * )
-         * return true;
-         *
-         * return false;
-         * */
     }
 
     /**

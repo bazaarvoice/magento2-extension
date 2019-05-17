@@ -2,7 +2,11 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceContainer name="content">
-            <block class="Bazaarvoice\Connector\Block\Pixel" name="bazaarvoice.bvpixel" template="Bazaarvoice_Connector::checkout/onepage/success/bvpixel.phtml" />
+            <block class="Magento\Framework\View\Element\Template" name="bazaarvoice.bvpixel" template="Bazaarvoice_Connector::checkout/onepage/success/bvpixel.phtml">
+                <arguments>
+                    <argument name="view_model" xsi:type="object">Bazaarvoice\Connector\ViewModel\Reviews</argument>
+                </arguments>
+            </block>
         </referenceContainer>
     </body>
 </page>

@@ -37,7 +37,7 @@ class XMLWriter extends \XMLWriter
      */
     public function writeRaw($content = null, $cdata = false)
     {
-        $content = trim($content);
+        $content = trim((string)$content);
         if ($cdata) {
             $this->writeCdata($content);
         } else {

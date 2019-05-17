@@ -1,41 +1,40 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-
     <!-- block injection -->
     <!-- inline ratings -->
     <type name="Magento\Catalog\Block\Product\ListProduct">
-        <plugin name="bazaarvoice-category" type="Bazaarvoice\Connector\Block\ProductList\Category" sortOrder="100"/>
+        <plugin name="bazaarvoice-category" type="Bazaarvoice\Connector\Plugin\ProductList\Category" sortOrder="100"/>
     </type>
     <virtualType name="Magento\CatalogSearch\Block\SearchResult\ListProduct">
-        <plugin name="bazaarvoice-search" type="Bazaarvoice\Connector\Block\ProductList\Search" sortOrder="100"/>
+        <plugin name="bazaarvoice-search" type="Bazaarvoice\Connector\Plugin\ProductList\Search" sortOrder="100"/>
     </virtualType>
     <type name="Magento\Catalog\Block\Product\ProductList\Upsell">
-        <plugin name="bazaarvoice-upsell" type="Bazaarvoice\Connector\Block\ProductList\Upsell" sortOrder="100"/>
+        <plugin name="bazaarvoice-upsell" type="Bazaarvoice\Connector\Plugin\ProductList\Upsell" sortOrder="100"/>
     </type>
     <type name="Magento\Catalog\Block\Product\ProductList\Related">
-        <plugin name="bazaarvoice-related" type="Bazaarvoice\Connector\Block\ProductList\Related" sortOrder="100"/>
+        <plugin name="bazaarvoice-related" type="Bazaarvoice\Connector\Plugin\ProductList\Related" sortOrder="100"/>
     </type>
     <type name="Magento\TargetRule\Block\Catalog\Product\ProductList\Upsell">
-        <plugin name="bazaarvoice-upsell" type="Bazaarvoice\Connector\Block\ProductList\Upsell" sortOrder="100"/>
+        <plugin name="bazaarvoice-upsell" type="Bazaarvoice\Connector\Plugin\ProductList\Upsell" sortOrder="100"/>
     </type>
     <type name="Magento\TargetRule\Block\Catalog\Product\ProductList\Related">
-        <plugin name="bazaarvoice-related" type="Bazaarvoice\Connector\Block\ProductList\Related" sortOrder="100"/>
+        <plugin name="bazaarvoice-related" type="Bazaarvoice\Connector\Plugin\ProductList\Related" sortOrder="100"/>
     </type>
     <type name="Magento\Checkout\Block\Cart\Crosssell">
-        <plugin name="bazaarvoice-crosssell" type="Bazaarvoice\Connector\Block\ProductList\Crosssell" sortOrder="100"/>
+        <plugin name="bazaarvoice-crosssell" type="Bazaarvoice\Connector\Plugin\ProductList\Crosssell" sortOrder="100"/>
     </type>
     <type name="Magento\CatalogWidget\Block\Product\ProductsList">
-        <plugin name="bazaarvoice-widget" type="Bazaarvoice\Connector\Block\ProductList\Widget" sortOrder="100"/>
+        <plugin name="bazaarvoice-widget" type="Bazaarvoice\Connector\Plugin\ProductList\Widget" sortOrder="100"/>
     </type>
 
     <!--disable core reviews-->
     <type name="Magento\Review\Block\Product\ReviewRenderer">
-        <plugin name="bazaarvoice-pdp-render" type="Bazaarvoice\Connector\Block\Disable" sortOrder="100"/>
+        <plugin name="bazaarvoice-pdp-render" type="Bazaarvoice\Connector\Plugin\Disable" sortOrder="100"/>
     </type>
     <type name="Magento\Review\Block\Product\Review">
-        <plugin name="bazaarvoice-pdp" type="Bazaarvoice\Connector\Block\Disable" sortOrder="100"/>
+        <plugin name="bazaarvoice-pdp" type="Bazaarvoice\Connector\Plugin\Disable" sortOrder="100"/>
     </type>
-    <preference for="Magento\ReviewStaging\Ui\DataProvider\Product\Form\Modifier\Review" type="Bazaarvoice\Connector\Ui\ReviewStaging\Review" />
+    <preference for="Magento\ReviewStaging\Ui\DataProvider\Product\Form\Modifier\Review" type="Bazaarvoice\Connector\Ui\ReviewStaging\Review"/>
 
 
     <!-- sftp -->
@@ -45,13 +44,17 @@
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
             <argument name="collections" xsi:type="array">
-                <item name="bv_index_data_source" xsi:type="string">Bazaarvoice\Connector\Model\ResourceModel\Index\Collection</item>
+                <item name="bv_index_data_source" xsi:type="string">
+                    Bazaarvoice\Connector\Model\ResourceModel\Index\Collection
+                </item>
             </argument>
         </arguments>
     </type>
     <virtualType name="BvIndexGridDataProvider" type="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
         <arguments>
-            <argument name="collection" xsi:type="object" shared="false">Bazaarvoice\Connector\Model\ResourceModel\Index\Collection</argument>
+            <argument name="collection" xsi:type="object" shared="false">
+                Bazaarvoice\Connector\Model\ResourceModel\Index\Collection
+            </argument>
         </arguments>
     </virtualType>
 
@@ -66,6 +69,7 @@
             </argument>
         </arguments>
     </type>
+
     <!-- Configure the console command feed dependencies as proxies to prevent Feed::__construct() during setup -->
     <type name="Bazaarvoice\Connector\Console\Command\Product">
         <arguments>
@@ -97,7 +101,7 @@
     <type name="Bazaarvoice\Connector\Logger\Logger">
         <arguments>
             <argument name="name" xsi:type="string">bvLogger</argument>
-            <argument name="handlers"  xsi:type="array">
+            <argument name="handlers" xsi:type="array">
                 <item name="system" xsi:type="object">Bazaarvoice\Connector\Logger\Handler</item>
             </argument>
         </arguments>
@@ -105,4 +109,15 @@
 
     <preference for="Bazaarvoice\Connector\Api\Data\IndexInterface" type="Bazaarvoice\Connector\Model\Index"/>
     <preference for="Bazaarvoice\Connector\Api\IndexRepositoryInterface" type="Bazaarvoice\Connector\Model\IndexRepository"/>
+    <preference for="Bazaarvoice\Connector\Api\DccBuilderInterface" type="Bazaarvoice\Connector\Model\DccBuilder"/>
+    <preference for="Bazaarvoice\Connector\Api\Data\Dcc\CatalogDataInterface" type="Bazaarvoice\Connector\Model\Dcc\CatalogData"/>
+    <preference for="Bazaarvoice\Connector\Api\Data\Dcc\CatalogDataBuilderInterface" type="Bazaarvoice\Connector\Model\Dcc\CatalogDataBuilder"/>
+    <preference for="Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProductInterface" type="Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProduct"/>
+    <preference for="Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProductBuilderInterface" type="Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProductBuilder"/>
+    <preference for="Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct\CategoryPathInterface" type="Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProduct\CategoryPath"/>
+    <preference for="Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct\CategoryPathBuilderInterface" type="Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProduct\CategoryPathBuilder"/>
+    <preference for="Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct\FamilyInterface" type="Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProduct\Family"/>
+    <preference for="Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct\FamilyBuilderInterface" type="Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProduct\FamilyBuilder"/>
+    <preference for="Bazaarvoice\Connector\Api\StringFormatterInterface" type="Bazaarvoice\Connector\Model\StringFormatter"/>
+    <preference for="Bazaarvoice\Connector\Api\ConfigProviderInterface" type="Bazaarvoice\Connector\Model\ConfigProvider"/>
 </config>
