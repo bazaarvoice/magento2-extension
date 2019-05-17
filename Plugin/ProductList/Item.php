@@ -55,6 +55,7 @@ class Item
         $subject,
         $product
     ) {
+        //todo: Combine with afterGetProductPrice into an around plugin?
         // @codingStandardsIgnoreEnd
         if ($this->isBvEnabled()) {
             $this->product = $product;
@@ -86,6 +87,7 @@ class Item
         $subject,
         $result
     ) {
+        //todo: Combine with afterGetProductPrice into an around plugin?
         // @codingStandardsIgnoreEnd
         if ($this->isBvEnabled()) {
             $productIdentifier = $this->stringFormatter->getFormattedProductSku($this->product);

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Bazaarvoice\Connector\Api;
 
@@ -39,7 +40,6 @@ interface ConfigProviderInterface
 
     /**
      * @param int|null $storeId
-     *
      * @param string   $scope
      *
      * @return bool|null
@@ -48,7 +48,6 @@ interface ConfigProviderInterface
 
     /**
      * @param int|null $storeId
-     *
      * @param string   $scope
      *
      * @return bool|null
@@ -57,7 +56,6 @@ interface ConfigProviderInterface
 
     /**
      * @param int|null $storeId
-     *
      * @param string   $scope
      *
      * @return bool|null

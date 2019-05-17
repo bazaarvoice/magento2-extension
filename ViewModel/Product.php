@@ -8,6 +8,7 @@ use Bazaarvoice\Connector\Api\StringFormatterInterface;
 use Bazaarvoice\Connector\Logger\Logger;
 use Bazaarvoice\Connector\Model\CurrentProductProvider;
 use Bazaarvoice\Connector\Model\Dcc;
+use Bazaarvoice\Connector\Model\Source\Environment;
 use Exception;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\ConfigurableProduct\Helper\Data;
@@ -220,7 +221,7 @@ class Product implements ArgumentInterface
      */
     public function canShowDebugDetails()
     {
-        return ($this->configProvider->getEnvironment() == 'staging');
+        return ($this->configProvider->getEnvironment() == Environment::STAGING);
     }
 
     /**

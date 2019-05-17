@@ -5,6 +5,7 @@ namespace Bazaarvoice\Connector\ViewModel;
 
 use Bazaarvoice\Connector\Api\ConfigProviderInterface;
 use Bazaarvoice\Connector\Api\StringFormatterInterface;
+use Bazaarvoice\Connector\Model\Source\Environment;
 use Exception;
 use Magento\Catalog\Helper\Image;
 use Magento\Catalog\Model\Product\Visibility;
@@ -227,7 +228,7 @@ class Pixel implements ArgumentInterface
      */
     public function canShowDebugDetails()
     {
-        return ($this->configProvider->getEnvironment() == 'staging');
+        return ($this->configProvider->getEnvironment() == Environment::STAGING);
     }
 
     /**

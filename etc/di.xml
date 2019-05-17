@@ -83,8 +83,7 @@
     </type>
     <type name="Bazaarvoice\Connector\Console\Command\Purchase">
         <arguments>
-            <argument name="purchaseFeed" xsi:type="object">Bazaarvoice\Connector\Model\Feed\PurchaseFeed\Proxy
-            </argument>
+            <argument name="purchaseFeed" xsi:type="object">Bazaarvoice\Connector\Model\Feed\PurchaseFeed\Proxy</argument>
         </arguments>
     </type>
     <type name="Bazaarvoice\Connector\Console\Command\Index">

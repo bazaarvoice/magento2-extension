@@ -29,6 +29,8 @@ class Disable
     }
 
     /**
+     * Prevents default Magento review functionality from displaying
+     *
      * @param $subject
      * @param $result
      *

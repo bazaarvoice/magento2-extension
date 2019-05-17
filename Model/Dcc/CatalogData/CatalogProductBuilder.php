@@ -10,6 +10,7 @@ use Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProductBuilderInterfac
 use Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProductInterface;
 use Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProductInterfaceFactory;
 use Bazaarvoice\Connector\Api\StringFormatterInterface;
+use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Helper\ImageFactory;
 use Magento\Catalog\Model\CategoryRepository;
 use Magento\Framework\Escaper;
@@ -27,6 +28,8 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
     private const EAN = 'EAN';
     private const ISBN = 'ISBN';
     private const MODEL_NUMBER = 'ModelNumber';
+    private const PRODUCT_SMALL_IMAGE = 'product_small_image';
+    const BRAND = 'brand';
     /**
      * @var \Magento\Catalog\Model\CategoryRepository
      */
@@ -166,7 +169,7 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
     private function getFamilies($product): ?array
     {
         if ($this->configProvider->isFamiliesEnabled($product->getStoreId())) {
-            $familyAttributeData['sku'] = $product->getSku();
+            $familyAttributeData[ProductInterface::SKU] = $product->getSku();
             if ($familyAttributes = $this->configProvider->getFormattedFamilyAttributes($product->getStoreId())) {
                 foreach ($familyAttributes as $familyAttribute) {
                     if ($product->getData($familyAttribute)) {
@@ -228,7 +231,7 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
         } else {
             $productToUse = $product;
         }
-        $imageUrl = $this->imageHelperFactory->create()->init($productToUse, 'product_small_image')->getUrl();
+        $imageUrl = $this->imageHelperFactory->create()->init($productToUse, static::PRODUCT_SMALL_IMAGE)->getUrl();
         return $this->escaper->escapeUrl($imageUrl);
     }
 
@@ -286,7 +289,7 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
      */
     private function getBrandAttribute($product)
     {
-        return $this->configProvider->getAttributeCode('brand', $product->getStoreId());
+        return $this->configProvider->getAttributeCode(static::BRAND, $product->getStoreId());
     }
 
     /**

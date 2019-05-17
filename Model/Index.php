@@ -69,7 +69,7 @@ class Index extends AbstractModel implements IndexInterface, IdentityInterface
      * @param      $storeId
      * @param null $scope
      *
-     * @return $this|mixed
+     * @return $this|\Bazaarvoice\Connector\Api\Data\IndexInterface
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function loadByStore($productId, $storeId, $scope = null)

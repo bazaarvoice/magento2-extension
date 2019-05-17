@@ -35,7 +35,7 @@ class ProductList implements OptionSourceInterface
             ],
             [
                 'value' => self::UPSELL,
-                'label' => __('Upsells on Product Pages'),
+                'label' => __('Up-Sell Products on Product Pages'),
             ],
             [
                 'value' => self::RELATED,
@@ -43,7 +43,7 @@ class ProductList implements OptionSourceInterface
             ],
             [
                 'value' => self::CROSSSELL,
-                'label' => __('Cross Sells on Cart Page'),
+                'label' => __('Cross-Sell Products on Cart Page'),
             ],
             [
                 'value' => self::WIDGET,

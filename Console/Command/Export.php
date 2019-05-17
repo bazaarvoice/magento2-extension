@@ -37,7 +37,6 @@ class Export extends Command
     }
 
     // @codingStandardsIgnoreStart
-
     /**
      * @param \Symfony\Component\Console\Input\InputInterface   $input
      * @param \Symfony\Component\Console\Output\OutputInterface $output
@@ -54,6 +53,6 @@ class Export extends Command
             echo $e->getMessage()."\n".$e->getTraceAsString();
         }
         echo "\n".'Memory usage: '.memory_get_usage()."\n";
-        // @codingStandardsIgnoreEnd
     }
+    // @codingStandardsIgnoreEnd
 }

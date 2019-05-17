@@ -35,8 +35,6 @@ class StringFormatter implements StringFormatterInterface
      * character like an underscore. This will only be used in the feed and not for
      * any customer facing purpose.
      *
-     * @static
-     *
      * @param string $rawId
      *
      * @return mixed
