@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
  *
  * @package Bazaarvoice\Connector\Test\Unit\Model\Dcc
  */
-class DccBuilderTest extends TestCase
+class DccTest extends TestCase
 {
     /**
      * @var \Magento\Framework\TestFramework\Unit\Helper\ObjectManager
@@ -27,29 +27,42 @@ class DccBuilderTest extends TestCase
 
     public function testBuildProductDoesNotExistEmptyResult()
     {
+        /** @var \Bazaarvoice\Connector\Model\Dcc $dcc */
+
         $className = Dcc::class;
         $arguments = $this->objectManager->getConstructArguments($className);
-        $dccBuilder = $this->objectManager->getObject(Dcc::class, $arguments);
-        $result = $dccBuilder->build();
+        $dcc = $this->objectManager->getObject($className, $arguments);
+        $result = $dcc->getJson();
 
         $this->assertEmpty($result);
     }
 
     public function testBuildProductExistsSomeResult()
     {
+        /** @var \Bazaarvoice\Connector\Model\Dcc $dcc */
+
         $currentProductProviderMock = $this->createPartialMock(CurrentProductProvider::class, ['getProduct']);
         $productMock = $this->getMockBuilder(ProductInterface::class)
             ->disableOriginalConstructor()
             ->getMockForAbstractClass();
-
         $currentProductProviderMock->method('getProduct')->willReturn($productMock);
 
-        $className = Dcc::class;
-        $arguments = $this->objectManager->getConstructArguments($className);
-        $arguments['currentProductProvider'] = $currentProductProviderMock;
-        $dccBuilder = $this->objectManager->getObject(Dcc::class, $arguments);
-        $result = $dccBuilder->build();
+        $dccCatalogDataMock = $this->createPartialMock(\Bazaarvoice\Connector\Model\Dcc\CatalogData::class, ['getData']);
+        $dccCatalogDataMock->method('getData')->willReturn('{}');
 
-        $this->assertEmpty($result);
+        $dccCatalogDataBuilderMock = $this->createPartialMock(\Bazaarvoice\Connector\Model\Dcc\CatalogDataBuilder::class, ['build']);
+        $dccCatalogDataBuilderMock->method('build')->willReturn($dccCatalogDataMock);
+
+        $stringFormatterMock = $this->createPartialMock(\Bazaarvoice\Connector\Model\StringFormatter::class, ['jsonEncode']);
+        $stringFormatterMock->method('jsonEncode')->willReturn('{}');
+
+        $arguments = $this->objectManager->getConstructArguments(Dcc::class);
+        $arguments['currentProductProvider'] = $currentProductProviderMock;
+        $arguments['catalogDataBuilder'] = $dccCatalogDataBuilderMock;
+        $arguments['stringFormatter'] = $stringFormatterMock;
+        $dcc = $this->objectManager->getObject(Dcc::class, $arguments);
+        $result = $dcc->getJson();
+
+        $this->assertNotEmpty($result);
     }
 }
