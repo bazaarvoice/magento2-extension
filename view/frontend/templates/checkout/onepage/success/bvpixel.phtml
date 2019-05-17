@@ -8,6 +8,8 @@
     <?php endif; ?>
     <script type="text/javascript">
         var transactionData = <?= $viewModel->getJsonOrderDetails(); ?>;
-        BV.pixel.trackTransaction(transactionData);
+        window.bvCallback = function (BV) {
+            BV.pixel.trackTransaction(transactionData);
+        }
     </script>
 <?php endif; ?>
