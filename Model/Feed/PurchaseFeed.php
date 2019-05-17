@@ -4,6 +4,7 @@ namespace Bazaarvoice\Connector\Model\Feed;
 
 use Bazaarvoice\Connector\Model\Source\Trigger;
 use \Magento\Catalog\Model\Product;
+use \Magento\Catalog\Model\Product\Attribute\Source\Status;
 use \Magento\ConfigurableProduct\Model\Product\Type;
 use \Magento\Sales\Model\Order;
 use \Magento\Store\Model\Group;
