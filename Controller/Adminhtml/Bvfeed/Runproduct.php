@@ -37,6 +37,7 @@ class Runproduct extends Action
     public function execute()
     {
         // phpcs:ignore
+        //todo: Is there a way to do this?
         echo '<pre>';
         $this->productFeed->setForce(true)->generateFeed();
     }
