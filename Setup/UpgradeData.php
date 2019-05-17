@@ -69,7 +69,7 @@ class UpgradeData implements Setup\UpgradeDataInterface
                     'is_used_in_grid'         => true,
                     'is_visible_in_grid'      => false,
                     'is_filterable_in_grid'   => false,
-                    'used_in_product_listing' => true,
+                    'used_in_product_listing' => true
                 ]
             );
 

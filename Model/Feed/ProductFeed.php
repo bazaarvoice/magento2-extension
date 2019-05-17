@@ -140,7 +140,6 @@ class ProductFeed extends Feed
         /** @var Store $store */
         $store = $this->storeManager->getStore(0);
 
-        /** Create varien io object and write local feed file */
         $writer = $this->openProductFile($store);
 
         $this->brand->processBrandsForGlobal($writer);

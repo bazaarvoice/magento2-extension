@@ -46,33 +46,58 @@ class Item
         $this->stringFormatter = $stringFormatter;
     }
 
-    // @codingStandardsIgnoreStart
+    /**
+     * @param $subject
+     * @param $product
+     */
     public function beforeGetProductPrice(
         /** @noinspection PhpUnusedParameterInspection */
-        $subject, $product)
-    {
+        $subject,
+        $product
+    ) {
+        //todo: Combine with afterGetProductPrice into an around plugin?
         // @codingStandardsIgnoreEnd
-        if ($this->isEnabled()) {
-            $this->_product = $product;
+        if ($this->isBvEnabled()) {
+            $this->product = $product;
         }
     }
 
     // @codingStandardsIgnoreStart
-    public function afterGetProductPrice(
-        /** @noinspection PhpUnusedParameterInspection */
-        $subject, $result)
-    {
-        // @codingStandardsIgnoreEnd
-        if ($this->isEnabled()) {
-            $productIdentifier = $this->helper->getProductId($this->_product);
-            $productUrl = $this->_product->getProductUrl();
-            $result = '
-            <div data-bv-show="inline_rating"
-				 data-bv-product-id="' . $productIdentifier . '"
-				 data-bv-redirect-url="' . $productUrl . '"></div>' . $result;
 
-        }
-        return $result;
+    /**
+     * @return bool
+     */
+    public function isBvEnabled()
+    {
+        $typesEnabled = explode(',', $this->configProvider->getInlineRatings());
+
+        return in_array($this->type, $typesEnabled);
     }
 
+    // @codingStandardsIgnoreStart
+
+    /**
+     * @param $subject
+     * @param $result
+     *
+     * @return string
+     */
+    public function afterGetProductPrice(
+        /** @noinspection PhpUnusedParameterInspection */
+        $subject,
+        $result
+    ) {
+        //todo: Combine with afterGetProductPrice into an around plugin?
+        // @codingStandardsIgnoreEnd
+        if ($this->isBvEnabled()) {
+            $productIdentifier = $this->stringFormatter->getFormattedProductSku($this->product);
+            $productUrl = $this->product->getProductUrl();
+            $result = '
+            <div data-bv-show="inline_rating"
+				 data-bv-product-id="'.$productIdentifier.'"
+				 data-bv-redirect-url="'.$productUrl.'"></div>'.$result;
+        }
+
+        return $result;
+    }
 }

@@ -78,9 +78,7 @@ class Logger extends \Monolog\Logger
             $message = print_r($message, $return = true);
         }
 
-        if (php_sapi_name() == "cli"
-            || $this->admin
-        ) {
+        if (php_sapi_name() == "cli" || $this->admin) {
             // phpcs:ignore
             echo $message."\n";
         }

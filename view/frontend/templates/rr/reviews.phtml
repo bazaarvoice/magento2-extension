@@ -1,10 +1,10 @@
-<?php /** @var \Bazaarvoice\Connector\Block\Reviews $this */ ?>
-<?php if ($this->canShow('rr')) : ?>
-<?php
-$seoContent = $this->getSEOContent();
-?>
-    <div data-bv-show="reviews"
-         data-bv-product-id="<?php echo $this->getProductSku() ?>">
-        <?php echo $seoContent ?>
+<?php /** @var Magento\Framework\View\Element\Template $block */ ?>
+<?php /** @var Bazaarvoice\Connector\ViewModel\Reviews $viewModel */ ?>
+<?php $viewModel = $block->getViewModel(); ?>
+
+<?php if ($viewModel->canShow()) : ?>
+    <?php $seoContent = $viewModel->getSeoContent(); ?>
+    <div data-bv-show="reviews" data-bv-product-id="<?= $viewModel->getProductSku() ?>">
+        <?= $seoContent ?>
     </div>
 <?php endif;
