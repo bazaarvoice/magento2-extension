@@ -11,10 +11,10 @@ namespace Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct;
 interface FamilyBuilderInterface
 {
     /**
-     * @param null|\Magento\Catalog\Api\Data\ProductInterface|\Magento\Catalog\Model\Product $parentProduct
+     * @param null|\Magento\Catalog\Api\Data\ProductInterface|\Magento\Catalog\Model\Product $product
      * @param string                                                                         $familyCode
      *
      * @return \Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct\FamilyInterface
      */
-    public function build($parentProduct, $familyCode): ?FamilyInterface;
+    public function build($product, $familyCode): ?FamilyInterface;
 }

@@ -117,7 +117,7 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
         $dccCatalogProduct->setEans($this->getCustomAttributeData($product, static::EAN));
         $dccCatalogProduct->setIsbns($this->getCustomAttributeData($product, static::ISBN));
         $dccCatalogProduct->setModelNumbers($this->getCustomAttributeData($product, static::MODEL_NUMBER));
-        $dccCatalogProduct->setFamilies($this->getFamilies($parentProduct ?? $product));
+        $dccCatalogProduct->setFamilies($this->getFamilies($product, $parentProduct));
 
         return $dccCatalogProduct;
     }
@@ -163,18 +163,22 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
     }
 
     /**
-     * @param \Magento\Catalog\Api\Data\ProductInterface|\Magento\Catalog\Model\Product $product
+     * @param \Magento\Catalog\Api\Data\ProductInterface|\Magento\Catalog\Model\Product      $product
+     * @param \Magento\Catalog\Api\Data\ProductInterface|\Magento\Catalog\Model\Product|null $parentProduct
      *
      * @return bool|array
      */
-    private function getFamilies($product): ?array
+    private function getFamilies($product, $parentProduct = null): ?array
     {
-        if ($this->configProvider->isFamiliesEnabled($product->getStoreId())) {
-            $familyAttributeData[ProductInterface::SKU] = $product->getSku();
-            if ($familyAttributes = $this->configProvider->getFormattedFamilyAttributes($product->getStoreId())) {
+        $parentProductToUse = $parentProduct ?? $product;
+
+        if ($this->configProvider->isFamiliesEnabled($parentProductToUse->getStoreId())) {
+            $familyAttributeData[ProductInterface::SKU] = $parentProductToUse->getSku();
+            $familyAttributes = $this->configProvider->getFamilyAttributesArray($parentProductToUse->getStoreId());
+            if ($familyAttributes) {
                 foreach ($familyAttributes as $familyAttribute) {
-                    if ($product->getData($familyAttribute)) {
-                        $familyAttributeData[$familyAttribute] = $product->getData($familyAttribute);
+                    if ($parentProductToUse->getData($familyAttribute)) {
+                        $familyAttributeData[$familyAttribute] = $parentProductToUse->getData($familyAttribute);
                     }
                 }
             }

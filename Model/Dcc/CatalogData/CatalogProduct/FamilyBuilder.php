@@ -8,7 +8,6 @@ use Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct\FamilyBuilderI
 use Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct\FamilyInterface;
 use Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct\FamilyInterfaceFactory;
 use Bazaarvoice\Connector\Api\StringFormatterInterface;
-use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 
 /**
  * Class FamilyBuilder
@@ -48,32 +47,17 @@ class FamilyBuilder implements FamilyBuilderInterface
     }
 
     /**
-     * @param null|\Magento\Catalog\Api\Data\ProductInterface|\Magento\Catalog\Model\Product $parentProduct
+     * @param null|\Magento\Catalog\Api\Data\ProductInterface|\Magento\Catalog\Model\Product $product
      * @param string                                                                         $familyCode
      *
      * @return \Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct\FamilyInterface
      */
-    public function build($parentProduct, $familyCode): ?FamilyInterface
+    public function build($product, $familyCode): ?FamilyInterface
     {
-        $products = [$parentProduct];
-        if ($parentProduct->getTypeId() == Configurable::TYPE_CODE
-            && $this->configProvider->isFamiliesEnabled($parentProduct->getStoreId())
-        ) {
-            $children = $parentProduct->getTypeInstance()->getUsedProducts($parentProduct);
-            foreach ($children as $childProduct) {
-                $products[] = $childProduct;
-            }
-        }
-
-        $familyMembers = [];
-        foreach ($products as $product) {
-            $familyMembers[] = $this->getFamilyMember($product);
-        }
-
         $dccFamily = $this->dccFamilyFactory->create();
         $dccFamily->setId($familyCode);
-        $dccFamily->setExpand($this->configProvider->isFamiliesExpandEnabled($parentProduct->getStoreId()));
-        $dccFamily->setMembers($familyMembers);
+        $dccFamily->setExpand($this->configProvider->isFamiliesExpandEnabled($product->getStoreId()));
+        $dccFamily->setMembers([$this->getFamilyMember($product)]);
 
         return $dccFamily;
     }
