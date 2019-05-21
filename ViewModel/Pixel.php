@@ -113,13 +113,15 @@ class Pixel implements ArgumentInterface
         $this->orderDetails['orderId'] = $order->getIncrementId();
 
         $total = $order->getGrandTotal() - $order->getTaxAmount() - $order->getShippingAmount();
-        $this->orderDetails['total'] = number_format($total, 2, '.', '');
-        $this->orderDetails['tax'] = number_format($order->getTaxAmount(), 2, '.', '');
-        $this->orderDetails['shipping'] = number_format($order->getShippingAmount(), 2, '.', '');
+        $this->orderDetails['total'] = number_format((float)$total, 2, '.', '');
+        $this->orderDetails['tax'] = number_format((float)$order->getTaxAmount() ?? 0.0, 2, '.', '');
+        $this->orderDetails['shipping'] = number_format((float)$order->getShippingAmount() ?? 0.0, 2, '.', '');
 
-        $this->orderDetails['city'] = $address->getCity();
-        $this->orderDetails['state'] = $this->region->load($address->getRegionId())->getCode();
-        $this->orderDetails['country'] = $address->getCountryId();
+        if ($address) {
+            $this->orderDetails['city'] = $address->getCity();
+            $this->orderDetails['state'] = $this->region->load($address->getRegionId())->getCode();
+            $this->orderDetails['country'] = $address->getCountryId();
+        }
 
         $this->orderDetails['items'] = [];
         /** if families are enabled, get all items */
@@ -148,8 +150,8 @@ class Pixel implements ArgumentInterface
              * Mage products can be in 0 - many categories.
              * Should we try to include it?
              */
-            $itemDetails['price'] = number_format($item->getPrice(), 2, '.', '');
-            $itemDetails['quantity'] = number_format($item->getQtyOrdered(), 0);
+            $itemDetails['price'] = number_format((float)$item->getPrice(), 2, '.', '');
+            $itemDetails['quantity'] = number_format((float)$item->getQtyOrdered(), 0);
             $itemDetails['imageURL'] = $this->imageHelper->init($product, 'product_small_image')
                 ->setImageFile($product->getSmallImage())->getUrl();
 
@@ -172,14 +174,16 @@ class Pixel implements ArgumentInterface
         }
         if ($order->getCustomerId()) {
             $userId = $order->getCustomerId();
-        } else {
+        } elseif ($order->getCustomerEmail()) {
             $userId = md5($order->getCustomerEmail());
         }
-        $this->orderDetails['userId'] = $userId;
+        if (!empty($userId)) {
+            $this->orderDetails['userId'] = $userId;
+        }
         $this->orderDetails['email'] = $order->getCustomerEmail();
         $this->orderDetails['nickname'] = $order->getCustomerFirstname()
             ? $order->getCustomerFirstname()
-            : $order->getBillingAddress()->getFirstname();
+            : $order->getBillingAddress() ? $order->getBillingAddress()->getFirstname() : '';
         /** There is no 'deliveryDate' yet */
         $this->orderDetails['locale'] = $this->configProvider->getLocale($order->getStoreId());
 

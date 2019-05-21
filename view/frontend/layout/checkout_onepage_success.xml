@@ -4,7 +4,7 @@
         <referenceContainer name="content">
             <block class="Magento\Framework\View\Element\Template" name="bazaarvoice.bvpixel" template="Bazaarvoice_Connector::checkout/onepage/success/bvpixel.phtml">
                 <arguments>
-                    <argument name="view_model" xsi:type="object">Bazaarvoice\Connector\ViewModel\Reviews</argument>
+                    <argument name="view_model" xsi:type="object">Bazaarvoice\Connector\ViewModel\Pixel</argument>
                 </arguments>
             </block>
         </referenceContainer>
