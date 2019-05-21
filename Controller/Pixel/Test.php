@@ -20,7 +20,9 @@ class Test extends Success
         $orderId = $this->getRequest()->getParam('order_id') ?? '000000001';
         $session = $this->getOnepage()->getCheckout();
         $session->setLastRealOrderId($orderId);
+        $session->setLastOrderId($orderId);
         $session->setLastSuccessQuoteId('dummy_value');
+        $session->setLastQuoteId('dummy_value');
         return parent::execute();
     }
 }
