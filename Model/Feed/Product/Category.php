@@ -150,8 +150,8 @@ class Category
         foreach ($defaultCollection as $category) {
             $categories[$category->getId()] = [
                 'url'        => $this->getStoreUrl($baseUrl, $category->getUrlPath()),
-                'name'       => $category->getName(),
-                'externalId' => $this->stringFormatter->getFormattedCategoryId($category),
+                'name'       => $this->configProvider->getCategoryPrefix($defaultStore->getId()) . $category->getName(),
+                'externalId' => $this->stringFormatter->getFormattedCategoryId($category, $defaultStore),
                 'parent_id'  => $category->getParentId(),
                 'names'      => [],
                 'urls'       => [],

@@ -498,7 +498,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
 
         if ($this->configProvider->isFamiliesEnabled($storeId)) {
             $familyFields = '';
-            $familyAttributes = $this->configProvider->getFormattedFamilyAttributes($storeId);
+            $familyAttributes = $this->configProvider->getFamilyAttributesArray($storeId);
             if ($familyAttributes) {
                 $familyFields = '';
                 foreach ($familyAttributes as $familyAttribute) {
@@ -595,7 +595,8 @@ class Flat implements IndexerActionInterface, MviewActionInterface
 
             $this->logger->debug("Image {$indexData['image_url']}");
 
-            $indexData['external_id'] = $this->stringFormatter->getFormattedProductSku($indexData['external_id']);
+            $indexData['external_id'] = $this->configProvider->getProductPrefix($storeId)
+                .  $this->stringFormatter->getFormattedProductSku($indexData['external_id']);
             $indexData['scope'] = $this->configProvider->getFeedGenerationScope();
             $indexData['store_id'] = $storeId;
 
@@ -757,7 +758,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
     private function joinParent(Select $select, $storeId, ResourceConnection $res)
     {
         $familyFields = '';
-        $familyAttributes = $this->configProvider->getFormattedFamilyAttributes($storeId);
+        $familyAttributes = $this->configProvider->getFamilyAttributesArray($storeId);
         if ($familyAttributes) {
             $familyFields = '';
             foreach ($familyAttributes as $familyAttribute) {
