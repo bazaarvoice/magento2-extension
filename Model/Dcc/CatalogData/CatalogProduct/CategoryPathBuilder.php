@@ -74,10 +74,7 @@ class CategoryPathBuilder implements CategoryPathBuilderInterface
      */
     private function getCategoryId($category): string
     {
-        $prefix = '';
-        if ($this->configProvider->isCategoryPrefixEnabled($category->getStoreId())) {
-            $prefix = $this->configProvider->getPrefix($category->getStoreId());
-        }
+        $prefix = $this->configProvider->getCategoryPrefix($category->getStoreId());
         return $prefix . $this->stringFormatter->getFormattedCategoryPath($category);
     }
 
@@ -88,10 +85,7 @@ class CategoryPathBuilder implements CategoryPathBuilderInterface
      */
     private function getCategoryName($category): string
     {
-        $prefix = '';
-        if ($this->configProvider->isCategoryPrefixEnabled($category->getStoreId())) {
-            $prefix = $this->configProvider->getPrefix($category->getStoreId());
-        }
+        $prefix = $this->configProvider->getCategoryPrefix($category->getStoreId());
         return $prefix . $this->escaper->escapeHtml($category->getName());
     }
 }

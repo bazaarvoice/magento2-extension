@@ -77,7 +77,7 @@ class StringFormatter implements StringFormatterInterface
             $rawCategoryId = str_replace('.html', '', $rawCategoryId);
             return $this->replaceIllegalCharacters($rawCategoryId);
         } else {
-            return $category->getId();
+            return $this->configProvider->getCategoryPrefix($storeId) . $category->getId();
         }
     }
 

@@ -236,7 +236,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return array|null
      */
-    public function getFormattedFamilyAttributes($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?array
+    public function getFamilyAttributesArray($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?array
     {
         $families = $this->getFamilyAttributes($storeId, $scope);
         if ($families) {
@@ -513,6 +513,36 @@ class ConfigProvider implements ConfigProviderInterface
     public function isCategoryPrefixEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
     {
         return (bool) $this->getConfig('feeds/enable_category_prefix', $storeId, $scope);
+    }
+
+    /**
+     * @param int $storeId
+     *
+     * @return string
+     */
+    public function getProductPrefix($storeId)
+    {
+        $prefix = '';
+        if ($this->isProductPrefixEnabled($storeId)) {
+            $prefix = $this->getPrefix($storeId);
+        }
+
+        return $prefix;
+    }
+
+    /**
+     * @param int $storeId
+     *
+     * @return string
+     */
+    public function getCategoryPrefix($storeId)
+    {
+        $prefix = '';
+        if ($this->isCategoryPrefixEnabled($storeId)) {
+            $prefix = $this->getPrefix($storeId);
+        }
+
+        return $prefix;
     }
 
     /**

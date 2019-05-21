@@ -132,7 +132,7 @@ interface ConfigProviderInterface
      *
      * @return array|null
      */
-    public function getFormattedFamilyAttributes($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?array;
+    public function getFamilyAttributesArray($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?array;
 
     /**
      * @param int|null $storeId
@@ -344,6 +344,20 @@ interface ConfigProviderInterface
      * @return bool
      */
     public function isCategoryPrefixEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool;
+
+    /**
+     * @param int $storeId
+     *
+     * @return string
+     */
+    public function getProductPrefix($storeId);
+
+    /**
+     * @param int $storeId
+     *
+     * @return string
+     */
+    public function getCategoryPrefix($storeId);
 
     /**
      * @param int|null $storeId
