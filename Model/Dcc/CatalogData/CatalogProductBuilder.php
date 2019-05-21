@@ -130,31 +130,32 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
     private function getCategoryPaths($product): array
     {
         if ($product->getData('bv_category_external_id')) {
-            $categoryIds = [$product->getData('bv_category_external_id')];
+            $categoryId = $product->getData('bv_category_external_id');
         } else {
             $categoryIds = $product->getCategoryIds();
+            /**
+             * Have to use only one category, because BV can only handle a category structure in which each
+             * category is a child of the previous category. BV cannot handle a tree structure. We choose the
+             * highest ID category in the hopes that it will be a leaf node.
+             */
+            $categoryId = end($categoryIds);
         }
 
         $categoryPaths = [];
-        if ($categoryIds) {
-            foreach ($categoryIds as $categoryId) {
-                try {
-                    $category = $this->categoryRepository->get($categoryId, $product->getStoreId());
-                    if (!$category->getIsActive()) {
-                        continue;
-                    }
-                    $categoryTree = $category->getPath();
-                    $categoryTree = explode('/', $categoryTree);
-                    array_shift($categoryTree);
-                    foreach ($categoryTree as $key => $treeId) {
-                        $parentCategory = $this->categoryRepository->get($treeId, $product->getStoreId());
-                        $dccCategoryPath = $this->dccCategoryPathBuilder->build($parentCategory);
-                        $categoryPaths[] = $this->prepareOutput($dccCategoryPath);
-                    }
-                    //phpcs:ignore
-                } catch (NoSuchEntityException $e) {
-                    //Category does not exist in this store
+        if ($categoryId) {
+            try {
+                $category = $this->categoryRepository->get($categoryId, $product->getStoreId());
+                $categoryTree = $category->getPath();
+                $categoryTree = explode('/', $categoryTree);
+                array_shift($categoryTree);
+                foreach ($categoryTree as $key => $treeId) {
+                    $parentCategory = $this->categoryRepository->get($treeId, $product->getStoreId());
+                    $dccCategoryPath = $this->dccCategoryPathBuilder->build($parentCategory);
+                    $categoryPaths[] = $this->prepareOutput($dccCategoryPath);
                 }
+                //phpcs:ignore
+            } catch (NoSuchEntityException $e) {
+                //Category does not exist in this store
             }
         }
 
