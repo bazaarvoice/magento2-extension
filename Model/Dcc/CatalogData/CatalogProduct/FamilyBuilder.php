@@ -67,8 +67,7 @@ class FamilyBuilder implements FamilyBuilderInterface
 
         $familyMembers = [];
         foreach ($products as $product) {
-            $memberId = $product->getSku();
-            $familyMembers[] = $this->stringFormatter->getFormattedProductSku($memberId);
+            $familyMembers[] = $this->getFamilyMember($product);
         }
 
         $dccFamily = $this->dccFamilyFactory->create();
@@ -77,5 +76,19 @@ class FamilyBuilder implements FamilyBuilderInterface
         $dccFamily->setMembers($familyMembers);
 
         return $dccFamily;
+    }
+
+    /**
+     * @param \Magento\Catalog\Api\Data\ProductInterface|\Magento\Catalog\Model\Product $product
+     *
+     * @return string
+     */
+    private function getFamilyMember($product): string
+    {
+        $prefix = '';
+        if ($this->configProvider->isProductPrefixEnabled($product->getStoreId())) {
+            $prefix = $this->configProvider->getPrefix($product->getStoreId());
+        }
+        return $prefix . $this->stringFormatter->getFormattedProductSku($product->getSku());
     }
 }
