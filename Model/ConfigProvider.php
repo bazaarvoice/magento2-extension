@@ -54,7 +54,7 @@ class ConfigProvider implements ConfigProviderInterface
      */
     public function isCloudSeoEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
     {
-        return $this->isBvEnabled($storeId, $scope) && $this->getConfig('general/enable_cloud_seo', $storeId, $scope);
+        return (bool) $this->isBvEnabled($storeId, $scope) && $this->getConfig('general/enable_cloud_seo', $storeId, $scope);
     }
 
     /**
@@ -78,7 +78,7 @@ class ConfigProvider implements ConfigProviderInterface
      */
     public function isQaEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
     {
-        return $this->isBvEnabled($storeId, $scope) && (bool) $this->getConfig('qa/enable_qa', $storeId, $scope);
+        return (bool) $this->isBvEnabled($storeId, $scope) && (bool) $this->getConfig('qa/enable_qa', $storeId, $scope);
     }
 
     /**
@@ -90,7 +90,7 @@ class ConfigProvider implements ConfigProviderInterface
      */
     public function isRrEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
     {
-        return $this->isBvEnabled($storeId, $scope) && (bool) $this->getConfig('rr/enable_rr', $storeId, $scope);
+        return (bool) $this->isBvEnabled($storeId, $scope) && (bool) $this->getConfig('rr/enable_rr', $storeId, $scope);
     }
 
     /**
@@ -117,7 +117,7 @@ class ConfigProvider implements ConfigProviderInterface
      */
     public function canSendProductFeed($storeId, $scope = ScopeInterface::SCOPE_STORE): ?bool
     {
-        return $this->isBvEnabled($storeId, $scope) && $this->isProductFeedEnabled($storeId, $scope);
+        return (bool) $this->isBvEnabled($storeId, $scope) && $this->isProductFeedEnabled($storeId, $scope);
     }
 
     /**
@@ -139,7 +139,7 @@ class ConfigProvider implements ConfigProviderInterface
      */
     public function canSendPurchaseFeed($storeId, $scope = ScopeInterface::SCOPE_STORE): ?bool
     {
-        return $this->isBvEnabled($storeId, $scope) && $this->isPurchaseFeedEnabled($storeId, $scope);
+        return (bool) $this->isBvEnabled($storeId, $scope) && $this->isPurchaseFeedEnabled($storeId, $scope);
     }
 
     /**
@@ -335,7 +335,7 @@ class ConfigProvider implements ConfigProviderInterface
      */
     public function isDccEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
     {
-        return $this->isBvEnabled($storeId, $scope) && $this->getConfig('feeds/enable_dcc', $storeId, $scope);
+        return (bool) $this->isBvEnabled($storeId, $scope) && $this->getConfig('feeds/enable_dcc', $storeId, $scope);
     }
 
     /**
@@ -346,7 +346,7 @@ class ConfigProvider implements ConfigProviderInterface
      */
     public function isBvPixelEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
     {
-        return $this->isBvEnabled($storeId, $scope) && $this->getConfig('general/enable_bvpixel', $storeId, $scope);
+        return (bool) $this->isBvEnabled($storeId, $scope) && $this->getConfig('general/enable_bvpixel', $storeId, $scope);
     }
 
     /**
