@@ -50,7 +50,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @param string   $scope
      *
-     * @return bool|null
+     * @return bool
      */
     public function isCloudSeoEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
     {
@@ -62,7 +62,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @param string   $scope
      *
-     * @return bool|null
+     * @return bool
      */
     public function isBvEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
     {
@@ -74,7 +74,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @param string   $scope
      *
-     * @return bool|null
+     * @return bool
      */
     public function isQaEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
     {
@@ -86,7 +86,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @param string   $scope
      *
-     * @return bool|null
+     * @return bool
      */
     public function isRrEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
     {
@@ -98,7 +98,7 @@ class ConfigProvider implements ConfigProviderInterface
      * @param int    $storeId
      * @param string $scope
      *
-     * @return bool|null
+     * @return bool
      */
     public function canSendFeed($type, $storeId, $scope = ScopeInterface::SCOPE_STORE): ?bool
     {
@@ -113,7 +113,7 @@ class ConfigProvider implements ConfigProviderInterface
      * @param int    $storeId
      * @param string $scope
      *
-     * @return bool|null
+     * @return bool
      */
     public function canSendProductFeed($storeId, $scope = ScopeInterface::SCOPE_STORE): ?bool
     {
@@ -124,7 +124,7 @@ class ConfigProvider implements ConfigProviderInterface
      * @param int|null $storeId
      * @param string   $scope
      *
-     * @return bool|null
+     * @return bool
      */
     private function isProductFeedEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
     {
@@ -146,7 +146,7 @@ class ConfigProvider implements ConfigProviderInterface
      * @param int|null $storeId
      * @param string   $scope
      *
-     * @return bool|null
+     * @return bool
      */
     private function isPurchaseFeedEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
     {
@@ -157,7 +157,7 @@ class ConfigProvider implements ConfigProviderInterface
      * @param int|null $storeId
      * @param string   $scope
      *
-     * @return bool|null
+     * @return bool
      */
     public function isFamiliesEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
     {
@@ -331,7 +331,7 @@ class ConfigProvider implements ConfigProviderInterface
      * @param int|null $storeId
      * @param string   $scope
      *
-     * @return mixed
+     * @return bool
      */
     public function isDccEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
     {
@@ -342,7 +342,7 @@ class ConfigProvider implements ConfigProviderInterface
      * @param int|null $storeId
      * @param string   $scope
      *
-     * @return mixed
+     * @return bool
      */
     public function isBvPixelEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
     {
