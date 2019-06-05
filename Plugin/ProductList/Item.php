@@ -69,7 +69,13 @@ class Item
      */
     public function isBvEnabled()
     {
-        $typesEnabled = explode(',', $this->configProvider->getInlineRatings());
+        $inlineRatings = $this->configProvider->getInlineRatings();
+
+        if (!$inlineRatings) {
+            return false;
+        }
+
+        $typesEnabled = explode(',', $inlineRatings);
 
         return in_array($this->type, $typesEnabled);
     }
