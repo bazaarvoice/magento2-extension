@@ -578,8 +578,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 = $this->stringFormatter->replaceIllegalCharacters($indexData['category_external_id']);
 
             if ($indexData['category_external_id'] == '') {
-                $indexData['status'] = Status::STATUS_DISABLED;
-                $this->logger->debug('Product marked disabled because no category found.');
+                $this->logger->debug('No category (or parent product category) found for product.');
             } else {
                 $this->logger->debug("Category '{$indexData['category_external_id']}'");
             }
