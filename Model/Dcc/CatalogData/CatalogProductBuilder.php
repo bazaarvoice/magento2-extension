@@ -261,12 +261,14 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
     private function getBrandId($product, $parentProduct = null)
     {
         $brandAttr = $this->getBrandAttribute($product);
+        $brandId = $brandAttr ? $product->getData($brandAttr) : null;
         $parentBrandId = null;
         if ($parentProduct) {
             $parentBrandAttr = $this->getBrandAttribute($parentProduct);
-            $parentBrandId = $parentProduct->getData($parentBrandAttr);
+            $parentBrandId = $parentBrandAttr ? $parentProduct->getData($parentBrandAttr) : null;
         }
-        return $product->getData($brandAttr) ?? $parentBrandId;
+
+        return $brandId ?? $parentBrandId;
     }
 
     /**
@@ -278,13 +280,14 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
     private function getBrandName($product, $parentProduct = null)
     {
         $brandAttr = $this->getBrandAttribute($product);
+        $brandName = $brandAttr ? $product->getAttributeText($brandAttr) : null;
         $parentBrandName = null;
         if ($parentProduct) {
             $parentBrandAttr = $this->getBrandAttribute($parentProduct);
-            $parentBrandName = $parentProduct->getAttributeText($parentBrandAttr);
+            $parentBrandName = $parentBrandAttr ? $parentProduct->getAttributeText($parentBrandAttr) : null;
         }
 
-        return $product->getAttributeText($brandAttr) ?? $parentBrandName;
+        return $brandName ?? $parentBrandName;
     }
 
     /**
