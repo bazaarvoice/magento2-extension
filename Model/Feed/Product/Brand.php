@@ -63,7 +63,7 @@ class Brand
         /** Lookup the configured attribute code for "Brand" */
         $attributeCode = $this->configProvider->getAttributeCode('brand', $store->getId());
         /** If there is no attribute code for store, then bail */
-        if (!strlen(trim($attributeCode))) {
+        if (!$attributeCode) {
             return;
         }
         $writer->startElement('Brands');
@@ -88,7 +88,7 @@ class Brand
         /** Lookup the configured attribute code for "Brand" */
         $attributeCode = $this->configProvider->getAttributeCode('brand', $storeGroup->getDefaultStore()->getId());
         /** If there is no attribute code for store, then bail */
-        if (!strlen(trim($attributeCode))) {
+        if (!$attributeCode) {
             return;
         }
         $brandsByLocale = $this->getOptionsByLocale($attributeCode, $storeGroup->getStoreIds());
@@ -109,10 +109,9 @@ class Brand
         /** Lookup the configured attribute code for "Brand" */
         $attributeCode = $this->configProvider->getAttributeCode('brand', $website->getDefaultStore()->getId());
         /** If there is no attribute code for store, then bail */
-        if (!strlen(trim($attributeCode))) {
+        if (!$attributeCode) {
             return;
         }
-
         $brandsByLocale = $this->getOptionsByLocale($attributeCode, $website->getStoreIds());
         $defaultBrands = $this->getOptionsForStore($attributeCode, $website->getDefaultStore());
         $writer->startElement('Brands');
@@ -130,7 +129,7 @@ class Brand
         /** Lookup the configured attribute code for "Brand" */
         $attributeCode = $this->configProvider->getAttributeCode('brand');
         /** If there is no attribute code for store, then bail */
-        if (!strlen(trim($attributeCode))) {
+        if (!$attributeCode) {
             return;
         }
         $storesList = $this->storeManager->getStores();
