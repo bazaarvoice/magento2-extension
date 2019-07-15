@@ -7,32 +7,32 @@
         <script type="text/javascript">
             var bvChildren = <?= $viewModel->getChildrenJson(); ?>;
             var bvSelected = "<?= $viewModel->getProductSku() ?>";
-            require(["jquery"], function ($) {
+            require(["jquery"], function (jQuery) {
                 function bindBvSwatches()
                 {
-                    $('#product-options-wrapper').on('click', '.swatch-option', function () {
+                    jQuery('#product-options-wrapper').on('click', '.swatch-option', function () {
                         var bvCurrent = '';
-                        $('.swatch-attribute').each(function () {
+                        jQuery('.swatch-attribute').each(function () {
                             bvCurrent = bvCurrent
-                                + $(this).attr('attribute-id') + '_'
-                                + $(this).attr('option-selected') + '_';
+                                + jQuery(this).attr('attribute-id') + '_'
+                                + jQuery(this).attr('option-selected') + '_';
                         });
                         console.log(bvCurrent);
                         if (bvChildren[bvCurrent] != undefined && bvChildren[bvCurrent] != bvSelected) {
                             var externalId = bvChildren[bvCurrent];
                             console.log("switching to " + externalId);
                             bvSelected = bvChildren[bvCurrent];
-                            $('div[data-bv-show=reviews]').attr('data-bv-product-id', externalId);
-                            BV.reviews.render($('div[data-bv-show=reviews]')[0]);
-                            $('div[data-bv-show=questions]').attr('data-bv-product-id', externalId);
-                            BV.questions.render($('div[data-bv-show=questions]')[0]);
-                            $('div[data-bv-show=rating_summary]').attr('data-bv-product-id', externalId);
-                            BV.rating_summary.render($('div[data-bv-show=rating_summary]')[0]);
+                            jQuery('div[data-bv-show=reviews]').attr('data-bv-product-id', externalId);
+                            BV.reviews.render(jQuery('div[data-bv-show=reviews]')[0]);
+                            jQuery('div[data-bv-show=questions]').attr('data-bv-product-id', externalId);
+                            BV.questions.render(jQuery('div[data-bv-show=questions]')[0]);
+                            jQuery('div[data-bv-show=rating_summary]').attr('data-bv-product-id', externalId);
+                            BV.rating_summary.render(jQuery('div[data-bv-show=rating_summary]')[0]);
                         }
                     });
                 }
 
-                $(document).ready(bindBvSwatches());
+                jQuery(document).ready(bindBvSwatches());
             });
         </script>
     <?php endif; ?>
