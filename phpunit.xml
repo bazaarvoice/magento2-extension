@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © Bazaarvoice, Inc. All rights reserved.
+  ~ See LICENSE.md for license details.
+  -->
+
 <phpunit backupGlobals="false" backupStaticAttributes="false" strict="true" verbose="true">
     <testsuites>
         <testsuite name="bazaarvoice_mage2_ext">

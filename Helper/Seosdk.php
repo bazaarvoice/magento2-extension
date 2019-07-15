@@ -1,4 +1,9 @@
 <?php
+/**
+ * Copyright © Bazaarvoice, Inc. All rights reserved.
+ * See LICENSE.md for license details.
+ */
+
 // phpcs:ignoreFile
 declare(strict_types=1);
 

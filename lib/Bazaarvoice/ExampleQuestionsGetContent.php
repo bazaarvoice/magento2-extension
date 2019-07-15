@@ -1,4 +1,9 @@
 <?php
+/**
+ * Copyright © Bazaarvoice, Inc. All rights reserved.
+ * See LICENSE.md for license details.
+ */
+
 //Please provide cloud_key, bv_root_folder and subject_id
 require('bvseosdk.php');
 $bv = new BV([

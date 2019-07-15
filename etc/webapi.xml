@@ -1,4 +1,9 @@
 <?xml version="1.0"?>
+<!--
+  ~ Copyright © Bazaarvoice, Inc. All rights reserved.
+  ~ See LICENSE.md for license details.
+  -->
+
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
     <route url="/V1/dcc/get-data/:productId/:storeId" method="GET">
         <service class="Bazaarvoice\Connector\Api\DccInterface" method="getJson"/>

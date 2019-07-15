@@ -1,4 +1,9 @@
 <?php
+/**
+ * Copyright © Bazaarvoice, Inc. All rights reserved.
+ * See LICENSE.md for license details.
+ */
+
 declare(strict_types=1);
 
 namespace Bazaarvoice\Connector\ViewModel;
@@ -230,5 +235,13 @@ class Product implements ArgumentInterface
     public function isDccEnabled()
     {
         return $this->configProvider->isDccEnabled();
+    }
+
+    /**
+     * @return mixed|string|null
+     */
+    public function getExtensionVersion()
+    {
+        return $this->configProvider->getExtensionVersion();
     }
 }

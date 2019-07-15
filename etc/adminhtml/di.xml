@@ -1,4 +1,9 @@
 <?xml version="1.0"?>
+<!--
+  ~ Copyright © Bazaarvoice, Inc. All rights reserved.
+  ~ See LICENSE.md for license details.
+  -->
+
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <!-- Admin Message -->
     <type name="Magento\Framework\Notification\MessageList">

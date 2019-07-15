@@ -1,4 +1,9 @@
 <?xml version="1.0"?>
+<!--
+  ~ Copyright © Bazaarvoice, Inc. All rights reserved.
+  ~ See LICENSE.md for license details.
+  -->
+
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
     <menu>
         <add id="Bazaarvoice_Connector::bvindex" title="Bazaarvoice Product Feed" module="Bazaarvoice_Connector" sortOrder="80" resource="Bazaarvoice_Connector::index" parent="Magento_Catalog::inventory" action="adminhtml/bvindex/index/"/>

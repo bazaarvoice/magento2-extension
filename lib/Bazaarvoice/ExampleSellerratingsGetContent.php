@@ -1,4 +1,9 @@
 <?php
+/**
+ * Copyright © Bazaarvoice, Inc. All rights reserved.
+ * See LICENSE.md for license details.
+ */
+
 // phpcs:ignoreFile
 //Please provide cloud_key and bv_root_folder
 require('bvseosdk.php');

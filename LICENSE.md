@@ -1,4 +1,4 @@
-Copyright 2017 Bazaarvoice, Inc.
+Copyright 2019 Bazaarvoice, Inc.
 
 Bazaarvoice copyright materials may not be reproduced in whole or in part by
 persons, organizations or corporations other than Bazaarvoice, Inc., its

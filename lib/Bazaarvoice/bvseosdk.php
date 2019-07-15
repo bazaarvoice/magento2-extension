@@ -1,4 +1,7 @@
-<?php /** @noinspection PhpMissingDocCommentInspection */
+<?php /**
+ * Copyright © Bazaarvoice, Inc. All rights reserved.
+ * See LICENSE.md for license details.
+ */ /** @noinspection PhpMissingDocCommentInspection */
 /** @codingStandardsIgnoreFile */
 
 /**

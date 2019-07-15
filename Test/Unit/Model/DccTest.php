@@ -1,4 +1,8 @@
 <?php
+/**
+ * Copyright © Bazaarvoice, Inc. All rights reserved.
+ * See LICENSE.md for license details.
+ */
 
 namespace Bazaarvoice\Connector\Test\Unit\Model\Dcc;
 
