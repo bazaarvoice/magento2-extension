@@ -3,6 +3,7 @@
 <?php $viewModel = $block->getViewModel(); ?>
 
 <?php if ($viewModel->isBvEnabled() && $viewModel->getProduct()): ?>
+    <!-- BV | Magento Extension <?= $viewModel->getExtensionVersion(); ?> -->
     <?php if ($viewModel->isConfigurable() && $viewModel->getConfigProvider()->isRrChildrenEnabled()): ?>
         <script type="text/javascript">
             var bvChildren = <?= $viewModel->getChildrenJson(); ?>;
