@@ -22,9 +22,10 @@ class Test extends Success
      */
     public function execute()
     {
-        $orderId = $this->getRequest()->getParam('order_id') ?? '000000001';
+        $orderIncrementId = $this->getRequest()->getParam('order_increment_id');
+        $orderId = $this->getRequest()->getParam('order_id');
         $session = $this->getOnepage()->getCheckout();
-        $session->setLastRealOrderId($orderId);
+        $session->setLastRealOrderId($orderIncrementId);
         $session->setLastOrderId($orderId);
         $session->setLastSuccessQuoteId('dummy_value');
         $session->setLastQuoteId('dummy_value');

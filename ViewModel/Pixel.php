@@ -121,6 +121,7 @@ class Pixel implements ArgumentInterface
         $this->orderDetails['total'] = number_format((float)$total, 2, '.', '');
         $this->orderDetails['tax'] = number_format((float)$order->getTaxAmount() ?? 0.0, 2, '.', '');
         $this->orderDetails['shipping'] = number_format((float)$order->getShippingAmount() ?? 0.0, 2, '.', '');
+        $this->orderDetails['discount'] = number_format((float)abs($order->getDiscountAmount()) ?? 0.0, 2, '.', '');
 
         if ($address) {
             $this->orderDetails['city'] = $address->getCity();
@@ -148,7 +149,7 @@ class Pixel implements ArgumentInterface
             }
 
             $itemDetails = [];
-            $itemDetails['sku'] = $this->stringFormatter->getFormattedProductSku($product);
+            $itemDetails['productId'] = $this->stringFormatter->getFormattedProductSku($product);
 
             $itemDetails['name'] = $item->getName();
             /** 'category' is not included.
@@ -156,6 +157,7 @@ class Pixel implements ArgumentInterface
              * Should we try to include it?
              */
             $itemDetails['price'] = number_format((float)$item->getPrice(), 2, '.', '');
+            $itemDetails['discount'] = number_format((float)$item->getDiscountAmount(), 2, '.', '');
             $itemDetails['quantity'] = number_format((float)$item->getQtyOrdered(), 0);
             $itemDetails['imageURL'] = $this->imageHelper->init($product, 'product_small_image')
                 ->setImageFile($product->getSmallImage())->getUrl();
@@ -193,6 +195,8 @@ class Pixel implements ArgumentInterface
         $this->orderDetails['locale'] = $this->configProvider->getLocale($order->getStoreId());
 
         /** Add partnerSource field */
+        $this->orderDetails['source'] = 'Magento_BV_Extension';
+        $this->orderDetails['partnerVersion'] = $this->configProvider->getExtensionVersion();
         $this->orderDetails['partnerSource'] = 'Magento Extension r'.$this->configProvider->getExtensionVersion();
         $this->orderDetails['deploymentZone'] = strtolower(str_replace(
             ' ',
