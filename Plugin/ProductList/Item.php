@@ -21,11 +21,7 @@ class Item
     /* @var \Magento\Catalog\Api\Data\ProductInterface|\Magento\Catalog\Model\Product */
     protected $product;
     /**
-     * @var
-     */
-    protected $productIds;
-    /**
-     * @var
+     * @var string
      */
     protected $type;
     /**
@@ -57,23 +53,25 @@ class Item
      */
     public function beforeGetProductPrice(
         /** @noinspection PhpUnusedParameterInspection */
+        // @codingStandardsIgnoreLine Squiz.Functions.MultiLineFunctionDeclaration.FirstParamSpacing
         $subject,
         $product
     ) {
         //todo: Combine with afterGetProductPrice into an around plugin?
-        // @codingStandardsIgnoreEnd
-        if ($this->isBvEnabled()) {
+        if ($this->isHostedInlineRatingsEnabled()) {
             $this->product = $product;
         }
     }
 
-    // @codingStandardsIgnoreStart
-
     /**
      * @return bool
      */
-    public function isBvEnabled()
+    public function isHostedInlineRatingsEnabled()
     {
+        if (!$this->configProvider->isRrEnabled()) {
+            return false;
+        }
+
         $inlineRatings = $this->configProvider->getInlineRatings();
 
         if (!$inlineRatings) {
@@ -85,8 +83,6 @@ class Item
         return in_array($this->type, $typesEnabled);
     }
 
-    // @codingStandardsIgnoreStart
-
     /**
      * @param $subject
      * @param $result
@@ -95,12 +91,12 @@ class Item
      */
     public function afterGetProductPrice(
         /** @noinspection PhpUnusedParameterInspection */
+        // @codingStandardsIgnoreLine Squiz.Functions.MultiLineFunctionDeclaration.FirstParamSpacing
         $subject,
         $result
     ) {
         //todo: Combine with afterGetProductPrice into an around plugin?
-        // @codingStandardsIgnoreEnd
-        if ($this->isBvEnabled()) {
+        if ($this->isHostedInlineRatingsEnabled()) {
             $productIdentifier = $this->stringFormatter->getFormattedProductSku($this->product);
             $productUrl = $this->product->getProductUrl();
             $result = '

@@ -22,6 +22,11 @@ class ProductList implements OptionSourceInterface
     const UPSELL = 'upsell';
     const RELATED = 'related';
     const CROSSSELL = 'crosssell';
+    const CATALOG_PRODUCTS_LIST_WIDGET = 'widget';
+    const CATALOG_NEW_PRODUCTS_LIST_WIDGET = 'new_products_list_widget';
+    /**
+     * @deprecated Use CATALOG_PRODUCTS_LIST_WIDGET
+     */
     const WIDGET = 'widget';
 
     /**
@@ -51,8 +56,12 @@ class ProductList implements OptionSourceInterface
                 'label' => __('Cross-Sell Products on Cart Page'),
             ],
             [
-                'value' => self::WIDGET,
+                'value' => self::CATALOG_PRODUCTS_LIST_WIDGET,
                 'label' => __('Product List Widget'),
+            ],
+            [
+                'value' => self::CATALOG_NEW_PRODUCTS_LIST_WIDGET,
+                'label' => __('Product New List Widget'),
             ],
         ];
     }
