@@ -8,6 +8,9 @@ namespace Bazaarvoice\Connector\Test\Unit\Model\Dcc;
 
 use Bazaarvoice\Connector\Model\CurrentProductProvider;
 use Bazaarvoice\Connector\Model\Dcc;
+use Bazaarvoice\Connector\Model\Dcc\CatalogData;
+use Bazaarvoice\Connector\Model\Dcc\CatalogDataBuilder;
+use Bazaarvoice\Connector\Model\StringFormatter;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use PHPUnit\Framework\TestCase;
@@ -23,11 +26,6 @@ class DccTest extends TestCase
      * @var \Magento\Framework\TestFramework\Unit\Helper\ObjectManager
      */
     private $objectManager;
-
-    protected function setUp()
-    {
-        $this->objectManager = new ObjectManager($this);
-    }
 
     public function testBuildProductDoesNotExistEmptyResult()
     {
@@ -51,13 +49,13 @@ class DccTest extends TestCase
             ->getMockForAbstractClass();
         $currentProductProviderMock->method('getProduct')->willReturn($productMock);
 
-        $dccCatalogDataMock = $this->createPartialMock(\Bazaarvoice\Connector\Model\Dcc\CatalogData::class, ['getData']);
+        $dccCatalogDataMock = $this->createPartialMock(CatalogData::class, ['getData']);
         $dccCatalogDataMock->method('getData')->willReturn('{}');
 
-        $dccCatalogDataBuilderMock = $this->createPartialMock(\Bazaarvoice\Connector\Model\Dcc\CatalogDataBuilder::class, ['build']);
+        $dccCatalogDataBuilderMock = $this->createPartialMock(CatalogDataBuilder::class, ['build']);
         $dccCatalogDataBuilderMock->method('build')->willReturn($dccCatalogDataMock);
 
-        $stringFormatterMock = $this->createPartialMock(\Bazaarvoice\Connector\Model\StringFormatter::class, ['jsonEncode']);
+        $stringFormatterMock = $this->createPartialMock(StringFormatter::class, ['jsonEncode']);
         $stringFormatterMock->method('jsonEncode')->willReturn('{}');
 
         $arguments = $this->objectManager->getConstructArguments(Dcc::class);
@@ -68,5 +66,10 @@ class DccTest extends TestCase
         $result = $dcc->getJson();
 
         $this->assertNotEmpty($result);
+    }
+
+    protected function setUp()
+    {
+        $this->objectManager = new ObjectManager($this);
     }
 }
