@@ -28,16 +28,14 @@ class Widget extends Item
      */
     public function beforeGetProductPriceHtml(
         /** @noinspection PhpUnusedParameterInspection */
+        // @codingStandardsIgnoreLine Squiz.Functions.MultiLineFunctionDeclaration.FirstParamSpacing
         $subject,
         $product
     ) {
-        // @codingStandardsIgnoreEnd
-        if ($this->configProvider->isBvEnabled()) {
+        if ($this->isHostedInlineRatingsEnabled()) {
             $this->product = $product;
         }
     }
-
-    // @codingStandardsIgnoreStart
 
     /**
      * @param $subject
@@ -47,11 +45,11 @@ class Widget extends Item
      */
     public function afterGetProductPriceHtml(
         /** @noinspection PhpUnusedParameterInspection */
+        // @codingStandardsIgnoreLine Squiz.Functions.MultiLineFunctionDeclaration.FirstParamSpacing
         $subject,
         $result
     ) {
-        // @codingStandardsIgnoreEnd
-        if ($this->configProvider->isBvEnabled()) {
+        if ($this->isHostedInlineRatingsEnabled()) {
             $productIdentifier = $this->stringFormatter->getFormattedProductSku($this->product);
             $productUrl = $this->product->getProductUrl();
             $result = '
