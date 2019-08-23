@@ -17,5 +17,8 @@ use Bazaarvoice\Connector\Model\Source\ProductList;
  */
 class Crosssell extends Item
 {
+    /**
+     * @var string
+     */
     protected $type = ProductList::CROSSSELL;
 }

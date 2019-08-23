@@ -31,6 +31,9 @@
     <type name="Magento\CatalogWidget\Block\Product\ProductsList">
         <plugin name="bazaarvoice-widget" type="Bazaarvoice\Connector\Plugin\ProductList\Widget" sortOrder="100"/>
     </type>
+    <type name="Magento\Catalog\Block\Product\Widget\NewWidget">
+        <plugin name="bazaarvoice-new-products-widget" type="Bazaarvoice\Connector\Plugin\ProductList\NewProductsWidget" sortOrder="100"/>
+    </type>
 
     <!--disable core reviews-->
     <type name="Magento\Review\Block\Product\ReviewRenderer">

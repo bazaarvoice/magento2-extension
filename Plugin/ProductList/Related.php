@@ -17,5 +17,8 @@ use Bazaarvoice\Connector\Model\Source\ProductList;
  */
 class Related extends Item
 {
+    /**
+     * @var string
+     */
     protected $type = ProductList::RELATED;
 }
