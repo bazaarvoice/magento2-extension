@@ -21,5 +21,5 @@ interface DccInterface
      *
      * @return string|null
      */
-    public function getJson($productId = null, $storeId = null): ?string;
+    public function getJson($productId = null, $storeId = null);
 }

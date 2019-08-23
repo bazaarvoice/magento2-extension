@@ -24,7 +24,7 @@ interface ConfigProviderInterface
      *
      * @return bool|null
      */
-    public function isCloudSeoEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool;
+    public function isCloudSeoEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param string $type
@@ -33,7 +33,7 @@ interface ConfigProviderInterface
      *
      * @return bool|null
      */
-    public function canSendFeed($type, $storeId, $scope = ScopeInterface::SCOPE_STORE): ?bool;
+    public function canSendFeed($type, $storeId, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int    $storeId
@@ -41,7 +41,7 @@ interface ConfigProviderInterface
      *
      * @return bool
      */
-    public function canSendPurchaseFeed($storeId, $scope = ScopeInterface::SCOPE_STORE): ?bool;
+    public function canSendPurchaseFeed($storeId, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -49,7 +49,7 @@ interface ConfigProviderInterface
      *
      * @return bool|null
      */
-    public function isBvEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool;
+    public function isBvEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -57,7 +57,7 @@ interface ConfigProviderInterface
      *
      * @return bool|null
      */
-    public function isQaEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool;
+    public function isQaEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -65,7 +65,7 @@ interface ConfigProviderInterface
      *
      * @return bool|null
      */
-    public function isRrEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool;
+    public function isRrEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int    $storeId
@@ -73,7 +73,7 @@ interface ConfigProviderInterface
      *
      * @return bool|null
      */
-    public function canSendProductFeed($storeId, $scope = ScopeInterface::SCOPE_STORE): ?bool;
+    public function canSendProductFeed($storeId, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -81,15 +81,7 @@ interface ConfigProviderInterface
      *
      * @return bool|null
      */
-    public function isFamiliesEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool;
-
-    /**
-     * @param int    $storeId
-     * @param string $scope
-     *
-     * @return string|null
-     */
-    public function getSftpUsername($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string;
+    public function isFamiliesEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int    $storeId
@@ -97,7 +89,15 @@ interface ConfigProviderInterface
      *
      * @return string|null
      */
-    public function getSftpPassword($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string;
+    public function getSftpUsername($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
+
+    /**
+     * @param int    $storeId
+     * @param string $scope
+     *
+     * @return string|null
+     */
+    public function getSftpPassword($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -105,7 +105,7 @@ interface ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getProductFilename($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string;
+    public function getProductFilename($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -113,7 +113,7 @@ interface ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getProductPath($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string;
+    public function getProductPath($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -121,7 +121,7 @@ interface ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getNumDaysLookback($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string;
+    public function getNumDaysLookback($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -129,7 +129,7 @@ interface ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getFamilyAttributes($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string;
+    public function getFamilyAttributes($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -137,7 +137,7 @@ interface ConfigProviderInterface
      *
      * @return array|null
      */
-    public function getFamilyAttributesArray($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?array;
+    public function getFamilyAttributesArray($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -145,7 +145,7 @@ interface ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getTriggeringEvent($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string;
+    public function getTriggeringEvent($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -153,7 +153,7 @@ interface ConfigProviderInterface
      *
      * @return bool
      */
-    public function isCategoryIdUseUrlPathEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool;
+    public function isCategoryIdUseUrlPathEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -161,7 +161,7 @@ interface ConfigProviderInterface
      *
      * @return bool
      */
-    public function isFamiliesInheritEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool;
+    public function isFamiliesInheritEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -169,7 +169,7 @@ interface ConfigProviderInterface
      *
      * @return bool
      */
-    public function isFamiliesExpandEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool;
+    public function isFamiliesExpandEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -177,7 +177,7 @@ interface ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getInlineRatings($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string;
+    public function getInlineRatings($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -185,7 +185,7 @@ interface ConfigProviderInterface
      *
      * @return string
      */
-    public function getCronjobDurationLimit($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string;
+    public function getCronjobDurationLimit($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -193,7 +193,7 @@ interface ConfigProviderInterface
      *
      * @return bool
      */
-    public function isRrChildrenEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool;
+    public function isRrChildrenEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -201,7 +201,7 @@ interface ConfigProviderInterface
      *
      * @return mixed
      */
-    public function isDccEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool;
+    public function isDccEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -209,7 +209,7 @@ interface ConfigProviderInterface
      *
      * @return mixed
      */
-    public function isBvPixelEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool;
+    public function isBvPixelEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -217,7 +217,7 @@ interface ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getRrDoShowContentJs($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string;
+    public function getRrDoShowContentJs($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -225,7 +225,7 @@ interface ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getQaDoShowContentJs($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string;
+    public function getQaDoShowContentJs($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * Get custom configured attributes
@@ -236,7 +236,7 @@ interface ConfigProviderInterface
      *
      * @return string
      */
-    public function getAttributeCode(string $type, $storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string;
+    public function getAttributeCode(string $type, $storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -244,7 +244,7 @@ interface ConfigProviderInterface
      *
      * @return bool
      */
-    public function isDebugEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool;
+    public function isDebugEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * If sftp host is set in config, use that.
@@ -255,7 +255,7 @@ interface ConfigProviderInterface
      *
      * @return string
      */
-    public function getSftpHost($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string;
+    public function getSftpHost($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -263,7 +263,7 @@ interface ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getEnvironment($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string;
+    public function getEnvironment($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -271,7 +271,7 @@ interface ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getCloudSeoKey($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string;
+    public function getCloudSeoKey($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * Get url to bv.js javascript API file
@@ -292,7 +292,7 @@ interface ConfigProviderInterface
      *
      * @return string|null
      */
-    public function getClientName($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string;
+    public function getClientName($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -300,7 +300,7 @@ interface ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getLegacyDisplayCode($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string;
+    public function getLegacyDisplayCode($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -308,7 +308,7 @@ interface ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getDeploymentZone($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string;
+    public function getDeploymentZone($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -316,12 +316,12 @@ interface ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getLocale($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string;
+    public function getLocale($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @return mixed
      */
-    public function getExtensionVersion(): ?string;
+    public function getExtensionVersion();
 
     /**
      * @return array
@@ -332,7 +332,7 @@ interface ConfigProviderInterface
     /**
      * @return string|null
      */
-    public function getFeedGenerationScope(): ?string;
+    public function getFeedGenerationScope();
 
     /**
      * @param int|null $storeId
@@ -340,7 +340,7 @@ interface ConfigProviderInterface
      *
      * @return bool
      */
-    public function isProductPrefixEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool;
+    public function isProductPrefixEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -348,7 +348,7 @@ interface ConfigProviderInterface
      *
      * @return bool
      */
-    public function isCategoryPrefixEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool;
+    public function isCategoryPrefixEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int $storeId
@@ -370,5 +370,5 @@ interface ConfigProviderInterface
      *
      * @return string|null
      */
-    public function getPrefix($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string;
+    public function getPrefix($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 }

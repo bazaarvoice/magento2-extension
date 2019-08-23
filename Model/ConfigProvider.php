@@ -57,7 +57,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return bool
      */
-    public function isCloudSeoEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
+    public function isCloudSeoEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return (bool) $this->isBvEnabled($storeId, $scope) && $this->getConfig('general/enable_cloud_seo', $storeId, $scope);
     }
@@ -69,7 +69,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return bool
      */
-    public function isBvEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
+    public function isBvEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return (bool) $this->getConfig('general/enable_bv', $storeId, $scope);
     }
@@ -81,7 +81,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return bool
      */
-    public function isQaEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
+    public function isQaEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return (bool) $this->isBvEnabled($storeId, $scope) && (bool) $this->getConfig('qa/enable_qa', $storeId, $scope);
     }
@@ -93,7 +93,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return bool
      */
-    public function isRrEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
+    public function isRrEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return (bool) $this->isBvEnabled($storeId, $scope) && (bool) $this->getConfig('rr/enable_rr', $storeId, $scope);
     }
@@ -105,7 +105,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return bool
      */
-    public function canSendFeed($type, $storeId, $scope = ScopeInterface::SCOPE_STORE): ?bool
+    public function canSendFeed($type, $storeId, $scope = ScopeInterface::SCOPE_STORE)
     {
         if ($type == 'purchase') {
             return $this->canSendPurchaseFeed($storeId, $scope);
@@ -120,7 +120,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return bool
      */
-    public function canSendProductFeed($storeId, $scope = ScopeInterface::SCOPE_STORE): ?bool
+    public function canSendProductFeed($storeId, $scope = ScopeInterface::SCOPE_STORE)
     {
         return (bool) $this->isBvEnabled($storeId, $scope) && $this->isProductFeedEnabled($storeId, $scope);
     }
@@ -131,7 +131,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return bool
      */
-    private function isProductFeedEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
+    private function isProductFeedEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return (bool) $this->getConfig('feeds/enable_product_feed', $storeId, $scope);
     }
@@ -142,7 +142,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return bool
      */
-    public function canSendPurchaseFeed($storeId, $scope = ScopeInterface::SCOPE_STORE): ?bool
+    public function canSendPurchaseFeed($storeId, $scope = ScopeInterface::SCOPE_STORE)
     {
         return (bool) $this->isBvEnabled($storeId, $scope) && $this->isPurchaseFeedEnabled($storeId, $scope);
     }
@@ -153,7 +153,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return bool
      */
-    private function isPurchaseFeedEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
+    private function isPurchaseFeedEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return (bool) $this->getConfig('feeds/enable_purchase_feed', $storeId, $scope);
     }
@@ -164,7 +164,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return bool
      */
-    public function isFamiliesEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
+    public function isFamiliesEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return (bool) $this->getConfig('general/families', $storeId, $scope);
     }
@@ -175,7 +175,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return string|null
      */
-    public function getSftpUsername($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string
+    public function getSftpUsername($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return $this->getConfig('feeds/sftp_username', $storeId, $scope);
     }
@@ -186,7 +186,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return string|null
      */
-    public function getSftpPassword($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string
+    public function getSftpPassword($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return $this->getConfig('feeds/sftp_password', $storeId, $scope);
     }
@@ -197,7 +197,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getProductFilename($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string
+    public function getProductFilename($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return $this->getConfig('feeds/product_filename', $storeId, $scope);
     }
@@ -208,7 +208,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getProductPath($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string
+    public function getProductPath($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return $this->getConfig('feeds/product_path', $storeId, $scope);
     }
@@ -219,7 +219,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getNumDaysLookback($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string
+    public function getNumDaysLookback($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return $this->getConfig('feeds/lookback', $storeId, $scope);
     }
@@ -230,7 +230,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return string|null
      */
-    public function getFamilyAttributes($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string
+    public function getFamilyAttributes($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return $this->getConfig('feeds/bvfamilies_code', $storeId, $scope);
     }
@@ -241,7 +241,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return array|null
      */
-    public function getFamilyAttributesArray($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?array
+    public function getFamilyAttributesArray($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         $families = $this->getFamilyAttributes($storeId, $scope);
         if ($families) {
@@ -261,7 +261,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getTriggeringEvent($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string
+    public function getTriggeringEvent($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return $this->getConfig('feeds/triggering_event', $storeId, $scope);
     }
@@ -272,7 +272,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return bool
      */
-    public function isCategoryIdUseUrlPathEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
+    public function isCategoryIdUseUrlPathEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return (bool) $this->getConfig('feeds/category_id_use_url_path', $storeId, $scope);
     }
@@ -283,7 +283,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return bool
      */
-    public function isFamiliesInheritEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
+    public function isFamiliesInheritEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return (bool) $this->getConfig('feeds/bvfamilies_inherit', $storeId, $scope);
     }
@@ -294,7 +294,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return bool
      */
-    public function isFamiliesExpandEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
+    public function isFamiliesExpandEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return (bool) $this->getConfig('feeds/bvfamilies_expand', $storeId, $scope);
     }
@@ -305,7 +305,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getInlineRatings($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string
+    public function getInlineRatings($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return $this->getConfig('rr/inline_ratings', $storeId, $scope);
     }
@@ -316,7 +316,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return string
      */
-    public function getCronjobDurationLimit($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string
+    public function getCronjobDurationLimit($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return $this->getConfig('feeds/limit', $storeId, $scope);
     }
@@ -327,7 +327,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return bool
      */
-    public function isRrChildrenEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
+    public function isRrChildrenEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return (bool) $this->getConfig('rr/children', $storeId, $scope);
     }
@@ -338,7 +338,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return bool
      */
-    public function isDccEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
+    public function isDccEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return (bool) $this->isBvEnabled($storeId, $scope) && $this->getConfig('feeds/enable_dcc', $storeId, $scope);
     }
@@ -349,7 +349,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return bool
      */
-    public function isBvPixelEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
+    public function isBvPixelEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return (bool) $this->isBvEnabled($storeId, $scope) && $this->getConfig('general/enable_bvpixel', $storeId, $scope);
     }
@@ -360,7 +360,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getRrDoShowContentJs($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string
+    public function getRrDoShowContentJs($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return $this->getConfig('rr/do_show_content_js', $storeId, $scope);
     }
@@ -371,7 +371,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getQaDoShowContentJs($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string
+    public function getQaDoShowContentJs($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return $this->getConfig('qa/do_show_content_js', $storeId, $scope);
     }
@@ -385,7 +385,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return string
      */
-    public function getAttributeCode(string $type, $storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string
+    public function getAttributeCode(string $type, $storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return $this->getConfig('feeds/'.$type.'_code', $storeId, $scope);
     }
@@ -396,7 +396,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return bool
      */
-    public function isDebugEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
+    public function isDebugEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return (bool) $this->getConfig('general/debug', $storeId, $scope);
     }
@@ -410,7 +410,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return string
      */
-    public function getSftpHost($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string
+    public function getSftpHost($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         $environment = $this->getEnvironment($storeId, $scope);
         $hostSelection = trim($this->getConfig('feeds/sftp_host_name', $storeId, $scope));
@@ -430,7 +430,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getEnvironment($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string
+    public function getEnvironment($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return $this->getConfig('general/environment', $storeId, $scope);
     }
@@ -441,7 +441,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getCloudSeoKey($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string
+    public function getCloudSeoKey($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return $this->getConfig('general/cloud_seo_key', $storeId, $scope);
     }
@@ -452,7 +452,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return string|null
      */
-    public function getClientName($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string
+    public function getClientName($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return $this->getConfig('general/client_name', $storeId, $scope);
     }
@@ -463,7 +463,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getLegacyDisplayCode($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string
+    public function getLegacyDisplayCode($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return $this->getConfig('bv_config/display_code', $storeId, $scope);
     }
@@ -474,7 +474,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getDeploymentZone($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string
+    public function getDeploymentZone($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return $this->getConfig('general/deployment_zone', $storeId, $scope);
     }
@@ -485,7 +485,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return mixed
      */
-    public function getLocale($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string
+    public function getLocale($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return $this->getConfig('general/locale', $storeId, $scope);
     }
@@ -493,7 +493,7 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * @return string|null
      */
-    public function getFeedGenerationScope(): ?string
+    public function getFeedGenerationScope()
     {
         return $this->getConfig('feeds/generation_scope');
     }
@@ -504,7 +504,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return bool
      */
-    public function isProductPrefixEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
+    public function isProductPrefixEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return (bool) $this->getConfig('feeds/enable_product_prefix', $storeId, $scope);
     }
@@ -515,7 +515,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return bool
      */
-    public function isCategoryPrefixEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?bool
+    public function isCategoryPrefixEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return (bool) $this->getConfig('feeds/enable_category_prefix', $storeId, $scope);
     }
@@ -556,7 +556,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return string|null
      */
-    public function getPrefix($storeId = null, $scope = ScopeInterface::SCOPE_STORE): ?string
+    public function getPrefix($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         $prefix = '';
         try {
@@ -584,7 +584,7 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * @return mixed
      */
-    public function getExtensionVersion(): ?string
+    public function getExtensionVersion()
     {
         /** @var \Magento\Framework\Module\ModuleResource $module */
 

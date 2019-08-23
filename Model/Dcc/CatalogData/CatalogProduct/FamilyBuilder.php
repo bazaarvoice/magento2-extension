@@ -10,7 +10,6 @@ namespace Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProduct;
 
 use Bazaarvoice\Connector\Api\ConfigProviderInterface;
 use Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct\FamilyBuilderInterface;
-use Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct\FamilyInterface;
 use Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct\FamilyInterfaceFactory;
 use Bazaarvoice\Connector\Api\StringFormatterInterface;
 
@@ -57,7 +56,7 @@ class FamilyBuilder implements FamilyBuilderInterface
      *
      * @return \Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct\FamilyInterface
      */
-    public function build($product, $familyCode): ?FamilyInterface
+    public function build($product, $familyCode)
     {
         $dccFamily = $this->dccFamilyFactory->create();
         $dccFamily->setId($familyCode);

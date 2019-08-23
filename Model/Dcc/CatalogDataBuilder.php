@@ -67,7 +67,7 @@ class CatalogDataBuilder implements CatalogDataBuilderInterface
      *
      * @return \Bazaarvoice\Connector\Api\Data\Dcc\CatalogDataInterface
      */
-    public function build($product): ?CatalogDataInterface
+    public function build($product)
     {
         $dccCatalogData = $this->catalogDataFactory->create();
         $dccCatalogData->setLocale($this->configProvider->getLocale($product->getStoreId()));
@@ -80,7 +80,7 @@ class CatalogDataBuilder implements CatalogDataBuilderInterface
      *
      * @return array|null
      */
-    private function getCatalogProducts($parentProduct): ?array
+    private function getCatalogProducts($parentProduct)
     {
         $parentData = $this->getCatalogProduct($parentProduct);
         $productData = [$parentData];

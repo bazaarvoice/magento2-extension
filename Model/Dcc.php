@@ -76,7 +76,7 @@ class Dcc extends DataObject implements DccInterface
      *
      * @return string
      */
-    public function getJson($productId = null, $storeId = null): ?string
+    public function getJson($productId = null, $storeId = null)
     {
         $product = $this->getProduct($productId, $storeId);
         if ($product) {

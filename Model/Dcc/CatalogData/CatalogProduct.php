@@ -28,7 +28,7 @@ class CatalogProduct extends DataObject implements CatalogProductInterface
     /**
      * @return string|null
      */
-    public function getProductId(): ?string
+    public function getProductId()
     {
         return $this->getData('productId');
     }
@@ -46,7 +46,7 @@ class CatalogProduct extends DataObject implements CatalogProductInterface
     /**
      * @return string|null
      */
-    public function getProductName(): ?string
+    public function getProductName()
     {
         return $this->getData('productName');
     }
@@ -64,7 +64,7 @@ class CatalogProduct extends DataObject implements CatalogProductInterface
     /**
      * @return string|null
      */
-    public function getProductDescription(): ?string
+    public function getProductDescription()
     {
         return $this->getData('productDescription');
     }
@@ -82,7 +82,7 @@ class CatalogProduct extends DataObject implements CatalogProductInterface
     /**
      * @return string|null
      */
-    public function getProductImageURL(): ?string
+    public function getProductImageURL()
     {
         return $this->getData('productImageURL');
     }
@@ -100,7 +100,7 @@ class CatalogProduct extends DataObject implements CatalogProductInterface
     /**
      * @return string|null
      */
-    public function getProductPageURL(): ?string
+    public function getProductPageURL()
     {
         return $this->getData('productPageURL');
     }
@@ -118,7 +118,7 @@ class CatalogProduct extends DataObject implements CatalogProductInterface
     /**
      * @return string|null
      */
-    public function getBrandId(): ?string
+    public function getBrandId()
     {
         return $this->getData('brandId');
     }
@@ -136,7 +136,7 @@ class CatalogProduct extends DataObject implements CatalogProductInterface
     /**
      * @return string|null
      */
-    public function getBrandName(): ?string
+    public function getBrandName()
     {
         return $this->getData('brandName');
     }
@@ -154,7 +154,7 @@ class CatalogProduct extends DataObject implements CatalogProductInterface
     /**
      * @return array|null
      */
-    public function getCategoryPath(): ?array
+    public function getCategoryPath()
     {
         return $this->getData('categoryPath');
     }
@@ -172,7 +172,7 @@ class CatalogProduct extends DataObject implements CatalogProductInterface
     /**
      * @return array|null
      */
-    public function getManufacturerPartNumbers(): ?array
+    public function getManufacturerPartNumbers()
     {
         return $this->getData('manufacturerPartNumbers');
     }
@@ -190,7 +190,7 @@ class CatalogProduct extends DataObject implements CatalogProductInterface
     /**
      * @return array|null
      */
-    public function getModelNumbers(): ?array
+    public function getModelNumbers()
     {
         return $this->getData('modelNumbers');
     }
@@ -208,7 +208,7 @@ class CatalogProduct extends DataObject implements CatalogProductInterface
     /**
      * @return string|null
      */
-    public function getInactive(): ?string
+    public function getInactive()
     {
         return $this->getData('Inactive');
     }

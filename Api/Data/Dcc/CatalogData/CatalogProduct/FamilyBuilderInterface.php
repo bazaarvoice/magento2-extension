@@ -21,5 +21,5 @@ interface FamilyBuilderInterface
      *
      * @return \Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct\FamilyInterface
      */
-    public function build($product, $familyCode): ?FamilyInterface;
+    public function build($product, $familyCode);
 }

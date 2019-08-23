@@ -20,5 +20,5 @@ interface CatalogDataBuilderInterface
      *
      * @return \Bazaarvoice\Connector\Api\Data\Dcc\CatalogDataInterface
      */
-    public function build($product): ?CatalogDataInterface;
+    public function build($product);
 }

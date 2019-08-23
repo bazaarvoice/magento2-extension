@@ -64,7 +64,7 @@ class CategoryPathBuilder implements CategoryPathBuilderInterface
      *
      * @return \Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct\CategoryPathInterface
      */
-    public function build($category): ?CategoryPathInterface
+    public function build($category)
     {
         $dccCategoryPath = $this->dccCategoryPathFactory->create();
         $dccCategoryPath->setId($this->getCategoryId($category));

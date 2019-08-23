@@ -28,12 +28,12 @@ use Magento\Framework\Exception\NoSuchEntityException;
  */
 class CatalogProductBuilder implements CatalogProductBuilderInterface
 {
-    private const UPC = 'upc';
-    private const MPN = 'ManufacturerPartNumber';
-    private const EAN = 'EAN';
-    private const ISBN = 'ISBN';
-    private const MODEL_NUMBER = 'ModelNumber';
-    private const PRODUCT_SMALL_IMAGE = 'product_small_image';
+    const UPC = 'upc';
+    const MPN = 'ManufacturerPartNumber';
+    const EAN = 'EAN';
+    const ISBN = 'ISBN';
+    const MODEL_NUMBER = 'ModelNumber';
+    const PRODUCT_SMALL_IMAGE = 'product_small_image';
     const BRAND = 'brand';
     /**
      * @var \Magento\Catalog\Model\CategoryRepository
@@ -106,7 +106,7 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
      *
      * @return \Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProductInterface
      */
-    public function build($product, $parentProduct = null): ?CatalogProductInterface
+    public function build($product, $parentProduct = null)
     {
         $dccCatalogProduct = $this->dccCatalogProductFactory->create();
         $dccCatalogProduct->setProductId($this->getProductId($product));
@@ -173,7 +173,7 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
      *
      * @return bool|array
      */
-    private function getFamilies($product, $parentProduct = null): ?array
+    private function getFamilies($product, $parentProduct = null)
     {
         $parentProductToUse = $parentProduct ?? $product;
 

@@ -21,5 +21,5 @@ interface CatalogProductBuilderInterface
      *
      * @return \Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProductInterface
      */
-    public function build($product, $parentProduct = null): ?CatalogProductInterface;
+    public function build($product, $parentProduct = null);
 }

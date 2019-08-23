@@ -20,5 +20,5 @@ interface CategoryPathBuilderInterface
      *
      * @return \Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct\CategoryPathInterface
      */
-    public function build($category): ?CategoryPathInterface;
+    public function build($category);
 }
