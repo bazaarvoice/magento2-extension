@@ -142,6 +142,7 @@ class PurchaseFeed extends Feed
             if ($order->getCustomerId()) {
                 $userId = $order->getCustomerId();
             } else {
+                // phpcs:ignore
                 $userId = md5($order->getCustomerEmail());
             }
             $writer->writeElement('UserID', $userId);

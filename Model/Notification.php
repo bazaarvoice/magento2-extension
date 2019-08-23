@@ -37,6 +37,7 @@ class Notification implements MessageInterface
      */
     public function getIdentity()
     {
+        // phpcs:ignore
         return md5('bazaarvoice_cron');
     }
 

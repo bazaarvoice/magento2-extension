@@ -22,6 +22,7 @@ This is a test page for Questions: getContent<br>
 This will return questions and answers content<br><br>
 
 <div id="BVQAContainer">
+    <?php // phpcs:ignore ?>
     <?php echo $bv->questions->getContent(); ?>
 </div>
 

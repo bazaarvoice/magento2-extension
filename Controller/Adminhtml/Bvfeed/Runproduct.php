@@ -27,7 +27,7 @@ class Runproduct extends Action
     /**
      * Runproduct constructor.
      *
-     * @param Context       $context
+     * @param Context     $context
      * @param ProductFeed $productFeed
      */
     public function __construct(Context $context, ProductFeed $productFeed)
@@ -41,8 +41,8 @@ class Runproduct extends Action
      */
     public function execute()
     {
-        // phpcs:ignore
         //todo: Is there a better way to do this?
+        // phpcs:ignore
         echo '<pre>';
         $this->productFeed->setForce(true)->generateFeed();
     }
