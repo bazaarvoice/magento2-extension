@@ -529,7 +529,12 @@ class Flat implements IndexerActionInterface, MviewActionInterface
             $rows = $select->query();
         } catch (Exception $e) {
             $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
-            throw new Exception($e);
+            if (strpos($e->getMessage(), 'Column not found') !== false) {
+                $errorExplanation = 'The following "Column not found" error typically results from a product attribute missing from the flat product table. Please ensure that the attribute referenced in the error is set to Use In Product Listing = Yes, which should cause a reindex to add it to the product flat table that is being queried: ' . $e->getMessage();
+                throw new Exception($errorExplanation, 0, $e);
+            } else {
+                throw new Exception($e);
+            }
         }
 
         while (($indexData = $rows->fetch()) !== false) {
