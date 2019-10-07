@@ -18,6 +18,7 @@ use Bazaarvoice\Connector\Api\StringFormatterInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Helper\ImageFactory;
 use Magento\Catalog\Model\CategoryRepository;
+use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Framework\Escaper;
 use Magento\Framework\Exception\NoSuchEntityException;
 
@@ -222,6 +223,15 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
                 } else {
                     $value = [$value];
                 }
+            }
+        }
+
+        if ($product->getTypeId() == Configurable::TYPE_CODE
+            && $this->configProvider->isFamiliesInheritEnabled($product->getStoreId())
+        ) {
+            $childProducts = $product->getTypeInstance()->getUsedProducts($product, [static::EAN, static::ISBN, static::UPC, static::MPN]);
+            foreach ($childProducts as $childProduct) {
+                $value = array_merge((array) $value, (array) $this->getCustomAttributeData($childProduct, $attributeCode));
             }
         }
 
