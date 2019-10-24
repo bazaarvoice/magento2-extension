@@ -48,12 +48,16 @@
             window.bvDCC = <?= $configData ?>;
         <?php endif; ?>
         window.bvCallback = function (BV) {
-            BV.reviews.on('show', function () {
-                <?= $viewModel->getConfigProvider()->getRrDoShowContentJs(); ?>
-            });
-            BV.questions.on('show', function () {
-                <?= $viewModel->getConfigProvider()->getQaDoShowContentJs(); ?>
-            });
+            if (BV.reviews !== undefined) {
+                BV.reviews.on('show', function () {
+                    <?= $viewModel->getConfigProvider()->getRrDoShowContentJs(); ?>
+                });
+            }
+            if (BV.questions !== undefined) {
+                BV.questions.on('show', function () {
+                    <?= $viewModel->getConfigProvider()->getQaDoShowContentJs(); ?>
+                });
+            }
             <?php if ($viewModel->isDccEnabled()) : ?>
                 for (var i = 0, len = window.bvDCC.catalogData.catalogProducts.length; i < len; ++i) {
                     BV.pixel.trackEvent("CatalogUpdate", {
