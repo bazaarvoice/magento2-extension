@@ -99,13 +99,13 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * @param string $type
-     * @param int    $storeId
-     * @param string $scope
+     * @param string   $type
+     * @param int|null $storeId
+     * @param string   $scope
      *
      * @return bool
      */
-    public function canSendFeed($type, $storeId, $scope = ScopeInterface::SCOPE_STORE)
+    public function canSendFeed($type, $storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         if ($type == 'purchase') {
             return $this->canSendPurchaseFeed($storeId, $scope);
@@ -115,12 +115,12 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * @param int    $storeId
-     * @param string $scope
+     * @param int|null $storeId
+     * @param string   $scope
      *
      * @return bool
      */
-    public function canSendProductFeed($storeId, $scope = ScopeInterface::SCOPE_STORE)
+    public function canSendProductFeed($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return (bool) $this->isBvEnabled($storeId, $scope) && $this->isProductFeedEnabled($storeId, $scope);
     }
@@ -137,12 +137,12 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * @param int    $storeId
-     * @param string $scope
+     * @param int|null $storeId
+     * @param string   $scope
      *
      * @return bool
      */
-    public function canSendPurchaseFeed($storeId, $scope = ScopeInterface::SCOPE_STORE)
+    public function canSendPurchaseFeed($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return (bool) $this->isBvEnabled($storeId, $scope) && $this->isPurchaseFeedEnabled($storeId, $scope);
     }
@@ -170,8 +170,8 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * @param int    $storeId
-     * @param string $scope
+     * @param int|null $storeId
+     * @param string   $scope
      *
      * @return string|null
      */
@@ -181,8 +181,8 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * @param int    $storeId
-     * @param string $scope
+     * @param int|null $storeId
+     * @param string   $scope
      *
      * @return string|null
      */
@@ -385,7 +385,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return string
      */
-    public function getAttributeCode(string $type, $storeId = null, $scope = ScopeInterface::SCOPE_STORE)
+    public function getAttributeCode($type, $storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return $this->getConfig('feeds/'.$type.'_code', $storeId, $scope);
     }
@@ -521,11 +521,11 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * @param int $storeId
+     * @param int|null $storeId
      *
      * @return string
      */
-    public function getProductPrefix($storeId)
+    public function getProductPrefix($storeId = null)
     {
         $prefix = '';
         if ($this->isProductPrefixEnabled($storeId)) {
@@ -536,11 +536,11 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * @param int $storeId
+     * @param int|null $storeId
      *
      * @return string
      */
-    public function getCategoryPrefix($storeId)
+    public function getCategoryPrefix($storeId = null)
     {
         $prefix = '';
         if ($this->isCategoryPrefixEnabled($storeId)) {

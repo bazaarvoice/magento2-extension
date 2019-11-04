@@ -27,21 +27,21 @@ interface ConfigProviderInterface
     public function isCloudSeoEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
-     * @param string $type
-     * @param int    $storeId
-     * @param string $scope
+     * @param string   $type
+     * @param int|null $storeId
+     * @param string   $scope
      *
      * @return bool|null
      */
-    public function canSendFeed($type, $storeId, $scope = ScopeInterface::SCOPE_STORE);
+    public function canSendFeed($type, $storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
-     * @param int    $storeId
-     * @param string $scope
+     * @param int|null $storeId
+     * @param string   $scope
      *
      * @return bool
      */
-    public function canSendPurchaseFeed($storeId, $scope = ScopeInterface::SCOPE_STORE);
+    public function canSendPurchaseFeed($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -68,12 +68,12 @@ interface ConfigProviderInterface
     public function isRrEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
-     * @param int    $storeId
-     * @param string $scope
+     * @param int|null $storeId
+     * @param string   $scope
      *
      * @return bool|null
      */
-    public function canSendProductFeed($storeId, $scope = ScopeInterface::SCOPE_STORE);
+    public function canSendProductFeed($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -84,16 +84,16 @@ interface ConfigProviderInterface
     public function isFamiliesEnabled($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
-     * @param int    $storeId
-     * @param string $scope
+     * @param int|null $storeId
+     * @param string   $scope
      *
      * @return string|null
      */
     public function getSftpUsername($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
-     * @param int    $storeId
-     * @param string $scope
+     * @param int|null $storeId
+     * @param string   $scope
      *
      * @return string|null
      */
@@ -236,7 +236,7 @@ interface ConfigProviderInterface
      *
      * @return string
      */
-    public function getAttributeCode(string $type, $storeId = null, $scope = ScopeInterface::SCOPE_STORE);
+    public function getAttributeCode($type, $storeId = null, $scope = ScopeInterface::SCOPE_STORE);
 
     /**
      * @param int|null $storeId
@@ -355,14 +355,14 @@ interface ConfigProviderInterface
      *
      * @return string
      */
-    public function getProductPrefix($storeId);
+    public function getProductPrefix($storeId = null);
 
     /**
      * @param int $storeId
      *
      * @return string
      */
-    public function getCategoryPrefix($storeId);
+    public function getCategoryPrefix($storeId = null);
 
     /**
      * @param int|null $storeId
