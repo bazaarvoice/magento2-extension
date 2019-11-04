@@ -153,9 +153,15 @@ class Flat implements IndexerActionInterface, MviewActionInterface
      */
     public function canIndex()
     {
-        if ($this->scopeConfig->getValue('catalog/frontend/flat_catalog_product') == false
-            || $this->scopeConfig->getValue('catalog/frontend/flat_catalog_category') == false) {
-            $this->logger->error('Bazaarvoice Product feed requires Catalog Flat Tables to be enabled. Please check your Store Config.');
+        if (!$this->configProvider->canSendProductFeed()) {
+            return false;
+        }
+
+        if (!$this->scopeConfig->getValue('catalog/frontend/flat_catalog_product')
+            || !$this->scopeConfig->getValue('catalog/frontend/flat_catalog_category')) {
+            $this->logger->error('Bazaarvoice Product XML Feed requires Catalog Flat Tables to be enabled. Please check your Store Config.');
+
+            return false;
         }
 
         return true;
@@ -169,7 +175,9 @@ class Flat implements IndexerActionInterface, MviewActionInterface
     {
         /** @var Collection $incompleteIndex */
 
-        $this->canIndex();
+        if (!$this->canIndex()) {
+            return false;
+        }
         $this->logger->debug('Full Product Feed Index');
         try {
             $incompleteIndex = $this->bvIndexCollectionFactory->create()->addFieldToFilter('version_id', 0);
@@ -202,7 +210,9 @@ class Flat implements IndexerActionInterface, MviewActionInterface
     {
         /** @var $idCollection \Bazaarvoice\Connector\Model\ResourceModel\Index\Collection */
 
-        $this->canIndex();
+        if (!$this->canIndex()) {
+            return false;
+        }
         try {
             $this->logger->debug('Partial Product Feed Index');
 
