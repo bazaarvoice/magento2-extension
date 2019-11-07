@@ -13,7 +13,6 @@ use Bazaarvoice\Connector\Api\Data\IndexInterface;
 use Bazaarvoice\Connector\Api\StringFormatterInterface;
 use Bazaarvoice\Connector\Model\ResourceModel\Index as IndexResourceModel;
 use Bazaarvoice\Connector\Model\ResourceModel\Index\Collection;
-use Magento\Framework\DataObject\IdentityInterface;
 use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\Model\Context;
 use Magento\Framework\Registry;
@@ -21,12 +20,10 @@ use Magento\Framework\Registry;
 /**
  * Class Index
  *
- * @package Bazaarvoice\Connector\Model2
+ * @package Bazaarvoice\Connector\Model
  */
-class Index extends AbstractModel implements IndexInterface, IdentityInterface
+class Index extends AbstractModel implements IndexInterface
 {
-    const CACHE_TAG = 'bazaarvoice_product_index';
-
     const CUSTOM_ATTRIBUTES = ['UPC', 'ManufacturerPartNumber', 'EAN', 'ISBN', 'ModelNumber'];
     /**
      * @var ConfigProviderInterface
@@ -59,14 +56,6 @@ class Index extends AbstractModel implements IndexInterface, IdentityInterface
         $this->configProvider = $configProvider;
         $this->stringFormatter = $stringFormatter;
         parent::__construct($context, $registry, $resource, $resourceCollection);
-    }
-
-    /**
-     * @return array|string[]
-     */
-    public function getIdentities()
-    {
-        return [self::CACHE_TAG.'_'.$this->getId()];
     }
 
     /**
