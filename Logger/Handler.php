@@ -23,7 +23,6 @@ class Handler extends Base
      * Logging level
      *
      * @var int
-     * @codingStandardsIgnoreStart
      */
     protected $loggerType = \Monolog\Logger::DEBUG;
 
@@ -33,7 +32,6 @@ class Handler extends Base
      * @var string
      */
     protected $fileName = '/var/log/bazaarvoice.log';
-    /** @codingStandardsIgnoreEnd */
 
     /**
      * Format string

@@ -49,14 +49,11 @@ class Config implements ObserverInterface
         $this->messageManger = $messageManager;
     }
 
-    // @codingStandardsIgnoreStart
-
     /**
      * @param EventObserver $observer
      */
     public function execute(EventObserver $observer)
     {
-        // @codingStandardsIgnoreEnd
         $this->messageManger->addNoticeMessage(__('Some configuration changes may require rebuilding the Bazaarvoice Product Feed Index.  This can be done by running the bv:index magento command or clicking Rebuild Index in Catalog > Bazaarvoice Product Feed'));
     }
 }
