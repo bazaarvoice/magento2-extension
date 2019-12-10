@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace Bazaarvoice\Connector\Model;
 
-use Magento\Cron\Model\Schedule;
 use Magento\Cron\Model\ScheduleFactory;
 use Magento\Framework\Notification\MessageInterface;
 
@@ -37,8 +36,7 @@ class Notification implements MessageInterface
      */
     public function getIdentity()
     {
-        // phpcs:ignore
-        return md5('bazaarvoice_cron');
+        return hash('sha256', 'bazaarvoice_cron');
     }
 
     /**

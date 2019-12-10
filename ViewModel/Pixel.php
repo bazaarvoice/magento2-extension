@@ -182,8 +182,7 @@ class Pixel implements ArgumentInterface
         if ($order->getCustomerId()) {
             $userId = $order->getCustomerId();
         } elseif ($order->getCustomerEmail()) {
-            // phpcs:ignore
-            $userId = md5($order->getCustomerEmail());
+            $userId = hash('sha256', $order->getCustomerEmail());
         }
         if (!empty($userId)) {
             $this->orderDetails['userId'] = $userId;
