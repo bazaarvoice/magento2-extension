@@ -4,10 +4,8 @@
  * See LICENSE.md for license details.
  */
 
-// phpcs:ignoreFile
 //Please provide cloud_key, bv_root_folder and subject_id
-require('bvseosdk.php');
-$bv = new BV([
+$bv = new \Bazaarvoice\Connector\Model\BVSEOSDK\BV([
     'bv_root_folder' => '',
     'subject_id'     => '',
     'cloud_key'      => '',
@@ -22,7 +20,7 @@ $bv = new BV([
 This is a test page for Reviews: getAggregateRating()<br>
 This will return aggregate rating content<br><br>
 <div id="BVRRSummaryContainer">
-    <?php echo $bv->reviews->getAggregateRating(); ?>
+    <?= $bv->reviews->getAggregateRating(); ?>
 </div>
 </body>
 </html>

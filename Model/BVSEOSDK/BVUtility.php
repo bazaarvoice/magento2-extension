@@ -6,6 +6,8 @@
 
 /** @codingStandardsIgnoreFile */
 
+namespace Bazaarvoice\Connector\Model\BVSEOSDK;
+
 /**
  * BV PHP SEO SDK Utilities.
  */

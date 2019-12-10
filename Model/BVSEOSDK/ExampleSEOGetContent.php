@@ -4,10 +4,8 @@
  * See LICENSE.md for license details.
  */
 
-// phpcs:ignoreFile
 //Please provide cloud_key, bv_root_folder and subject_id
-require('bvseosdk.php');
-$bv = new BV([
+$bv = new \Bazaarvoice\Connector\Model\BVSEOSDK\BV([
     'bv_root_folder' => '',
     'subject_id'     => '',
     'cloud_key'      => '',
@@ -25,7 +23,7 @@ This is a test page for SEO getContent<br>
 This will return questions and answers content<br><br>
 
 <div id="BVQAContainer">
-    <?php echo $bv->SEO->getContent(); ?>
+    <?= $bv->SEO->getContent(); ?>
 </div>
 
 </body>

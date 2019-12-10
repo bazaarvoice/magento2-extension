@@ -8,8 +8,8 @@ namespace Bazaarvoice\Connector\Model;
 
 use Bazaarvoice\Connector\Api\ConfigProviderInterface;
 use Bazaarvoice\Connector\Api\StringFormatterInterface;
-use Bazaarvoice\Connector\Helper\Seosdk;
 use Bazaarvoice\Connector\Logger\Logger;
+use Bazaarvoice\Connector\Model\BVSEOSDK\BV;
 use Bazaarvoice\Connector\Model\Source\Environment;
 use Exception;
 use Magento\Framework\App\RequestInterface;
@@ -120,7 +120,7 @@ class SeoContent
     }
 
     /**
-     * @return \Bazaarvoice\Connector\Helper\Seosdk
+     * @return \Bazaarvoice\Connector\Model\BVSEOSDK\BV
      */
     private function getSeosdk()
     {
@@ -128,7 +128,7 @@ class SeoContent
         if ($this->configProvider->isCloudSeoEnabled() && !$this->seoSdk) {
             try {
                 $params = $this->getParams();
-                $this->seoSdk = new Seosdk($params);
+                $this->seoSdk = new BV($params);
             } catch (Exception $e) {
                 $this->logger->critical('Could not initialize Seo SDK with error: ' . $e->getTraceAsString());
             }
