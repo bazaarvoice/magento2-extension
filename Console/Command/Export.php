@@ -41,7 +41,6 @@ class Export extends Command
         $this->setDescription('Generates Bazaarvoice formatted Magento reviews.');
     }
 
-    // @codingStandardsIgnoreStart
     /**
      * @param \Symfony\Component\Console\Input\InputInterface   $input
      * @param \Symfony\Component\Console\Output\OutputInterface $output
@@ -50,14 +49,13 @@ class Export extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        echo "\n".'Memory usage: '.memory_get_usage()."\n";
+        print_r("\n".'Memory usage: '.memory_get_usage()."\n");
 
         try {
             $this->_exporter->exportReviews();
         } catch (Exception $e) {
-            echo $e->getMessage()."\n".$e->getTraceAsString();
+            print_r($e->getMessage()."\n".$e->getTraceAsString());
         }
-        echo "\n".'Memory usage: '.memory_get_usage()."\n";
+        print_r("\n".'Memory usage: '.memory_get_usage()."\n");
     }
-    // @codingStandardsIgnoreEnd
 }

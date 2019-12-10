@@ -40,8 +40,7 @@ class Runpurchase extends Action
      */
     public function execute()
     {
-        // phpcs:ignore
-        echo '<pre>';
+        print_r('<pre>');
         $this->purchaseFeed->setForce(true)->generateFeed();
     }
 }

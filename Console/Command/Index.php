@@ -40,8 +40,6 @@ class Index extends Command
         $this->setName('bv:index')->setDescription('Clear Bazaarvoice Product Feed Index.');
     }
 
-    // @codingStandardsIgnoreStart
-
     /**
      * @param \Symfony\Component\Console\Input\InputInterface   $input
      * @param \Symfony\Component\Console\Output\OutputInterface $output
@@ -50,12 +48,10 @@ class Index extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        // @codingStandardsIgnoreEnd
         try {
             $this->_indexer->executeFull();
         } catch (Exception $e) {
-            // phpcs:ignore
-            echo $e->getMessage()."\n".$e->getTraceAsString();
+            print_r($e->getMessage()."\n".$e->getTraceAsString());
         }
     }
 }

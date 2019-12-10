@@ -41,9 +41,7 @@ class Runproduct extends Action
      */
     public function execute()
     {
-        //todo: Is there a better way to do this?
-        // phpcs:ignore
-        echo '<pre>';
+        print_r('<pre>');
         $this->productFeed->setForce(true)->generateFeed();
     }
 }

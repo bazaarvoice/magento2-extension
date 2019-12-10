@@ -39,8 +39,6 @@ class Purchase extends Command
         $this->setName('bv:purchase')->setDescription('Generates Bazaarvoice Purchase Feed.');
     }
 
-    // @codingStandardsIgnoreStart
-
     /**
      * @param \Symfony\Component\Console\Input\InputInterface   $input
      * @param \Symfony\Component\Console\Output\OutputInterface $output
@@ -49,9 +47,8 @@ class Purchase extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        echo "\n".'Memory usage: '.memory_get_usage()."\n";
+        print_r("\n".'Memory usage: '.memory_get_usage()."\n");
         $this->_purchaseFeed->generateFeed();
-        echo "\n".'Memory usage: '.memory_get_usage()."\n";
-        // @codingStandardsIgnoreEnd
+        print_r("\n".'Memory usage: '.memory_get_usage()."\n");
     }
 }

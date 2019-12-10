@@ -79,13 +79,11 @@ class Logger extends \Monolog\Logger
     public function addRecord($level, $message, array $context = [])
     {
         if (is_array($message)) {
-            // phpcs:ignore
             $message = print_r($message, $return = true);
         }
 
         if (php_sapi_name() == "cli" || $this->admin) {
-            // phpcs:ignore
-            echo $message."\n";
+            print_r($message."\n");
         }
 
         return parent::addRecord($level, $message, $context);
