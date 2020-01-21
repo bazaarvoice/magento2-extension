@@ -58,6 +58,10 @@ class PurchaseFeed extends Feed
      * @var \Magento\Framework\App\ResourceConnection
      */
     private $resourceConnection;
+    /**
+     * @var array
+     */
+    private $orderStatus;
 
     /**
      * Constructor
@@ -85,7 +89,8 @@ class PurchaseFeed extends Feed
         State $state,
         Image $imageHelper,
         CollectionFactory $orderCollectionFactory,
-        ResourceConnection $resourceConnection
+        ResourceConnection $resourceConnection,
+        $orderStatus = []
     ) {
         try {
             $state->getAreaCode();
@@ -102,6 +107,7 @@ class PurchaseFeed extends Feed
         $this->imageHelper = $imageHelper;
         $this->orderCollectionFactory = $orderCollectionFactory;
         $this->resourceConnection = $resourceConnection;
+        $this->orderStatus = $orderStatus;
     }
 
     /**
@@ -407,10 +413,7 @@ class PurchaseFeed extends Feed
         /** Status is 'complete' or 'closed' */
         if ($this->test == false) {
             $orders->addFieldToFilter('status', [
-                'in' => [
-                    'complete',
-                    'closed',
-                ],
+                'in' => $this->orderStatus,
             ]);
         }
 
