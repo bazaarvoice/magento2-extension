@@ -161,7 +161,9 @@ class Product
             $writer->endElement(); //End Descriptions
         }
 
-        $writer->writeElement('CategoryExternalId', $product->getData('category_external_id'));
+        if ($product->getData('category_external_id')) {
+            $writer->writeElement('CategoryExternalId', $product->getData('category_external_id'));
+        }
 
         $writer->writeElement('ProductPageUrl', $product->getData('product_page_url'), true);
         $localeUrls = $product->getData('locale_product_page_url');
