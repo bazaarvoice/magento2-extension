@@ -73,10 +73,6 @@ class Flat implements IndexerActionInterface, MviewActionInterface
      */
     private $scopeConfig;
     /**
-     * @var string
-     */
-    private $productIdField;
-    /**
      * @var
      */
     private $mageVersion;
@@ -138,7 +134,6 @@ class Flat implements IndexerActionInterface, MviewActionInterface
         $this->bvIndexCollectionFactory = $collectionFactory;
         $this->resourceConnection = $resourceConnection;
         $this->scopeConfig = $scopeConfig;
-        $this->productIdField = $this->getProductIdFieldName();
         $this->mageVersion = $productMetadata->getVersion();
         $this->bvIndexFactory = $bvIndexFactory;
         $this->indexRepository = $indexRepository;
@@ -793,7 +788,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
             )
             ->joinLeft(
                 ['parent' => $res->getTableName('catalog_product_flat').'_'.$storeId],
-                'pp.parent_id = parent.'.$this->productIdField,
+                'pp.parent_id = parent.entity_id',
                 [
                     'parent_bvfamily' => "GROUP_CONCAT(DISTINCT CONCAT_WS('||', {$familyFields}parent.sku))",
                     'parent_image' => 'small_image',
@@ -1015,18 +1010,6 @@ class Flat implements IndexerActionInterface, MviewActionInterface
         }
 
         return true;
-    }
-
-    /**
-     * @return string
-     */
-    protected function getProductIdFieldName()
-    {
-        $connection = $this->resourceConnection->getConnection('core_read');
-        $table = $this->resourceConnection->getTableName('catalog_product_entity');
-        $indexList = $connection->getIndexList($table);
-
-        return $indexList[$connection->getPrimaryKeyName($table)]['COLUMNS_LIST'][0];
     }
 
     private function saveProductIndexes()
