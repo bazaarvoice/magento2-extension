@@ -516,7 +516,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 }
             }
 
-            $select->columns(['family' => "GROUP_CONCAT(DISTINCT CONCAT_WS('||', {$familyFields}p.sku))"]);
+            $select->columns(['family' => "GROUP_CONCAT(DISTINCT CONCAT_WS(',', {$familyFields}p.sku))"]);
         }
 
         /** Version */
@@ -547,6 +547,9 @@ class Flat implements IndexerActionInterface, MviewActionInterface
             foreach ($indexData as $key => $value) {
                 if ($value && strpos($value, '||') !== false) {
                     $indexData[$key] = explode('||', $value);
+                }
+                if (in_array($key, ['family', 'parent_bvfamily']) && $value && strpos($value, ',') !== false) {
+                    $indexData[$key] = explode(',', $value);
                 }
             }
 
@@ -790,7 +793,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 ['parent' => $res->getTableName('catalog_product_flat').'_'.$storeId],
                 'pp.parent_id = parent.entity_id',
                 [
-                    'parent_bvfamily' => "GROUP_CONCAT(DISTINCT CONCAT_WS('||', {$familyFields}parent.sku))",
+                    'parent_bvfamily' => "GROUP_CONCAT(DISTINCT CONCAT_WS(',', {$familyFields}parent.sku))",
                     'parent_image' => 'small_image',
                 ]
             );
