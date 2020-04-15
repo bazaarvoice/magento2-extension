@@ -65,4 +65,12 @@ class Header implements ArgumentInterface
     {
         return $this->configProvider->isBvEnabled();
     }
+
+    /**
+     * @return mixed|string|null
+     */
+    public function getExtensionVersion()
+    {
+        return $this->configProvider->getExtensionVersion();
+    }
 }

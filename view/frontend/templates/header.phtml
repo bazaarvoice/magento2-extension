@@ -5,5 +5,6 @@
 <?php if ($viewModel->isBvEnabled()): ?>
     <?php $bvApiUrl = $viewModel->getConfigProvider()->getBvApiHostUrl(); ?>
     <!--suppress HtmlUnknownTarget -->
+    <!-- BV | Magento Extension <?= $viewModel->getExtensionVersion(); ?> -->
     <script async type="text/javascript" src="<?= $bvApiUrl; ?>"></script>
 <?php endif; ?>
