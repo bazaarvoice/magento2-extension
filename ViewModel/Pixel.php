@@ -175,6 +175,7 @@ class Pixel implements ArgumentInterface
                 }
                 /** also get price from parent item */
                 $itemDetails['price'] = number_format((float)$item->getParentItem()->getPrice(), 2, '.', '');
+                $itemDetails['discount'] = number_format((float)$item->getParentItem()->getDiscountAmount() / $item->getQtyOrdered(), 2, '.', '');
             }
 
             array_push($this->orderDetails['items'], $itemDetails);
