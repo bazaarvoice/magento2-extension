@@ -92,5 +92,19 @@ class UpgradeData implements Setup\UpgradeDataInterface
                 $eavSetup->removeAttributeGroup($entityTypeId, $attributeSetId, 'Product Details');
             }
         }
+
+        if (version_compare($context->getVersion(), '8.1.11') < 0) {
+            /** @var CategorySetup $eavSetup */
+            $eavSetup = $this->categorySetupFactory->create(['setup' => $setup]);
+            $entityTypeId = $eavSetup->getEntityTypeId(Product::ENTITY);
+
+            $eavSetup->updateAttribute(
+                $entityTypeId,
+                \Bazaarvoice\Connector\Model\Feed\ProductFeed::INCLUDE_IN_FEED_FLAG,
+                'note',
+                'Not needed if using DCC'
+            );
+        }
+
     }
 }
