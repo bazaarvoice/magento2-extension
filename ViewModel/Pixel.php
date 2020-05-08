@@ -252,4 +252,12 @@ class Pixel implements ArgumentInterface
     {
         return print_r($this->getOrderDetails(), true);
     }
+
+    /**
+     * @return string
+     */
+    public function getExtensionInjectionMessage()
+    {
+        return $this->configProvider->getExtensionInjectionMessage();
+    }
 }

@@ -324,6 +324,11 @@ interface ConfigProviderInterface
     public function getExtensionVersion();
 
     /**
+     * @return string
+     */
+    public function getExtensionInjectionMessage();
+
+    /**
      * @return array
      * @throws \Exception
      */

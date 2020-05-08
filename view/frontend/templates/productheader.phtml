@@ -1,9 +1,16 @@
+<?php
+/**
+ * Copyright © Bazaarvoice, Inc. All rights reserved.
+ * See LICENSE.md for license details.
+ */
+?>
+
 <?php /** @var Magento\Framework\View\Element\Template $block */ ?>
 <?php /** @var Bazaarvoice\Connector\ViewModel\Product $viewModel */ ?>
 <?php $viewModel = $block->getViewModel(); ?>
 
 <?php if ($viewModel->isBvEnabled() && $viewModel->getProduct()): ?>
-    <!-- BV | Magento Extension <?= $viewModel->getExtensionVersion(); ?> -->
+    <!-- <?= $viewModel->getExtensionInjectionMessage(); ?> -->
     <?php if ($viewModel->isConfigurable() && $viewModel->getConfigProvider()->isRrChildrenEnabled()): ?>
         <script type="text/javascript">
             var bvChildren = <?= $viewModel->getChildrenJson(); ?>;

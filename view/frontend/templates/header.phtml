@@ -1,3 +1,10 @@
+<?php
+/**
+ * Copyright © Bazaarvoice, Inc. All rights reserved.
+ * See LICENSE.md for license details.
+ */
+?>
+
 <?php /** @var Magento\Framework\View\Element\Template $block */ ?>
 <?php /** @var Bazaarvoice\Connector\ViewModel\Header $viewModel */ ?>
 <?php $viewModel = $block->getViewModel(); ?>
@@ -5,6 +12,6 @@
 <?php if ($viewModel->isBvEnabled()): ?>
     <?php $bvApiUrl = $viewModel->getConfigProvider()->getBvApiHostUrl(); ?>
     <!--suppress HtmlUnknownTarget -->
-    <!-- BV | Magento Extension <?= $viewModel->getExtensionVersion(); ?> -->
+    <!-- <?= $viewModel->getExtensionInjectionMessage(); ?> -->
     <script async type="text/javascript" src="<?= $bvApiUrl; ?>"></script>
 <?php endif; ?>

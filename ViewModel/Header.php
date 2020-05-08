@@ -69,8 +69,8 @@ class Header implements ArgumentInterface
     /**
      * @return mixed|string|null
      */
-    public function getExtensionVersion()
+    public function getExtensionInjectionMessage()
     {
-        return $this->configProvider->getExtensionVersion();
+        return $this->configProvider->getExtensionInjectionMessage();
     }
 }

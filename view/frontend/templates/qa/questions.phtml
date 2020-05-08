@@ -1,16 +1,19 @@
+<?php
+/**
+ * Copyright © Bazaarvoice, Inc. All rights reserved.
+ * See LICENSE.md for license details.
+ */
+?>
+
 <?php /** @var Magento\Framework\View\Element\Template $block */ ?>
 <?php /** @var Bazaarvoice\Connector\ViewModel\Questions $viewModel */ ?>
 <?php $viewModel = $block->getViewModel(); ?>
 
 <?php if ($viewModel->canShow()) : ?>
+    <!-- <?= $viewModel->getExtensionInjectionMessage(); ?> -->
     <?php $seoContent = $viewModel->getSeoContent(); ?>
     <div data-bv-show="questions" data-bv-product-id="<?= $viewModel->getProductSku() ?>">
         <?= $seoContent ?>
     </div>
 <?php endif;
-/**
- * Copyright © Bazaarvoice, Inc. All rights reserved.
- * See LICENSE.md for license details.
- */
-
 

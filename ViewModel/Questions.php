@@ -94,4 +94,12 @@ class Questions implements ArgumentInterface
     {
         return $this->configProvider->isQaEnabled();
     }
+
+    /**
+     * @return string
+     */
+    public function getExtensionInjectionMessage()
+    {
+        return $this->configProvider->getExtensionInjectionMessage();
+    }
 }

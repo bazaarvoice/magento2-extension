@@ -102,4 +102,12 @@ class Reviews implements ArgumentInterface
 
         return null;
     }
+
+    /**
+     * @return string
+     */
+    public function getExtensionInjectionMessage()
+    {
+        return $this->configProvider->getExtensionInjectionMessage();
+    }
 }

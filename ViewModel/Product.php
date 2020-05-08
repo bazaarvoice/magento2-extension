@@ -238,10 +238,10 @@ class Product implements ArgumentInterface
     }
 
     /**
-     * @return mixed|string|null
+     * @return string
      */
-    public function getExtensionVersion()
+    public function getExtensionInjectionMessage()
     {
-        return $this->configProvider->getExtensionVersion();
+        return $this->configProvider->getExtensionInjectionMessage();
     }
 }

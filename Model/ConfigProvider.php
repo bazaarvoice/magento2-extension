@@ -596,6 +596,14 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
+     * @return string
+     */
+    public function getExtensionInjectionMessage()
+    {
+        return __('BV | Magento Extension %1', $this->getExtensionVersion());
+    }
+
+    /**
      * Get url to bv.js javascript API file
      *
      * C2013 staging call:
