@@ -42,6 +42,7 @@ class Runproduct extends Action
     public function execute()
     {
         print_r('<pre>');
-        $this->productFeed->setForce(true)->generateFeed();
+        $force = (bool) $this->getRequest()->getParam('force', false);
+        $this->productFeed->setForce($force)->generateFeed();
     }
 }

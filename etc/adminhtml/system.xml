@@ -232,8 +232,17 @@
                 </field>
                 <field id="run_product" translate="button_label" type="button" sortOrder="190" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label/>
-                    <button_label><![CDATA[Run Bazaarvoice Product Feed Now]]></button_label>
+                    <button_label><![CDATA[Run Enabled Bazaarvoice Product Feeds Now]]></button_label>
                     <button_url>*/bvfeed/runproduct</button_url>
+                    <frontend_model>Bazaarvoice\Connector\Block\System\Config\Button</frontend_model>
+                    <depends>
+                        <field id="enable_product_feed">1</field>
+                    </depends>
+                </field>
+                <field id="run_product_force" translate="button_label" type="button" sortOrder="190" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label/>
+                    <button_label><![CDATA[Force Run All Bazaarvoice Product Feeds Now]]></button_label>
+                    <button_url>*/bvfeed/runproduct/force/1</button_url>
                     <frontend_model>Bazaarvoice\Connector\Block\System\Config\Button</frontend_model>
                     <depends>
                         <field id="enable_product_feed">1</field>
