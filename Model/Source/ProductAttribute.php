@@ -8,13 +8,10 @@ declare(strict_types=1);
 
 namespace Bazaarvoice\Connector\Model\Source;
 
-use Exception;
+use Magento\Catalog\Model\ResourceModel\Attribute;
+use Magento\Catalog\Model\ResourceModel\Product\Attribute\Collection as AttributeCollection;
 use Magento\Catalog\Model\ResourceModel\Product\Attribute\CollectionFactory;
-use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Data\OptionSourceInterface;
-use Magento\Framework\ObjectManagerInterface;
-use Magento\Store\Model\Store;
-use Magento\Store\Model\StoreManagerInterface;
 
 /**
  * Class ProductAttribute
@@ -24,26 +21,17 @@ use Magento\Store\Model\StoreManagerInterface;
 class ProductAttribute implements OptionSourceInterface
 {
     /**
-     * @var \Magento\Catalog\Model\ResourceModel\Product\Attribute\CollectionFactory
+     * @var CollectionFactory
      */
-    private $productAttributeCollectionFactory;
-    /**
-     * @var \Magento\Store\Model\StoreManagerInterface
-     */
-    private $storeManager;
+    protected $productAttributeCollectionFactory;
 
     /**
      * ProductAttribute constructor.
      *
-     * @param \Magento\Framework\App\ResourceConnection                                $resourceConnection
-     * @param \Magento\Catalog\Model\ResourceModel\Product\Attribute\CollectionFactory $attributeCollectionFactory
+     * @param CollectionFactory $attributeCollectionFactory
      */
-    public function __construct(
-        StoreManagerInterface $storeManager,
-        CollectionFactory $attributeCollectionFactory
-    ) {
+    public function __construct(CollectionFactory $attributeCollectionFactory) {
         $this->productAttributeCollectionFactory = $attributeCollectionFactory;
-        $this->storeManager = $storeManager;
     }
 
     /**
@@ -53,37 +41,20 @@ class ProductAttribute implements OptionSourceInterface
      */
     public function toOptionArray($isMultiselect = false)
     {
-        /** @var \Magento\Catalog\Model\ResourceModel\Product\Attribute\Collection $attributes */
-        $attributes = $this->productAttributeCollectionFactory->create();
-
-        $stores = $this->storeManager->getStores();
-        $defaultStore = null;
-        /** @var Store $store */
-        foreach ($stores as $store) {
-            if (isset($defaultStore) == false) {
-                $defaultStore = $store;
-                break;
-            }
-        }
-
+        $attributeOptions = [];
         if (!$isMultiselect) {
-            $attributeOptions = [
-                [
-                    'label' => __('-- Please Select --'),
-                    'value' => '',
-                ],
+            $attributeOptions[] = [
+                'label' => __('-- Please Select --'),
+                'value' => ''
             ];
-        } else {
-            $attributeOptions = [];
         }
 
-        /** @var \Magento\Catalog\Model\ResourceModel\Attribute $attribute */
+        /** @var AttributeCollection $attributes */
+        $attributes = $this->productAttributeCollectionFactory->create();
+        $attributes->addFieldToFilter('used_in_product_listing', '1');
+
+        /** @var Attribute $attribute */
         foreach ($attributes as $attribute) {
-            if ($attribute->getIsUserDefined() == 0
-                || $attribute->getUsedInProductListing() == 0
-            ) {
-                continue;
-            }
             $attributeOptions[] = [
                 'label' => $attribute->getFrontendLabel(),
                 'value' => $attribute->getAttributeCode(),
