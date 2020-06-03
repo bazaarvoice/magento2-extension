@@ -11,7 +11,7 @@ namespace Bazaarvoice\Connector\Model\Feed;
 use Bazaarvoice\Connector\Api\ConfigProviderInterface;
 use Bazaarvoice\Connector\Api\StringFormatterInterface;
 use Bazaarvoice\Connector\Logger\Logger;
-use Magento\Framework\ObjectManagerInterface;
+use Bazaarvoice\Connector\Model\XMLWriter;
 use Magento\Framework\UrlFactory;
 use Magento\Review\Model\Review;
 use Magento\Review\Model\ReviewFactory;
@@ -27,32 +27,36 @@ class Export extends Feed
      * @var \Magento\Review\Model\ReviewFactory
      */
     protected $reviewFactory;
+
     /**
      * @var \Magento\Framework\UrlFactory
      */
     protected $urlFactory;
 
     /**
-     * Category constructor.
+     * Export constructor.
      *
-     * @param Logger                   $logger
-     * @param ReviewFactory            $reviewFactory
-     * @param UrlFactory               $urlFactory
+     * @param Logger $logger
+     * @param ReviewFactory $reviewFactory
+     * @param UrlFactory $urlFactory
      * @param StringFormatterInterface $stringFormatter
-     * @param ConfigProviderInterface  $configProvider
+     * @param ConfigProviderInterface $configProvider
+     * @param XMLWriter $XMLWriter
      */
     public function __construct(
         Logger $logger,
         ReviewFactory $reviewFactory,
         UrlFactory $urlFactory,
         StringFormatterInterface $stringFormatter,
-        ConfigProviderInterface $configProvider
+        ConfigProviderInterface $configProvider,
+        XMLWriter $XMLWriter
     ) {
         $this->reviewFactory = $reviewFactory;
         $this->urlFactory = $urlFactory;
         $this->stringFormatter = $stringFormatter;
         $this->configProvider = $configProvider;
         $this->logger = $logger;
+        $this->xmlWriter = $XMLWriter;
     }
 
     public function exportReviews()
