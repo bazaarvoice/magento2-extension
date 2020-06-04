@@ -12,6 +12,7 @@ use Bazaarvoice\Connector\Api\ConfigProviderInterface;
 use Bazaarvoice\Connector\Api\StringFormatterInterface;
 use Bazaarvoice\Connector\Logger\Logger;
 use Bazaarvoice\Connector\Model\XMLWriter;
+use Magento\Framework\Filesystem\Io\File;
 use Magento\Framework\UrlFactory;
 use Magento\Review\Model\Review;
 use Magento\Review\Model\ReviewFactory;
@@ -42,6 +43,7 @@ class Export extends Feed
      * @param StringFormatterInterface $stringFormatter
      * @param ConfigProviderInterface $configProvider
      * @param XMLWriter $XMLWriter
+     * @param File $filesystem
      */
     public function __construct(
         Logger $logger,
@@ -49,7 +51,8 @@ class Export extends Feed
         UrlFactory $urlFactory,
         StringFormatterInterface $stringFormatter,
         ConfigProviderInterface $configProvider,
-        XMLWriter $XMLWriter
+        XMLWriter $XMLWriter,
+        File $filesystem
     ) {
         $this->reviewFactory = $reviewFactory;
         $this->urlFactory = $urlFactory;
@@ -57,6 +60,7 @@ class Export extends Feed
         $this->configProvider = $configProvider;
         $this->logger = $logger;
         $this->xmlWriter = $XMLWriter;
+        $this->filesystem = $filesystem;
     }
 
     public function exportReviews()
