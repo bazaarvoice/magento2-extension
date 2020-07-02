@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © Bazaarvoice, Inc. All rights reserved.
+  ~ See LICENSE.md for license details.
+  -->
+
+<csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp:etc/csp_whitelist.xsd">
+    <policies>
+        <policy id="script-src">
+            <values>
+                <value id="apps_bazaarvoice" type="host">apps.bazaarvoice.com</value>
+                <value id="apps_nexus_bazaarvoice" type="host">apps.nexus.bazaarvoice.com</value>
+                <value id="apps-stg_nexus_bazaarvoice" type="host">apps-stg.nexus.bazaarvoice.com</value>
+                <value id="analytics-static_ugc_bazaarvoice" type="host">analytics-static.ugc.bazaarvoice.com</value>
+                <value id="network_bazaarvoice" type="host">network.bazaarvoice.com</value>
+                <value id="network-stg_bazaarvoice" type="host">network-stg.bazaarvoice.com</value>
+                <value id="display_ugc_bazaarvoice" type="host">display.ugc.bazaarvoice.com</value>
+                <value id="api_bazaarvoice" type="host">api.bazaarvoice.com</value>
+                <value id="stg_api_bazaarvoice" type="host">stg.api.bazaarvoice.com</value>
+                <value id="mpsnare_iesnare_bazaarvoice" type="host">mpsnare.iesnare.com</value>
+            </values>
+        </policy>
+        <policy id="connect-src">
+            <values>
+                <value id="api_bazaarvoice" type="host">api.bazaarvoice.com</value>
+                <value id="stg_api_bazaarvoice" type="host">stg.api.bazaarvoice.com</value>
+                <value id="apps_bazaarvoice" type="host">apps.bazaarvoice.com</value>
+                <value id="network_bazaarvoice" type="host">network.bazaarvoice.com</value>
+                <value id="network-stg_bazaarvoice" type="host">network-stg.bazaarvoice.com</value>
+            </values>
+        </policy>
+        <policy id="img-src">
+            <values>
+                <value id="display_ugc_bazaarvoice" type="host">display.ugc.bazaarvoice.com</value>
+                <value id="network_bazaarvoice" type="host">network.bazaarvoice.com</value>
+                <value id="network-stg_bazaarvoice" type="host">network-stg.bazaarvoice.com</value>
+                <value id="network-a_bazaarvoice" type="host">network-a.bazaarvoice.com</value>
+                <value id="network-stg-a_bazaarvoice" type="host">network-stg-a.bazaarvoice.com</value>
+                <value id="photos-uat-us_bazaarvoice" type="host">photos-uat-us.bazaarvoice.com</value>
+                <value id="img_youtube_bazaarvoice" type="host">img.youtube.com</value>
+            </values>
+        </policy>
+        <policy id="style-src">
+            <values>
+                <value id="display_ugc_bazaarvoice" type="host">display.ugc.bazaarvoice.com</value>
+            </values>
+        </policy>
+        <policy id="frame-src">
+            <values>
+                <value id="display_ugc_bazaarvoice" type="host">display.ugc.bazaarvoice.com</value>
+                <value id="api_bazaarvoice" type="host">api.bazaarvoice.com</value>
+                <value id="stg_api_bazaarvoice" type="host">stg.api.bazaarvoice.com</value>
+            </values>
+        </policy>
+        <policy id="form-action">
+            <values>
+                <value id="api_bazaarvoice" type="host">api.bazaarvoice.com</value>
+                <value id="stg_api_bazaarvoice" type="host">stg.api.bazaarvoice.com</value>
+            </values>
+        </policy>
+    </policies>
+</csp_whitelist>
