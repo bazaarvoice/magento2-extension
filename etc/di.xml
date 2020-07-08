@@ -71,7 +71,6 @@
         <arguments>
             <argument name="commands" xsi:type="array">
                 <item name="product" xsi:type="object">Bazaarvoice\Connector\Console\Command\Product</item>
-                <item name="export" xsi:type="object">Bazaarvoice\Connector\Console\Command\Export</item>
                 <item name="purchase" xsi:type="object">Bazaarvoice\Connector\Console\Command\Purchase</item>
                 <item name="index" xsi:type="object">Bazaarvoice\Connector\Console\Command\Index</item>
             </argument>
@@ -99,7 +98,7 @@
             <argument name="indexer" xsi:type="object">Bazaarvoice\Connector\Model\Indexer\Flat\Proxy</argument>
         </arguments>
     </type>
-    
+
     <!-- Purchase Feed Status definition -->
     <type name="Bazaarvoice\Connector\Model\Feed\PurchaseFeed">
         <arguments>
@@ -109,7 +108,7 @@
             </argument>
         </arguments>
     </type>
-    
+
     <!-- Logging -->
     <type name="Bazaarvoice\Connector\Logger\Handler">
         <arguments>
