@@ -24,4 +24,4 @@ You can install our Bazaarvoice Magento 2 extension via [Composer](http://getcom
 ## Compatibility
 This extension is compatible with the newer Bazaarvoice Conversations offering. There is currently no extension available for the Magento 2 platform that is compatible with the older legacy Bazaarvoice Conversations PRR offering.
 
-Please go to https://github.com/bazaarvoice/magento-extension if you are looking for the Bazaarvoice Magento extension compatible with the older Magento 1 platform.
+Please go to https://knowledge.bazaarvoice.com/wp-content/partnerintegrations/en_US/ecommerce.html#magento-1x if you are looking for the Bazaarvoice Magento extension compatible with the older Magento 1 platform.
