@@ -83,11 +83,6 @@
             <argument name="productFeed" xsi:type="object">Bazaarvoice\Connector\Model\Feed\ProductFeed\Proxy</argument>
         </arguments>
     </type>
-    <type name="Bazaarvoice\Connector\Console\Command\Export">
-        <arguments>
-            <argument name="exporter" xsi:type="object">Bazaarvoice\Connector\Model\Feed\Export\Proxy</argument>
-        </arguments>
-    </type>
     <type name="Bazaarvoice\Connector\Console\Command\Purchase">
         <arguments>
             <argument name="purchaseFeed" xsi:type="object">Bazaarvoice\Connector\Model\Feed\PurchaseFeed\Proxy</argument>
