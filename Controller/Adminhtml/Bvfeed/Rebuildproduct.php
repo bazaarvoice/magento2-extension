@@ -41,11 +41,11 @@ class Rebuildproduct extends Action
      */
     public function execute()
     {
-        $result = $this->indexer->executeFull();
-        if ($result) {
+        try {
+            $this->indexer->executeFull();
             $this->messageManager->addSuccessMessage(__('Product Feed Index is being rebuilt.'));
-        } else {
-            $this->messageManager->addErrorMessage(__('Product Feed Index could not be rebuilt. To use the Product Feed Index, please ensure that the product feed and flat catalog configurations are enabled. See the documentation for details.'));
+        } catch (\Exception $e) {
+            $this->messageManager->addErrorMessage(__($e->getMessage()));
         }
 
         $this->_redirect('adminhtml/bvindex/index');
