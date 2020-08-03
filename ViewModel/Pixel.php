@@ -191,7 +191,7 @@ class Pixel implements ArgumentInterface
         $this->orderDetails['email'] = $order->getCustomerEmail();
         $this->orderDetails['nickname'] = $order->getCustomerFirstname()
             ? $order->getCustomerFirstname()
-            : $order->getBillingAddress() ? $order->getBillingAddress()->getFirstname() : '';
+            : ($order->getBillingAddress() ? $order->getBillingAddress()->getFirstname() : '');
         /** There is no 'deliveryDate' yet */
         $this->orderDetails['locale'] = $this->configProvider->getLocale($order->getStoreId());
 
