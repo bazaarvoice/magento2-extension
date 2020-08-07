@@ -16,8 +16,8 @@ use Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProductInterface;
 use Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProductInterfaceFactory;
 use Bazaarvoice\Connector\Api\StringFormatterInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
-use Magento\Catalog\Helper\ImageFactory;
 use Magento\Catalog\Model\CategoryRepository;
+use Magento\Catalog\Model\Product\Media\ConfigFactory;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Framework\Escaper;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -57,10 +57,6 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
      */
     private $stringFormatter;
     /**
-     * @var \Magento\Catalog\Helper\ImageFactory
-     */
-    private $imageHelperFactory;
-    /**
      * @var \Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct\CategoryPathBuilderInterface
      */
     private $dccCategoryPathBuilder;
@@ -68,6 +64,10 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
      * @var \Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct\FamilyBuilderInterface
      */
     private $dccFamilyBuilder;
+    /**
+     * @var \Magento\Catalog\Model\Product\Media\ConfigFactory
+     */
+    private $mediaConfigFactory;
 
     /**
      * CatalogDataBuilder constructor.
@@ -77,9 +77,9 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
      * @param \Magento\Catalog\Model\CategoryRepository                                                   $categoryRepository
      * @param \Magento\Framework\Escaper                                                                  $escaper
      * @param \Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProductInterfaceFactory              $dccCatalogProductFactory
-     * @param \Magento\Catalog\Helper\ImageFactory                                                        $imageHelperFactory
      * @param \Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct\CategoryPathBuilderInterface $dccCategoryPathBuilder
      * @param \Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct\FamilyBuilderInterface       $dccFamilyBuilder
+     * @param \Magento\Catalog\Model\Product\Media\ConfigFactory                                          $mediaConfigFactory
      */
     public function __construct(
         ConfigProviderInterface $configProvider,
@@ -87,18 +87,18 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
         CategoryRepository $categoryRepository,
         Escaper $escaper,
         CatalogProductInterfaceFactory $dccCatalogProductFactory,
-        ImageFactory $imageHelperFactory,
         CategoryPathBuilderInterface $dccCategoryPathBuilder,
-        FamilyBuilderInterface $dccFamilyBuilder
+        FamilyBuilderInterface $dccFamilyBuilder,
+        ConfigFactory $mediaConfigFactory
     ) {
         $this->categoryRepository = $categoryRepository;
         $this->escaper = $escaper;
         $this->dccCatalogProductFactory = $dccCatalogProductFactory;
         $this->configProvider = $configProvider;
         $this->stringFormatter = $stringFormatter;
-        $this->imageHelperFactory = $imageHelperFactory;
         $this->dccCategoryPathBuilder = $dccCategoryPathBuilder;
         $this->dccFamilyBuilder = $dccFamilyBuilder;
+        $this->mediaConfigFactory = $mediaConfigFactory;
     }
 
     /**
@@ -251,7 +251,7 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
         } else {
             $productToUse = $product;
         }
-        $imageUrl = $this->imageHelperFactory->create()->init($productToUse, static::PRODUCT_SMALL_IMAGE)->getUrl();
+        $imageUrl = $this->mediaConfigFactory->create()->getMediaUrl($productToUse->getSmallImage());
         return $this->escaper->escapeUrl($imageUrl);
     }
 
