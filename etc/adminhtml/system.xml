@@ -273,7 +273,7 @@
                     <button_label><![CDATA[Run Bazaarvoice Purchase Feed Now]]></button_label>
                     <button_url>*/bvfeed/runpurchase</button_url>
                     <frontend_model>Bazaarvoice\Connector\Block\System\Config\Button</frontend_model>
-                    <comment><![CDATA[<strong>WARNING Do not run in production until emails have been tested.</strong>]]></comment>
+                    <comment><![CDATA[<strong>WARNING Do not run in production until emails have been tested.</strong>]]></comment>
                     <depends>
                         <field id="enable_purchase_feed">1</field>
                     </depends>
