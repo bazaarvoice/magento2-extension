@@ -12,7 +12,7 @@ use Bazaarvoice\Connector\Api\ConfigProviderInterface;
 use Bazaarvoice\Connector\Api\StringFormatterInterface;
 use Bazaarvoice\Connector\Model\Source\Environment;
 use Exception;
-use Magento\Catalog\Helper\Image;
+use Magento\Catalog\Model\Product\Media\ConfigFactory;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\Checkout\Model\Session;
@@ -34,10 +34,6 @@ class Pixel implements ArgumentInterface
      */
     private $checkoutSession;
     /**
-     * @var \Magento\Catalog\Helper\Image
-     */
-    private $imageHelper;
-    /**
      * @var \Magento\Directory\Model\Region
      */
     private $region;
@@ -57,31 +53,35 @@ class Pixel implements ArgumentInterface
      * @var StringFormatterInterface
      */
     private $stringFormatter;
+    /**
+     * @var \Magento\Catalog\Model\Product\Media\ConfigFactory
+     */
+    private $mediaConfigFactory;
 
     /**
      * Pixel constructor.
      *
-     * @param ConfigProviderInterface                  $configProvider
-     * @param StringFormatterInterface                 $stringFormatter
-     * @param \Magento\Catalog\Helper\Image            $imageHelper
-     * @param \Magento\Checkout\Model\Session          $checkoutSession
-     * @param \Magento\Directory\Model\Region          $region
-     * @param \Magento\Catalog\Model\ProductRepository $productRepository
+     * @param ConfigProviderInterface                            $configProvider
+     * @param StringFormatterInterface                           $stringFormatter
+     * @param \Magento\Checkout\Model\Session                    $checkoutSession
+     * @param \Magento\Directory\Model\Region                    $region
+     * @param \Magento\Catalog\Model\ProductRepository           $productRepository
+     * @param \Magento\Catalog\Model\Product\Media\ConfigFactory $mediaConfigFactory
      */
     public function __construct(
         ConfigProviderInterface $configProvider,
         StringFormatterInterface $stringFormatter,
-        Image $imageHelper,
         Session $checkoutSession,
         Region $region,
-        ProductRepository $productRepository
+        ProductRepository $productRepository,
+        ConfigFactory $mediaConfigFactory
     ) {
         $this->checkoutSession = $checkoutSession;
-        $this->imageHelper = $imageHelper;
         $this->region = $region;
         $this->productRepository = $productRepository;
         $this->configProvider = $configProvider;
         $this->stringFormatter = $stringFormatter;
+        $this->mediaConfigFactory = $mediaConfigFactory;
     }
 
     /**
@@ -159,8 +159,7 @@ class Pixel implements ArgumentInterface
             $itemDetails['price'] = number_format((float)$item->getPrice(), 2, '.', '');
             $itemDetails['discount'] = number_format((float)$item->getDiscountAmount() / $item->getQtyOrdered(), 2, '.', '');
             $itemDetails['quantity'] = number_format((float)$item->getQtyOrdered(), 0);
-            $itemDetails['imageURL'] = $this->imageHelper->init($product, 'product_small_image')
-                ->setImageFile($product->getSmallImage())->getUrl();
+            $itemDetails['imageURL'] = $this->mediaConfigFactory->create()->getMediaUrl($product->getSmallImage());
 
             if ($this->configProvider->isFamiliesEnabled() && $item->getParentItem()) {
                 if (strpos($itemDetails['imageURL'], 'placeholder/image.jpg') !== false) {
@@ -168,8 +167,7 @@ class Pixel implements ArgumentInterface
                     $parentId = $item->getParentItem()->getProductId();
                     try {
                         $parent = $this->productRepository->getById($parentId);
-                        $itemDetails['imageURL'] = $this->imageHelper->init($parent, 'product_small_image')
-                            ->setImageFile($parent->getSmallImage())->getUrl();
+                        $itemDetails['imageURL'] = $this->mediaConfigFactory->create()->getMediaUrl($parent->getSmallImage());
                     } catch (NoSuchEntityException $e) {
                     }
                 }
