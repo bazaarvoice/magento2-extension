@@ -176,7 +176,8 @@ class Flat implements IndexerActionInterface, MviewActionInterface
         /** @var Collection $incompleteIndex */
 
         if (!$this->canIndex()) {
-            return false;
+            throw new \Exception('Product Feed Index could not be rebuilt. To use the Product Feed Index, please ensure that the product feed and flat catalog configurations are enabled. See the documentation for details.');
+
         }
         $this->logger->debug('Full Product Feed Index');
         try {
