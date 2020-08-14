@@ -168,7 +168,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
     }
 
     /**
-     * @return void
+     * @return mixed
      * @throws \Exception
      */
     public function executeFull()
@@ -193,8 +193,9 @@ class Flat implements IndexerActionInterface, MviewActionInterface
             $this->execute();
         } catch (Exception $e) {
             $this->logger->err($e->getMessage()."\n".$e->getTraceAsString());
-            throw $e;
         }
+
+        return true;
     }
 
     /**
@@ -202,18 +203,17 @@ class Flat implements IndexerActionInterface, MviewActionInterface
      *
      * @param \int[] $ids
      *
-     * @return void
+     * @return mixed
      * @throws \Exception
      */
     public function execute($ids = [])
     {
         /** @var $idCollection \Bazaarvoice\Connector\Model\ResourceModel\Index\Collection */
 
+        if (!$this->canIndex()) {
+            return false;
+        }
         try {
-            if (!$this->canIndex()) {
-                throw new \Exception('Product Feed Index could not be rebuilt. To use the Product Feed Index, please ensure that the product feed and flat catalog configurations are enabled. See the documentation for details.');
-            }
-
             $this->logger->debug('Partial Product Feed Index');
 
             if (empty($ids)) {
@@ -261,8 +261,9 @@ class Flat implements IndexerActionInterface, MviewActionInterface
             }
         } catch (Exception $e) {
             $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
-            throw $e;
         }
+
+        return true;
     }
 
     /**
