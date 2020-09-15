@@ -639,6 +639,80 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
+     * @param string[] $configPaths
+     * @param string $scope
+     *
+     * @return mixed
+     */
+    private function areAllConfigsEnabledInAnyScopeId(array $configPaths, $scope)
+    {
+        /** @var \Magento\Store\Model\Website $website */
+        /** @var \Magento\Store\Model\Group $group */
+        /** @var \Magento\Store\Model\Store $store */
+
+        switch ($scope) {
+            case ScopeConfigInterface::SCOPE_TYPE_DEFAULT:
+                $allConfigPathsEnabledInScope = true;
+                foreach ($configPaths as $configPath) {
+                    if (!$this->getConfig($configPath, 0)) {
+                        $allConfigPathsEnabledInScope = false;
+                    }
+                }
+
+                if ($allConfigPathsEnabledInScope) {
+                    return true;
+                }
+                break;
+            case ScopeInterface::SCOPE_WEBSITE:
+                $websites = $this->storeManager->getWebsites();
+                foreach ($websites as $website) {
+                    $allConfigPathsEnabledInScope = true;
+                    foreach ($configPaths as $configPath) {
+                        if (!$this->getConfig($configPath, $website->getId(), ScopeInterface::SCOPE_WEBSITE)) {
+                            $allConfigPathsEnabledInScope = false;
+                        }
+                    }
+
+                    if ($allConfigPathsEnabledInScope) {
+                        return true;
+                    }
+                }
+                break;
+            case ScopeInterface::SCOPE_GROUP:
+                $groups = $this->storeManager->getGroups();
+                foreach ($groups as $group) {
+                    $allConfigPathsEnabledInScope = true;
+                    foreach ($configPaths as $configPath) {
+                        if (!$this->getConfig($configPath, $group->getId(), ScopeInterface::SCOPE_GROUP)) {
+                            $allConfigPathsEnabledInScope = false;
+                        }
+                    }
+
+                    if ($allConfigPathsEnabledInScope) {
+                        return true;
+                    }
+                }
+                break;
+            case ScopeInterface::SCOPE_STORE:
+                $stores = $this->storeManager->getStores();
+                foreach ($stores as $store) {
+                    $allConfigPathsEnabledInScope = true;
+                    foreach ($configPaths as $configPath) {
+                        if (!$this->getConfig($configPath, $store->getId(), ScopeInterface::SCOPE_STORE)) {
+                            $allConfigPathsEnabledInScope = false;
+                        }
+                    }
+
+                    if ($allConfigPathsEnabledInScope) {
+                        return true;
+                    }
+                }
+        }
+
+        return false;
+    }
+
+    /**
      * @param string $configPath
      * @param mixed  $store
      * @param string $scope
@@ -739,5 +813,35 @@ class ConfigProvider implements ConfigProviderInterface
         }
 
         return $locales;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function canSendProductFeedInAnyScope()
+    {
+        $configScope = $this->getConfigScope($this->getFeedGenerationScope());
+
+        return $this->areAllConfigsEnabledInAnyScopeId(['general/enable_bv', 'feeds/enable_product_feed'], $configScope);
+    }
+
+    /**
+     * @param string $feedGenerationScope
+     *
+     * @return string
+     */
+    private function getConfigScope($feedGenerationScope)
+    {
+        switch ($feedGenerationScope) {
+            case Scope::WEBSITE:
+                return ScopeInterface::SCOPE_WEBSITE;
+            case Scope::SCOPE_GLOBAL:
+                return ScopeConfigInterface::SCOPE_TYPE_DEFAULT;
+            case Scope::STORE_GROUP:
+                return ScopeInterface::SCOPE_GROUP;
+            case Scope::STORE_VIEW:
+            default:
+                return ScopeInterface::SCOPE_STORE;
+        }
     }
 }

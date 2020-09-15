@@ -376,4 +376,9 @@ interface ConfigProviderInterface
      * @return string|null
      */
     public function getPrefix($storeId = null, $scope = ScopeInterface::SCOPE_STORE);
+
+    /**
+     * @return bool|null
+     */
+    public function canSendProductFeedInAnyScope();
 }

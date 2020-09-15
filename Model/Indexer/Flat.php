@@ -153,7 +153,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
      */
     public function canIndex()
     {
-        if (!$this->configProvider->canSendProductFeed()) {
+        if (!$this->configProvider->canSendProductFeedInAnyScope()) {
             return false;
         }
 
