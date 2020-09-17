@@ -157,7 +157,6 @@ class Pixel implements ArgumentInterface
              * Should we try to include it?
              */
             $itemDetails['price'] = number_format((float)$item->getPrice(), 2, '.', '');
-            $itemDetails['discount'] = number_format((float)$item->getDiscountAmount() / $item->getQtyOrdered(), 2, '.', '');
             $itemDetails['quantity'] = number_format((float)$item->getQtyOrdered(), 0);
             $itemDetails['imageURL'] = $this->mediaConfigFactory->create()->getMediaUrl($product->getSmallImage());
 
@@ -173,7 +172,6 @@ class Pixel implements ArgumentInterface
                 }
                 /** also get price from parent item */
                 $itemDetails['price'] = number_format((float)$item->getParentItem()->getPrice(), 2, '.', '');
-                $itemDetails['discount'] = number_format((float)$item->getParentItem()->getDiscountAmount() / $item->getQtyOrdered(), 2, '.', '');
             }
 
             array_push($this->orderDetails['items'], $itemDetails);
