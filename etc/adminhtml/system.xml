@@ -89,6 +89,7 @@
                 </field>
                 <field id="inline_ratings" translate="label" type="multiselect" sortOrder="30" showInDefault="1" showInStore="1" showInWebsite="1">
                     <label>Enable Hosted Inline Ratings</label>
+                    <can_be_empty>1</can_be_empty>
                     <source_model>Bazaarvoice\Connector\Model\Source\ProductList</source_model>
                     <comment><![CDATA[This places a simple 1-5 out of 5 star rating wherever products are found on the site. Choose which pages you’d like this functionality to be seen. See Documentation on defining where stars can be added across the site.]]></comment>
                 </field>
@@ -209,6 +210,7 @@
                 </field>
                 <field id="bvfamilies_code" translate="label" type="multiselect" sortOrder="173" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Family Attributes</label>
+                    <can_be_empty>1</can_be_empty>
                     <source_model>Bazaarvoice\Connector\Model\Source\ProductAttribute</source_model>
                     <comment><![CDATA[If set, these attribute code(s) will be used in addition to the configurable product SKU to populate family data. <strong>Attribute must be set to 'Use in Product Listing' to display.</strong>]]></comment>
                 </field>
