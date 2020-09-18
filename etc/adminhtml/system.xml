@@ -147,9 +147,10 @@
                         <field id="enable_product_feed">1</field>
                     </depends>
                 </field>
-                <field id="sftp_password" translate="label" type="password" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="sftp_password" translate="label" type="obscure" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>SFTP Password</label>
-                    <comment><![CDATA[Password used to access the BV SFTP server for feed upload/download processes.]]></comment>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                    <comment><![CDATA[Password used to access the BV SFTP server for feed upload/download processes. <strong>Note: this field is encrypted in v8.3.0+. If you recently upgraded and are experiencing connectivity issues, please try re-entering your password.</strong>]]></comment>
                     <depends>
                         <field id="enable_product_feed">1</field>
                     </depends>
