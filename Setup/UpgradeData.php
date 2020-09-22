@@ -40,19 +40,19 @@ class UpgradeData implements Setup\UpgradeDataInterface
     /**
      * @var \Magento\Framework\Encryption\EncryptorInterface
      */
-    private EncryptorInterface $encryptor;
+    private $encryptor;
     /**
      * @var \Magento\Store\Model\StoreManagerInterface
      */
-    private StoreManagerInterface $storeManager;
+    private $storeManager;
     /**
      * @var \Magento\Framework\App\Config\Storage\WriterInterface
      */
-    private WriterInterface $configWriter;
+    private $configWriter;
     /**
      * @var \Magento\Config\App\Config\Source\RuntimeConfigSource
      */
-    private RuntimeConfigSource $runtimeConfigSource;
+    private $runtimeConfigSource;
 
     /**
      * @param CategorySetupFactory                                  $categorySetupFactory
