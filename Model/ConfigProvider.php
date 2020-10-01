@@ -13,6 +13,7 @@ use Bazaarvoice\Connector\Model\Source\Environment;
 use Bazaarvoice\Connector\Model\Source\Scope;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ObjectManager;
+use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Module\ModuleResource;
@@ -37,17 +38,24 @@ class ConfigProvider implements ConfigProviderInterface
      * @var \Magento\Store\Model\StoreManagerInterface
      */
     private $storeManager;
+    /**
+     * @var \Magento\Framework\Encryption\EncryptorInterface
+     */
+    private EncryptorInterface $encryptor;
 
     /**
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param \Magento\Store\Model\StoreManagerInterface         $storeManager
+     * @param \Magento\Framework\Encryption\EncryptorInterface   $encryptor
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
-        StoreManagerInterface $storeManager
+        StoreManagerInterface $storeManager,
+        EncryptorInterface $encryptor
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
+        $this->encryptor = $encryptor;
     }
 
     /**
@@ -188,7 +196,7 @@ class ConfigProvider implements ConfigProviderInterface
      */
     public function getSftpPassword($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
-        return $this->getConfig('feeds/sftp_password', $storeId, $scope);
+        return $this->encryptor->decrypt($this->getConfig('feeds/sftp_password', $storeId, $scope));
     }
 
     /**
