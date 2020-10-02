@@ -41,7 +41,7 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * @var \Magento\Framework\Encryption\EncryptorInterface
      */
-    private EncryptorInterface $encryptor;
+    private $encryptor;
 
     /**
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
