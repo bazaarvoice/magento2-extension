@@ -132,6 +132,7 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
         $dccCatalogProduct->setIsbns($this->getCustomAttributeData($product, static::ISBN));
         $dccCatalogProduct->setModelNumbers($this->getCustomAttributeData($product, static::MODEL_NUMBER));
         $dccCatalogProduct->setFamilies($this->getFamilies($product, $parentProduct));
+        $dccCatalogProduct->setInactive(false);
 
         return $dccCatalogProduct;
     }

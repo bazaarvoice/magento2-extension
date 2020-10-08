@@ -206,20 +206,20 @@ class CatalogProduct extends DataObject implements CatalogProductInterface
     }
 
     /**
-     * @return string|null
+     * @return bool|null
      */
     public function getInactive()
     {
-        return $this->getData('Inactive');
+        return $this->getData('inactive');
     }
 
     /**
-     * @param string $inactive
+     * @param bool $inactive
      *
      * @return \Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProduct
      */
-    public function setInactive(string $inactive): CatalogProduct
+    public function setInactive(bool $inactive): CatalogProduct
     {
-        return $this->setData('Inactive', $inactive);
+        return $this->setData('inactive', $inactive);
     }
 }

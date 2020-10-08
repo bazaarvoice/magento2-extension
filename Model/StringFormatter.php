@@ -169,6 +169,8 @@ class StringFormatter implements StringFormatterInterface
      */
     public function stripEmptyValues($data)
     {
-        return array_filter($data);
+        return array_filter($data, function ($a) {
+            return !empty($a) || $a === false; //send false values
+        });
     }
 }
