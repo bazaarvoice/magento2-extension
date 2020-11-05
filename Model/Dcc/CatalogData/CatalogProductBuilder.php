@@ -168,12 +168,14 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
         if (isset($category)) {
             try {
                 $categoryTree = $category->getPath();
-                $categoryTree = explode('/', $categoryTree);
-                array_shift($categoryTree);
-                foreach ($categoryTree as $key => $treeId) {
-                    $parentCategory = $this->categoryRepository->get($treeId, $product->getStoreId());
-                    $dccCategoryPath = $this->dccCategoryPathBuilder->build($parentCategory);
-                    $categoryPaths[] = $this->prepareOutput($dccCategoryPath);
+                if ($categoryTree) {
+                    $categoryTree = explode('/', $categoryTree);
+                    array_shift($categoryTree);
+                    foreach ($categoryTree as $key => $treeId) {
+                        $parentCategory = $this->categoryRepository->get($treeId, $product->getStoreId());
+                        $dccCategoryPath = $this->dccCategoryPathBuilder->build($parentCategory);
+                        $categoryPaths[] = $this->prepareOutput($dccCategoryPath);
+                    }
                 }
                 //phpcs:ignore
             } catch (NoSuchEntityException $e) {
