@@ -10,7 +10,7 @@ This is the official Magento 2 extension for Bazaarvoice.
 
 ## Getting Started
 
-Please visit our Bazaarvoice Knowledge website and start with our step by step integration guide for Magento 2: https://knowledge.bazaarvoice.com/wp-content/partnerintegrations/en_US/ecommerce.html#magento-2
+Please visit our Bazaarvoice Knowledge website and start with our step-by-step integration guide for Magento 2: https://knowledge.bazaarvoice.com/wp-content/partnerintegrations/en_US/ecommerce.html#magento-2
 
 ## Installation via Composer
 
