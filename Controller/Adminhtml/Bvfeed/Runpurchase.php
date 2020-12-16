@@ -40,6 +40,7 @@ class Runpurchase extends Action
      */
     public function execute()
     {
+        echo 'sdfs';exit;
         print_r('<pre>');
         $this->purchaseFeed->setForce(true)->generateFeed();
     }

@@ -163,6 +163,11 @@
                         <field id="enable_product_feed">1</field>
                     </depends>
                 </field>
+                <field id="bv_sftp_test_connect_wizard" type="button" translate="button_label" sortOrder="101" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label/>
+                    <button_label>Test Connection</button_label>
+                    <frontend_model>Bazaarvoice\Connector\Block\Adminhtml\System\Config\Sftp\TestConnection</frontend_model>
+                </field>
                 <field id="product_filename" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Product Feed Filename</label>
                     <comment><![CDATA[If blank 'productfeed.xml' will be used.]]></comment>

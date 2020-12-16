@@ -418,10 +418,10 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return string
      */
-    public function getSftpHost($storeId = null, $scope = ScopeInterface::SCOPE_STORE)
+    public function getSftpHost($storeId = null, $scope = ScopeInterface::SCOPE_STORE, $host = null)
     {
         $environment = $this->getEnvironment($storeId, $scope);
-        $hostSelection = trim($this->getConfig('feeds/sftp_host_name', $storeId, $scope));
+        $hostSelection = $host ? $host : trim($this->getConfig('feeds/sftp_host_name', $storeId, $scope));
 
         if ($environment == Environment::STAGING) {
             $sftpHost = $hostSelection.'-stg.bazaarvoice.com';
