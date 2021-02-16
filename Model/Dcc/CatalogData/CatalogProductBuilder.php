@@ -266,12 +266,13 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
      */
     private function getProductImageUrl($product, $parentProduct = null)
     {
-        if ($parentProduct && $parentProduct->getData('small_image')) {
-            $productToUse = $parentProduct;
+        if ($product && $product->getData('small_image')) {
+            $imageUrl = $this->mediaConfigFactory->create()->getMediaUrl($product->getSmallImage());
+        } else if ($parentProduct && $parentProduct->getData('small_image')) {
+            $imageUrl = $this->mediaConfigFactory->create()->getMediaUrl($parentProduct->getSmallImage());
         } else {
-            $productToUse = $product;
+            $imageUrl = $this->mediaConfigFactory->create()->getMediaUrl($product->getSmallImage());
         }
-        $imageUrl = $this->mediaConfigFactory->create()->getMediaUrl($productToUse->getSmallImage());
 
         return $this->escaper->escapeUrl($imageUrl);
     }
