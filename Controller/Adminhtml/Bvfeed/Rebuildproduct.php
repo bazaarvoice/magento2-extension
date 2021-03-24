@@ -8,44 +8,41 @@ declare(strict_types=1);
 
 namespace Bazaarvoice\Connector\Controller\Adminhtml\Bvfeed;
 
-use Bazaarvoice\Connector\Model\Indexer\Flat;
+use Bazaarvoice\Connector\Model\Indexer\Indexer;
+use Exception;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 
-/**
- * Class Rebuildproduct
- *
- * @package Bazaarvoice\Connector\Controller\Adminhtml\Bvfeed
- */
 class Rebuildproduct extends Action
 {
-
-    /** @var  Flat $indexer */
+    /**
+     * @var \Bazaarvoice\Connector\Model\Indexer\Indexer
+     */
     protected $indexer;
 
     /**
      * Runproduct constructor.
      *
-     * @param Context $context
-     * @param Flat    $indexer
+     * @param Context                                      $context
+     * @param \Bazaarvoice\Connector\Model\Indexer\Indexer $indexer
      */
-    public function __construct(Context $context, Flat $indexer)
+    public function __construct(Context $context, Indexer $indexer)
     {
         parent::__construct($context);
         $this->indexer = $indexer;
     }
 
     /**
-     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface|void
+     * @return void
      * @throws \Exception
      */
     public function execute()
     {
-        $result = $this->indexer->executeFull();
-        if ($result) {
+        try {
+            $this->indexer->executeFull();
             $this->messageManager->addSuccessMessage(__('Product Feed Index is being rebuilt.'));
-        } else {
-            $this->messageManager->addErrorMessage(__('Product Feed Index could not be rebuilt. To use the Product Feed Index, please ensure that the product feed and flat catalog configurations are enabled. See the documentation for details.'));
+        } catch (Exception $e) {
+            $this->messageManager->addErrorMessage($e->__toString());
         }
 
         $this->_redirect('adminhtml/bvindex/index');

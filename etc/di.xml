@@ -90,7 +90,7 @@
     </type>
     <type name="Bazaarvoice\Connector\Console\Command\Index">
         <arguments>
-            <argument name="indexer" xsi:type="object">Bazaarvoice\Connector\Model\Indexer\Flat\Proxy</argument>
+            <argument name="indexer" xsi:type="object">Bazaarvoice\Connector\Model\Indexer\Indexer\Proxy</argument>
         </arguments>
     </type>
 

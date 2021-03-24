@@ -8,8 +8,8 @@ declare(strict_types=1);
 
 namespace Bazaarvoice\Connector\Console\Command;
 
-use Bazaarvoice\Connector\Model\Indexer\Flat;
 use Exception;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -21,18 +21,24 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Index extends Command
 {
-    /** @var Flat $_indexer */
-    protected $_indexer;
+    /**
+     * @var \Bazaarvoice\Connector\Model\Indexer\Indexer
+     */
+    protected $indexer;
 
     /**
      * Purchase constructor.
      *
-     * @param Flat $indexer
+     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+     * @param \Bazaarvoice\Connector\Model\Indexer\Indexer       $indexer
      */
-    public function __construct(Flat $indexer)
-    {
+    public function __construct(
+        ScopeConfigInterface $scopeConfig,
+        \Bazaarvoice\Connector\Model\Indexer\Indexer $indexer
+    ) {
         parent::__construct();
-        $this->_indexer = $indexer;
+        $this->scopeConfig = $scopeConfig;
+        $this->indexer = $indexer;
     }
 
     protected function configure()
@@ -49,7 +55,7 @@ class Index extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-            $this->_indexer->executeFull();
+            $this->indexer->executeFull();
         } catch (Exception $e) {
             print_r($e->getMessage()."\n".$e->getTraceAsString());
         }
