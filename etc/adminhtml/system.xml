@@ -143,25 +143,16 @@
                 <field id="sftp_username" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>SFTP Username</label>
                     <comment><![CDATA[SFTP Connection Username. If this is left blank, the above Client Name will be used.]]></comment>
-                    <depends>
-                        <field id="enable_product_feed">1</field>
-                    </depends>
                 </field>
                 <field id="sftp_password" translate="label" type="obscure" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>SFTP Password</label>
                     <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
                     <comment><![CDATA[Password used to access the BV SFTP server for feed upload/download processes. <strong>Note: this field is encrypted in v8.3.0+. If you recently upgraded and are experiencing connectivity issues, please try re-entering your password.</strong>]]></comment>
-                    <depends>
-                        <field id="enable_product_feed">1</field>
-                    </depends>
                 </field>
                 <field id="sftp_host_name" translate="label" type="select" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>SFTP Host Name</label>
                     <source_model>Bazaarvoice\Connector\Model\Source\SftpHost</source_model>
                     <comment><![CDATA[SFTP Connection Host. ]]></comment>
-                    <depends>
-                        <field id="enable_product_feed">1</field>
-                    </depends>
                 </field>
                 <field id="bv_sftp_test_connect_wizard" type="button" translate="button_label" sortOrder="101" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label/>
