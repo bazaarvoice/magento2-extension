@@ -240,8 +240,6 @@ class Eav implements IndexerActionInterface, MviewActionInterface
     }
 
     /**
-     * Get index data using flat tables
-     *
      * @param array $productIds
      *
      * @throws \Exception
@@ -250,14 +248,10 @@ class Eav implements IndexerActionInterface, MviewActionInterface
     {
         switch ($this->configProvider->getFeedGenerationScope()) {
             case Scope::SCOPE_GLOBAL:
-                $stores = $this->storeManager->getStores();
-                ksort($stores);
-                /** @var \Magento\Store\Model\Store $store */
-                foreach ($stores as $store) {
-                    if ($this->configProvider->canSendProductFeed($store->getId())) {
-                        $this->reindexProductsForStore($productIds, $store);
-                        break;
-                    }
+                $store = $this->storeManager->getStore(Store::DEFAULT_STORE_ID);
+                if ($this->configProvider->canSendProductFeed($store->getId())) {
+                    $this->reindexProductsForStore($productIds, $store);
+                    break;
                 }
                 break;
             case Scope::WEBSITE:
@@ -343,8 +337,6 @@ class Eav implements IndexerActionInterface, MviewActionInterface
     }
 
     /**
-     * Mass update process, uses flat tables.
-     *
      * @param array     $productIds
      * @param int|Store $store
      *
@@ -470,17 +462,7 @@ class Eav implements IndexerActionInterface, MviewActionInterface
 
         //$this->_logger->debug($select->__toString());
 
-        try {
-            $rows = $select->query();
-        } catch (Exception $e) {
-            $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
-            if (strpos($e->getMessage(), 'Column not found') !== false) {
-                $errorExplanation = 'The following "Column not found" error typically results from a product attribute missing from the flat product table. Please ensure that the attribute referenced in the error is set to Use In Product Listing = Yes, which should cause a reindex to add it to the product flat table that is being queried: ' . $e->getMessage();
-                throw new Exception($errorExplanation, 0, $e);
-            } else {
-                throw new Exception($e);
-            }
-        }
+        $rows = $select->query();
 
         while (($indexData = $rows->fetch()) !== false) {
             $this->logger->debug('Processing product '.$indexData['product_id']);
@@ -822,7 +804,7 @@ class Eav implements IndexerActionInterface, MviewActionInterface
         $indexTable = $this->resourceConnection->getTableName('bazaarvoice_index_product');
 
         $delete = $write->deleteFromSelect($write->select()->from($indexTable)->where('product_id IN(?)', $productIds)
-            ->where('store_id = 0'), $indexTable);
+            ->where('version_id = 0'), $indexTable);
         $write->query($delete);
     }
 
@@ -1073,12 +1055,15 @@ class Eav implements IndexerActionInterface, MviewActionInterface
         $store,
         string $mainTableAlias = 'p'
     ) {
-        $websiteId = $store->getWebsite()->getId();
-        $select->join(
-            ['cpw' => 'catalog_product_website'],
-            "p.entity_id = cpw.product_id and cpw.website_id = $websiteId",
-            []
-        );
+        if ($store->getId() != Store::DEFAULT_STORE_ID) {
+            $websiteId = $store->getWebsite()->getId();
+            $select->join(
+                ['cpw' => 'catalog_product_website'],
+                "p.entity_id = cpw.product_id and cpw.website_id = $websiteId",
+                []
+            );
+        }
+
         $attribute = $this->eavConfig->getAttribute('catalog_product', 'status');
         $aliasTableName = $mainTableAlias.'t'.$attribute->getId();
         $columnValue = $this->resourceConnection->getConnection()->getIfNullSql(
