@@ -35,14 +35,13 @@ class Index extends AbstractModel implements IndexInterface
     private $stringFormatter;
 
     /**
-     * @param \Magento\Framework\Model\Context $context
-     * @param \Magento\Framework\Registry      $registry
-     * @param ConfigProviderInterface          $configProvider
-     * @param StringFormatterInterface         $stringFormatter
-     * @param IndexResourceModel               $resource
-     * @param Collection                       $resourceCollection
+     * @param \Magento\Framework\Model\Context                                 $context
+     * @param \Magento\Framework\Registry                                      $registry
+     * @param ConfigProviderInterface                                          $configProvider
+     * @param StringFormatterInterface                                         $stringFormatter
+     * @param \Bazaarvoice\Connector\Model\ResourceModel\Index|null            $resource
+     * @param \Bazaarvoice\Connector\Model\ResourceModel\Index\Collection|null $resourceCollection
      */
-    // @codingStandardsIgnoreStart
     public function __construct(
         Context $context,
         Registry $registry,
@@ -51,7 +50,6 @@ class Index extends AbstractModel implements IndexInterface
         ResourceModel\Index $resource = null,
         Collection $resourceCollection = null
     ) {
-        // @codingStandardsIgnoreEnd
         $this->_init(IndexResourceModel::class);
         $this->configProvider = $configProvider;
         $this->stringFormatter = $stringFormatter;
@@ -76,7 +74,7 @@ class Index extends AbstractModel implements IndexInterface
             $storeId = $storeId->getId();
         }
 
-        $scope = $scope ? $scope : $this->configProvider->getFeedGenerationScope();
+        $scope = $scope ?: $this->configProvider->getFeedGenerationScope();
 
         /** @var ResourceModel\Index $resource */
         $resource = $this->getResource();
@@ -108,7 +106,7 @@ class Index extends AbstractModel implements IndexInterface
     /**
      * @return bool
      */
-    public function hasParent()
+    public function hasParent(): bool
     {
         if ($this->configProvider->isFamiliesEnabled()) {
             if (!empty($this->getData('family'))) {
@@ -124,7 +122,7 @@ class Index extends AbstractModel implements IndexInterface
      *
      * @return \Bazaarvoice\Connector\Model\Index
      */
-    public function setLocaleDescription($localeDescription)
+    public function setLocaleDescription($localeDescription): Index
     {
         return $this->setJsonField('locale_description', $localeDescription);
     }
@@ -135,7 +133,7 @@ class Index extends AbstractModel implements IndexInterface
      *
      * @return $this
      */
-    private function setJsonField($field, $value)
+    private function setJsonField($field, $value): Index
     {
         if (is_array($value)) {
             $this->setData($field, $this->stringFormatter->jsonEncode($value));
@@ -151,7 +149,7 @@ class Index extends AbstractModel implements IndexInterface
      *
      * @return \Bazaarvoice\Connector\Model\Index
      */
-    public function setLocaleImageUrl($localeImageUrl)
+    public function setLocaleImageUrl($localeImageUrl): Index
     {
         return $this->setJsonField('locale_image_url', $localeImageUrl);
     }
@@ -161,7 +159,7 @@ class Index extends AbstractModel implements IndexInterface
      *
      * @return \Bazaarvoice\Connector\Model\Index
      */
-    public function setLocaleName($localeName)
+    public function setLocaleName($localeName): Index
     {
         return $this->setJsonField('locale_name', $localeName);
     }
@@ -171,7 +169,7 @@ class Index extends AbstractModel implements IndexInterface
      *
      * @return \Bazaarvoice\Connector\Model\Index
      */
-    public function setLocaleProductPageUrl($localeProductPageUrl)
+    public function setLocaleProductPageUrl($localeProductPageUrl): Index
     {
         return $this->setJsonField('locale_product_page_url', $localeProductPageUrl);
     }
@@ -228,7 +226,7 @@ class Index extends AbstractModel implements IndexInterface
      *
      * @return \Bazaarvoice\Connector\Model\Index
      */
-    public function addLocaleDescription($value)
+    public function addLocaleDescription($value): Index
     {
         return $this->addJsonField('locale_description', $value);
     }
@@ -239,7 +237,7 @@ class Index extends AbstractModel implements IndexInterface
      *
      * @return $this
      */
-    public function addJsonField($field, $value)
+    public function addJsonField($field, $value): Index
     {
         $fieldData = $this->getJsonField($field);
         if (isset($value)) {
@@ -258,7 +256,7 @@ class Index extends AbstractModel implements IndexInterface
      *
      * @return \Bazaarvoice\Connector\Model\Index
      */
-    public function addLocaleImageUrl($value)
+    public function addLocaleImageUrl($value): Index
     {
         return $this->addJsonField('locale_image_url', $value);
     }
@@ -268,7 +266,7 @@ class Index extends AbstractModel implements IndexInterface
      *
      * @return \Bazaarvoice\Connector\Model\Index
      */
-    public function addLocaleProductPageUrl($value)
+    public function addLocaleProductPageUrl($value): Index
     {
         return $this->addJsonField('locale_product_page_url', $value);
     }
@@ -278,7 +276,7 @@ class Index extends AbstractModel implements IndexInterface
      *
      * @return \Bazaarvoice\Connector\Model\Index
      */
-    public function addLocaleName($value)
+    public function addLocaleName($value): Index
     {
         return $this->addJsonField('locale_name', $value);
     }

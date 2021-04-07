@@ -40,7 +40,8 @@ use Magento\Store\Model\StoreManagerInterface;
 /**
  * Class Flat
  *
- * @package Bazaarvoice\Connector\Model\Indexer
+ * @deprecated Disable Magento flat tables so that this module uses its EAV indexer instead. Support for flat tables
+ *             is deprecated by Magento and in this module.
  */
 class Flat implements IndexerActionInterface, MviewActionInterface
 {

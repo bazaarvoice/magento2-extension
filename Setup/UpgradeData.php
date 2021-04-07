@@ -138,7 +138,7 @@ class UpgradeData implements Setup\UpgradeDataInterface
                 $entityTypeId,
                 ProductFeed::INCLUDE_IN_FEED_FLAG,
                 'note',
-                'Not needed if using DCC'
+                'Not applicable to DCC'
             );
         }
 
