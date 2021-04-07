@@ -116,7 +116,7 @@
                 <field id="enable_product_feed" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enable Product Feed</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment><![CDATA[Turn on Product Feed generation. This will enable generation of a product feed to be sent to the BV SFTP server. See documentation for additional steps to setup a scheduled job in Magento for this feature to take effect. Either this or DCC should be enabled, but not both. <strong>Product feed requires 'Catalog Flat Tables' to be enabled for Products and Categories.</strong>]]></comment>
+                    <comment><![CDATA[Turn on Product Feed generation. This will enable generation of a product feed to be sent to the BV SFTP server. See documentation for additional steps to setup a scheduled job in Magento for this feature to take effect. Either this or DCC should be enabled, but not both.]]></comment>
                 </field>
                 <field id="generation_scope" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Feed Generation Scope</label>
