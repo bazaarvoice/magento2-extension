@@ -169,6 +169,13 @@ class UpgradeData implements Setup\UpgradeDataInterface
                     'bv_feed_include' //just fixes the code to reflect that it's been used as an include flag for years
                 );
             }
+
+            $eavSetup->updateAttribute(
+                $entityTypeId,
+                ProductFeed::INCLUDE_IN_FEED_FLAG,
+                'default',
+                Boolean::VALUE_YES
+            );
         }
     }
 

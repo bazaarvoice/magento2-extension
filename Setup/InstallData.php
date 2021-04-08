@@ -83,7 +83,7 @@ class InstallData implements Setup\InstallDataInterface
                 'visible'                 => true,
                 'required'                => false,
                 'user_defined'            => false,
-                'default'                 => Boolean::VALUE_NO,
+                'default'                 => Boolean::VALUE_YES,
                 'apply_to'                => '',
                 'visible_on_front'        => false,
                 'is_used_in_grid'         => true,
