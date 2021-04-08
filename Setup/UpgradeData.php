@@ -176,6 +176,24 @@ class UpgradeData implements Setup\UpgradeDataInterface
                 'default',
                 Boolean::VALUE_YES
             );
+            foreach ($eavSetup->getAllAttributeSetIds() as $attributeSetId) {
+                if (!$eavSetup->getAttributeGroup($entityTypeId, $attributeSetId, 'Bazaarvoice')) {
+                    $eavSetup->addAttributeGroup($entityTypeId, $attributeSetId, 'Bazaarvoice');
+                }
+                $attributeGroupId = $eavSetup->getAttributeGroupId($entityTypeId, $attributeSetId, 'Bazaarvoice');
+                $eavSetup->addAttributeToGroup(
+                    $entityTypeId,
+                    $attributeSetId,
+                    $attributeGroupId,
+                    ProductFeed::INCLUDE_IN_FEED_FLAG
+                );
+                $eavSetup->addAttributeToGroup(
+                    $entityTypeId,
+                    $attributeSetId,
+                    $attributeGroupId,
+                    ProductFeed::CATEGORY_EXTERNAL_ID
+                );
+            }
         }
     }
 
