@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="sales_order" resource="sales" engine="innodb" comment="Sales Order">
+        <column xsi:type="int" name="sent_in_bv_postpurchase_feed" nullable="true" default="0" comment="Has Order Been Sent in Bazaarvoice Post-Purchase Feed?"/>
+    </table>
+    <table name="bazaarvoice_index_product" resource="default" engine="innodb" comment="Bazaarvoice Product Feed Index">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="int" name="product_id" unsigned="true" nullable="false" comment="Product ID"/>
+        <column xsi:type="varchar" name="product_type" length="32" nullable="false" comment="Product Type"/>
+        <column xsi:type="varchar" name="external_id" length="255" nullable="false" comment="Product External ID"/>
+        <column xsi:type="varchar" name="category_external_id" length="255" nullable="true" comment="Product Category External ID"/>
+        <column xsi:type="varchar" name="brand_external_id" length="255" nullable="true" comment="Product Brand External ID"/>
+        <column xsi:type="varchar" name="family" length="255" nullable="true" comment="Product Family"/>
+        <column xsi:type="text" name="name" nullable="false" comment="Product Name"/>
+        <column xsi:type="text" name="locale_name" nullable="true" comment="Product Locale Name"/>
+        <column xsi:type="text" name="description" nullable="true" comment="Product Description"/>
+        <column xsi:type="text" name="locale_description" nullable="true" comment="Product Locale Description"/>
+        <column xsi:type="text" name="product_page_url" nullable="true" comment="Product Page URL"/>
+        <column xsi:type="text" name="image_url" nullable="true" comment="Product Image URL"/>
+        <column xsi:type="text" name="locale_image_url" nullable="true" comment="Product Locale Image URL"/>
+        <column xsi:type="text" name="upcs" nullable="true" comment="Product UPCs"/>
+        <column xsi:type="text" name="eans" nullable="true" comment="Product EANs"/>
+        <column xsi:type="text" name="isbns" nullable="true" comment="Product ISBNs"/>
+        <column xsi:type="text" name="manufacturerpartnumbers" nullable="true" comment="Product Manufacturer Part Numbers"/>
+        <column xsi:type="text" name="modelnumbers" nullable="true" comment="Product Model Numbers"/>
+        <column xsi:type="varchar" length="255" name="scope" nullable="true" comment="Scope"/>
+        <column xsi:type="int" name="store_id" nullable="false" comment="Store ID"/>
+        <column xsi:type="smallint" name="status" unsigned="true" nullable="false" default="1" comment="Product Status (Enabled or Disabled)"/>
+        <column xsi:type="bigint" name="version_id" unsigned="true" nullable="false" default="0" comment="Version ID"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Creation Time"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Modification Time"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="UNIQUE_BAZAARVOICE_PRODUCT_ID_SCOPE_STORE_ID">
+            <column name="product_id"/>
+            <column name="scope"/>
+            <column name="store_id"/>
+        </constraint>
+    </table>
+</schema>
