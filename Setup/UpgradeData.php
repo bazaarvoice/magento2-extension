@@ -14,7 +14,9 @@ use Bazaarvoice\Connector\Model\Source\Category;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Setup\CategorySetup;
 use Magento\Catalog\Setup\CategorySetupFactory;
+use Magento\Config\App\Config\Source\RuntimeConfigSource;
 use Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface;
+use Magento\Eav\Model\Entity\Attribute\Source\Boolean;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Config\Storage\WriterInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
@@ -22,7 +24,6 @@ use Magento\Framework\Setup;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Sales\Setup\SalesSetupFactory;
-use Magento\Config\App\Config\Source\RuntimeConfigSource;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
@@ -151,6 +152,22 @@ class UpgradeData implements Setup\UpgradeDataInterface
 
             foreach ($this->storeManager->getStores() as $store) {
                 $this->encryptPasswordConfig(ScopeInterface::SCOPE_STORES, $store);
+            }
+        }
+
+
+        if (version_compare($context->getVersion(), '9.0.0') < 0) {
+            /** @var CategorySetup $eavSetup */
+            $eavSetup = $this->categorySetupFactory->create(['setup' => $setup]);
+            $entityTypeId = $eavSetup->getEntityTypeId(Product::ENTITY);
+
+            if ($eavSetup->getAttribute($entityTypeId, 'bv_feed_exclude')) {
+                $eavSetup->updateAttribute(
+                    $entityTypeId,
+                    'bv_feed_exclude',
+                    'attribute_code',
+                    'bv_feed_include' //just fixes the code to reflect that it's been used as an include flag for years
+                );
             }
         }
     }

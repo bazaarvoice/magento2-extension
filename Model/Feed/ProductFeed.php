@@ -28,7 +28,7 @@ use Magento\Store\Model\Website;
  */
 class ProductFeed extends Feed
 {
-    const INCLUDE_IN_FEED_FLAG = 'bv_feed_exclude';
+    const INCLUDE_IN_FEED_FLAG = 'bv_feed_include';
     const FEED_FILE_XSD = 'http://www.bazaarvoice.com/xs/PRR/ProductFeed/14.7';
     const CATEGORY_EXTERNAL_ID = 'bv_category_id';
 

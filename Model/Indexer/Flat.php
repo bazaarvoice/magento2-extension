@@ -764,7 +764,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 'external_id'     => 'p.sku',
                 'image_url'       => 'p.small_image',
                 'visibility'      => 'p.visibility',
-                'bv_feed_exclude' => 'bv_feed_exclude',
+                ProductFeed::INCLUDE_IN_FEED_FLAG => ProductFeed::INCLUDE_IN_FEED_FLAG,
                 'bv_category_id'  => 'p.bv_category_id',
             ]);
 

@@ -475,7 +475,9 @@ class Eav implements IndexerActionInterface, MviewActionInterface
                 }
             }
 
-            $indexData['status'] = $indexData[ProductFeed::INCLUDE_IN_FEED_FLAG] ? Status::STATUS_ENABLED
+            $indexData['status'] = ($indexData[ProductFeed::INCLUDE_IN_FEED_FLAG]
+                || $indexData[ProductFeed::INCLUDE_IN_FEED_FLAG] === null)
+                ? Status::STATUS_ENABLED
                 : Status::STATUS_DISABLED;
 
             if ($this->configProvider->isFamiliesEnabled($storeId)) {
@@ -662,14 +664,14 @@ class Eav implements IndexerActionInterface, MviewActionInterface
         $this->addFieldToJoin($select, 'short_description', $storeId);
         $this->addFieldToJoin($select, 'small_image', $storeId);
         $this->addFieldToJoin($select, 'visibility', $storeId);
-        $this->addFieldToJoin($select, 'bv_feed_exclude', $storeId);
+        $this->addFieldToJoin($select, ProductFeed::INCLUDE_IN_FEED_FLAG, $storeId);
         $this->addFieldToJoin($select, 'status', $storeId);
 
         $this->addFieldToSelect($select, 'name', 'name');
         $this->addFieldToSelect($select, 'description', 'short_description');
         $this->addFieldToSelect($select, 'image_url', 'small_image');
         $this->addFieldToSelect($select, 'visibility', 'visibility');
-        $this->addFieldToSelect($select, 'bv_feed_exclude', 'bv_feed_exclude');
+        $this->addFieldToSelect($select, ProductFeed::INCLUDE_IN_FEED_FLAG, ProductFeed::INCLUDE_IN_FEED_FLAG);
 
         $this->filterByStore($select, $store);
 
