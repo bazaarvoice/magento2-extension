@@ -98,7 +98,7 @@ class InstallData implements Setup\InstallDataInterface
         $attributeSetId = $eavSetup->getAttributeSetId($entityTypeId, 'Default');
 
         $attribute = $eavSetup->getAttribute($entityTypeId, Connector\Model\Feed\ProductFeed::INCLUDE_IN_FEED_FLAG);
-        if ($attribute) {
+        if ($attribute && $attributeSetId) {
             $eavSetup->addAttributeToGroup(
                 $entityTypeId,
                 $attributeSetId,
@@ -108,7 +108,7 @@ class InstallData implements Setup\InstallDataInterface
             );
         }
 
-        if (!$eavSetup->getAttributesNumberInGroup($entityTypeId, $attributeSetId, 'Product Details')) {
+        if ($attributeSetId && !$eavSetup->getAttributesNumberInGroup($entityTypeId, $attributeSetId, 'Product Details')) {
             $eavSetup->removeAttributeGroup($entityTypeId, $attributeSetId, 'Product Details');
         }
     }
