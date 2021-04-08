@@ -826,7 +826,7 @@ class Eav implements IndexerActionInterface, MviewActionInterface
         $result = $select->query();
 
         while ($row = $result->fetch()) {
-            if ($row['store_id'] == 0) {
+            if ($row['version_id'] == 0) {
                 $this->logger->debug("{$row['total']} Products left to Index");
             } else {
                 $this->logger->debug("{$row['total']} Products Indexed for Store {$row['store_id']}");
