@@ -57,13 +57,13 @@ class Uninstall implements UninstallInterface
     ) {
         $setup->startSetup();
 
-        $salesSetup = $this->salesSetupFactory->create(['setup' => $setup]);
+        $salesSetup = $this->salesSetupFactory->create();
         $salesSetup->removeAttribute(
             Order::ENTITY,
             Connector\Model\Feed\PurchaseFeed::ALREADY_SENT_IN_FEED_FLAG
         );
 
-        $catalogSetup = $this->categorySetupFactory->create(['setup' => $setup]);
+        $catalogSetup = $this->categorySetupFactory->create();
         $entityTypeId = $catalogSetup->getEntityTypeId(Product::ENTITY);
 
         if ($catalogSetup->getAttribute($entityTypeId, 'bv_feed_exclude')) {
