@@ -778,7 +778,11 @@ class ConfigProvider implements ConfigProviderInterface
                 break;
             case Scope::SCOPE_GLOBAL:
                 $stores = $this->storeManager->getStores();
-                $defaultStore = $this->storeManager->getStore(0);
+                if (!$this->getDefaultConfig('catalog/frontend/flat_catalog_product')
+                    && !$this->getDefaultConfig('catalog/frontend/flat_catalog_category')
+                ) {
+                    $defaultStore = $this->storeManager->getStore(0);
+                }
                 ksort($stores);
                 /** @var Store $store */
                 $globalLocales = [];
@@ -787,8 +791,14 @@ class ConfigProvider implements ConfigProviderInterface
                         $localeCode = $this->getLocale($store->getId());
                         if (!empty($localeCode)) {
                             $globalLocales[$localeCode] = $store;
+                            if (!isset($defaultStore)) {
+                                $defaultStore = $store;
+                            }
                         }
                     }
+                }
+                if (!isset($defaultStore)) {
+                    throw new NoSuchEntityException(__('No valid store found for feed generation'));
                 }
                 $locales[$defaultStore->getId()] = $globalLocales;
                 $defaultLocale = $this->getLocale($defaultStore->getId());
