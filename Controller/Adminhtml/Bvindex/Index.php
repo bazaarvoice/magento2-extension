@@ -54,18 +54,6 @@ class Index extends Action
     {
         /** @var Page $resultPage */
         $resultPage = $this->_resultPageFactory->create();
-
-        if ($this->_scopeConfig->getValue('catalog/frontend/flat_catalog_product') == false
-            || $this->_scopeConfig->getValue('catalog/frontend/flat_catalog_category') == false) {
-            $url = $this->getUrl('*/system_config/edit/section/catalog');
-            $this->messageManager->addErrorMessage(
-                __(
-                    'Bazaarvoice Product feed requires Catalog Flat Tables to be enabled. Please check your <a href="%1">Store Config</a>.',
-                    $url
-                )
-            );
-        }
-
         $resultPage->setActiveMenu('Magento_Catalog::inventory');
         $resultPage->getConfig()->getTitle()->prepend(__('Bazaarvoice Product Feed'));
 
