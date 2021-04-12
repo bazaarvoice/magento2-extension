@@ -502,6 +502,9 @@ class Eav implements IndexerActionInterface, MviewActionInterface
                 $this->logger->debug('Not visible');
                 if (!empty($indexData['parent_url'])) {
                     $indexData['product_page_url'] = $indexData['parent_url'];
+                    if ($storeId == Store::DEFAULT_STORE_ID) {
+                        $indexData['url_store_id'] = $indexData['parent_url_store_id'];
+                    }
                     $this->logger->debug('Using Parent URL');
                 } else {
                     $this->logger->debug('Product marked disabled because no parent URL found');
@@ -526,10 +529,19 @@ class Eav implements IndexerActionInterface, MviewActionInterface
             $standardUrl = $this->getStandardUrl($indexData['product_id']);
 
             /** Add Store base to URLs */
-            $indexData['product_page_url'] = $this->getStoreUrl(
-                $store->getBaseUrl(),
-                $indexData['product_page_url'] == '' ? $standardUrl : $indexData['product_page_url']
-            );
+            if ($storeId == Store::DEFAULT_STORE_ID) {
+                $urlStore = $this->storeManager->getStore($indexData['url_store_id']);
+                $indexData['product_page_url'] = $this->getStoreUrl(
+                    $urlStore->getBaseUrl(),
+                    $indexData['product_page_url'] == '' ? $standardUrl : $indexData['product_page_url']
+                );
+            } else {
+                $indexData['product_page_url'] = $this->getStoreUrl(
+                    $store->getBaseUrl(),
+                    $indexData['product_page_url'] == '' ? $standardUrl : $indexData['product_page_url']
+                );
+            }
+
             $this->logger->debug("URL {$indexData['product_page_url']}");
             $indexData['image_url'] = $this->getImageUrl($store, $indexData);
 
@@ -594,13 +606,35 @@ class Eav implements IndexerActionInterface, MviewActionInterface
                             }
                         }
 
+                        /** Use parent URLs/categories if appropriate */
+                        if ($indexData['visibility'] == Visibility::VISIBILITY_NOT_VISIBLE) {
+                            $this->logger->debug('Locale not visible');
+                            if (!empty($indexData['parent_url'])) {
+                                $indexData['product_page_url'] = $indexData['parent_url'];
+                                if ($storeId == Store::DEFAULT_STORE_ID && $localeStore->getId() == Store::DEFAULT_STORE_ID) {
+                                    $indexData['url_store_id'] = $indexData['parent_url_store_id'];
+                                }
+                                $this->logger->debug('Locale using Parent URL');
+                            }
+                        }
+
                         /** @var Store $localeStore */
-                        $urlPath = $indexData['product_page_url'] ?? $this->getStandardUrl($indexData['product_id']);
-                        $localeUrl = $this->getStoreUrl(
-                            $localeStore->getBaseUrl(),
-                            $urlPath,
-                            $localeStore->getCode()
-                        );
+                        if ($storeId == Store::DEFAULT_STORE_ID && $localeStore->getId() == Store::DEFAULT_STORE_ID) {
+                            $urlStore = $this->storeManager->getStore($indexData['url_store_id']);
+                            $urlPath = $indexData['product_page_url'] ?? $this->getStandardUrl($indexData['product_id']);
+                            $localeUrl = $this->getStoreUrl(
+                                $urlStore->getBaseUrl(),
+                                $urlPath,
+                                $urlStore->getCode()
+                            );
+                        } else {
+                            $urlPath = $indexData['product_page_url'] ?? $this->getStandardUrl($indexData['product_id']);
+                            $localeUrl = $this->getStoreUrl(
+                                $localeStore->getBaseUrl(),
+                                $urlPath,
+                                $localeStore->getCode()
+                            );
+                        }
                         $indexData['product_page_url'] = $localeUrl;
 
                         if (isset($indexData['product_page_url'])) {
@@ -609,19 +643,6 @@ class Eav implements IndexerActionInterface, MviewActionInterface
                         }
 
                         $indexData['image_url'] = $this->getImageUrl($localeStore, $indexData);
-
-                        /** Use parent URLs/categories if appropriate */
-                        if ($indexData['visibility'] == Visibility::VISIBILITY_NOT_VISIBLE) {
-                            $this->logger->debug('Locale not visible');
-                            if (!empty($indexData['parent_url'])) {
-                                $indexData['product_page_url'] = $this->getStoreUrl(
-                                    $localeStore->getBaseUrl(),
-                                    $indexData['parent_url'],
-                                    $localeStore->getCode()
-                                );
-                                $this->logger->debug('Locale using Parent URL');
-                            }
-                        }
 
                         if (isset($indexData['description'])) {
                             $productIndex->addLocaleDescription([$locale => $indexData['description']]);
@@ -736,26 +757,42 @@ class Eav implements IndexerActionInterface, MviewActionInterface
      *
      * @return void
      */
-    private function joinUrlRewrite(Select $select, $storeId, ResourceConnection $res):void
+    private function joinUrlRewrite(Select $select, $storeId, ResourceConnection $res): void
     {
         /** urls */
-        $select
-            ->joinLeft(
-                ['url' => $res->getTableName('url_rewrite')],
-                "url.entity_type = 'product'
-                and url.metadata is null
-                and url.entity_id = p.entity_id
-                and url.store_id = $storeId",
-                ['product_page_url' => 'url.request_path']
-            )
-            ->joinLeft(
-                ['parent_url' => $res->getTableName('url_rewrite')],
-                "parent_url.entity_type = 'product'
-                and parent_url.metadata is null
-                and parent_url.entity_id = parent.entity_id
-                and parent_url.store_id = $storeId",
-                ['parent_url' => 'max(parent_url.request_path)']
-            );
+        if ($storeId == Store::DEFAULT_STORE_ID) {
+            $select
+                ->joinLeft(
+                    ['url' => new Zend_Db_Expr("(select min(store_id) as url_store_id, entity_id, request_path
+                    from `url_rewrite` where metadata is null and entity_type = 'product' group by entity_id)")],
+                    "url.entity_id = p.entity_id",
+                    ['product_page_url' => 'url.request_path', 'url_store_id' => 'url_store_id']
+                )
+                ->joinLeft(
+                    ['parent_url' => new Zend_Db_Expr("(select min(store_id) as parent_url_store_id, entity_id, request_path
+                    from `url_rewrite` where metadata is null and entity_type = 'product' group by entity_id)")],
+                    "parent_url.entity_id = parent.entity_id",
+                    ['parent_url' => 'parent_url.request_path', 'parent_url_store_id' => 'parent_url_store_id']
+                );
+        } else {
+            $select
+                ->joinLeft(
+                    ['url' => $res->getTableName('url_rewrite')],
+                    "url.entity_type = 'product'
+                    and url.metadata is null
+                    and url.entity_id = p.entity_id
+                    and url.store_id = $storeId",
+                    ['product_page_url' => 'url.request_path']
+                )
+                ->joinLeft(
+                    ['parent_url' => $res->getTableName('url_rewrite')],
+                    "parent_url.entity_type = 'product'
+                    and parent_url.metadata is null
+                    and parent_url.entity_id = parent.entity_id
+                    and parent_url.store_id = $storeId",
+                    ['parent_url' => 'max(parent_url.request_path)']
+                );
+        }
     }
 
     /**
