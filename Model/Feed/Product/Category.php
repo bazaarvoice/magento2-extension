@@ -147,7 +147,7 @@ class Category
     protected function processCategories(XMLWriter $writer, $defaultStore)
     {
         $localeStores = $this->configProvider->getLocales();
-        $defaultCollection = $this->getProductCollection($defaultStore);
+        $defaultCollection = $this->getCategoryCollection($defaultStore);
 
         $baseUrl = $defaultStore->getBaseUrl();
         $categories = [];
@@ -170,7 +170,7 @@ class Category
                 /** @var Store $localeStore */
                 $localeBaseUrl = $localeStore->getBaseUrl();
                 $localeStoreCode = $localeStore->getCode();
-                $localeCollection = $this->getProductCollection($localeStore);
+                $localeCollection = $this->getCategoryCollection($localeStore);
                 $localeCode = $this->configProvider->getLocale($localeStore->getId());
                 foreach ($localeCollection as $category) {
                     /** Skip categories not in main store */
@@ -282,7 +282,7 @@ class Category
      * @return \Magento\Catalog\Model\ResourceModel\Category\Collection
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    protected function getProductCollection($store = null)
+    protected function getCategoryCollection($store = null)
     {
         /** @var \Magento\Catalog\Model\ResourceModel\Category\Collection $collection */
         $collection = $this->categoryFactory->create()->getCollection();
