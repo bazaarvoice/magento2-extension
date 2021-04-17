@@ -559,7 +559,9 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 }
             }
 
-            $indexData['status'] = $indexData[ProductFeed::INCLUDE_IN_FEED_FLAG] ? Status::STATUS_ENABLED
+            $indexData['status'] = ($indexData[ProductFeed::INCLUDE_IN_FEED_FLAG]
+                || $indexData[ProductFeed::INCLUDE_IN_FEED_FLAG] === null)
+                ? Status::STATUS_ENABLED
                 : Status::STATUS_DISABLED;
 
             if ($this->configProvider->isFamiliesEnabled($storeId)) {
