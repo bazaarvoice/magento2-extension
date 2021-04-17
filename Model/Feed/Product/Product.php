@@ -148,7 +148,9 @@ class Product
             $writer->endElement(); //End Names
         }
 
-        $writer->writeElement('Description', $product->getData('description'), true);
+        if ($product->getData('description')) {
+            $writer->writeElement('Description', $product->getData('description'), true);
+        }
         $localeDescription = $product->getData('locale_description');
         if (is_array($localeDescription) && count($localeDescription)) {
             $writer->startElement('Descriptions');
