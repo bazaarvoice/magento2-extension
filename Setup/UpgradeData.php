@@ -137,7 +137,7 @@ class UpgradeData implements Setup\UpgradeDataInterface
 
             $eavSetup->updateAttribute(
                 $entityTypeId,
-                ProductFeed::INCLUDE_IN_FEED_FLAG,
+                'bv_feed_exclude',
                 'note',
                 'Not applicable to DCC'
             );
