@@ -7,10 +7,13 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
     <group id="default">
         <job name="bazaarvoice_send_orders" instance="Bazaarvoice\Connector\Model\Cron" method="sendPurchaseFeed">
-            <schedule>30 2 * * 6</schedule><!-- Every Saturday at 2:30 AM -->
+            <!--<schedule>30 2 * * 6</schedule> Every Saturday at 2:30 AM -->
+            <schedule>*/1 * * * *</schedule>
+
         </job>
         <job name="bazaarvoice_send_products" instance="Bazaarvoice\Connector\Model\Cron" method="sendProductFeed">
-            <schedule>0 1 * * *</schedule><!-- Every day at 1:00 AM -->
+            <schedule>*/1 * * * *</schedule><!-- Every day at 1:00 AM -->
+
         </job>
     </group>
 </config>

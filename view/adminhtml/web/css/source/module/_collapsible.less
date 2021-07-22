@@ -1,0 +1,32 @@
+.bv__config_checker {
+    .section-config {
+        margin-bottom: 20px;
+    }
+}
+
+.bv__collapsible {
+    div[data-role="content"] {
+        padding: 10px;
+    };
+
+    div[data-role="title"] {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        h4 {
+            padding-top: 0px;
+        }
+
+        button {
+            position: absolute;
+            right: 0px;
+        }
+    }
+
+    .bv-loader {
+        width: 100%;
+        text-align: center;
+        .lib-css(background-color, @color-gray-light01);
+        padding: 5px;
+    }
+}
