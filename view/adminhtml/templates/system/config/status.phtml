@@ -1,0 +1,72 @@
+<?php
+    /** @var \Bazaarvoice\Connector\Block\Adminhtml\System\Config\Form\FieldTable $block */
+?>
+
+<script type="text/javascript">
+    require(['jquery', 'domReady!'], function($) {
+        console.log('<?= $block->getValidations(); ?>')
+       $("tr#row_bazaarvoice_config_status_config_status td.label").css('display', 'none');
+       $("tr#row_bazaarvoice_config_status_config_status td.value").css('width', '100%');
+    });
+</script>
+
+<div class="wrapper bv__config_checker">
+
+    <div class="section-config">
+        <div class="bv__collapsible" data-mage-init='{"Bazaarvoice_Connector/js/bv-collapsible": {
+                "ajaxContent": true,
+                "collapsible": false,
+                "active": true,
+                "openedState": "active",
+                "loadingClass": "bv-loader"
+            }}'>
+
+            <div data-role="title">
+                <h4>Cron Jobs <p class="note"><span>Check cron BV cron jobs configuration and job status</span></p></h4>
+                <button class="action action-default" data-role="trigger">Re-run</button>
+            </div>
+            <div data-role="content"></div>
+            <a href="<?= $block->getUrl('adminhtml/config_validation/cron') ?>" data-ajax="true"></a>
+        </div>
+    </div>
+
+    <div class="section-config">
+        <div class="bv__collapsible" data-mage-init='{"Bazaarvoice_Connector/js/bv-collapsible": {
+                "ajaxContent": true,
+                "collapsible": false,
+                "active": true,
+                "openedState": "active",
+                "loadingClass": "bv-loader"
+            }}'>
+
+            <div data-role="title">
+                <h4>SFTP <p class="note"><span>Check SFTP configuration and connection.</span></p></h4>
+                <button class="action action-default" data-role="trigger">Re-run</button>
+            </div>
+            <div data-role="content"></div>
+            <a href="<?= $block->getUrl('adminhtml/config_validation/sftp') ?>" data-ajax="true"></a>
+
+        </div>
+    </div>
+
+    <div class="section-config">
+        <div class="bv__collapsible" data-mage-init='{"Bazaarvoice_Connector/js/bv-collapsible": {
+                "ajaxContent": true,
+                "collapsible": false,
+                "active": true,
+                "openedState": "active",
+                "loadingClass": "bv-loader"
+            }}'>
+
+            <div data-role="title">
+                <h4>Product Feed/DCC <p class="note"><span>Check Product feed and DCC configuration.</span></p></h4>
+                <button class="action action-default" data-role="trigger">Re-run</button>
+            </div>
+            <div data-role="content"></div>
+            <a href="<?= $block->getUrl('adminhtml/config_validation/requiredconfig') ?>" data-ajax="true"></a>
+
+        </div>
+    </div>
+
+</div>
+
