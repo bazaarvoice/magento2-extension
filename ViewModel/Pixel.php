@@ -20,6 +20,7 @@ use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Directory\Model\Region;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
+use Magento\Tax\Model\Config;
 
 /**
  * Class Pixel
@@ -57,6 +58,10 @@ class Pixel implements ArgumentInterface
      * @var \Magento\Catalog\Model\Product\Media\ConfigFactory
      */
     private $mediaConfigFactory;
+    /**
+     * @var \Magento\Tax\Model\Config
+     */
+    private $taxConfig;
 
     /**
      * Pixel constructor.
@@ -67,6 +72,7 @@ class Pixel implements ArgumentInterface
      * @param \Magento\Directory\Model\Region                    $region
      * @param \Magento\Catalog\Model\ProductRepository           $productRepository
      * @param \Magento\Catalog\Model\Product\Media\ConfigFactory $mediaConfigFactory
+     * @param \Magento\Tax\Model\Config                          $taxConfig
      */
     public function __construct(
         ConfigProviderInterface $configProvider,
@@ -74,7 +80,8 @@ class Pixel implements ArgumentInterface
         Session $checkoutSession,
         Region $region,
         ProductRepository $productRepository,
-        ConfigFactory $mediaConfigFactory
+        ConfigFactory $mediaConfigFactory,
+        Config $taxConfig
     ) {
         $this->checkoutSession = $checkoutSession;
         $this->region = $region;
@@ -82,6 +89,7 @@ class Pixel implements ArgumentInterface
         $this->configProvider = $configProvider;
         $this->stringFormatter = $stringFormatter;
         $this->mediaConfigFactory = $mediaConfigFactory;
+        $this->taxConfig = $taxConfig;
     }
 
     /**
@@ -121,7 +129,14 @@ class Pixel implements ArgumentInterface
         $this->orderDetails['total'] = number_format((float)$total, 2, '.', '');
         $this->orderDetails['tax'] = number_format((float)$order->getTaxAmount() ?? 0.0, 2, '.', '');
         $this->orderDetails['shipping'] = number_format((float)$order->getShippingAmount() ?? 0.0, 2, '.', '');
-        $this->orderDetails['discount'] = number_format((float)abs($order->getDiscountAmount()) ?? 0.0, 2, '.', '');
+        if (!$this->taxConfig->discountTax()) {
+            $this->orderDetails['discount'] = number_format((float)abs($order->getDiscountAmount()) ?? 0.0, 2, '.', '');
+        } else {
+            //when discount is applied to products "including tax" - extract tax compensation amount from "discount".
+            $this->orderDetails['discount'] = number_format(
+                (float)abs($order->getDiscountAmount()) - (float)abs($order->getDiscountTaxCompensationAmount()) ?? 0.0, 2, '.', ''
+            );
+        }
 
         if ($address) {
             $this->orderDetails['city'] = $address->getCity();
