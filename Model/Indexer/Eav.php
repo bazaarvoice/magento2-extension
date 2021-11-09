@@ -28,6 +28,7 @@ use Magento\Eav\Model\Config;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Indexer\ActionInterface as IndexerActionInterface;
 use Magento\Framework\Indexer\IndexerInterface;
@@ -37,6 +38,9 @@ use Magento\Framework\UrlInterface;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use Zend_Db_Expr;
+use Magento\Framework\View\Asset\Repository as AssetRepository;
+use Magento\Framework\View\DesignInterface;
+use Magento\Theme\Model\Theme;
 
 class Eav implements IndexerActionInterface, MviewActionInterface
 {
@@ -117,7 +121,11 @@ class Eav implements IndexerActionInterface, MviewActionInterface
         ResourceConnection $resourceConnection,
         IndexInterfaceFactory $bvIndexFactory,
         IndexRepositoryInterface $indexRepository,
-        Config $eavConfig
+        Config $eavConfig,
+        Image $imageHelper,
+        AssetRepository $assetRepository,
+        DesignInterface $design,
+        Theme $theme
     ) {
         $this->logger = $logger;
         $this->storeManager = $storeManager;
@@ -131,6 +139,10 @@ class Eav implements IndexerActionInterface, MviewActionInterface
         $this->configProvider = $configProvider;
         $this->stringFormatter = $stringFormatter;
         $this->eavConfig = $eavConfig;
+        $this->imageHelper = $imageHelper;
+        $this->assetRepository = $assetRepository;
+        $this->design = $design;
+        $this->theme = $theme;
     }
 
     /**
@@ -912,6 +924,8 @@ class Eav implements IndexerActionInterface, MviewActionInterface
             } else {
                 $this->logger->debug('Product has no parent and no image');
                 $indexData['image_url'] = $this->getPlaceholderUrl($store);
+                $this->logger->debug('default product url:');
+                $this->logger->debug($indexData['image_url'] );
             }
         }
 
@@ -933,27 +947,27 @@ class Eav implements IndexerActionInterface, MviewActionInterface
      */
     public function getPlaceholderUrl($store)
     {
-        /** @var Image $imageHelper */
-        /** @var \Magento\Framework\View\Asset\Repository $assetRepo */
-        /** @var \Magento\Framework\View\DesignInterface $design */
         /** @var Store $localeStore */
         /** @var string $locale */
-        /** @var \Magento\Theme\Model\Theme $theme */
 
-        $imageHelper = $this->objectManager->get('\Magento\Catalog\Helper\Image');
-        $assetRepo = $this->objectManager->get('\Magento\Framework\View\Asset\Repository');
-        $design = $this->objectManager->create('\Magento\Framework\View\DesignInterface');
-        $localeCode = $this->configProvider->getLocale($store->getId());
-        $themeId = $design->getConfigurationDesignTheme('frontend', ['store' => $store->getId()]);
-        $theme = $this->objectManager->create('\Magento\Theme\Model\Theme')->load($themeId);
-        $assetParams = [
-            'area'   => 'frontend',
-            'theme'  => $theme->getThemePath(),
-            'locale' => $localeCode,
-        ];
 
-        return $assetRepo->createAsset($imageHelper->getPlaceholder('image'), $assetParams)
-            ->getUrl();
+        try {
+            $localeCode = $this->configProvider->getLocale($store->getId());
+            $themeId  = $this->design->getConfigurationDesignTheme('frontend', [$store->getId()]);
+
+            $theme = $this->theme->load($themeId);
+            $assetParams = [
+                'area'   => 'frontend',
+                'theme'  => $theme->getThemePath(),
+                'locale' => $localeCode,
+            ];
+
+            return $this->assetRepository->createAsset($this->imageHelper->getPlaceholder('image'), $assetParams)
+                ->getUrl();
+        } catch (LocalizedException $exception) {
+            throw new LocalizedException($exception->getMessage());
+        }
+
     }
 
     /**
