@@ -52,7 +52,9 @@ class Index extends Action
      */
     public function execute()
     {
-        /** @var Page $resultPage */
+        /**
+        * @var Page $resultPage 
+        */
         $resultPage = $this->_resultPageFactory->create();
         $resultPage->setActiveMenu('Magento_Catalog::inventory');
         $resultPage->getConfig()->getTitle()->prepend(__('Bazaarvoice Product Feed'));

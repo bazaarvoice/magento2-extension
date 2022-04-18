@@ -20,7 +20,9 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class PurchaseTest extends Command
 {
-    /** @var PurchaseFeed $_purchaseFeed */
+    /**
+     * @var PurchaseFeed $_purchaseFeed 
+     */
     protected $_purchaseFeed;
 
     /**

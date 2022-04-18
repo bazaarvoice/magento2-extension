@@ -73,7 +73,9 @@ class TestConnection extends Action
         }
 
 
-        /** @var \Magento\Framework\Controller\Result\Json $resultJson */
+        /**
+        * @var \Magento\Framework\Controller\Result\Json $resultJson 
+        */
         $resultJson = $this->resultJsonFactory->create();
         return $resultJson->setData($result);
     }
