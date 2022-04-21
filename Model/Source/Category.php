@@ -16,8 +16,6 @@ use Magento\Framework\Exception\LocalizedException;
 
 /**
  * Class Category
- *
- * @package Bazaarvoice\Connector\Model\Source
  */
 class Category extends AbstractSource
 {

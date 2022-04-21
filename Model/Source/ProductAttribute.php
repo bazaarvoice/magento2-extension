@@ -15,8 +15,6 @@ use Magento\Framework\Data\OptionSourceInterface;
 
 /**
  * Class ProductAttribute
- *
- * @package Bazaarvoice\Connector\Model\Source
  */
 class ProductAttribute implements OptionSourceInterface
 {
