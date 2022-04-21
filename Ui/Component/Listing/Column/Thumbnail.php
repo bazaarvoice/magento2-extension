@@ -12,8 +12,6 @@ use Magento\Ui\Component\Listing\Columns\Column;
 
 /**
  * Class Thumbnail
- *
- * @package Bazaarvoice\Connector\Ui\Component\Listing\Column
  */
 class Thumbnail extends Column
 {

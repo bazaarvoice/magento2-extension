@@ -10,8 +10,6 @@ namespace Bazaarvoice\Connector\Model\Filesystem\Io;
 
 /**
  * Class Sftp
- *
- * @package Bazaarvoice\Connector\Model\Filesystem\Io
  */
 class Sftp extends \Magento\Framework\Filesystem\Io\Sftp
 {

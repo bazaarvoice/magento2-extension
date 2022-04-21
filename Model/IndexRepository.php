@@ -21,8 +21,6 @@ use Magento\Framework\Exception\NoSuchEntityException;
 
 /**
  * Class IndexRepository
- *
- * @package Bazaarvoice\Connector\Model
  */
 class IndexRepository implements IndexRepositoryInterface
 {
