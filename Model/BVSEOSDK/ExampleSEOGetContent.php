@@ -5,14 +5,16 @@
  */
 
 //Please provide cloud_key, bv_root_folder and subject_id
-$bv = new \Bazaarvoice\Connector\Model\BVSEOSDK\BV([
+$bv = new \Bazaarvoice\Connector\Model\BVSEOSDK\BV(
+    [
     'bv_root_folder' => '',
     'subject_id'     => '',
     'cloud_key'      => '',
     'content_type'   => 'questions',
     'subject_type'   => 'category',
     'staging'        => true,
-]);
+    ]
+);
 ?><!DOCTYPE html>
 <html>
 <head>
@@ -23,7 +25,7 @@ This is a test page for SEO getContent<br>
 This will return questions and answers content<br><br>
 
 <div id="BVQAContainer">
-    <?= $bv->SEO->getContent(); ?>
+    <?php echo $bv->SEO->getContent(); ?>
 </div>
 
 </body>
