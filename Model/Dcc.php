@@ -18,8 +18,6 @@ use Magento\Framework\Exception\NoSuchEntityException;
 
 /**
  * Class Builder
- *
- * @package Bazaarvoice\Connector\Model\Dcc
  */
 class Dcc extends DataObject implements DccInterface
 {

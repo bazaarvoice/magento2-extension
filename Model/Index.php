@@ -19,8 +19,6 @@ use Magento\Framework\Registry;
 
 /**
  * Class Index
- *
- * @package Bazaarvoice\Connector\Model
  */
 class Index extends AbstractModel implements IndexInterface
 {

@@ -17,8 +17,6 @@ use Magento\Framework\UrlInterface;
 
 /**
  * Class SeoContent
- *
- * @package Bazaarvoice\Connector\Model
  */
 class SeoContent
 {

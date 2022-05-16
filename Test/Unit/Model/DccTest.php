@@ -17,8 +17,6 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Class BuilderTest
- *
- * @package Bazaarvoice\Connector\Test\Unit\Model\Dcc
  */
 class DccTest extends TestCase
 {

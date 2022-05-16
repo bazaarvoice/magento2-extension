@@ -25,8 +25,6 @@ use Magento\Framework\Exception\NoSuchEntityException;
 
 /**
  * Class CatalogProductBuilder
- *
- * @package Bazaarvoice\Connector\Model\Dcc\CatalogData
  */
 class CatalogProductBuilder implements CatalogProductBuilderInterface
 {

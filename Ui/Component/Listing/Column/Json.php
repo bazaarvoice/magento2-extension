@@ -15,8 +15,6 @@ use Magento\Ui\Component\Listing\Columns\Column;
 
 /**
  * Class Json
- *
- * @package Bazaarvoice\Connector\Ui\Component\Listing\Column
  */
 class Json extends Column
 {
