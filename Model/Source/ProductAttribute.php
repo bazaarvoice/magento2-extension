@@ -30,7 +30,8 @@ class ProductAttribute implements OptionSourceInterface
      *
      * @param CollectionFactory $attributeCollectionFactory
      */
-    public function __construct(CollectionFactory $attributeCollectionFactory) {
+    public function __construct(CollectionFactory $attributeCollectionFactory)
+    {
         $this->productAttributeCollectionFactory = $attributeCollectionFactory;
     }
 
@@ -49,11 +50,15 @@ class ProductAttribute implements OptionSourceInterface
             ];
         }
 
-        /** @var AttributeCollection $attributes */
+        /**
+         * @var AttributeCollection $attributes 
+         */
         $attributes = $this->productAttributeCollectionFactory->create();
         $attributes->addFieldToFilter('used_in_product_listing', '1');
 
-        /** @var Attribute $attribute */
+        /**
+         * @var Attribute $attribute 
+         */
         foreach ($attributes as $attribute) {
             $attributeOptions[] = [
                 'label' => $attribute->getFrontendLabel(),

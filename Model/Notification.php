@@ -18,7 +18,9 @@ use Magento\Framework\Notification\MessageInterface;
  */
 class Notification implements MessageInterface
 {
-    /** @var  ScheduleFactory $objectManger */
+    /**
+     * @var ScheduleFactory $objectManger 
+     */
     protected $_scheduleFactory;
 
     /**

@@ -64,7 +64,7 @@ class Product
 
     /**
      * @param \Bazaarvoice\Connector\Model\XMLWriter $writer
-     * @param \Magento\Store\Api\Data\StoreInterface             $store
+     * @param \Magento\Store\Api\Data\StoreInterface $store
      */
     public function processProducts(XMLWriter $writer, StoreInterface $store)
     {
@@ -81,14 +81,16 @@ class Product
     }
 
     /**
-     * @param \Bazaarvoice\Connector\Model\XMLWriter $writer
+     * @param \Bazaarvoice\Connector\Model\XMLWriter                                    $writer
      * @param \Magento\Catalog\Api\Data\ProductInterface|\Magento\Catalog\Model\Product $product
      */
     public function writeProduct(XMLWriter $writer, $product)
     {
         $this->logger->debug('Write product '.$product->getData('product_id'));
 
-        /** Load parent value if product value is blank */
+        /**
+         * Load parent value if product value is blank 
+        */
         if ($product->getData('family') && $this->configProvider->isFamiliesInheritEnabled()) {
             $this->logger->debug('inherit family values');
             $children = $this->indexCollectionFactory->create();
@@ -127,7 +129,8 @@ class Product
 
         foreach ($product->getData() as $key => $value) {
             if (is_string($value)
-                && (substr($value, 0, 1) == '[' || substr($value, 0, 1) == '{')) {
+                && (substr($value, 0, 1) == '[' || substr($value, 0, 1) == '{')
+            ) {
                 $product->setData($key, $this->stringFormatter->jsonDecode($value));
             }
         }

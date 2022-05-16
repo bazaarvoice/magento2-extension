@@ -59,15 +59,19 @@ class Brand
 
     /**
      * @param XMLWriter $writer
-     * @param           $store
+     * @param $store
      *
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function processBrandsForStore(XMLWriter $writer, Store $store)
     {
-        /** Lookup the configured attribute code for "Brand" */
+        /**
+         * Lookup the configured attribute code for "Brand" 
+        */
         $attributeCode = $this->configProvider->getAttributeCode('brand', $store->getId());
-        /** If there is no attribute code for store, then bail */
+        /**
+         * If there is no attribute code for store, then bail 
+        */
         if (!$attributeCode) {
             return;
         }
@@ -90,9 +94,13 @@ class Brand
      */
     public function processBrandsForStoreGroup(XMLWriter $writer, Group $storeGroup)
     {
-        /** Lookup the configured attribute code for "Brand" */
+        /**
+         * Lookup the configured attribute code for "Brand" 
+        */
         $attributeCode = $this->configProvider->getAttributeCode('brand', $storeGroup->getDefaultStore()->getId());
-        /** If there is no attribute code for store, then bail */
+        /**
+         * If there is no attribute code for store, then bail 
+        */
         if (!$attributeCode) {
             return;
         }
@@ -111,9 +119,13 @@ class Brand
      */
     public function processBrandsForWebsite(XMLWriter $writer, Website $website)
     {
-        /** Lookup the configured attribute code for "Brand" */
+        /**
+         * Lookup the configured attribute code for "Brand" 
+        */
         $attributeCode = $this->configProvider->getAttributeCode('brand', $website->getDefaultStore()->getId());
-        /** If there is no attribute code for store, then bail */
+        /**
+         * If there is no attribute code for store, then bail 
+        */
         if (!$attributeCode) {
             return;
         }
@@ -131,22 +143,30 @@ class Brand
      */
     public function processBrandsForGlobal(XMLWriter $writer)
     {
-        /** Lookup the configured attribute code for "Brand" */
+        /**
+         * Lookup the configured attribute code for "Brand" 
+        */
         $attributeCode = $this->configProvider->getAttributeCode('brand');
-        /** If there is no attribute code for store, then bail */
+        /**
+         * If there is no attribute code for store, then bail 
+        */
         if (!$attributeCode) {
             return;
         }
         $storesList = $this->storeManager->getStores();
         $stores = [];
-        /** @var StoreInterface $store */
+        /**
+         * @var StoreInterface $store 
+        */
         foreach ($storesList as $store) {
             if ($this->configProvider->isBvEnabled($store->getId())) {
                 $stores[] = $store->getId();
             }
         }
         $brandsByLocale = $this->getOptionsByLocale($attributeCode, $stores);
-        /** Using admin store for now */
+        /**
+         * Using admin store for now 
+        */
         $store = $this->storeManager->getStore(0);
         $defaultBrands = $this->getOptionsForStore($attributeCode, $store);
         $writer->startElement('Brands');
@@ -206,11 +226,15 @@ class Brand
     protected function getOptionsForStore($code, $store)
     {
         $storeId = $store instanceof Store ? $store->getId() : $store;
-        /** Lookup the attribute options for this store */
+        /**
+         * Lookup the attribute options for this store 
+        */
         $attribute = $this->attribute->loadByCode(\Magento\Catalog\Model\Product::ENTITY, $code);
         $attribute->setStoreId($storeId);
         $attributeOptions = $attribute->getSource()->getAllOptions();
-        /** Reformat array */
+        /**
+         * Reformat array 
+        */
         $processedOptions = [];
         foreach ($attributeOptions as $attributeOption) {
             if (!empty($attributeOption['value'])) {

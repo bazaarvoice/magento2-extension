@@ -221,7 +221,7 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
 
     /**
      * @param \Magento\Catalog\Api\Data\ProductInterface|\Magento\Catalog\Model\Product $product
-     * @param                                                                           $attributeCode
+     * @param $attributeCode
      *
      * @return mixed
      */
@@ -250,8 +250,10 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
             $childProducts = $product->getTypeInstance()
                 ->getUsedProducts($product, [static::EAN, static::ISBN, static::UPC, static::MPN]);
             foreach ($childProducts as $childProduct) {
-                $value = array_merge((array)$value,
-                    (array)$this->getCustomAttributeData($childProduct, $attributeCode));
+                $value = array_merge(
+                    (array)$value,
+                    (array)$this->getCustomAttributeData($childProduct, $attributeCode)
+                );
             }
         }
 
@@ -285,8 +287,10 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
      */
     private function getProductPageUrl($product, $parentProduct = null): string
     {
-        return $this->escaper->escapeUrl($parentProduct ? $parentProduct->getProductUrl()
-            : $product->getProductUrl());
+        return $this->escaper->escapeUrl(
+            $parentProduct ? $parentProduct->getProductUrl()
+            : $product->getProductUrl()
+        );
     }
 
     /**
@@ -344,7 +348,9 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
      */
     private function prepareOutput($object)
     {
-        /** @var \Magento\Framework\Model\AbstractModel $object */
+        /**
+         * @var \Magento\Framework\Model\AbstractModel $object 
+         */
         return $this->stringFormatter->stripEmptyValues($object->getData());
     }
 

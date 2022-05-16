@@ -75,18 +75,18 @@ abstract class Feed
 
         try {
             switch ($this->configProvider->getFeedGenerationScope()) {
-                case Scope::STORE_GROUP:
-                    $this->exportFeedByStoreGroup();
-                    break;
-                case Scope::STORE_VIEW:
-                    $this->exportFeedByStore();
-                    break;
-                case Scope::WEBSITE:
-                    $this->exportFeedByWebsite();
-                    break;
-                case Scope::SCOPE_GLOBAL:
-                    $this->exportFeedByGlobal();
-                    break;
+            case Scope::STORE_GROUP:
+                $this->exportFeedByStoreGroup();
+                break;
+            case Scope::STORE_VIEW:
+                $this->exportFeedByStore();
+                break;
+            case Scope::WEBSITE:
+                $this->exportFeedByWebsite();
+                break;
+            case Scope::SCOPE_GLOBAL:
+                $this->exportFeedByGlobal();
+                break;
             }
         } catch (Exception $e) {
             $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
@@ -102,19 +102,25 @@ abstract class Feed
 
         foreach ($storeGroups as $storeGroup) {
             /* @var \Magento\Store\Model\Group $storeGroup */
-            /** Default store, for config and product data */
+            /**
+             * Default store, for config and product data 
+             */
             $store = $storeGroup->getDefaultStore();
             try {
                 if ($this->force || $this->configProvider->canSendFeed($this->typeId, $store->getId())) {
                     $this->logger->info('Exporting '.$this->typeId.' feed for store group: '.$storeGroup->getName());
                     $this->exportFeedForStoreGroup($storeGroup);
                 } else {
-                    $this->logger->info(ucwords($this->typeId).' feed disabled for store group: '
-                        .$storeGroup->getName());
+                    $this->logger->info(
+                        ucwords($this->typeId).' feed disabled for store group: '
+                        .$storeGroup->getName()
+                    );
                 }
             } catch (Exception $e) {
-                $this->logger->error('Failed to export daily '.$this->typeId.' feed for store group: '
-                    .$storeGroup->getName());
+                $this->logger->error(
+                    'Failed to export daily '.$this->typeId.' feed for store group: '
+                    .$storeGroup->getName()
+                );
                 $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
             }
         }
@@ -267,8 +273,8 @@ abstract class Feed
     }
 
     /**
-     * @param       $sourceFile
-     * @param       $destinationFile
+     * @param $sourceFile
+     * @param $destinationFile
      * @param Store $store
      */
     protected function uploadFeed($sourceFile, $destinationFile, $store = null)
@@ -284,7 +290,9 @@ abstract class Feed
         ];
         $this->logger->debug('Username '.$params['username']);
 
-        /** @var Sftp $sftp */
+        /**
+         * @var Sftp $sftp 
+         */
         $sftp = new Sftp();
         try {
             $sftp->open($params);
@@ -292,7 +300,9 @@ abstract class Feed
             $sftp->close();
             $this->logger->info('File upload result: '.($result ? 'success!' : 'failure.'));
             if ($result) {
-                /** @var \Magento\Framework\Filesystem\Io\File $ioObject */
+                /**
+                 * @var \Magento\Framework\Filesystem\Io\File $ioObject 
+                 */
                 $ioObject = $this->filesystem;
                 $sentFile = dirname($sourceFile).'/sent/'.basename($sourceFile);
                 $ioObject->setAllowCreateFolders(true);

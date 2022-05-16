@@ -62,7 +62,8 @@ class Json extends Column
                 }
                 $valueData = $this->stringFormatter->jsonDecode($item[$fieldName]);
                 if (is_object($valueData) == true
-                    || is_array($valueData) == true) {
+                    || is_array($valueData) == true
+                ) {
                     $html = '';
                     foreach ($valueData as $key => $value) {
                         if (!is_numeric($key)) {

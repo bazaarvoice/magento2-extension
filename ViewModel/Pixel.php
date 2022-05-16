@@ -113,7 +113,9 @@ class Pixel implements ArgumentInterface
      */
     public function getOrderDetails()
     {
-        /** @var \Magento\Sales\Model\Order $order */
+        /**
+         * @var \Magento\Sales\Model\Order $order 
+         */
         $order = $this->checkoutSession->getLastRealOrder();
 
         if ($this->orderDetails) {
@@ -145,7 +147,9 @@ class Pixel implements ArgumentInterface
         }
 
         $this->orderDetails['items'] = [];
-        /** if families are enabled, get all items */
+        /**
+         * if families are enabled, get all items 
+         */
         if ($this->configProvider->isFamiliesEnabled()) {
             $items = $order->getAllItems();
         } else {
@@ -157,9 +161,12 @@ class Pixel implements ArgumentInterface
             } catch (NoSuchEntityException $e) {
                 continue;
             }
-            /** skip configurable items if families are enabled */
+            /**
+             * skip configurable items if families are enabled 
+             */
             if ($this->configProvider->isFamiliesEnabled()
-                && $product->getTypeId() == Configurable::TYPE_CODE) {
+                && $product->getTypeId() == Configurable::TYPE_CODE
+            ) {
                 continue;
             }
 
@@ -167,7 +174,8 @@ class Pixel implements ArgumentInterface
             $itemDetails['productId'] = $this->stringFormatter->getFormattedProductSku($product);
 
             $itemDetails['name'] = $item->getName();
-            /** 'category' is not included.
+            /**
+             * 'category' is not included.
              * Mage products can be in 0 - many categories.
              * Should we try to include it?
              */
@@ -177,7 +185,9 @@ class Pixel implements ArgumentInterface
 
             if ($this->configProvider->isFamiliesEnabled() && $item->getParentItem()) {
                 if (strpos($itemDetails['imageURL'], 'placeholder/image.jpg') !== false) {
-                    /** if product families are enabled and product has no image, use configurable image */
+                    /**
+                     * if product families are enabled and product has no image, use configurable image 
+                     */
                     $parentId = $item->getParentItem()->getProductId();
                     try {
                         $parent = $this->productRepository->getById($parentId);
@@ -185,7 +195,9 @@ class Pixel implements ArgumentInterface
                     } catch (NoSuchEntityException $e) {
                     }
                 }
-                /** also get price from parent item */
+                /**
+                 * also get price from parent item 
+                 */
                 $itemDetails['price'] = number_format((float)$item->getParentItem()->getPrice(), 2, '.', '');
             }
 
@@ -203,18 +215,24 @@ class Pixel implements ArgumentInterface
         $this->orderDetails['nickname'] = $order->getCustomerFirstname()
             ? $order->getCustomerFirstname()
             : ($order->getBillingAddress() ? $order->getBillingAddress()->getFirstname() : '');
-        /** There is no 'deliveryDate' yet */
+        /**
+         * There is no 'deliveryDate' yet 
+         */
         $this->orderDetails['locale'] = $this->configProvider->getLocale($order->getStoreId());
 
-        /** Add partnerSource field */
+        /**
+         * Add partnerSource field 
+         */
         $this->orderDetails['source'] = 'Magento_BV_Extension';
         $this->orderDetails['partnerVersion'] = $this->configProvider->getExtensionVersion();
         $this->orderDetails['partnerSource'] = 'Magento Extension r'.$this->configProvider->getExtensionVersion();
-        $this->orderDetails['deploymentZone'] = strtolower(str_replace(
-            ' ',
-            '_',
-            $this->configProvider->getDeploymentZone()
-        ));
+        $this->orderDetails['deploymentZone'] = strtolower(
+            str_replace(
+                ' ',
+                '_',
+                $this->configProvider->getDeploymentZone()
+            )
+        );
 
         return $this->orderDetails;
     }
