@@ -138,7 +138,6 @@ class UpgradeBvDataAtttribute implements DataPatchInterface, PatchRevertableInte
             'Not applicable to DCC'
         );
     
-         $logger->info("function3");
         $this->encryptPasswordConfig(ScopeConfigInterface::SCOPE_TYPE_DEFAULT);
 
         foreach ($this->storeManager->getWebsites() as $website) {
@@ -150,7 +149,6 @@ class UpgradeBvDataAtttribute implements DataPatchInterface, PatchRevertableInte
         }
 
 
-        $logger->info("function4");
         /** @var CategorySetup $eavSetup */
         $eavSetup = $this->categorySetupFactory->create(['setup' => $this->moduleDataSetup]);
         $entityTypeId = $eavSetup->getEntityTypeId(Product::ENTITY);
