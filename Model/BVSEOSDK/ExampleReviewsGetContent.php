@@ -23,7 +23,7 @@ This is a test page for Reviews: getContent() <br>
 GetContent() will return reviews and aggregate content <br><br>
 
 <div id="BVRRContainer">
-    <?php echo $bv->reviews->getContent(); ?>
+    <?php print_r($bv->reviews->getContent()); ?>
 </div>
 </body>
 </html>

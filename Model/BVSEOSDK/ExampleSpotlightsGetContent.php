@@ -23,7 +23,7 @@ This is a test page for Spotlights: getContent() <br>
 GetContent() will return spotlights content <br><br>
 
 <div id="BVRRContainer">
-    <?php echo $bv->spotlights->getContent(); ?>
+    <?php print_r($bv->spotlights->getContent()); ?>
 </div>
 </body>
 </html>

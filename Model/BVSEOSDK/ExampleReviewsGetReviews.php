@@ -23,7 +23,7 @@ This is a test page for Reviews: getReviews()<br>
 This will return review content<br><br>
 
 <div id="BVRRContainer">
-    <?php echo $bv->reviews->getReviews(); ?>
+    <?php print_r($bv->reviews->getReviews()); ?>
 </div>
 </body>
 </html>

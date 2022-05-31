@@ -25,7 +25,7 @@ This is a test page for Stories: getContent() <br>
 GetContent() will return stories_grid content <br><br>
 
 <div id="BVRRContainer">
-    <?php echo $bv->stories->getContent(); ?>
+    <?php print_r($bv->stories->getContent()); ?>
 </div>
 </body>
 </html>

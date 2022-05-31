@@ -22,7 +22,7 @@ $bv = new \Bazaarvoice\Connector\Model\BVSEOSDK\BV(
 This is a test page for Reviews: getAggregateRating()<br>
 This will return aggregate rating content<br><br>
 <div id="BVRRSummaryContainer">
-    <?php echo $bv->reviews->getAggregateRating(); ?>
+    <?php print_r($bv->reviews->getAggregateRating()); ?>
 </div>
 </body>
 </html>

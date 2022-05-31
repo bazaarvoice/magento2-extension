@@ -23,7 +23,7 @@ This is a test page for SellerRatings: getContent() <br>
 GetContent() will return seller ratings content <br><br>
 
 <div id="BVRRContainer">
-    <?php echo $bv->sellerratings->getContent(); ?>
+    <?php print_r($bv->sellerratings->getContent()); ?>
 </div>
 </body>
 </html>

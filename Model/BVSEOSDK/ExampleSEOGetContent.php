@@ -25,7 +25,7 @@ This is a test page for SEO getContent<br>
 This will return questions and answers content<br><br>
 
 <div id="BVQAContainer">
-    <?php echo $bv->SEO->getContent(); ?>
+    <?php print_r($bv->SEO->getContent()); ?>
 </div>
 
 </body>

@@ -23,7 +23,7 @@ This is a test page for Questions: getContent<br>
 This will return questions and answers content<br><br>
 
 <div id="BVQAContainer">
-    <?php echo $bv->questions->getContent(); ?>
+    <?php print_r($bv->questions->getContent()); ?>
 </div>
 
 </body>
