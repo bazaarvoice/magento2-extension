@@ -12,8 +12,6 @@ use Magento\Framework\App\Config\Value;
 
 /**
  * Class Remote
- *
- * @package Bazaarvoice\Connector\Model\Backend
  */
 class Remote extends Value
 {

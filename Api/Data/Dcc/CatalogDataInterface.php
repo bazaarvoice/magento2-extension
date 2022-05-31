@@ -17,8 +17,8 @@ namespace Bazaarvoice\Connector\Api\Data\Dcc;
 interface CatalogDataInterface
 {
     /**
-     * @param string     $key
-     * @param string|int $index
+     * @param  string     $key
+     * @param  string|int $index
      * @return mixed
      */
     public function getData($key = '', $index = null);

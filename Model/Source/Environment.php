@@ -12,8 +12,6 @@ use Magento\Framework\Data\OptionSourceInterface;
 
 /**
  * Class Environment
- *
- * @package Bazaarvoice\Connector\Model\Source
  */
 class Environment implements OptionSourceInterface
 {

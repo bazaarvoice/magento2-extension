@@ -20,7 +20,9 @@ use Magento\Backend\App\Action\Context;
 class Runpurchase extends Action
 {
 
-    /** @var  PurchaseFeed $purchaseFeed */
+    /**
+     * @var PurchaseFeed $purchaseFeed 
+     */
     protected $purchaseFeed;
 
     /**

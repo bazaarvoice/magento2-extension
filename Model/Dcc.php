@@ -18,8 +18,6 @@ use Magento\Framework\Exception\NoSuchEntityException;
 
 /**
  * Class Builder
- *
- * @package Bazaarvoice\Connector\Model\Dcc
  */
 class Dcc extends DataObject implements DccInterface
 {
@@ -115,8 +113,10 @@ class Dcc extends DataObject implements DccInterface
 
             return $this->currentProductProvider->getProduct();
         } catch (NoSuchEntityException $e) {
-            $this->logger->critical("Product does not exist. ID: $productId and store: $storeId. "
-                ."Error: {$e->getTraceAsString()}");
+            $this->logger->critical(
+                "Product does not exist. ID: $productId and store: $storeId. "
+                ."Error: {$e->getTraceAsString()}"
+            );
         }
 
         return false;

@@ -17,8 +17,6 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Class BuilderTest
- *
- * @package Bazaarvoice\Connector\Test\Unit\Model\Dcc
  */
 class DccTest extends TestCase
 {
@@ -29,7 +27,9 @@ class DccTest extends TestCase
 
     public function testBuildProductDoesNotExistEmptyResult()
     {
-        /** @var \Bazaarvoice\Connector\Model\Dcc $dcc */
+        /**
+         * @var \Bazaarvoice\Connector\Model\Dcc $dcc 
+         */
 
         $className = Dcc::class;
         $arguments = $this->objectManager->getConstructArguments($className);
@@ -41,7 +41,9 @@ class DccTest extends TestCase
 
     public function testBuildProductExistsSomeResult()
     {
-        /** @var \Bazaarvoice\Connector\Model\Dcc $dcc */
+        /**
+         * @var \Bazaarvoice\Connector\Model\Dcc $dcc 
+         */
 
         $currentProductProviderMock = $this->createPartialMock(CurrentProductProvider::class, ['getProduct']);
         $productMock = $this->getMockBuilder(ProductInterface::class)

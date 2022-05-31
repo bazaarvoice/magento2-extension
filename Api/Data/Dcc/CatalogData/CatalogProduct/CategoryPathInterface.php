@@ -17,8 +17,8 @@ namespace Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProduct;
 interface CategoryPathInterface
 {
     /**
-     * @param string     $key
-     * @param string|int $index
+     * @param  string     $key
+     * @param  string|int $index
      * @return mixed
      */
     public function getData($key = '', $index = null);

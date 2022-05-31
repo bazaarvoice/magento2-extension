@@ -17,8 +17,6 @@ use Magento\Framework\Escaper;
 
 /**
  * Class CategoryPathBuilder
- *
- * @package Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProduct
  */
 class CategoryPathBuilder implements CategoryPathBuilderInterface
 {

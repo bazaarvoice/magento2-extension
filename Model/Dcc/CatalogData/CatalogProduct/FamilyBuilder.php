@@ -15,8 +15,6 @@ use Bazaarvoice\Connector\Api\StringFormatterInterface;
 
 /**
  * Class FamilyBuilder
- *
- * @package Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProduct
  */
 class FamilyBuilder implements FamilyBuilderInterface
 {

@@ -1,70 +1,87 @@
 
-define([
+define(
+    [
     'jquery',
     'Magento_Ui/js/modal/alert',
     'jquery/ui'
-], function ($, alert) {
-    'use strict';
+    ], function ($, alert) {
+        'use strict';
 
-    $.widget('mage.testConnection', {
-        options: {
-            url: '',
-            elementId: '',
-            successText: '',
-            failedText: '',
-            fieldMapping: ''
-        },
+        $.widget(
+            'mage.testConnection', {
+                options: {
+                    url: '',
+                    elementId: '',
+                    successText: '',
+                    failedText: '',
+                    fieldMapping: ''
+                },
 
-        /**
-         * Bind handlers to events
-         */
-        _create: function () {
-            this._on({
-                'click': $.proxy(this._connect, this)
-            });
-        },
+                /**
+                 * Bind handlers to events
+                 */
+                _create: function () {
+                    this._on(
+                        {
+                            'click': $.proxy(this._connect, this)
+                        }
+                    );
+                },
 
-        /**
-         * Method triggers an AJAX request to check SFTP connection
-         * @private
-         */
-        _connect: function () {
-            var result = this.options.failedText,
-                element =  $('#' + this.options.elementId),
-                self = this,
-                params = {},
-                msg = '',
-                fieldToCheck = this.options.fieldToCheck || 'success';
+                /**
+                 * Method triggers an AJAX request to check SFTP connection
+                 *
+                 * @private
+                 */
+                _connect: function () {
+                    var result = this.options.failedText,
+                    element =  $('#' + this.options.elementId),
+                    self = this,
+                    params = {},
+                    msg = '',
+                    fieldToCheck = this.options.fieldToCheck || 'success';
 
-            element.removeClass('success').addClass('fail');
-            console.log($.parseJSON(this.options.fieldMapping));
-            $.each($.parseJSON(this.options.fieldMapping), function (key, el) {
-                params[key] = $('#' + el).val();
-            });
-            console.log(params);
-            $.ajax({
-                url: this.options.url,
-                showLoader: true,
-                data: params,
-                headers: this.options.headers || {}
-            }).done(function (response) {
-                if (response[fieldToCheck]) {
-                    element.removeClass('fail').addClass('success');
-                    result = self.options.successText;
-                } else {
-                    msg = response.errorMessage;
+                    element.removeClass('success').addClass('fail');
+                    console.log($.parseJSON(this.options.fieldMapping));
+                    $.each(
+                        $.parseJSON(this.options.fieldMapping), function (key, el) {
+                            params[key] = $('#' + el).val();
+                        }
+                    );
+                    console.log(params);
+                    $.ajax(
+                        {
+                            url: this.options.url,
+                            showLoader: true,
+                            data: params,
+                            headers: this.options.headers || {}
+                        }
+                    ).done(
+                        function (response) {
+                            if (response[fieldToCheck]) {
+                                element.removeClass('fail').addClass('success');
+                                result = self.options.successText;
+                            } else {
+                                msg = response.errorMessage;
 
-                    if (msg) {
-                        alert({
-                            content: msg
-                        });
-                    }
+                                if (msg) {
+                                    alert(
+                                        {
+                                            content: msg
+                                        }
+                                    );
+                                }
+                            }
+                        }
+                    ).always(
+                        function () {
+                            $('#' + self.options.elementId + '_result').text(result);
+                        }
+                    );
                 }
-            }).always(function () {
-                $('#' + self.options.elementId + '_result').text(result);
-            });
-        }
-    });
+            }
+        );
 
-    return $.mage.testConnection;
-});
+        return $.mage.testConnection;
+    }
+);

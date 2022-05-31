@@ -14,8 +14,6 @@ use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 
 /**
  * Class Collection
- *
- * @package Bazaarvoice\Connector\Model\ResourceModel\Index
  */
 class Collection extends AbstractCollection
 {

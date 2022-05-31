@@ -12,8 +12,6 @@ use Magento\Framework\Data\OptionSourceInterface;
 
 /**
  * Class SftpHost
- *
- * @package Bazaarvoice\Connector\Model\Source
  */
 class SftpHost implements OptionSourceInterface
 {

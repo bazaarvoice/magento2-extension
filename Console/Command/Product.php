@@ -21,7 +21,9 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Product extends Command
 {
-    /** @var ProductFeed $_productFeed */
+    /**
+     * @var ProductFeed $_productFeed 
+     */
     protected $_productFeed;
 
     /**

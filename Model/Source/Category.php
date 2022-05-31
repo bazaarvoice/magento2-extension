@@ -16,8 +16,6 @@ use Magento\Framework\Exception\LocalizedException;
 
 /**
  * Class Category
- *
- * @package Bazaarvoice\Connector\Model\Source
  */
 class Category extends AbstractSource
 {
@@ -94,7 +92,9 @@ class Category extends AbstractSource
             $this->categories = [];
             $this->categoryCollection->addAttributeToSelect('name');
             $this->categoryCollection->addAttributeToFilter('level', ['gt' => 1]);
-            /** @var \Magento\Catalog\Model\Category $category */
+            /**
+             * @var \Magento\Catalog\Model\Category $category 
+             */
             foreach ($this->categoryCollection as $category) {
                 $names = [];
                 foreach ($category->getParentCategories() as $parent) {

@@ -26,7 +26,9 @@ class Button extends Field
      */
     protected function _getElementHtml(AbstractElement $element)
     {
-        /** @var \Magento\Backend\Block\Widget\Button $buttonBlock */
+        /**
+         * @var \Magento\Backend\Block\Widget\Button $buttonBlock 
+        */
         $buttonBlock = $this->getForm()->getLayout()->createBlock(\Magento\Backend\Block\Widget\Button::class);
 
         $originalData = $element->getOriginalData();
