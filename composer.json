@@ -1,6 +1,6 @@
 {
   "name": "bazaarvoice/bazaarvoice-magento2-ext",
-  "description": "Bazaarvoice Magento 2 Integration Extension",
+  "description": "Bazaarvoice Magento 2 Integration Extension.",
   "type": "magento2-module",
   "license": [
     "MIT"
