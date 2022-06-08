@@ -20,7 +20,7 @@ class XMLWriter extends \XMLWriter
      * @param null   $content
      * @param bool   $cdata
      *
-     * @return bool|void
+     * @return bool|void 
      */
     public function writeElement($name, $content = null, $cdata = false): bool
     {
