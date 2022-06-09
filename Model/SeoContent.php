@@ -17,8 +17,6 @@ use Magento\Framework\UrlInterface;
 
 /**
  * Class SeoContent
- *
- * @package Bazaarvoice\Connector\Model
  */
 class SeoContent
 {
@@ -157,7 +155,9 @@ class SeoContent
      */
     private function getParams()
     {
-        /** Check if admin has configured a legacy display code */
+        /**
+         * Check if admin has configured a legacy display code 
+         */
         if ($this->configProvider->getLegacyDisplayCode()) {
             $deploymentZoneId
                 = $this->configProvider->getLegacyDisplayCode().
@@ -184,11 +184,17 @@ class SeoContent
         $params = [
             'seo_sdk_enabled' => true,
             'bv_root_folder'  => $deploymentZoneId,
-            /** replace with your display code (BV provided) */
+            /**
+             * replace with your display code (BV provided) 
+             */
             'subject_id'      => $this->stringFormatter->getFormattedProductSku($product),
-            /** replace with product id */
+            /**
+             * replace with product id 
+             */
             'cloud_key'       => $this->configProvider->getCloudSeoKey(),
-            /** BV provided value */
+            /**
+             * BV provided value 
+             */
             'base_url'        => $baseUrl,
             'page_url'        => $productUrl,
             'staging'         => ($this->configProvider->getEnvironment() == Environment::STAGING ? true : false),

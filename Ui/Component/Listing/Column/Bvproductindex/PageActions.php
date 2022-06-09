@@ -12,8 +12,6 @@ use Magento\Ui\Component\Listing\Columns\Column;
 
 /**
  * Class PageActions
- *
- * @package Bazaarvoice\Connector\Ui\Component\Listing\Column\Bvproductindex
  */
 class PageActions extends Column
 {

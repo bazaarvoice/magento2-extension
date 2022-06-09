@@ -20,7 +20,9 @@ use Bazaarvoice\Connector\Model\Feed\PurchaseFeed;
  */
 class Cron
 {
-    /** @var Logger $logger */
+    /**
+     * @var Logger $logger 
+     */
     private $logger;
 
     const JOB_CODE = 'bazaarvoice_send_orders';

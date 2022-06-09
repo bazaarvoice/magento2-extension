@@ -15,8 +15,6 @@ use Magento\Ui\Component\Listing\Columns\Column;
 
 /**
  * Class Json
- *
- * @package Bazaarvoice\Connector\Ui\Component\Listing\Column
  */
 class Json extends Column
 {
@@ -62,7 +60,8 @@ class Json extends Column
                 }
                 $valueData = $this->stringFormatter->jsonDecode($item[$fieldName]);
                 if (is_object($valueData) == true
-                    || is_array($valueData) == true) {
+                    || is_array($valueData) == true
+                ) {
                     $html = '';
                     foreach ($valueData as $key => $value) {
                         if (!is_numeric($key)) {

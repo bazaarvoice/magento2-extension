@@ -17,8 +17,6 @@ use Magento\Framework\Registry;
 
 /**
  * Class GetCurrentProductService
- *
- * @package Bazaarvoice\Connector\Service
  */
 class CurrentProductProvider
 {

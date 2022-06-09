@@ -10,8 +10,6 @@ namespace Bazaarvoice\Connector\Model\Filesystem\Io;
 
 /**
  * Class Sftp
- *
- * @package Bazaarvoice\Connector\Model\Filesystem\Io
  */
 class Sftp extends \Magento\Framework\Filesystem\Io\Sftp
 {
@@ -23,8 +21,8 @@ class Sftp extends \Magento\Framework\Filesystem\Io\Sftp
     /**
      * Fixes Magento 2.1 phpseclib notice.
      *
-     * @param      $filename
-     * @param      $source
+     * @param $filename
+     * @param $source
      * @param null $mode
      *
      * @return mixed

@@ -65,11 +65,25 @@ class Version extends Value
      */
     public function getModuleVersion()
     {
-        /** @var string $composerJsonData */
-        /** @var string[] $data */
-        /** @var ReadInterface $directoryRead */
-        /** @var null|string $path */
-        /** @var string $version */
+        /**
+         * @var string $composerJsonData 
+         */
+
+        /**
+         * @var string[] $data 
+         */
+
+        /**
+         * @var ReadInterface $directoryRead 
+         */
+
+        /**
+         * @var null|string $path 
+         */
+
+        /**
+         * @var string $version 
+         */
 
         $path = $this->componentRegistrar->getPath(
             \Magento\Framework\Component\ComponentRegistrar::MODULE,

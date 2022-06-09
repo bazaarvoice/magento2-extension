@@ -19,8 +19,6 @@ use Magento\Framework\Registry;
 
 /**
  * Class Index
- *
- * @package Bazaarvoice\Connector\Model
  */
 class Index extends AbstractModel implements IndexInterface
 {
@@ -57,8 +55,8 @@ class Index extends AbstractModel implements IndexInterface
     }
 
     /**
-     * @param      $productId
-     * @param      $storeId
+     * @param $productId
+     * @param $storeId
      * @param null $scope
      *
      * @return $this|\Bazaarvoice\Connector\Api\Data\IndexInterface
@@ -76,13 +74,17 @@ class Index extends AbstractModel implements IndexInterface
 
         $scope = $scope ?: $this->configProvider->getFeedGenerationScope();
 
-        /** @var ResourceModel\Index $resource */
+        /**
+         * @var ResourceModel\Index $resource 
+         */
         $resource = $this->getResource();
-        $index = $resource->loadBy([
+        $index = $resource->loadBy(
+            [
             'product_id' => $productId,
             'scope'      => $scope,
             'store_id'   => $storeId,
-        ]);
+            ]
+        );
 
         if ($index) {
             $this->setData($index);

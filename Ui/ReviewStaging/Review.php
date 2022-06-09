@@ -12,8 +12,6 @@ use Magento\Catalog\Ui\DataProvider\Product\Form\Modifier\AbstractModifier;
 
 /**
  * Class Review
- *
- * @package Bazaarvoice\Connector\Ui\ReviewStaging
  */
 class Review extends AbstractModifier
 {

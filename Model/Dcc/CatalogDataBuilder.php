@@ -117,7 +117,9 @@ class CatalogDataBuilder implements CatalogDataBuilderInterface
      */
     private function prepareOutput($object)
     {
-        /** @var \Magento\Framework\Model\AbstractModel $object */
+        /**
+         * @var \Magento\Framework\Model\AbstractModel $object 
+         */
         return $this->stringFormatter->stripEmptyValues($object->getData());
     }
 }

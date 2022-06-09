@@ -21,8 +21,6 @@ use Magento\Framework\Exception\NoSuchEntityException;
 
 /**
  * Class IndexRepository
- *
- * @package Bazaarvoice\Connector\Model
  */
 class IndexRepository implements IndexRepositoryInterface
 {
@@ -74,7 +72,9 @@ class IndexRepository implements IndexRepositoryInterface
     public function save(IndexInterface $object)
     {
         try {
-            /** @noinspection PhpParamsInspection */
+            /**
+             * @noinspection PhpParamsInspection 
+             */
             $this->resourceModel->save($object);
         } catch (Exception $e) {
             throw new CouldNotSaveException(__($e->getMessage()));
@@ -104,7 +104,9 @@ class IndexRepository implements IndexRepositoryInterface
     public function delete(IndexInterface $object)
     {
         try {
-            /** @noinspection PhpParamsInspection */
+            /**
+             * @noinspection PhpParamsInspection 
+             */
             $this->resourceModel->delete($object);
         } catch (Exception $exception) {
             throw new CouldNotDeleteException(__($exception->getMessage()));
@@ -124,10 +126,12 @@ class IndexRepository implements IndexRepositoryInterface
         $object = $this->objectFactory->create();
         $object->load($id);
         if (!$object->getId()) {
-            throw new NoSuchEntityException(__(
-                'Object with id "%1" does not exist.',
-                $id
-            ));
+            throw new NoSuchEntityException(
+                __(
+                    'Object with id "%1" does not exist.',
+                    $id
+                )
+            );
         }
 
         return $object;
@@ -168,7 +172,9 @@ class IndexRepository implements IndexRepositoryInterface
         $searchResults->setTotalCount($collection->getSize());
         $sortOrders = $criteria->getSortOrders();
         if ($sortOrders) {
-            /** @var SortOrder $sortOrder */
+            /**
+             * @var SortOrder $sortOrder 
+             */
             foreach ($sortOrders as $sortOrder) {
                 $collection->addOrder(
                     $sortOrder->getField(),
@@ -202,12 +208,14 @@ class IndexRepository implements IndexRepositoryInterface
         $object = $this->objectFactory->create();
         $object->loadByStore($productId, $storeId, $scope);
         if (!$object->getId()) {
-            throw new NoSuchEntityException(__(
-                'Object with product ID "%1", store ID "%2", scope "%3" does not exist.',
-                $productId,
-                $storeId,
-                $scope
-            ));
+            throw new NoSuchEntityException(
+                __(
+                    'Object with product ID "%1", store ID "%2", scope "%3" does not exist.',
+                    $productId,
+                    $storeId,
+                    $scope
+                )
+            );
         }
 
         return $object;

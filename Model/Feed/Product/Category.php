@@ -126,7 +126,9 @@ class Category
         ksort($storesList);
         $stores = [];
         $defaultStore = null;
-        /** @var StoreInterface $store */
+        /**
+         * @var StoreInterface $store 
+        */
         foreach ($storesList as $store) {
             if ($this->configProvider->canSendProductFeed($store->getId())) {
                 $stores[] = $store->getId();
@@ -151,7 +153,9 @@ class Category
 
         $baseUrl = $defaultStore->getBaseUrl();
         $categories = [];
-        /** @var \Magento\Catalog\Model\Category $category */
+        /**
+         * @var \Magento\Catalog\Model\Category $category 
+        */
         foreach ($defaultCollection as $category) {
             $categories[$category->getId()] = [
                 'url'        => $this->getStoreUrl($baseUrl, $category->getUrlPath()),
@@ -165,15 +169,21 @@ class Category
         unset($defaultCollection);
 
         if (is_array($localeStores) && !empty($localeStores[$defaultStore->getId()])) {
-            /** get localized data */
+            /**
+             * get localized data 
+            */
             foreach ($localeStores[$defaultStore->getId()] as $localeCode => $localeStore) {
-                /** @var Store $localeStore */
+                /**
+                 * @var Store $localeStore 
+                */
                 $localeBaseUrl = $localeStore->getBaseUrl();
                 $localeStoreCode = $localeStore->getCode();
                 $localeCollection = $this->getCategoryCollection($localeStore);
                 $localeCode = $this->configProvider->getLocale($localeStore->getId());
                 foreach ($localeCollection as $category) {
-                    /** Skip categories not in main store */
+                    /**
+                     * Skip categories not in main store 
+                    */
                     if (!isset($categories[$category->getId()])) {
                         continue;
                     }
@@ -190,11 +200,15 @@ class Category
             }
         }
 
-        /** Check count of categories */
+        /**
+         * Check count of categories 
+        */
         if (count($categories) > 0) {
             $writer->startElement('Categories');
         }
-        /** @var array $category */
+        /**
+         * @var array $category 
+        */
         foreach ($categories as $category) {
             if (!empty($category['parent_id'])
                 && $category['parent_id'] != $defaultStore->getRootCategoryId()
@@ -220,7 +234,9 @@ class Category
         $writer->startElement('Category');
         $writer->writeElement('ExternalId', $category['externalId']);
 
-        /** If parent category is the root category, then ignore it */
+        /**
+         * If parent category is the root category, then ignore it 
+        */
         if (isset($category['parent'])) {
             $writer->writeElement('ParentExternalId', $category['parent']);
         }
@@ -228,7 +244,9 @@ class Category
         $writer->writeElement('Name', htmlspecialchars($category['name'], ENT_QUOTES, 'UTF-8', false), true);
         $writer->writeElement('CategoryPageUrl', htmlspecialchars($category['url'], ENT_QUOTES, 'UTF-8', false), true);
 
-        /** Write out localized <Names> */
+        /**
+         * Write out localized <Names> 
+        */
         if (is_array($category['names']) && !empty($category['names'])) {
             $writer->startElement('Names');
             foreach ($category['names'] as $locale => $name) {
@@ -241,7 +259,9 @@ class Category
         }
 
         if (is_array($category['urls']) && !empty($category['urls'])) {
-            /** Write out localized <CategoryPageUrls> */
+            /**
+             * Write out localized <CategoryPageUrls> 
+            */
             $writer->startElement('CategoryPageUrls');
             foreach ($category['urls'] as $locale => $url) {
                 $writer->startElement('CategoryPageUrl');
@@ -284,7 +304,9 @@ class Category
      */
     protected function getCategoryCollection($store = null)
     {
-        /** @var \Magento\Catalog\Model\ResourceModel\Category\Collection $collection */
+        /**
+         * @var \Magento\Catalog\Model\ResourceModel\Category\Collection $collection 
+        */
         $collection = $this->categoryFactory->create()->getCollection();
 
         /**

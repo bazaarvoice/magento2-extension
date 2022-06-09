@@ -4,7 +4,9 @@
  * See LICENSE.md for license details.
  */
 
-/** @noinspection DuplicatedCode */
+/**
+ * @noinspection DuplicatedCode 
+ */
 declare(strict_types=1);
 
 namespace Bazaarvoice\Connector\Model\Indexer;
@@ -159,7 +161,9 @@ class Eav implements IndexerActionInterface, MviewActionInterface
      */
     public function executeFull()
     {
-        /** @var Collection $incompleteIndex */
+        /**
+         * @var Collection $incompleteIndex 
+         */
 
         if (!$this->canIndex()) {
             return false;
@@ -187,13 +191,15 @@ class Eav implements IndexerActionInterface, MviewActionInterface
     /**
      * Update a batch of index rows
      *
-     * @param \int[] $ids
+     * @param  \int[] $ids
      * @return mixed
      * @throws \Exception
      */
     public function execute($ids = [])
     {
-        /** @var $idCollection \Bazaarvoice\Connector\Model\ResourceModel\Index\Collection */
+        /**
+         * @var $idCollection \Bazaarvoice\Connector\Model\ResourceModel\Index\Collection 
+         */
 
         if (!$this->canIndex()) {
             return false;
@@ -210,10 +216,14 @@ class Eav implements IndexerActionInterface, MviewActionInterface
 
             $this->logger->debug('Found '.count($ids).' products to update.');
 
-            /** Break ids into pages */
+            /**
+             * Break ids into pages 
+             */
             $productIdSets = array_chunk($ids, 50);
 
-            /** Time throttling */
+            /**
+             * Time throttling 
+             */
             $limit = ($this->configProvider->getCronjobDurationLimit() * 60) - 10;
             $stop = time() + $limit;
             $counter = 0;
@@ -259,54 +269,60 @@ class Eav implements IndexerActionInterface, MviewActionInterface
     protected function reindexProducts(array $productIds)
     {
         switch ($this->configProvider->getFeedGenerationScope()) {
-            case Scope::SCOPE_GLOBAL:
-                $store = $this->storeManager->getStore(Store::DEFAULT_STORE_ID);
-                if ($this->configProvider->canSendProductFeed($store->getId())) {
-                    $this->reindexProductsForStore($productIds, $store);
-                    break;
-                }
+        case Scope::SCOPE_GLOBAL:
+            $store = $this->storeManager->getStore(Store::DEFAULT_STORE_ID);
+            if ($this->configProvider->canSendProductFeed($store->getId())) {
+                $this->reindexProductsForStore($productIds, $store);
                 break;
-            case Scope::WEBSITE:
-                $websites = $this->storeManager->getWebsites();
-                /** @var \Magento\Store\Model\Website $website */
-                foreach ($websites as $website) {
-                    $defaultStore = $website->getDefaultStore();
-                    if ($defaultStore->getId()) {
-                        if ($this->configProvider->canSendProductFeed($defaultStore->getId())) {
-                            $this->reindexProductsForStore($productIds, $defaultStore);
-                        }
-                    } else {
-                        throw new NoSuchEntityException(__('Website %s has no default store!', $website->getCode()));
+            }
+            break;
+        case Scope::WEBSITE:
+            $websites = $this->storeManager->getWebsites();
+            /**
+             * @var \Magento\Store\Model\Website $website 
+             */
+            foreach ($websites as $website) {
+                $defaultStore = $website->getDefaultStore();
+                if ($defaultStore->getId()) {
+                    if ($this->configProvider->canSendProductFeed($defaultStore->getId())) {
+                        $this->reindexProductsForStore($productIds, $defaultStore);
                     }
+                } else {
+                    throw new NoSuchEntityException(__('Website %s has no default store!', $website->getCode()));
                 }
-                break;
-            case Scope::STORE_GROUP:
-                $groups = $this->storeManager->getGroups();
-                /** @var \Magento\Store\Model\Group $group */
-                foreach ($groups as $group) {
-                    $defaultStore = $group->getDefaultStore();
-                    if ($defaultStore->getId()) {
-                        if ($this->configProvider->canSendProductFeed($defaultStore->getId())) {
-                            $this->reindexProductsForStore($productIds, $defaultStore);
-                        }
-                    } else {
-                        throw new NoSuchEntityException(__('Store Group %s has no default store!', $group->getName()));
+            }
+            break;
+        case Scope::STORE_GROUP:
+            $groups = $this->storeManager->getGroups();
+            /**
+             * @var \Magento\Store\Model\Group $group 
+             */
+            foreach ($groups as $group) {
+                $defaultStore = $group->getDefaultStore();
+                if ($defaultStore->getId()) {
+                    if ($this->configProvider->canSendProductFeed($defaultStore->getId())) {
+                        $this->reindexProductsForStore($productIds, $defaultStore);
                     }
+                } else {
+                    throw new NoSuchEntityException(__('Store Group %s has no default store!', $group->getName()));
                 }
-                break;
-            case Scope::STORE_VIEW:
-                $stores = $this->storeManager->getStores();
-                /** @var \Magento\Store\Model\Store $store */
-                foreach ($stores as $store) {
-                    if ($store->getId()) {
-                        if ($this->configProvider->canSendProductFeed($store->getId())) {
-                            $this->reindexProductsForStore($productIds, $store);
-                        }
-                    } else {
-                        throw new NoSuchEntityException(__('Store %s not found!', $store->getCode()));
+            }
+            break;
+        case Scope::STORE_VIEW:
+            $stores = $this->storeManager->getStores();
+            /**
+             * @var \Magento\Store\Model\Store $store 
+             */
+            foreach ($stores as $store) {
+                if ($store->getId()) {
+                    if ($this->configProvider->canSendProductFeed($store->getId())) {
+                        $this->reindexProductsForStore($productIds, $store);
                     }
+                } else {
+                    throw new NoSuchEntityException(__('Store %s not found!', $store->getCode()));
                 }
-                break;
+            }
+            break;
         }
         $this->_purgeUnversioned($productIds);
     }
@@ -320,28 +336,38 @@ class Eav implements IndexerActionInterface, MviewActionInterface
     protected function flushIndex()
     {
         $this->canIndex();
-        /** Set indexer to use mview */
+        /**
+         * Set indexer to use mview 
+         */
         $this->indexer->setScheduled(true);
 
         $writeAdapter = $this->resourceConnection->getConnection('core_write');
 
-        /** Flush all old data */
+        /**
+         * Flush all old data 
+         */
         $indexTable = $this->resourceConnection->getTableName('bazaarvoice_index_product');
         $writeAdapter->truncateTable($indexTable);
         $changelogTable = $this->resourceConnection->getTableName('bazaarvoice_product_cl');
         $writeAdapter->truncateTable($changelogTable);
 
-        /** Setup dummy rows */
+        /**
+         * Setup dummy rows 
+         */
         $productTable = $this->resourceConnection->getTableName('catalog_product_entity');
         $writeAdapter->query("INSERT INTO `$indexTable` (`product_id`, `version_id`) SELECT DISTINCT `entity_id`, '0' FROM `$productTable`;");
         $writeAdapter->query("INSERT INTO `$changelogTable` (`entity_id`) SELECT DISTINCT `entity_id` FROM `$productTable`;");
 
-        /** Reset mview version */
+        /**
+         * Reset mview version 
+         */
         $mviewTable = $this->resourceConnection->getTableName('mview_state');
         $writeAdapter->query("UPDATE `$mviewTable` SET `version_id` = NULL, `status` = 'idle' WHERE `view_id` = 'bazaarvoice_product';");
         $indexCheck = $writeAdapter
-            ->query("SELECT COUNT(1) indexIsThere FROM INFORMATION_SCHEMA.STATISTICS
-                    WHERE table_schema=DATABASE() AND table_name='$changelogTable' AND index_name='entity_id';");
+            ->query(
+                "SELECT COUNT(1) indexIsThere FROM INFORMATION_SCHEMA.STATISTICS
+                    WHERE table_schema=DATABASE() AND table_name='$changelogTable' AND index_name='entity_id';"
+            );
         $indexCheck = $indexCheck->fetchObject();
         if ($indexCheck->indexIsThere == 0) {
             $writeAdapter->query("ALTER TABLE `$changelogTable` ADD INDEX (`entity_id`);");
@@ -366,7 +392,7 @@ class Eav implements IndexerActionInterface, MviewActionInterface
     }
 
     /**
-     * @param       $productIds
+     * @param $productIds
      * @param Store $store
      *
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -463,7 +489,9 @@ class Eav implements IndexerActionInterface, MviewActionInterface
             }
         }
 
-        /** Version */
+        /**
+         * Version 
+         */
         $select->joinLeft(
             ['cl' => $res->getTableName('bazaarvoice_product_cl')],
             'cl.entity_id = p.entity_id',
@@ -509,7 +537,9 @@ class Eav implements IndexerActionInterface, MviewActionInterface
                 $indexData['parent_category_external_id'] = $indexData['bv_parent_category_external_id'];
             }
 
-            /** Use parent URLs/categories if appropriate */
+            /**
+             * Use parent URLs/categories if appropriate 
+             */
             if ($indexData['visibility'] == Visibility::VISIBILITY_NOT_VISIBLE) {
                 $this->logger->debug('Not visible');
                 if (!empty($indexData['parent_url'])) {
@@ -540,7 +570,9 @@ class Eav implements IndexerActionInterface, MviewActionInterface
             }
             $standardUrl = $this->getStandardUrl($indexData['product_id']);
 
-            /** Add Store base to URLs */
+            /**
+             * Add Store base to URLs 
+             */
             if ($storeId == Store::DEFAULT_STORE_ID) {
                 $urlStore = $this->storeManager->getStore($indexData['url_store_id']);
                 $indexData['product_page_url'] = $this->getStoreUrl(
@@ -570,7 +602,9 @@ class Eav implements IndexerActionInterface, MviewActionInterface
                 }
             }
 
-            /** @var \Bazaarvoice\Connector\Model\Index $index */
+            /**
+             * @var \Bazaarvoice\Connector\Model\Index $index 
+             */
             $index = $this->bvIndexFactory->create();
             $index->setData($indexData);
             $this->productIndexes[] = $index;
@@ -592,9 +626,13 @@ class Eav implements IndexerActionInterface, MviewActionInterface
             $res = $this->resourceConnection;
             $read = $res->getConnection('core_read');
 
-            /** @var Store $localeStore */
+            /**
+             * @var Store $localeStore 
+             */
             foreach ($locales[$storeId] as $locale => $localeStore) {
-                /** Core Data  */
+                /**
+                 * Core Data  
+                 */
                 $select = $this->getBaseSelect($read, $localeStore, $res);
 
                 $this->joinParent($select, $localeStore->getId(), $res);
@@ -609,16 +647,21 @@ class Eav implements IndexerActionInterface, MviewActionInterface
                 try {
                     $rows = $select->query();
                     while (($indexData = $rows->fetch()) !== false) {
-                        /** @var Index $productIndex */
+                        /**
+                         * @var Index $productIndex 
+                         */
 
                         foreach ($this->productIndexes as $productIndex) {
                             if ($productIndex->getData('product_id') == $indexData['product_id']
-                                && $productIndex->getData('store_id') == $storeId) {
+                                && $productIndex->getData('store_id') == $storeId
+                            ) {
                                 break;
                             }
                         }
 
-                        /** Use parent URLs/categories if appropriate */
+                        /**
+                         * Use parent URLs/categories if appropriate 
+                         */
                         if ($indexData['visibility'] == Visibility::VISIBILITY_NOT_VISIBLE) {
                             $this->logger->debug('Locale not visible');
                             if (!empty($indexData['parent_url'])) {
@@ -630,7 +673,9 @@ class Eav implements IndexerActionInterface, MviewActionInterface
                             }
                         }
 
-                        /** @var Store $localeStore */
+                        /**
+                         * @var Store $localeStore 
+                         */
                         if ($storeId == Store::DEFAULT_STORE_ID && $localeStore->getId() == Store::DEFAULT_STORE_ID) {
                             $urlStore = $this->storeManager->getStore($indexData['url_store_id']);
                             $urlPath = $indexData['product_page_url'] ?? $this->getStandardUrl($indexData['product_id']);
@@ -680,8 +725,8 @@ class Eav implements IndexerActionInterface, MviewActionInterface
     }
 
     /**
-     * @param                                           $read
-     * @param                                           $store
+     * @param $read
+     * @param $store
      * @param \Magento\Framework\App\ResourceConnection $res
      *
      * @return mixed
@@ -713,7 +758,7 @@ class Eav implements IndexerActionInterface, MviewActionInterface
 
     /**
      * @param \Magento\Framework\DB\Select              $select
-     * @param                                           $storeId
+     * @param $storeId
      * @param \Magento\Framework\App\ResourceConnection $res
      *
      * @return void
@@ -764,25 +809,31 @@ class Eav implements IndexerActionInterface, MviewActionInterface
 
     /**
      * @param \Magento\Framework\DB\Select              $select
-     * @param                                           $storeId
+     * @param $storeId
      * @param \Magento\Framework\App\ResourceConnection $res
      *
      * @return void
      */
     private function joinUrlRewrite(Select $select, $storeId, ResourceConnection $res): void
     {
-        /** urls */
+        /**
+         * urls 
+         */
         if ($storeId == Store::DEFAULT_STORE_ID) {
             $select
                 ->joinLeft(
-                    ['url' => new Zend_Db_Expr("(select min(store_id) as url_store_id, entity_id, request_path
-                    from `url_rewrite` where metadata is null and entity_type = 'product' group by entity_id)")],
+                    ['url' => new Zend_Db_Expr(
+                        "(select min(store_id) as url_store_id, entity_id, request_path
+                    from `url_rewrite` where metadata is null and entity_type = 'product' group by entity_id)"
+                    )],
                     "url.entity_id = p.entity_id",
                     ['product_page_url' => 'url.request_path', 'url_store_id' => 'url_store_id']
                 )
                 ->joinLeft(
-                    ['parent_url' => new Zend_Db_Expr("(select min(store_id) as parent_url_store_id, entity_id, request_path
-                    from `url_rewrite` where metadata is null and entity_type = 'product' group by entity_id)")],
+                    ['parent_url' => new Zend_Db_Expr(
+                        "(select min(store_id) as parent_url_store_id, entity_id, request_path
+                    from `url_rewrite` where metadata is null and entity_type = 'product' group by entity_id)"
+                    )],
                     "parent_url.entity_id = parent.entity_id",
                     ['parent_url' => 'parent_url.request_path', 'parent_url_store_id' => 'parent_url_store_id']
                 );
@@ -823,7 +874,9 @@ class Eav implements IndexerActionInterface, MviewActionInterface
      */
     private function getStandardUrl($productId): string
     {
-        /** Handle missing rewrites */
+        /**
+         * Handle missing rewrites 
+         */
         return 'catalog/product/view/id/'.$productId;
     }
 
@@ -849,13 +902,17 @@ class Eav implements IndexerActionInterface, MviewActionInterface
      */
     private function _purgeUnversioned(array $productIds)
     {
-        /** Database Resources */
+        /**
+         * Database Resources 
+         */
         $write = $this->resourceConnection->getConnection('core_write');
 
         $indexTable = $this->resourceConnection->getTableName('bazaarvoice_index_product');
 
-        $delete = $write->deleteFromSelect($write->select()->from($indexTable)->where('product_id IN(?)', $productIds)
-            ->where('version_id = 0'), $indexTable);
+        $delete = $write->deleteFromSelect(
+            $write->select()->from($indexTable)->where('product_id IN(?)', $productIds)
+                ->where('version_id = 0'), $indexTable
+        );
         $write->query($delete);
     }
 
@@ -866,9 +923,11 @@ class Eav implements IndexerActionInterface, MviewActionInterface
     {
         $select = $this->resourceConnection->getConnection('core_read')
             ->select()
-            ->from([
+            ->from(
+                [
                 'source' => $this->resourceConnection->getTableName('bazaarvoice_index_product'),
-            ]);
+                ]
+            );
 
         $select->columns(['store_id', 'total' => 'count(*)']);
         $select->group('store_id');
@@ -916,7 +975,9 @@ class Eav implements IndexerActionInterface, MviewActionInterface
      */
     private function getImageUrl($store, $indexData)
     {
-        /** Use parent image if appropriate */
+        /**
+         * Use parent image if appropriate 
+         */
         if ($indexData['image_url'] == '' || $indexData['image_url'] == 'no_selection') {
             if (!empty($indexData['parent_image'])) {
                 $indexData['image_url'] = $indexData['parent_image'];
@@ -925,7 +986,7 @@ class Eav implements IndexerActionInterface, MviewActionInterface
                 $this->logger->debug('Product has no parent and no image');
                 $indexData['image_url'] = $this->getPlaceholderUrl($store);
                 $this->logger->debug('default product url:');
-                $this->logger->debug($indexData['image_url'] );
+                $this->logger->debug($indexData['image_url']);
             }
         }
 
@@ -947,8 +1008,12 @@ class Eav implements IndexerActionInterface, MviewActionInterface
      */
     public function getPlaceholderUrl($store)
     {
-        /** @var Store $localeStore */
-        /** @var string $locale */
+        /**
+         * @var Store $localeStore 
+         */
+        /**
+         * @var string $locale 
+         */
 
 
         try {
@@ -978,9 +1043,11 @@ class Eav implements IndexerActionInterface, MviewActionInterface
     {
         $select = $this->resourceConnection->getConnection('core_read')
             ->select()
-            ->from([
+            ->from(
+                [
                 'source' => $this->resourceConnection->getTableName('bazaarvoice_index_product'),
-            ]);
+                ]
+            );
 
         $select->columns(['total' => 'count(*)']);
         $select->where("scope IS NOT NULL AND scope != '{$this->configProvider->getFeedGenerationScope()}'");
@@ -1007,7 +1074,9 @@ class Eav implements IndexerActionInterface, MviewActionInterface
 
     private function saveProductIndexes()
     {
-        /** @var \Bazaarvoice\Connector\Model\Index $bvIndex */
+        /**
+         * @var \Bazaarvoice\Connector\Model\Index $bvIndex 
+         */
         foreach ($this->productIndexes as $bvIndex) {
             try {
                 $this->indexRepository->save($bvIndex);
@@ -1053,8 +1122,10 @@ class Eav implements IndexerActionInterface, MviewActionInterface
         if (!in_array($aliasTableName, array_keys($select->getPart('from')))) {
             $select->joinLeft(
                 [$aliasTableName => $tableName],
-                sprintf($joinCondition, $mainTableAlias, $aliasTableName, $attribute->getId(), $linkField,
-                    $defaultStoreId),
+                sprintf(
+                    $joinCondition, $mainTableAlias, $aliasTableName, $attribute->getId(), $linkField,
+                    $defaultStoreId
+                ),
                 []
             );
         }
@@ -1098,7 +1169,7 @@ class Eav implements IndexerActionInterface, MviewActionInterface
 
     /**
      * @param \Magento\Framework\DB\Select $select
-     * @param                              $store
+     * @param $store
      * @param string                       $mainTableAlias
      *
      * @throws \Magento\Framework\Exception\LocalizedException

@@ -1,8 +1,10 @@
 <?php
-
+/**
+ * Copyright © Bazaarvoice, Inc. All rights reserved.
+ * See LICENSE.md for license details.
+ */
 
 namespace Bazaarvoice\Connector\Controller\Adminhtml\Config\Sftp;
-
 
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
@@ -13,8 +15,20 @@ use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Store\Model\ScopeInterface;
 
+/**
+ * Class TestConnection
+ *
+ * @package Bazaarvoice\Connector\Controller\Adminhtml\Config\Sftp\TestConnection
+ */
 class TestConnection extends Action
 {
+   
+    /**
+     * TestConnection constructor.
+     *
+     * @param Context      $context
+     * @param PurchaseFeed $purchaseFeed
+     */
     public function __construct(
         Context $context,
         \Bazaarvoice\Connector\Model\Filesystem\Io\Sftp $sftp,
@@ -73,7 +87,9 @@ class TestConnection extends Action
         }
 
 
-        /** @var \Magento\Framework\Controller\Result\Json $resultJson */
+        /**
+        * @var \Magento\Framework\Controller\Result\Json $resultJson 
+        */
         $resultJson = $this->resultJsonFactory->create();
         return $resultJson->setData($result);
     }

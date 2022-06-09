@@ -12,8 +12,6 @@ use Magento\Framework\Data\OptionSourceInterface;
 
 /**
  * Class Trigger
- *
- * @package Bazaarvoice\Connector\Model\Source
  */
 class Trigger implements OptionSourceInterface
 {

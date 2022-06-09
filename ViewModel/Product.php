@@ -156,12 +156,16 @@ class Product implements ArgumentInterface
         if ($this->isConfigurable() && $this->configProvider->isRrChildrenEnabled()) {
             $product = $this->getProduct();
 
-            /** @var Configurable $typeInstance */
+            /**
+             * @var Configurable $typeInstance 
+             */
             $typeInstance = $product->getTypeInstance();
             $childProducts = $typeInstance->getUsedProductCollection($product);
             $allowAttributes = $typeInstance->getConfigurableAttributes($product);
 
-            /** @var \Magento\Catalog\Api\Data\ProductInterface|\Magento\Catalog\Model\Product $childProduct */
+            /**
+             * @var \Magento\Catalog\Api\Data\ProductInterface|\Magento\Catalog\Model\Product $childProduct 
+             */
             foreach ($childProducts as $childProduct) {
                 $key = '';
                 foreach ($allowAttributes as $attribute) {
@@ -174,7 +178,9 @@ class Product implements ArgumentInterface
                 $children[$key] = $this->stringFormatter->getFormattedProductSku($childProduct);
             }
         }
-        /** @noinspection PhpParamsInspection */
+        /**
+         * @noinspection PhpParamsInspection 
+         */
         $this->bvLogger->info($children);
 
         return $this->stringFormatter->jsonEncode($children);

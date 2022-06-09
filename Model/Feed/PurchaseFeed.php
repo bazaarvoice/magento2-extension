@@ -130,14 +130,22 @@ class PurchaseFeed extends Feed
             $purchaseFeedFileName = dirname($purchaseFeedFileName).'/test-'.basename($purchaseFeedFileName);
         }
 
-        /** Get client name for the scope */
+        /**
+         * Get client name for the scope 
+         */
         $clientName = $this->configProvider->getClientName($store->getId());
 
-        /** Create varien io object and write local feed file */
-        /** @var XMLWriter $writer */
+        /**
+         * Create varien io object and write local feed file 
+         */
+        /**
+         * @var XMLWriter $writer 
+         */
         $writer = $this->openFile('http://www.bazaarvoice.com/xs/PRR/PostPurchaseFeed/5.6', $clientName);
 
-        /** @var \Magento\Sales\Model\Order $order */
+        /**
+         * @var \Magento\Sales\Model\Order $order 
+         */
         foreach ($orders as $order) {
             $writer->startElement('Interaction');
 
@@ -155,7 +163,9 @@ class PurchaseFeed extends Feed
 
             $writer->startElement('Products');
 
-            /** if families are enabled, get all items */
+            /**
+             * if families are enabled, get all items 
+             */
             if ($this->configProvider->isFamiliesEnabled()) {
                 $items = $order->getAllItems();
             } else {
@@ -174,7 +184,7 @@ class PurchaseFeed extends Feed
                 //parent product has been deleted or disabled
                 if ($item->getParentItem()
                     && (!$item->getParentItem()->getProduct()
-                        || $item->getParentItem()->getProduct()->getStatus() == Status::STATUS_DISABLED)
+                    || $item->getParentItem()->getProduct()->getStatus() == Status::STATUS_DISABLED)
                 ) {
                     continue;
                 }
@@ -182,9 +192,13 @@ class PurchaseFeed extends Feed
                 /* @var Order\Item $item */
                 $writer->startElement('Product');
 
-                /** @var Product $product */
+                /**
+                 * @var Product $product 
+                 */
                 $product = $item->getProduct();
-                /** Using store on the order, to handle website/group data */
+                /**
+                 * Using store on the order, to handle website/group data 
+                 */
                 $product->setStoreId($order->getStoreId());
                 $this->storeManager->setCurrentStore($order->getStoreId());
                 $product->load($product->getId());
@@ -196,15 +210,21 @@ class PurchaseFeed extends Feed
                 $originalPrice = $item->getOriginalPrice();
 
                 if ($item->getParentItem()) {
-                    /** @var Order\Item $parentItem */
+                    /**
+                     * @var Order\Item $parentItem 
+                     */
                     $parentItem = $item->getParentItem();
 
-                    /** get price from parent item */
+                    /**
+                     * get price from parent item 
+                     */
                     $originalPrice = $parentItem->getOriginalPrice();
 
                     if ($this->configProvider->isFamiliesEnabled()) {
                         if (strpos($imageUrl, 'placeholder/image.jpg') !== false) {
-                            /** if product families are enabled and product has no image, use configurable image */
+                            /**
+                             * if product families are enabled and product has no image, use configurable image 
+                             */
                             try {
                                 $parent = $parentItem->getProduct();
                                 $imageUrl = $this->mediaConfigFactory->create()->getMediaUrl($parent->getSmallImage());
@@ -218,16 +238,24 @@ class PurchaseFeed extends Feed
                 $writer->writeElement('Price', number_format((float)$originalPrice, 2, '.', ''));
 
                 $writer->endElement();
-                /** Product */
+                /**
+                 * Product 
+                 */
             }
 
             $writer->endElement();
-            /** Products */
+            /**
+             * Products 
+             */
 
             $writer->endElement();
-            /** Interaction */
+            /**
+             * Interaction 
+             */
 
-            /** Mark order as sent */
+            /**
+             * Mark order as sent 
+             */
             if ($this->test == false) {
                 try {
                     $order->setData(self::ALREADY_SENT_IN_FEED_FLAG, true)->save();
@@ -242,7 +270,9 @@ class PurchaseFeed extends Feed
         $this->closeFile($writer, $purchaseFeedFileName);
         $this->logger->debug("Wrote file $purchaseFeedFileName");
 
-        /** Upload feed */
+        /**
+         * Upload feed 
+         */
         $destinationFile = '/ppe/inbox/bv_ppe_tag_feed-magento-'.date('U').'.xml';
         if ($this->test == false) {
             $this->uploadFeed($purchaseFeedFileName, $destinationFile, $store);
@@ -302,7 +332,9 @@ class PurchaseFeed extends Feed
         }
 
         return $latestShipmentTimestamp;
-        /** This should be an int timestamp of num seconds since epoch */
+        /**
+         * This should be an int timestamp of num seconds since epoch 
+         */
     }
 
     /**
@@ -311,14 +343,20 @@ class PurchaseFeed extends Feed
     public function exportFeedForStore(Store $store)
     {
         $orders = $this->getOrders();
-        /** Add filter to limit orders to this store */
+        /**
+         * Add filter to limit orders to this store 
+         */
         $orders->addFieldToFilter('store_id', $store->getId());
         $this->logger->debug('Found '.$orders->count().' orders to send.');
 
-        /** Build local file name / path */
+        /**
+         * Build local file name / path 
+         */
         $purchaseFeedFilePath = BP.'/var/export/bvfeeds';
         $purchaseFeedFileName = $purchaseFeedFilePath.'/purchaseFeed-store-'.$store->getId().'-'.date('U').'.xml';
-        /** Write orders to file */
+        /**
+         * Write orders to file 
+         */
         if ($orders->count()) {
             $this->sendOrders($orders, $store, $purchaseFeedFileName);
         }
@@ -332,7 +370,9 @@ class PurchaseFeed extends Feed
         $orders = $this->getOrders();
         $storeTable = $this->resourceConnection->getTableName('store');
 
-        /** Add filter to limit orders to this store group */
+        /**
+         * Add filter to limit orders to this store group 
+         */
         $orders->getSelect()
             ->joinLeft(
                 ['store_table' => $storeTable],
@@ -342,12 +382,18 @@ class PurchaseFeed extends Feed
             ->where('store_table.group_id = '.$storeGroup->getId());
         $this->logger->debug('Found '.$orders->count().' orders to send.');
 
-        /** Build local file name / path */
+        /**
+         * Build local file name / path 
+         */
         $purchaseFeedFilePath = BP.'/var/export/bvfeeds';
         $purchaseFeedFileName = $purchaseFeedFilePath.'/purchaseFeed-group-'.$storeGroup->getId().'-'.date('U').'.xml';
-        /** Using default store for now */
+        /**
+         * Using default store for now 
+         */
         $store = $storeGroup->getDefaultStore();
-        /** Write orders to file */
+        /**
+         * Write orders to file 
+         */
         if ($orders->count()) {
             $this->sendOrders($orders, $store, $purchaseFeedFileName);
         }
@@ -360,7 +406,9 @@ class PurchaseFeed extends Feed
     {
         $orders = $this->getOrders();
         $storeTable = $this->resourceConnection->getTableName('store');
-        /** Add filter to limit orders to this website */
+        /**
+         * Add filter to limit orders to this website 
+         */
         $orders->getSelect()
             ->joinLeft(
                 ['store_table' => $storeTable],
@@ -370,12 +418,18 @@ class PurchaseFeed extends Feed
             ->where('store_table.website_id = '.$website->getId());
         $this->logger->debug('Found '.$orders->count().' orders to send.');
 
-        /** Build local file name / path */
+        /**
+         * Build local file name / path 
+         */
         $purchaseFeedFilePath = BP.'/var/export/bvfeeds';
         $purchaseFeedFileName = $purchaseFeedFilePath.'/purchaseFeed-website-'.$website->getId().'-'.date('U').'.xml';
-        /** Using default store for now */
+        /**
+         * Using default store for now 
+         */
         $store = $website->getDefaultStore();
-        /** Write orders to file */
+        /**
+         * Write orders to file 
+         */
         if ($orders->count()) {
             $this->sendOrders($orders, $store, $purchaseFeedFileName);
         }
@@ -390,14 +444,20 @@ class PurchaseFeed extends Feed
         $orders->getSelect();
         $this->logger->debug('Found '.$orders->count().' orders to send.');
 
-        /** Build local file name / path */
+        /**
+         \* Build local file name / path 
+        */
         $purchaseFeedFilePath = BP.'/var/export/bvfeeds';
         $purchaseFeedFileName = $purchaseFeedFilePath.'/purchaseFeed-'.date('U').'.xml';
 
-        /** Using admin store for now */
+        /**
+         * Using admin store for now 
+         */
         $store = $this->storeManager->getStore(0);
 
-        /** Write orders to file */
+        /**
+         * Write orders to file 
+         */
         if ($orders->count()) {
             $this->sendOrders($orders, $store, $purchaseFeedFileName);
         }
@@ -410,16 +470,24 @@ class PurchaseFeed extends Feed
     {
         $orders = $this->orderCollectionFactory->create();
 
-        /** Status is 'complete' or 'closed' */
+        /**
+         * Status is 'complete' or 'closed' 
+         */
         if ($this->test == false) {
-            $orders->addFieldToFilter('status', [
+            $orders->addFieldToFilter(
+                'status', [
                 'in' => $this->orderStatus,
-            ]);
+                ]
+            );
         }
 
-        /** Only orders created within our look-back window */
+        /**
+         * Only orders created within our look-back window 
+         */
         $orders->addFieldToFilter('created_at', ['gteq' => $this->getNumDaysLookbackStartDate()]);
-        /** Include only orders that have not been sent or have errored out */
+        /**
+         * Include only orders that have not been sent or have errored out 
+         */
         if ($this->test == false) {
             $orders->addFieldToFilter(
                 [self::ALREADY_SENT_IN_FEED_FLAG, self::ALREADY_SENT_IN_FEED_FLAG],
