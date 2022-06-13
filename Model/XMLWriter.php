@@ -20,9 +20,9 @@ class XMLWriter extends \XMLWriter
      * @param null   $content
      * @param bool   $cdata
      *
-     * @return bool|void 
+     * @return bool|void
      */
-    public function writeElement($name, $content = null, $cdata = false): bool
+    public function writeElement($name, $content = null, $cdata = false)
     {
         $content = trim((string)$content);
         if ($cdata) {
@@ -40,7 +40,7 @@ class XMLWriter extends \XMLWriter
      *
      * @return bool|void
      */
-    public function writeRaw($content = null, $cdata = false): bool
+    public function writeRaw($content = null, $cdata = false)
     {
         $content = trim((string)$content);
         if ($cdata) {
