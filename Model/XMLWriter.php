@@ -32,6 +32,7 @@ class XMLWriter extends \XMLWriter
             return true;
         } else {
             parent::writeElement($name, $content);
+            return true;
         }
     }
 
@@ -49,6 +50,7 @@ class XMLWriter extends \XMLWriter
             return true;
         } else {
             parent::writeRaw($content);
+            return true;
         }
     }
 }
