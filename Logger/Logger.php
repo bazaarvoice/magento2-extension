@@ -11,6 +11,7 @@ namespace Bazaarvoice\Connector\Logger;
 use Bazaarvoice\Connector\Api\ConfigProviderInterface;
 use Exception;
 use Magento\Framework\App\State;
+use Monolog\DateTimeImmutable;
 
 /**
  * Class Logger
@@ -71,10 +72,11 @@ class Logger extends \Monolog\Logger
      * @param int    $level
      * @param string $message
      * @param array  $context
+     * @param DateTimeImmutable $datetime
      *
      * @return bool
      */
-    public function addRecord($level, $message, array $context = []): bool
+    public function addRecord($level, $message, array $context = [], DateTimeImmutable $datetime = null): bool
     {
         if (is_array($message)) {
             $message = print_r($message, $return = true);
@@ -84,6 +86,6 @@ class Logger extends \Monolog\Logger
             print_r($message."\n");
         }
 
-        return parent::addRecord($level, $message, $context);
+        return parent::addRecord($level, $message, $context, $datetime);
     }
 }
