@@ -153,7 +153,7 @@ class UpgradeBvDataAtttribute implements DataPatchInterface, PatchRevertableInte
         $eavSetup = $this->categorySetupFactory->create(['setup' => $this->moduleDataSetup]);
         $entityTypeId = $eavSetup->getEntityTypeId(Product::ENTITY);
 
-        if ($eavSetup->getAttribute($entityTypeId, 'bv_feed_exclude')) {
+        if ($eavSetup->getAttribute($entityTypeId, 'bv_feed_exclude') && !$eavSetup->getAttribute($entityTypeId, 'bv_feed_include')) {
             $eavSetup->updateAttribute(
                 $entityTypeId,
                 'bv_feed_exclude',
