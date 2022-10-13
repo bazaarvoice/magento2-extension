@@ -136,7 +136,7 @@ class Pixel implements ArgumentInterface
         } else {
             //when discount is applied to products "including tax" - extract tax compensation amount from "discount".
             $this->orderDetails['discount'] = number_format(
-                (float)abs($order->getDiscountAmount()) - (float)abs((float)$order->getDiscountTaxCompensationAmount()) ?? 0.0, 2, '.', ''
+                (float)abs((float)$order->getDiscountAmount()) - (float)abs((float)$order->getDiscountTaxCompensationAmount()) ?? 0.0, 2, '.', ''
             );
         }
 
