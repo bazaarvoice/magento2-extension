@@ -29,8 +29,10 @@ class XMLWriter extends \XMLWriter
             $this->startElement($name);
             $this->writeCdata($content);
             $this->endElement();
+            return true;
         } else {
             parent::writeElement($name, $content);
+            return true;
         }
     }
 
@@ -45,8 +47,10 @@ class XMLWriter extends \XMLWriter
         $content = trim((string)$content);
         if ($cdata) {
             $this->writeCdata($content);
+            return true;
         } else {
             parent::writeRaw($content);
+            return true;
         }
     }
 }
