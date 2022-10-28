@@ -196,7 +196,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
             $this->logger->debug(__('Bazaarvoice Product Feed Index is being rebuilt.'));
             $this->execute();
         } catch (Exception $e) {
-            $this->logger->err($e->getMessage()."\n".$e->getTraceAsString());
+            $this->logger->error($e->getMessage()."\n".$e->getTraceAsString());
         }
 
         return true;
