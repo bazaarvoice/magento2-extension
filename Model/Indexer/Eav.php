@@ -255,7 +255,7 @@ class Eav implements IndexerActionInterface, MviewActionInterface
                 $this->logStats();
             }
         } catch (Exception $e) {
-            $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+            $this->logger->critical($e->getMessage()."\n".$e->getTraceAsString());
         }
 
         return true;
@@ -718,7 +718,7 @@ class Eav implements IndexerActionInterface, MviewActionInterface
                         }
                     }
                 } catch (Exception $e) {
-                    $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+                    $this->logger->critical($e->getMessage()."\n".$e->getTraceAsString());
                 }
             }
         }
@@ -1091,10 +1091,10 @@ class Eav implements IndexerActionInterface, MviewActionInterface
                     $existingIndex->addData($bvIndex->getData());
                     $this->indexRepository->save($existingIndex);
                 } catch (Exception $e) {
-                    $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+                    $this->logger->critical($e->getMessage()."\n".$e->getTraceAsString());
                 }
             } catch (Exception $e) {
-                $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+                $this->logger->critical($e->getMessage()."\n".$e->getTraceAsString());
             }
         }
     }
