@@ -167,7 +167,7 @@ class BV
                     $this->SEO = $this->spotlights;
                     break;
                 default:
-                    throw new Exception('Invalid content_type value provided: '.$this->config['content_type']);
+                    throw new \Exception('Invalid content_type value provided: '.$this->config['content_type']);
             }
         }
     }
@@ -175,21 +175,21 @@ class BV
     protected function validateParameters($params)
     {
         if (!is_array($params)) {
-            throw new Exception(
+            throw new \Exception(
                 'BV class constructor argument $params must be an array.'
             );
         }
 
         // check to make sure we have the required parameters.
         if (empty($params['bv_root_folder'])) {
-            throw new Exception(
+            throw new \Exception(
                 'BV class constructor argument $params is missing required bv_root_folder key. An '.
                 'array containing bv_root_folder (string) is expected.'
             );
         }
 
         if (empty($params['subject_id'])) {
-            throw new Exception(
+            throw new \Exception(
                 'BV class constructor argument $params is missing required subject_id key. An '.
                 'array containing subject_id (string) is expected.'
             );
