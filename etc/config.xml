@@ -31,6 +31,9 @@
                 <bvfamilies_inherit>1</bvfamilies_inherit>
                 <category_id_use_url_path>0</category_id_use_url_path>
             </feeds>
+            <indexer>
+                <image_attribute_code>small_image</image_attribute_code>
+            </indexer>
         </bazaarvoice>
     </default>
 </config>

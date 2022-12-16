@@ -278,6 +278,13 @@
                     </depends>
                 </field>
             </group>
+            <group id="indexer" translate="label" type="text" sortOrder="700" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Indexer</label>
+                <field id="image_attribute_code" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Image Attribute Code</label>
+                    <comment>Attribute of image to send to bazaarvoice (Default: "small_image")</comment>
+                </field>
+            </group>
         </section>
     </system>
 </config>

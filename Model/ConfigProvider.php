@@ -839,6 +839,14 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
+     * @return string
+     */
+    public function getImageAttributeCode($storeId = null,  $scope = ScopeInterface::SCOPE_STORE)
+    {
+        return (string) $this->getConfig('indexer/image_attribute_code', $storeId, $scope);
+    }
+
+    /**
      * @param string $feedGenerationScope
      *
      * @return string
