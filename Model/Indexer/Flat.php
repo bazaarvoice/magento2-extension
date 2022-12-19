@@ -1016,7 +1016,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
      *
      * @return mixed
      */
-    private function getImageUrl($store, $indexData)
+    public function getImageUrl($store, $indexData)
     {
         /**
          * Use parent image if appropriate

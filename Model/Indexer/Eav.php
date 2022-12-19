@@ -976,7 +976,7 @@ class Eav implements IndexerActionInterface, MviewActionInterface
      * @return mixed
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    private function getImageUrl($store, $indexData)
+    public function getImageUrl($store, $indexData)
     {
         /**
          * Use parent image if appropriate
