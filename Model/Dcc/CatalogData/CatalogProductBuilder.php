@@ -266,9 +266,9 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
      */
     private function getProductImageUrl($product, $parentProduct = null)
     {
-        if ($product && $product->getData('small_image')) {
+        if ($product && $product->getData($this->configProvider->getImageAttributeCode())) {
             $imageUrl = $this->mediaConfigFactory->create()->getMediaUrl($product->getSmallImage());
-        } else if ($parentProduct && $parentProduct->getData('small_image')) {
+        } else if ($parentProduct && $parentProduct->getData($this->configProvider->getImageAttributeCode())) {
             $imageUrl = $this->mediaConfigFactory->create()->getMediaUrl($parentProduct->getSmallImage());
         } else {
             $imageUrl = $this->mediaConfigFactory->create()->getMediaUrl($product->getSmallImage());
@@ -347,7 +347,7 @@ class CatalogProductBuilder implements CatalogProductBuilderInterface
     private function prepareOutput($object)
     {
         /**
-         * @var \Magento\Framework\Model\AbstractModel $object 
+         * @var \Magento\Framework\Model\AbstractModel $object
          */
         return $this->stringFormatter->stripEmptyValues($object->getData());
     }
