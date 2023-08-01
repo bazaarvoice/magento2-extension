@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace Bazaarvoice\Connector\Console\Command;
 
 use Exception;
-use Magento\Framework\App\Config\ScopeConfigInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -29,15 +28,12 @@ class Index extends Command
     /**
      * Purchase constructor.
      *
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param \Bazaarvoice\Connector\Model\Indexer\Indexer       $indexer
      */
     public function __construct(
-        ScopeConfigInterface $scopeConfig,
         \Bazaarvoice\Connector\Model\Indexer\Indexer $indexer
     ) {
         parent::__construct();
-        $this->scopeConfig = $scopeConfig;
         $this->indexer = $indexer;
     }
 

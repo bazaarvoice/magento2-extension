@@ -114,7 +114,7 @@ class Pixel implements ArgumentInterface
     public function getOrderDetails()
     {
         /**
-         * @var \Magento\Sales\Model\Order $order 
+         * @var \Magento\Sales\Model\Order $order
          */
         $order = $this->checkoutSession->getLastRealOrder();
 
@@ -132,12 +132,11 @@ class Pixel implements ArgumentInterface
         $this->orderDetails['tax'] = number_format((float)$order->getTaxAmount() ?? 0.0, 2, '.', '');
         $this->orderDetails['shipping'] = number_format((float)$order->getShippingAmount() ?? 0.0, 2, '.', '');
         if (!$this->taxConfig->discountTax()) {
-            $this->orderDetails['discount'] = number_format((float)abs($order->getDiscountAmount()) ?? 0.0, 2, '.', '');
+            $this->orderDetails['discount'] = number_format(abs((float)$order->getDiscountAmount()) ?? 0.0, 2, '.', '');
         } else {
-            //when discount is applied to products "including tax" - extract tax compensation amount from "discount".
+            //when discount is applied to products "including tax" - extract tax compensation amount from "discount".  
             $this->orderDetails['discount'] = number_format(
-                (float)abs($order->getDiscountAmount()) - (float)abs($order->getDiscountTaxCompensationAmount()) ?? 0.0, 2, '.', ''
-            );
+            abs((float)$order->getDiscountAmount()) - abs((float)$order->getDiscountTaxCompensationAmount()) ?? 0.0, 2, '.', '' );
         }
 
         if ($address) {
@@ -148,7 +147,7 @@ class Pixel implements ArgumentInterface
 
         $this->orderDetails['items'] = [];
         /**
-         * if families are enabled, get all items 
+         * if families are enabled, get all items
          */
         if ($this->configProvider->isFamiliesEnabled()) {
             $items = $order->getAllItems();
@@ -162,7 +161,7 @@ class Pixel implements ArgumentInterface
                 continue;
             }
             /**
-             * skip configurable items if families are enabled 
+             * skip configurable items if families are enabled
              */
             if ($this->configProvider->isFamiliesEnabled()
                 && $product->getTypeId() == Configurable::TYPE_CODE
@@ -186,7 +185,7 @@ class Pixel implements ArgumentInterface
             if ($this->configProvider->isFamiliesEnabled() && $item->getParentItem()) {
                 if (strpos($itemDetails['imageURL'], 'placeholder/image.jpg') !== false) {
                     /**
-                     * if product families are enabled and product has no image, use configurable image 
+                     * if product families are enabled and product has no image, use configurable image
                      */
                     $parentId = $item->getParentItem()->getProductId();
                     try {
@@ -196,7 +195,7 @@ class Pixel implements ArgumentInterface
                     }
                 }
                 /**
-                 * also get price from parent item 
+                 * also get price from parent item
                  */
                 $itemDetails['price'] = number_format((float)$item->getParentItem()->getPrice(), 2, '.', '');
             }
@@ -216,12 +215,12 @@ class Pixel implements ArgumentInterface
             ? $order->getCustomerFirstname()
             : ($order->getBillingAddress() ? $order->getBillingAddress()->getFirstname() : '');
         /**
-         * There is no 'deliveryDate' yet 
+         * There is no 'deliveryDate' yet
          */
         $this->orderDetails['locale'] = $this->configProvider->getLocale($order->getStoreId());
 
         /**
-         * Add partnerSource field 
+         * Add partnerSource field
          */
         $this->orderDetails['source'] = 'Magento_BV_Extension';
         $this->orderDetails['partnerVersion'] = $this->configProvider->getExtensionVersion();

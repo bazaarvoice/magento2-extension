@@ -59,12 +59,12 @@ class Logger extends \Monolog\Logger
      * @param string|array $message
      * @param array        $context
      *
-     * @return bool 
+     * @return bool
      */
     public function debug($message, array $context = []): void
     {
         if ($this->configProvider->isDebugEnabled()) {
-            $this->addRecord(static::DEBUG, $message, $context);
+            $this->addRecord(static::DEBUG, strval($message),$context);
         }
     }
 
