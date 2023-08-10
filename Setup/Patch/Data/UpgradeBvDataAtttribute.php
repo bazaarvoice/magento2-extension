@@ -56,6 +56,10 @@ class UpgradeBvDataAtttribute implements DataPatchInterface, PatchRevertableInte
      * @var \Magento\Config\App\Config\Source\RuntimeConfigSource
      */
     private $runtimeConfigSource;
+    /**
+     * @var ModuleListInterface
+     */
+    private $_moduleList;
 
     public function __construct(
         ModuleDataSetupInterface $moduleDataSetup,
