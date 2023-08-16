@@ -637,7 +637,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 }
             }
 
-            if(!empty($indexData['category_external_id']) {
+            if(!empty($indexData['category_external_id'])) {
                 $indexData['category_external_id'] = str_replace('/', '-', $indexData['category_external_id']);
                 $indexData['category_external_id'] = str_replace('.html', '', $indexData['category_external_id']);
                 $indexData['category_external_id']
