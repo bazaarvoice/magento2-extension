@@ -64,6 +64,9 @@ class Logger extends \Monolog\Logger
     public function debug($message, array $context = []): void
     {
         if ($this->configProvider->isDebugEnabled()) {
+            if (is_array($message)) {
+                $message = json_encode($message);
+            }
             $this->addRecord(static::DEBUG, strval($message),$context);
         }
     }
