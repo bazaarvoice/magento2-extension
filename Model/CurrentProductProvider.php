@@ -68,7 +68,7 @@ class CurrentProductProvider
                 }
                 $this->currentProduct = $this->productRepository->getById($product->getId());
             } catch (Exception $e) {
-                $this->bvLogger->crit($e->getMessage()."\n".$e->getTraceAsString());
+                $this->bvLogger->critical($e->getMessage()."\n".$e->getTraceAsString());
 
                 return false;
             }

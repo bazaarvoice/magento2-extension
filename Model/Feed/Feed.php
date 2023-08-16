@@ -89,7 +89,7 @@ abstract class Feed
                 break;
             }
         } catch (Exception $e) {
-            $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+            $this->logger->critical($e->getMessage()."\n".$e->getTraceAsString());
         }
         $this->logger->debug('End Bazaarvoice '.$this->typeId.' Feed Generation');
     }
@@ -121,7 +121,7 @@ abstract class Feed
                     'Failed to export daily '.$this->typeId.' feed for store group: '
                     .$storeGroup->getName()
                 );
-                $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+                $this->logger->critical($e->getMessage()."\n".$e->getTraceAsString());
             }
         }
     }
@@ -143,7 +143,7 @@ abstract class Feed
                 }
             } catch (Exception $e) {
                 $this->logger->error('Failed to export daily '.$this->typeId.' feed for store: '.$store->getCode());
-                $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+                $this->logger->critical($e->getMessage()."\n".$e->getTraceAsString());
             }
         }
     }
@@ -164,7 +164,7 @@ abstract class Feed
                 }
             } catch (Exception $e) {
                 $this->logger->error('Failed to export daily '.$this->typeId.' feed for website: '.$website->getName());
-                $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+                $this->logger->critical($e->getMessage()."\n".$e->getTraceAsString());
             }
         }
     }
@@ -181,7 +181,7 @@ abstract class Feed
             }
         } catch (Exception $e) {
             $this->logger->error('Failed to export daily '.$this->typeId.' feed.');
-            $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+            $this->logger->critical($e->getMessage()."\n".$e->getTraceAsString());
         }
     }
 
