@@ -310,7 +310,7 @@ abstract class Feed
                 $ioObject->mv($sourceFile, $sentFile);
             }
         } catch (Exception $e) {
-            $this->logger->err($e->getMessage());
+            $this->logger->error($e->getMessage());
         }
     }
 }
