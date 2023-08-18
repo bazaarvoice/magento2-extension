@@ -196,7 +196,7 @@ class Product implements ArgumentInterface
                 return $this->getProduct()->getTypeId() == Configurable::TYPE_CODE;
             }
         } catch (Exception $e) {
-            $this->bvLogger->crit($e->getMessage()."\n".$e->getTraceAsString());
+            $this->bvLogger->critical($e->getMessage()."\n".$e->getTraceAsString());
         }
 
         return false;
