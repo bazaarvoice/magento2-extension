@@ -196,7 +196,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
             $this->logger->debug(__('Bazaarvoice Product Feed Index is being rebuilt.'));
             $this->execute();
         } catch (Exception $e) {
-            $this->logger->err($e->getMessage()."\n".$e->getTraceAsString());
+            $this->logger->error($e->getMessage()."\n".$e->getTraceAsString());
         }
 
         return true;
@@ -270,7 +270,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 $this->logStats();
             }
         } catch (Exception $e) {
-            $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+            $this->logger->critical($e->getMessage()."\n".$e->getTraceAsString());
         }
 
         return true;
@@ -574,7 +574,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
         try {
             $rows = $select->query();
         } catch (Exception $e) {
-            $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+            $this->logger->critical($e->getMessage()."\n".$e->getTraceAsString());
             if (strpos($e->getMessage(), 'Column not found') !== false) {
                 $errorExplanation = 'The following "Column not found" error typically results from a product attribute missing from the flat product table. Please ensure that the attribute referenced in the error is set to Use In Product Listing = Yes, which should cause a reindex to add it to the product flat table that is being queried: ' . $e->getMessage();
                 throw new Exception($errorExplanation, 0, $e);
@@ -637,7 +637,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                 }
             }
 
-            if(!empty($indexData['category_external_id']) {
+            if(!empty($indexData['category_external_id'])) {
                 $indexData['category_external_id'] = str_replace('/', '-', $indexData['category_external_id']);
                 $indexData['category_external_id'] = str_replace('.html', '', $indexData['category_external_id']);
                 $indexData['category_external_id']
@@ -797,7 +797,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                         }
                     }
                 } catch (Exception $e) {
-                    $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+                    $this->logger->critical($e->getMessage()."\n".$e->getTraceAsString());
                 }
             }
         }
@@ -1144,10 +1144,10 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                     $existingIndex->addData($bvIndex->getData());
                     $this->indexRepository->save($existingIndex);
                 } catch (Exception $e) {
-                    $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+                    $this->logger->critical($e->getMessage()."\n".$e->getTraceAsString());
                 }
             } catch (Exception $e) {
-                $this->logger->crit($e->getMessage()."\n".$e->getTraceAsString());
+                $this->logger->critical($e->getMessage()."\n".$e->getTraceAsString());
             }
         }
     }
