@@ -18,7 +18,7 @@ class Questions extends Base
     /**
      * @var array<string, string>|array<string, mixed>
      */
-    public $confi
+    public $config;
 
     function __construct($params = array())
     {
