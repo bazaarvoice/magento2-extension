@@ -22,7 +22,12 @@ use Magento\Store\Model\ScopeInterface;
  */
 class TestConnection extends Action
 {
-   
+    public $sftp;
+    public $storeManager;
+    public $configProvider;
+    public $resultJsonFactory;
+    public $tagFilter;
+
     /**
      * TestConnection constructor.
      *
@@ -88,7 +93,7 @@ class TestConnection extends Action
 
 
         /**
-        * @var \Magento\Framework\Controller\Result\Json $resultJson 
+        * @var \Magento\Framework\Controller\Result\Json $resultJson
         */
         $resultJson = $this->resultJsonFactory->create();
         return $resultJson->setData($result);
