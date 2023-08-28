@@ -5,7 +5,7 @@
   "license": [
     "MIT"
   ],
-  "version": "9.1.6.1",
+  "version": "9.1.7",
   "autoload": {
     "files": [
       "registration.php"
