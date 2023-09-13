@@ -18,6 +18,21 @@ namespace Bazaarvoice\Connector\Model\BVSEOSDK;
  */
 class Base
 {
+
+    public $config;
+    /**
+     * @var array<string, mixed>|array<string, string>
+     */
+    public $bv_config;
+    public $seo_url;
+    /**
+     * @var float|string
+     */
+    public $start_time;
+    /**
+     * @var float
+     */
+    public $response_time;
     private $msg = '';
 
     public function __construct($params = array())
@@ -45,7 +60,8 @@ class Base
             : $this->config['execution_timeout'];
 
         // set up combined user agent to be passed to cloud storage (if needed)
-        $this->config['user_agent'] = "bv_php_sdk/3.2.1;".$_SERVER['HTTP_USER_AGENT'];
+        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $this->config['user_agent'] = "bv_php_sdk/3.2.1;".$userAgent;
     }
 
     protected function validateParams($params)
@@ -284,6 +300,10 @@ class Base
     {
         $bvreveal = $this->_getBVReveal();
         if ($bvreveal) {
+            return true;
+        }
+
+        if (!isset($this->config['crawler_agent_pattern']) || !isset($_SERVER['HTTP_USER_AGENT'])) {
             return true;
         }
 

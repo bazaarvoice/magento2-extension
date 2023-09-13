@@ -54,6 +54,31 @@ define('DEFAULT_CHARSET', 'UTF-8');
  */
 class BV
 {
+    public $config;
+    /**
+     * @var \Bazaarvoice\Connector\Model\BVSEOSDK\Reviews
+     */
+    public $reviews;
+    /**
+     * @var \Bazaarvoice\Connector\Model\BVSEOSDK\Questions
+     */
+    public $questions;
+    /**
+     * @var \Bazaarvoice\Connector\Model\BVSEOSDK\Stories
+     */
+    public $stories;
+    /**
+     * @var \Bazaarvoice\Connector\Model\BVSEOSDK\Spotlights
+     */
+    public $spotlights;
+    /**
+     * @var \Bazaarvoice\Connector\Model\BVSEOSDK\SellerRatings
+     */
+    public $sellerratings;
+    /**
+     * @var \Bazaarvoice\Connector\Model\BVSEOSDK\SellerRatings|\Bazaarvoice\Connector\Model\BVSEOSDK\Reviews|\Bazaarvoice\Connector\Model\BVSEOSDK\Questions|\Bazaarvoice\Connector\Model\BVSEOSDK\Stories|\Bazaarvoice\Connector\Model\BVSEOSDK\Spotlights
+     */
+    public $SEO;
 
     /**
      * BV Class Constructor
@@ -196,4 +221,3 @@ class BV
         }
     }
 }
-

@@ -10,6 +10,10 @@ namespace Bazaarvoice\Connector\Model\BVSEOSDK;
 
 class Spotlights extends Base
 {
+    /**
+     * @var array<string, string>
+     */
+    public $config;
 
     function __construct($params = array())
     {

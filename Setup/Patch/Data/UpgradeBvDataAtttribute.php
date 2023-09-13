@@ -30,6 +30,7 @@ use Magento\Store\Model\StoreManagerInterface;
 
 class UpgradeBvDataAtttribute implements DataPatchInterface, PatchRevertableInterface
 {
+    public $salesSetupFactory;
     const MODULE_NAME = 'Bazaarvoice_Connector';
     /**
      * @var ModuleDataSetupInterface
