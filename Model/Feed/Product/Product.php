@@ -6,6 +6,7 @@
 
 declare(strict_types=1);
 
+
 namespace Bazaarvoice\Connector\Model\Feed\Product;
 
 use Bazaarvoice\Connector\Api\ConfigProviderInterface;
@@ -70,9 +71,11 @@ class Product
     {
         $writer->startElement('Products');
         $indexCollection = $this->getIndexCollection();
+        $this->logger->info('selected store for process product : '.$store->getId());
         if ($store->getId()) {
             $indexCollection->setStore($store);
         }
+        $this->logger->info($indexCollection->count().' total product count to export.');
         foreach ($indexCollection as $product) {
             $this->writeProduct($writer, $product);
         }
@@ -89,8 +92,8 @@ class Product
         $this->logger->debug('Write product '.$product->getData('product_id'));
 
         /**
-         * Load parent value if product value is blank 
-        */
+         * Load parent value if product value is blank
+         */
         if ($product->getData('family') && $this->configProvider->isFamiliesInheritEnabled()) {
             $this->logger->debug('inherit family values');
             $children = $this->indexCollectionFactory->create();

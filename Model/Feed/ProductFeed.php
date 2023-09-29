@@ -48,6 +48,10 @@ class ProductFeed extends Feed
      * @var \Bazaarvoice\Connector\Model\Feed\Product\Product
      */
     private $product;
+    /**
+     * @var \Bazaarvoice\Connector\Logger\Logger
+     */
+    protected $logger;
 
     /**
      * Constructor
@@ -107,9 +111,11 @@ class ProductFeed extends Feed
      */
     public function exportFeedForStoreGroup(Group $storeGroup)
     {
+        $this->logger->info('Exporting storegroup'.$storeGroup.' feed');
         $store = $storeGroup->getDefaultStore();
+        $this->logger->info('selected default store : '.$store);
         /**
-         * Create varien io object and write local feed file 
+         * Create varien io object and write local feed file
          */
         $writer = $this->openProductFile($store);
 
@@ -127,9 +133,11 @@ class ProductFeed extends Feed
      */
     public function exportFeedForWebsite(Website $website)
     {
-        $store = $website->getDefaultStore();
+        $this->logger->info('Exporting website'.$website.' feed');
+        $store = $storeGroup->getDefaultStore();
+        $this->logger->info('selected default store : '.$store);
         /**
-         * Create varien io object and write local feed file 
+         * Create varien io object and write local feed file
          */
         $writer = $this->openProductFile($store);
 
@@ -146,12 +154,14 @@ class ProductFeed extends Feed
     public function exportFeedForGlobal()
     {
         /**
-         * Using admin store for now 
+         * Using admin store for now
          */
         /**
-         * @var Store $store 
+         * @var Store $store
          */
+        $this->logger->info('Exporting Global feed');
         $store = $this->storeManager->getStore(0);
+        $this->logger->info('selected default store : '.$store);
 
         $writer = $this->openProductFile($store);
 
@@ -181,12 +191,12 @@ class ProductFeed extends Feed
     {
 
         /**
-         * Get client name for the scope 
+         * Get client name for the scope
          */
         $clientName = $this->configProvider->getClientName($store->getId());
 
         /**
-         * Create varien io object and write local feed file 
+         * Create varien io object and write local feed file
          */
         $writer = parent::openFile(self::FEED_FILE_XSD, $clientName);
         return $writer;
@@ -200,7 +210,7 @@ class ProductFeed extends Feed
     protected function closeAndUploadFile($writer, $scopeId, $store)
     {
         /**
-         * Build local file name / path 
+         * Build local file name / path
          */
         $productFeedFilePath = BP . '/var/export/bvfeeds';
         $scope = $this->configProvider->getFeedGenerationScope();
@@ -212,7 +222,7 @@ class ProductFeed extends Feed
         parent::closeFile($writer, $productFeedFileName);
 
         /**
-         * Upload feed 
+         * Upload feed
          */
         $destinationFile = $this->configProvider->getProductPath($store->getId()) . '/' .
                            $this->configProvider->getProductFilename($store->getId());
