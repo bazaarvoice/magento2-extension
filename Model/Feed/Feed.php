@@ -10,7 +10,7 @@ namespace Bazaarvoice\Connector\Model\Feed;
 
 use Bazaarvoice\Connector\Api\ConfigProviderInterface;
 use Bazaarvoice\Connector\Api\StringFormatterInterface;
-use Bazaarvoice\Connector\Model\Filesystem\Io\Sftp;
+use Magento\Framework\Filesystem\Io\Sftp;
 use Bazaarvoice\Connector\Model\Source\Scope;
 use Exception;
 use Magento\Store\Model\Group;

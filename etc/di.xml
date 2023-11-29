@@ -44,10 +44,6 @@
     </type>
     <preference for="Magento\ReviewStaging\Ui\DataProvider\Product\Form\Modifier\Review" type="Bazaarvoice\Connector\Ui\ReviewStaging\Review"/>
 
-
-    <!-- sftp -->
-    <preference for="Magento\Framework\Filesystem\Io\Sftp" type="Bazaarvoice\Connector\Model\Filesystem\Io\Sftp" />
-
     <!-- Admin Grid -->
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
