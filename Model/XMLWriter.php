@@ -20,7 +20,7 @@ class XMLWriter extends \XMLWriter
      * @param null   $content
      * @param bool   $cdata
      *
-     * @return bool|void 
+     * @return bool
      */
     public function writeElement($name, $content = null, $cdata = false): bool
     {
@@ -31,26 +31,25 @@ class XMLWriter extends \XMLWriter
             $this->endElement();
             return true;
         } else {
-            parent::writeElement($name, $content);
-            return true;
+            return parent::writeElement($name, $content);
         }
+        return false;
     }
 
     /**
      * @param null $content
      * @param bool $cdata
      *
-     * @return bool|void
+     * @return bool
      */
     public function writeRaw($content = null, $cdata = false): bool
     {
         $content = trim((string)$content);
         if ($cdata) {
-            $this->writeCdata($content);
-            return true;
+            return $this->writeCdata($content);
         } else {
-            parent::writeRaw($content);
-            return true;
+            return parent::writeRaw($content);
         }
+        return false;
     }
 }

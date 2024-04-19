@@ -47,6 +47,13 @@ use Magento\Theme\Model\Theme;
 class Eav implements IndexerActionInterface, MviewActionInterface
 {
     /**
+     * @var \Magento\Catalog\Helper\Image
+     */
+    public $imageHelper;
+    public $assetRepository;
+    public $design;
+    public $theme;
+    /**
      * @var \Bazaarvoice\Connector\Logger\Logger
      */
     private $logger;

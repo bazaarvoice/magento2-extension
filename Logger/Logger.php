@@ -87,6 +87,6 @@ class Logger extends \Monolog\Logger
             print_r($message."\n");
         }
 
-        return parent::addRecord($level, $message, $context);
+        return parent::addRecord($level, $message, $context, $datetime);
     }
 }

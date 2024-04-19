@@ -15,6 +15,10 @@ namespace Bazaarvoice\Connector\Model\BVSEOSDK;
  */
 class Questions extends Base
 {
+    /**
+     * @var array<string, string>|array<string, mixed>
+     */
+    public $config;
 
     function __construct($params = array())
     {
