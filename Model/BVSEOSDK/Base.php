@@ -20,6 +20,11 @@ class Base
 {
     private $msg = '';
 
+    /** 
+     * @var array $config
+     */
+    private $config; 
+
     public function __construct($params = array())
     {
 

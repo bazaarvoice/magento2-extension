@@ -66,6 +66,11 @@ class BV
      *
      * @throws \Exception
      */
+    /** 
+     * @var array $config
+     */
+    private $config; 
+
     public function __construct($params = array())
     {
 

@@ -98,6 +98,22 @@ class Eav implements IndexerActionInterface, MviewActionInterface
      * @var \Magento\Eav\Model\Config
      */
     private $eavConfig;
+    /**
+     * @var \Magento\Catalog\Helper\Image 
+     */
+    private $imageHelper;
+    /**
+     * @var \Magento\Framework\View\Asset\Repository
+     */
+    private $assetRepository;
+    /**
+     * @var \Magento\Framework\View\DesignInterface
+     */
+    private $design;
+    /**
+     * @var \Magento\Theme\Model\Theme
+     */
+    private $theme;
 
     /**
      * @param \Bazaarvoice\Connector\Logger\Logger                               $logger
