@@ -22,6 +22,30 @@ use Magento\Store\Model\ScopeInterface;
  */
 class TestConnection extends Action
 {
+    /**
+     * @var Bazaarvoice\Connector\Controller\Adminhtml\Config\Sftp\TestConnection
+     */
+    private $sftp;
+
+    /**
+     * @var \Magento\Store\Model\StoreManagerInterface
+     */
+    private $storeManager;
+
+    /**
+     * @var \Bazaarvoice\Connector\Api\ConfigProviderInterface
+     */
+    private $configProvider;
+
+    /**
+     * @var \Magento\Framework\Controller\Result\JsonFactory
+     */
+    private $resultJsonFactory;
+
+    /**
+     * @var \Magento\Framework\Filter\StripTags
+     */
+    private $tagFilter;
    
     /**
      * TestConnection constructor.

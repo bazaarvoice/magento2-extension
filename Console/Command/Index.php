@@ -12,6 +12,7 @@ use Exception;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Magento\Framework\Console\Cli;
 
 /**
  * Class Index
@@ -50,10 +51,13 @@ class Index extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $returnValue = Cli::RETURN_SUCCESS;
         try {
             $this->indexer->executeFull();
         } catch (Exception $e) {
             print_r($e->getMessage()."\n".$e->getTraceAsString());
+            $returnValue = Cli::RETURN_FAILURE;
         }
+        return $returnValue;
     }
 }
