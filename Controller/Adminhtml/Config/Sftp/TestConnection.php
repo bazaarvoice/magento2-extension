@@ -14,6 +14,7 @@ use Bazaarvoice\Connector\Api\ConfigProviderInterface;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Store\Model\ScopeInterface;
+use Bazaarvoice\Connector\Model\Filesystem\Io\Sftp;
 
 /**
  * Class TestConnection
@@ -23,7 +24,7 @@ use Magento\Store\Model\ScopeInterface;
 class TestConnection extends Action
 {
     /**
-     * @var Bazaarvoice\Connector\Controller\Adminhtml\Config\Sftp\TestConnection
+     * @var Bazaarvoice\Connector\Model\Filesystem\Io\Sftp
      */
     private $sftp;
 
@@ -50,7 +51,13 @@ class TestConnection extends Action
     /**
      * TestConnection constructor.
      *
-     * @param Context      $context
+     * @param Context                   $context
+     * @param Sftp                      $sftp
+     * @param ConfigProviderInterface   $configProvider
+     * @param StoreInterface            $store
+     * @param StoreManagerInterface     $storeManager
+     * @param JsonFactory               $resultJsonFactory
+     * @param StripTags                 $tagFilter
      * @param PurchaseFeed $purchaseFeed
      */
     public function __construct(
