@@ -127,6 +127,10 @@ class Eav implements IndexerActionInterface, MviewActionInterface
      * @param \Bazaarvoice\Connector\Api\Data\IndexInterfaceFactory              $bvIndexFactory
      * @param \Bazaarvoice\Connector\Api\IndexRepositoryInterface                $indexRepository
      * @param \Magento\Eav\Model\Config                                          $eavConfig
+     * @param \Magento\Catalog\Helper\Image                                      $imageHelper
+     * @param \Magento\Framework\View\Asset\Repository                           $assetRepository
+     * @param \Magento\Framework\View\DesignInterface                            $design
+     * @param \Magento\Theme\Model\Theme                                         $theme
      */
     public function __construct(
         Logger $logger,
