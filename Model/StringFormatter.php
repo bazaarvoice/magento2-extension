@@ -86,8 +86,8 @@ class StringFormatter implements StringFormatterInterface
     {
         if ($this->configProvider->isCategoryIdUseUrlPathEnabled($storeId)) {
             $rawCategoryId = $category->getUrlPath();
-            $rawCategoryId = str_replace('/', '-', $rawCategoryId);
-            $rawCategoryId = str_replace('.html', '', $rawCategoryId);
+            $rawCategoryId = str_replace('/', '-', $rawCategoryId ?? '');
+            $rawCategoryId = str_replace('.html', '', $rawCategoryId ?? '');
             return $this->replaceIllegalCharacters($rawCategoryId);
         } else {
             return $this->configProvider->getCategoryPrefix($storeId) . $category->getId();
@@ -101,7 +101,7 @@ class StringFormatter implements StringFormatterInterface
      */
     public function getFormattedCategoryPath($category)
     {
-        return str_replace('/', '-', $category->getPath());
+        return str_replace('/', '-', $category->getPath() ?? '');
     }
 
     /**

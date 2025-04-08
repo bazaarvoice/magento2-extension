@@ -16,6 +16,8 @@ namespace Bazaarvoice\Connector\Model\BVSEOSDK;
 class Stories extends Base
 {
 
+    private mixed $config;
+
     function __construct($params = array())
     {
         // call Base Class constructor

@@ -638,8 +638,8 @@ class Flat implements IndexerActionInterface, MviewActionInterface
             }
 
             if(!empty($indexData['category_external_id'])) {
-                $indexData['category_external_id'] = str_replace('/', '-', $indexData['category_external_id']);
-                $indexData['category_external_id'] = str_replace('.html', '', $indexData['category_external_id']);
+                $indexData['category_external_id'] = str_replace('/', '-', $indexData['category_external_id'] ?? '');
+                $indexData['category_external_id'] = str_replace('.html', '', $indexData['category_external_id'] ?? '');
                 $indexData['category_external_id']
                     = $this->stringFormatter->replaceIllegalCharacters($indexData['category_external_id']);
             }
@@ -905,7 +905,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
      */
     private function filterByProducts($select, $productIds)
     {
-        $select->where("p.entity_id IN(?)", $productIds)->group('p.entity_id');
+        $select->where("p.entity_id IN(?)", $productIds, \Zend_Db::INT_TYPE)->group('p.entity_id');
     }
 
     /**
@@ -953,7 +953,7 @@ class Flat implements IndexerActionInterface, MviewActionInterface
         $indexTable = $this->resourceConnection->getTableName('bazaarvoice_index_product');
 
         $delete = $write->deleteFromSelect(
-            $write->select()->from($indexTable)->where('product_id IN(?)', $productIds)
+            $write->select()->from($indexTable)->where('product_id IN(?)', $productIds, \Zend_Db::INT_TYPE)
                 ->where('store_id = 0'), $indexTable
         );
         $write->query($delete);

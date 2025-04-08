@@ -580,8 +580,8 @@ class Eav implements IndexerActionInterface, MviewActionInterface
 
             if (!empty($indexData['parent_category_external_id']) && !empty($indexData['category_external_id']))
             {
-                $indexData['category_external_id'] = str_replace('/', '-', $indexData['category_external_id']);
-                $indexData['category_external_id'] = str_replace('.html', '', $indexData['category_external_id']);
+                $indexData['category_external_id'] = str_replace('/', '-', $indexData['category_external_id'] ?? '');
+                $indexData['category_external_id'] = str_replace('.html', '', $indexData['category_external_id'] ?? '');
                 $indexData['category_external_id'] = $this->stringFormatter->replaceIllegalCharacters($indexData['category_external_id']);
             }
 
@@ -886,7 +886,7 @@ class Eav implements IndexerActionInterface, MviewActionInterface
      */
     private function filterByProducts(Select $select, array $productIds)
     {
-        $select->where("p.entity_id in (?)", $productIds)->group('p.entity_id');
+        $select->where("p.entity_id in (?)", $productIds, \Zend_Db::INT_TYPE)->group('p.entity_id');
     }
 
     /**
@@ -932,7 +932,7 @@ class Eav implements IndexerActionInterface, MviewActionInterface
         $indexTable = $this->resourceConnection->getTableName('bazaarvoice_index_product');
 
         $delete = $write->deleteFromSelect(
-            $write->select()->from($indexTable)->where('product_id IN(?)', $productIds)
+            $write->select()->from($indexTable)->where('product_id IN(?)', $productIds, \Zend_Db::INT_TYPE)
                 ->where('version_id = 0'), $indexTable
         );
         $write->query($delete);
@@ -1133,11 +1133,15 @@ class Eav implements IndexerActionInterface, MviewActionInterface
         string $entityType = 'catalog_product'
     ) {
         $attribute = $this->eavConfig->getAttribute($entityType, $attributeCode);
+        $attributeBackendType = $attribute->getBackendType();
+        if ($attributeBackendType == "static") {
+           return;
+        }
 
         $aliasTableName = $mainTableAlias.'t'.$attribute->getId();
         $storeAliasTableName = 's' . $mainTableAlias.'t'.$attribute->getId();
         $joinCondition = '%1$s.%4$s = %2$s.%4$s AND %2$s.attribute_id = %3$d AND %2$s.store_id = %5$d';
-        $tableName = "{$entityType}_entity_{$attribute->getBackendType()}";
+        $tableName = "{$entityType}_entity_{$attributeBackendType}";
         $linkField = $this->getProductIdFieldName();
         $defaultStoreId = Store::DEFAULT_STORE_ID;
 
@@ -1178,11 +1182,15 @@ class Eav implements IndexerActionInterface, MviewActionInterface
         string $entityType = 'catalog_product'
     ): Zend_Db_Expr {
         $attribute = $this->eavConfig->getAttribute($entityType, $attributeCode);
-        $aliasTableName = $mainTableAlias.'t'.$attribute->getId();
-        $columnValue = $this->resourceConnection->getConnection()->getIfNullSql(
-            's' . $aliasTableName . '.value',
-            $aliasTableName . '.value'
-        );
+        if ($attribute->getBackendType() == "static") {
+            $columnValue = new \Zend_Db_Expr($mainTableAlias . '.' . $attributeCode);
+        } else {
+            $aliasTableName = $mainTableAlias.'t'.$attribute->getId();
+            $columnValue = $this->resourceConnection->getConnection()->getIfNullSql(
+                's' . $aliasTableName . '.value',
+                $aliasTableName . '.value'
+            );
+        }
 
         $select->columns([$fieldAlias => $columnValue]);
 

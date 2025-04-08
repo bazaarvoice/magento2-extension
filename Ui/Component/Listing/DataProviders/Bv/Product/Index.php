@@ -18,6 +18,8 @@ use Magento\Ui\DataProvider\AbstractDataProvider;
  */
 class Index extends AbstractDataProvider
 {
+    private $collection;
+
     /**
      * @param string                                                              $name
      * @param string                                                              $primaryFieldName

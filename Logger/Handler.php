@@ -39,6 +39,7 @@ class Handler extends Base
      * @var string
      */
     protected $_format = "[%datetime%] %level_name%: %message%\n";
+    private DriverInterface $filesystem;
 
     /**
      * @param DriverInterface $filesystem

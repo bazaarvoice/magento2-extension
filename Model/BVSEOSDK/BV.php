@@ -69,7 +69,13 @@ class BV
     /** 
      * @var array $config
      */
-    private $config; 
+    private $config;
+    private Reviews $reviews;
+    private Questions $questions;
+    private Stories $stories;
+    private Spotlights $spotlights;
+    private SellerRatings $sellerratings;
+    private Reviews|Questions|Spotlights|Stories|SellerRatings $SEO;
 
     public function __construct($params = array())
     {
