@@ -20,14 +20,14 @@ class Base
 {
     private $msg = '';
 
-    /** 
-     * @var array $config
-     */
-    private $config;
     private mixed $bv_config;
     private string $seo_url;
     private $start_time;
     private float $response_time;
+    /** 
+     * @var array $config
+     */
+    private $config;
 
     public function __construct($params = array())
     {

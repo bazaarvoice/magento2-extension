@@ -66,16 +66,17 @@ class BV
      *
      * @throws \Exception
      */
-    /** 
-     * @var array $config
-     */
-    private $config;
     private Reviews $reviews;
     private Questions $questions;
     private Stories $stories;
     private Spotlights $spotlights;
     private SellerRatings $sellerratings;
     private Reviews|Questions|Spotlights|Stories|SellerRatings $SEO;
+
+    /** 
+     * @var array $config
+     */
+    private $config;
 
     public function __construct($params = array())
     {
