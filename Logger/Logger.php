@@ -12,6 +12,8 @@ use Bazaarvoice\Connector\Api\ConfigProviderInterface;
 use Exception;
 use Magento\Framework\App\State;
 use Monolog\DateTimeImmutable;
+use Monolog\JsonSerializableDateTimeImmutable;
+use Monolog\Level;
 
 /**
  * Class Logger
@@ -72,12 +74,13 @@ class Logger extends \Monolog\Logger
     }
 
     /**
-     * @param int    $level
+     * @param int|Level $level
      * @param string $message
-     * @param array  $context
+     * @param array $context
+     * @param JsonSerializableDateTimeImmutable|null $datetime
      * @return bool
      */
-    public function addRecord(int $level, string $message, array $context = [], DateTimeImmutable $datetime = null): bool
+    public function addRecord(int|Level $level, string $message, array $context = [], JsonSerializableDateTimeImmutable|null $datetime = null): bool
     {
         if (is_array($message)) {
             $message = print_r($message, $return = true);
