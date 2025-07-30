@@ -121,7 +121,6 @@
 
     <preference for="Bazaarvoice\Connector\Api\Data\IndexInterface" type="Bazaarvoice\Connector\Model\Index"/>
     <preference for="Bazaarvoice\Connector\Api\IndexRepositoryInterface" type="Bazaarvoice\Connector\Model\IndexRepository"/>
-    <preference for="Bazaarvoice\Connector\Api\DccBuilderInterface" type="Bazaarvoice\Connector\Model\DccBuilder"/>
     <preference for="Bazaarvoice\Connector\Api\Data\Dcc\CatalogDataInterface" type="Bazaarvoice\Connector\Model\Dcc\CatalogData"/>
     <preference for="Bazaarvoice\Connector\Api\Data\Dcc\CatalogDataBuilderInterface" type="Bazaarvoice\Connector\Model\Dcc\CatalogDataBuilder"/>
     <preference for="Bazaarvoice\Connector\Api\Data\Dcc\CatalogData\CatalogProductInterface" type="Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProduct"/>
