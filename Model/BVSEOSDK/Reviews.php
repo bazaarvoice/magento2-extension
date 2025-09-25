@@ -15,6 +15,7 @@ namespace Bazaarvoice\Connector\Model\BVSEOSDK;
  */
 class Reviews extends Base
 {
+    protected mixed $config;
 
     function __construct($params = array())
     {

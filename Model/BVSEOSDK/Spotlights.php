@@ -11,6 +11,8 @@ namespace Bazaarvoice\Connector\Model\BVSEOSDK;
 class Spotlights extends Base
 {
 
+    protected mixed $config;
+    
     function __construct($params = array())
     {
         // call Base Class constructor

@@ -118,7 +118,7 @@ class Product
                     }
                 }
             }
-            $this->logger->debug($childrenValues);
+            $this->logger->debug(json_encode($childrenValues));
             foreach ($childrenValues as $attribute => $values) {
                 if (!is_array($values) || empty($values)) {
                     continue;

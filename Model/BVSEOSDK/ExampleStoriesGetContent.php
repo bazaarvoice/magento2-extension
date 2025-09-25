@@ -3,6 +3,9 @@
  * Copyright © Bazaarvoice, Inc. All rights reserved.
  * See LICENSE.md for license details.
  */
+use Magento\Framework\Escaper;
+
+$escaper = new Escaper();
 
 //Please provide cloud_key, bv_root_folder and subject_id
 $bv = new \Bazaarvoice\Connector\Model\BVSEOSDK\BV(
@@ -25,7 +28,7 @@ This is a test page for Stories: getContent() <br>
 GetContent() will return stories_grid content <br><br>
 
 <div id="BVRRContainer">
-    <?php print_r($bv->stories->getContent()); ?>
+    <?= $escaper->escapeHtml($bv->stories->getContent()); ?>
 </div>
 </body>
 </html>
