@@ -11,6 +11,8 @@ namespace Bazaarvoice\Connector\Model\BVSEOSDK;
 class SellerRatings extends Base
 {
 
+    protected mixed $config;
+    
     function __construct($params = array())
     {
 

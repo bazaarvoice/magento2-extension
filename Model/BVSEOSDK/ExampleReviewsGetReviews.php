@@ -3,6 +3,9 @@
  * Copyright © Bazaarvoice, Inc. All rights reserved.
  * See LICENSE.md for license details.
  */
+use Magento\Framework\Escaper;
+
+$escaper = new Escaper();
 
 //Please provide cloud_key, bv_root_folder and subject_id
 $bv = new \Bazaarvoice\Connector\Model\BVSEOSDK\BV(
@@ -23,7 +26,7 @@ This is a test page for Reviews: getReviews()<br>
 This will return review content<br><br>
 
 <div id="BVRRContainer">
-    <?php print_r($bv->reviews->getReviews()); ?>
+    <?= $escaper->escapeHtml($bv->reviews->getReviews()); ?>
 </div>
 </body>
 </html>

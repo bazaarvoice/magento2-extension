@@ -3,6 +3,9 @@
  * Copyright © Bazaarvoice, Inc. All rights reserved.
  * See LICENSE.md for license details.
  */
+use Magento\Framework\Escaper;
+
+$escaper = new Escaper();
 
 //Please provide cloud_key, bv_root_folder and subject_id
 $bv = new \Bazaarvoice\Connector\Model\BVSEOSDK\BV(
@@ -23,7 +26,7 @@ This is a test page for Questions: getContent<br>
 This will return questions and answers content<br><br>
 
 <div id="BVQAContainer">
-    <?php print_r($bv->questions->getContent()); ?>
+    <?= $escaper->escapeHtml($bv->questions->getContent()); ?>
 </div>
 
 </body>

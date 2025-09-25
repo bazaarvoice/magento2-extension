@@ -66,6 +66,14 @@ class BV
      *
      * @throws \Exception
      */
+
+    private Reviews $reviews;
+    private Questions $questions;
+    private Stories $stories;
+    private Spotlights $spotlights;
+    private SellerRatings $sellerratings;
+    private Reviews|Questions|Stories|Spotlights|SellerRatings $SEO;
+
     /** 
      * @var array $config
      */
