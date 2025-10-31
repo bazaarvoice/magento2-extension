@@ -19,10 +19,10 @@ namespace Bazaarvoice\Connector\Model\BVSEOSDK;
 class Base
 {
     private $msg = '';
-    private $start_time;
-    private string $seo_url;
-    private mixed $bv_config;
-    private float $response_time;
+    public $start_time;
+    public string $seo_url;
+    public mixed $bv_config;
+    public float $response_time;
 
     /** 
      * @var array $config

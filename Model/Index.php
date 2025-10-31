@@ -45,8 +45,8 @@ class Index extends AbstractModel implements IndexInterface
         Registry $registry,
         ConfigProviderInterface $configProvider,
         StringFormatterInterface $stringFormatter,
-        ResourceModel\Index $resource = null,
-        Collection $resourceCollection = null
+        ?ResourceModel\Index $resource = null,
+        ?Collection $resourceCollection = null
     ) {
         $this->_init(IndexResourceModel::class);
         $this->configProvider = $configProvider;

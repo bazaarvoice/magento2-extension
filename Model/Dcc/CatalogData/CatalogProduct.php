@@ -38,7 +38,7 @@ class CatalogProduct extends DataObject implements CatalogProductInterface
      *
      * @return \Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProduct
      */
-    public function setProductId(string $productId = null): CatalogProduct
+    public function setProductId(?string $productId = NULL): CatalogProduct
     {
         return $this->setData('productId', $productId);
     }
@@ -56,7 +56,7 @@ class CatalogProduct extends DataObject implements CatalogProductInterface
      *
      * @return \Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProduct
      */
-    public function setProductName(string $productName = null): CatalogProduct
+    public function setProductName(?string $productName = NULL): CatalogProduct
     {
         return $this->setData('productName', $productName);
     }
@@ -74,7 +74,7 @@ class CatalogProduct extends DataObject implements CatalogProductInterface
      *
      * @return \Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProduct
      */
-    public function setProductDescription(string $productDescription = null): CatalogProduct
+    public function setProductDescription(?string $productDescription = NULL): CatalogProduct
     {
         return $this->setData('productDescription', $productDescription);
     }
@@ -92,7 +92,7 @@ class CatalogProduct extends DataObject implements CatalogProductInterface
      *
      * @return \Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProduct
      */
-    public function setProductImageURL(string $productImageURL = null): CatalogProduct
+    public function setProductImageURL(?string $productImageURL = NULL): CatalogProduct
     {
         return $this->setData('productImageURL', $productImageURL);
     }
@@ -110,7 +110,7 @@ class CatalogProduct extends DataObject implements CatalogProductInterface
      *
      * @return \Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProduct
      */
-    public function setProductPageURL(string $productPageUrl = null): CatalogProduct
+    public function setProductPageURL(?string $productPageUrl = NULL): CatalogProduct
     {
         return $this->setData('productPageURL', $productPageUrl);
     }
@@ -164,7 +164,7 @@ class CatalogProduct extends DataObject implements CatalogProductInterface
      *
      * @return \Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProduct
      */
-    public function setCategoryPath(array $categoryPath = null): CatalogProduct
+    public function setCategoryPath(?array $categoryPath = NULL): CatalogProduct
     {
         return $this->setData('categoryPath', $categoryPath);
     }
@@ -182,7 +182,7 @@ class CatalogProduct extends DataObject implements CatalogProductInterface
      *
      * @return \Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProduct
      */
-    public function setManufacturerPartNumbers(array $categoryPath = null): CatalogProduct
+    public function setManufacturerPartNumbers(?array $categoryPath = NULL): CatalogProduct
     {
         return $this->setData('manufacturerPartNumbers', $categoryPath);
     }
@@ -200,7 +200,7 @@ class CatalogProduct extends DataObject implements CatalogProductInterface
      *
      * @return \Bazaarvoice\Connector\Model\Dcc\CatalogData\CatalogProduct
      */
-    public function setModelNumbers(array $categoryPath = null): CatalogProduct
+    public function setModelNumbers(?array $categoryPath = NULL): CatalogProduct
     {
         return $this->setData('modelNumbers', $categoryPath);
     }
