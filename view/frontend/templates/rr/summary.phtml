@@ -9,11 +9,11 @@
 <?php /** @var Bazaarvoice\Connector\ViewModel\Reviews $viewModel */ ?>
 <?php $viewModel = $block->getViewModel(); ?>
 
-<?php if ($viewModel->canShow()) : ?>
-    <!-- <?= $viewModel->getExtensionInjectionMessage(); ?> -->
+<?php if ($viewModel->canShow()): ?>
+    <!-- <?= $escaper->escapeHtml($viewModel->getExtensionInjectionMessage()); ?> -->
     <div data-bv-show="rating_summary"
-         data-bv-product-id="<?= $viewModel->getProductSku() ?>">
-        <?= $viewModel->getAggregateSEOContent() ?>
+         data-bv-product-id="<?= $escaper->escapeHtml($viewModel->getProductSku()) ?>">
+        <?= $escaper->escapeHtml($viewModel->getAggregateSEOContent()) ?>
     </div>
 <?php endif;
 

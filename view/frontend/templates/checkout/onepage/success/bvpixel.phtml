@@ -9,13 +9,13 @@
 <?php /** @var Bazaarvoice\Connector\ViewModel\Pixel $viewModel */ ?>
 <?php $viewModel = $block->getViewModel(); ?>
 
-<?php if ($viewModel->getBvPixelEnabled()) : ?>
-    <!-- <?= $viewModel->getExtensionInjectionMessage(); ?> -->
-    <?php if ($viewModel->canShowDebugDetails()) : ?>
-        <!--<?= $viewModel->getDebugDetails(); ?>-->
+<?php if ($viewModel->getBvPixelEnabled()): ?>
+    <!-- <?= $escaper->escapeHtml($viewModel->getExtensionInjectionMessage()); ?> -->
+    <?php if ($viewModel->canShowDebugDetails()): ?>
+        <!--<?= $escaper->escapeHtml($viewModel->getDebugDetails()); ?>-->
     <?php endif; ?>
     <script type="text/javascript">
-        var transactionData = <?= $viewModel->getJsonOrderDetails(); ?>;
+        var transactionData = <?= $escaper->escapeHtml($viewModel->getJsonOrderDetails()); ?>;
         window.bvCallback = function (BV) {
             BV.pixel.trackTransaction(transactionData);
         }

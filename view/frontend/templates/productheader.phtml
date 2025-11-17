@@ -10,11 +10,11 @@
 <?php $viewModel = $block->getViewModel(); ?>
 
 <?php if ($viewModel->isBvEnabled() && $viewModel->getProduct()): ?>
-    <!-- <?= $viewModel->getExtensionInjectionMessage(); ?> -->
+    <!-- <?= $escaper->escapeHtml($viewModel->getExtensionInjectionMessage()); ?> -->
     <?php if ($viewModel->isConfigurable() && $viewModel->getConfigProvider()->isRrChildrenEnabled()): ?>
         <script type="text/javascript">
-            var bvChildren = <?= $viewModel->getChildrenJson(); ?>;
-            var bvSelected = "<?= $viewModel->getProductSku() ?>";
+            var bvChildren = <?= $escaper->escapeHtml($viewModel->getChildrenJson()); ?>;
+            var bvSelected = "<?= $escaper->escapeHtml($viewModel->getProductSku()) ?>";
             require(["jquery"], function (jQuery) {
                 function bindBvSwatches()
                 {
@@ -44,28 +44,28 @@
             });
         </script>
     <?php endif; ?>
-    <?php if ($viewModel->isDccEnabled()) : ?>
+    <?php if ($viewModel->isDccEnabled()): ?>
         <?php $configData = $viewModel->getDccConfig(); ?>
-        <?php if ($viewModel->canShowDebugDetails()) : ?>
+        <?php if ($viewModel->canShowDebugDetails()): ?>
             <!-- <?php print_r(json_encode(json_decode($configData), JSON_PRETTY_PRINT)) ?> -->
         <?php endif; ?>
     <?php endif; ?>
     <script async type="text/javascript">
-        <?php if ($viewModel->isDccEnabled()) : ?>
-            window.bvDCC = <?= $configData ?>;
+        <?php if ($viewModel->isDccEnabled()): ?>
+            window.bvDCC = <?= /* @noEscape */ json_decode($configData) ?>;
         <?php endif; ?>
         window.bvCallback = function (BV) {
             if (BV.reviews !== undefined) {
                 BV.reviews.on('show', function () {
-                    <?= $viewModel->getConfigProvider()->getRrDoShowContentJs(); ?>
+                    <?= $escaper->escapeHtml($viewModel->getConfigProvider()->getRrDoShowContentJs()); ?>
                 });
             }
             if (BV.questions !== undefined) {
                 BV.questions.on('show', function () {
-                    <?= $viewModel->getConfigProvider()->getQaDoShowContentJs(); ?>
+                    <?= $escaper->escapeHtml($viewModel->getConfigProvider()->getQaDoShowContentJs()); ?>
                 });
             }
-            <?php if ($viewModel->isDccEnabled()) : ?>
+            <?php if ($viewModel->isDccEnabled()): ?>
                 for (var i = 0, len = window.bvDCC.catalogData.catalogProducts.length; i < len; ++i) {
                     BV.pixel.trackEvent("CatalogUpdate", {
                         type: 'Product',
