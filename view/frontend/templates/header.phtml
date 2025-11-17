@@ -12,6 +12,6 @@
 <?php if ($viewModel->isBvEnabled()): ?>
     <?php $bvApiUrl = $viewModel->getConfigProvider()->getBvApiHostUrl(); ?>
     <!--suppress HtmlUnknownTarget -->
-    <!-- <?= $viewModel->getExtensionInjectionMessage(); ?> -->
-    <script async type="text/javascript" src="<?php echo $bvApiUrl; ?>"></script>
+    <!-- <?= $escaper->escapeHtml($viewModel->getExtensionInjectionMessage()); ?> -->
+    <script async type="text/javascript" src="<?= $escaper->escapeUrl($bvApiUrl); ?>"></script>
 <?php endif; ?>
