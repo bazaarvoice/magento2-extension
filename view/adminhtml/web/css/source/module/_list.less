@@ -1,0 +1,79 @@
+@list-item-icon__indent-left: 3.5rem;
+
+ul,
+ol,
+dl {
+    margin-top: 0;
+}
+
+.list {
+    margin-bottom: 1em;
+    padding-left: 0;
+
+    > li {
+        display: block;
+        margin-bottom: .75em;
+        position: relative;
+        margin: 20px;
+
+        > .icon-success,
+        > .icon-failed {
+            font-size: 1.6em;
+            left: -.1em;
+            position: absolute;
+            top: 0;
+        }
+
+        > .icon-success {
+            .lib-css(color, @message-success__color);
+        }
+
+        > .icon-failed {
+            .lib-css(color, @error__color);
+        }
+    }
+}
+
+.list-item-icon {
+    padding-left: @list-item-icon__indent-left;
+}
+
+.list-item-success,
+.list-item-failed,
+.list-item-warning {
+    padding-left: @list-item-icon__indent-left;
+
+    &:before {
+        .lib-css(font-family, @icons-admin__font-name);
+        font-size: 1.6em;
+        left: -.1em;
+        position: absolute;
+        top: -.2em;
+    }
+}
+
+.list-item-success {
+    .lib-css(color, @color-dark-green1);
+    &:before {
+        .lib-css(color, @color-dark-green1);
+        content: @icon-success-messages__content;
+    }
+}
+
+.list-item-failed {
+    .lib-css(color, @error__color);
+    &:before {
+        .lib-css(color, @error__color);
+        content: @icon-error__content;
+    }
+}
+
+.list-item-warning {
+    .lib-css(color, @color-brownie1);
+    &:before {
+        .lib-css(color, @icon-warning);
+        content: @icon-warning__content;
+    }
+}
+
+
