@@ -1,4 +1,4 @@
-<?php
+<?php global $escaper;
 /**
  * Copyright © Bazaarvoice, Inc. All rights reserved.
  * See LICENSE.md for license details.
@@ -15,7 +15,7 @@
         <!--<?= $escaper->escapeHtml($viewModel->getDebugDetails()); ?>-->
     <?php endif; ?>
     <script type="text/javascript">
-        var transactionData = <?= $escaper->escapeHtml($viewModel->getJsonOrderDetails()); ?>;
+        var transactionData = <?= /* @noEscape */ $viewModel->getJsonOrderDetails(); ?>;
         window.bvCallback = function (BV) {
             BV.pixel.trackTransaction(transactionData);
         }

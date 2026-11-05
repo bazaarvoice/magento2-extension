@@ -11,7 +11,6 @@ namespace Bazaarvoice\Connector\Logger;
 use Bazaarvoice\Connector\Api\ConfigProviderInterface;
 use Exception;
 use Magento\Framework\App\State;
-use Monolog\DateTimeImmutable;
 use Monolog\JsonSerializableDateTimeImmutable;
 use Monolog\Level;
 

@@ -22,7 +22,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Product extends Command
 {
     /**
-     * @var ProductFeed $_productFeed 
+     * @var ProductFeed $_productFeed
      */
     protected $_productFeed;
 
@@ -43,12 +43,12 @@ class Product extends Command
     }
 
     /**
-     * @param \Symfony\Component\Console\Input\InputInterface   $input
-     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     * @param InputInterface $input
+     * @param OutputInterface $output
      *
-     * @return int|void|null
+     * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         print_r("\n".'Memory usage: '.memory_get_usage()."\n");
         try {
