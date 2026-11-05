@@ -21,7 +21,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class PurchaseTest extends Command
 {
     /**
-     * @var PurchaseFeed $_purchaseFeed 
+     * @var PurchaseFeed $_purchaseFeed
      */
     protected $_purchaseFeed;
 
@@ -47,7 +47,7 @@ class PurchaseTest extends Command
      *
      * @return int|void|null
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         print_r("\n".'Memory usage: '.memory_get_usage()."\n");
         $this->_purchaseFeed->setTest(true)->generateFeed();

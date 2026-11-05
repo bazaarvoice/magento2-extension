@@ -99,7 +99,7 @@ class Eav implements IndexerActionInterface, MviewActionInterface
      */
     private $eavConfig;
     /**
-     * @var \Magento\Catalog\Helper\Image 
+     * @var \Magento\Catalog\Helper\Image
      */
     private $imageHelper;
     /**
@@ -1051,10 +1051,13 @@ class Eav implements IndexerActionInterface, MviewActionInterface
 
             return $this->assetRepository->createAsset($this->imageHelper->getPlaceholder('image'), $assetParams)
                 ->getUrl();
-        } catch (LocalizedException $exception) {
-            throw new LocalizedException($exception->getMessage());
+        } catch (\Throwable $e) {
+            $this->logger->debug(
+                'Placeholder generation failed',
+                ['exception' => $e]
+            );
+            return '';
         }
-
     }
 
     /**
