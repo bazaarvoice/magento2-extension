@@ -52,17 +52,17 @@
     <?php endif; ?>
     <script async type="text/javascript">
         <?php if ($viewModel->isDccEnabled()): ?>
-            window.bvDCC = <?= /* @noEscape */ json_decode($configData) ?>;
+            window.bvDCC = <?= /* @noEscape */ $configData ?>;
         <?php endif; ?>
         window.bvCallback = function (BV) {
             if (BV.reviews !== undefined) {
                 BV.reviews.on('show', function () {
-                    <?= $escaper->escapeHtml($viewModel->getConfigProvider()->getRrDoShowContentJs()); ?>
+                    <?= /* @noEscape */ $viewModel->getConfigProvider()->getRrDoShowContentJs(); ?>
                 });
             }
             if (BV.questions !== undefined) {
                 BV.questions.on('show', function () {
-                    <?= $escaper->escapeHtml($viewModel->getConfigProvider()->getQaDoShowContentJs()); ?>
+                    <?= /* @noEscape */ $viewModel->getConfigProvider()->getQaDoShowContentJs(); ?>
                 });
             }
             <?php if ($viewModel->isDccEnabled()): ?>
