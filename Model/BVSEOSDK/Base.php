@@ -60,7 +60,7 @@ class Base
     protected function validateParams($params)
     {
         if (!is_array($params)) {
-            throw new Exception('BV Base Class missing config array.');
+            throw new \Exception('BV Base Class missing config array.');
         }
     }
 
@@ -265,8 +265,8 @@ class Base
             }
 
             try {
-                $payload = $this->_getFullSeoContents($access_method);
-            } catch (Exception $e) {
+                $payload = $this->_getFullSeoContents();
+            } catch (\Exception $e) {
                 $this->_setBuildMessage($e->getMessage());
             }
         }
@@ -698,7 +698,7 @@ class Base
     public function getContent()
     {
         $this->_setBuildMessage('Content Type "'.$this->config['content_type'].'" is not supported by getContent().');
-        $pay_load = $this->_buildComment('', 'getContent');
+        $pay_load = $this->_buildComment('');
 
         return $pay_load;
     }
@@ -707,7 +707,7 @@ class Base
     {
         $this->_setBuildMessage('Content Type "'.$this->config['content_type']
             .'" is not supported by getAggregateRating().');
-        $pay_load = $this->_buildComment('', 'getAggregateRating');
+        $pay_load = $this->_buildComment('');
 
         return $pay_load;
     }
@@ -715,7 +715,7 @@ class Base
     public function getReviews()
     {
         $this->_setBuildMessage('Content Type "'.$this->config['content_type'].'" is not supported by getReviews().');
-        $pay_load = $this->_buildComment('', 'getReviews');
+        $pay_load = $this->_buildComment('');
 
         return $pay_load;
     }

@@ -47,6 +47,11 @@ use Magento\Theme\Model\Theme;
 class Eav implements IndexerActionInterface, MviewActionInterface
 {
     /**
+     * @var \Magento\Theme\Model\ResourceModel\Theme
+     */
+    private $themeResource;
+
+    /**
      * @var \Bazaarvoice\Connector\Logger\Logger
      */
     private $logger;
@@ -147,8 +152,10 @@ class Eav implements IndexerActionInterface, MviewActionInterface
         Image $imageHelper,
         AssetRepository $assetRepository,
         DesignInterface $design,
+        \Magento\Theme\Model\ResourceModel\Theme $themeResource,
         Theme $theme
     ) {
+        $this->themeResource = $themeResource;
         $this->logger = $logger;
         $this->storeManager = $storeManager;
         $this->objectManager = $objectManager;
@@ -673,12 +680,18 @@ class Eav implements IndexerActionInterface, MviewActionInterface
                          * @var Index $productIndex
                          */
 
-                        foreach ($this->productIndexes as $productIndex) {
-                            if ($productIndex->getData('product_id') == $indexData['product_id']
-                                && $productIndex->getData('store_id') == $storeId
+                        $productIndex = null;
+                        foreach ($this->productIndexes as $candidate) {
+                            if ($candidate->getData('product_id') == $indexData['product_id']
+                                && $candidate->getData('store_id') == $storeId
                             ) {
+                                $productIndex = $candidate;
                                 break;
                             }
+                        }
+
+                        if ($productIndex === null) {
+                            continue;
                         }
 
                         /**
@@ -1042,7 +1055,8 @@ class Eav implements IndexerActionInterface, MviewActionInterface
             $localeCode = $this->configProvider->getLocale($store->getId());
             $themeId  = $this->design->getConfigurationDesignTheme('frontend', [$store->getId()]);
 
-            $theme = $this->theme->load($themeId);
+            $theme = $this->theme;
+            $this->themeResource->load($theme, $themeId);
             $assetParams = [
                 'area'   => 'frontend',
                 'theme'  => $theme->getThemePath(),

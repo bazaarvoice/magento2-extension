@@ -34,7 +34,7 @@ class Index extends Action
     {
         $this->_pageFactory = $pageFactory;
 
-        return parent::__construct($context);
+        parent::__construct($context);
     }
 
     /**

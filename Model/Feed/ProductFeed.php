@@ -33,6 +33,11 @@ class ProductFeed extends Feed
     const CATEGORY_EXTERNAL_ID = 'bv_category_id';
 
     /**
+     * @var \Magento\Framework\App\Filesystem\DirectoryList
+     */
+    private $directoryList;
+
+    /**
      * @var string
      */
     protected $typeId = 'product';
@@ -68,11 +73,13 @@ class ProductFeed extends Feed
         ConfigProviderInterface $configProvider,
         StringFormatterInterface $stringFormatter,
         XMLWriter $xmlWriter,
+        \Magento\Framework\App\Filesystem\DirectoryList $directoryList,
         File $filesystem,
         Brand $brand,
         Category $category,
         Product $product
     ) {
+        $this->directoryList = $directoryList;
         $this->logger = $logger;
         $this->storeManager = $storeManager;
         $this->configProvider = $configProvider;
@@ -202,7 +209,7 @@ class ProductFeed extends Feed
         /**
          * Build local file name / path 
          */
-        $productFeedFilePath = BP . '/var/export/bvfeeds';
+        $productFeedFilePath = $this->directoryList->getRoot() . '/var/export/bvfeeds';
         $scope = $this->configProvider->getFeedGenerationScope();
         $date = date('U');
 

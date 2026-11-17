@@ -4,74 +4,64 @@
  * See LICENSE.md for license details.
  */
 
-namespace Bazaarvoice\Connector\Test\Unit\Model\Dcc;
+namespace Bazaarvoice\Connector\Test\Unit\Model;
 
+use Bazaarvoice\Connector\Api\Data\Dcc\CatalogDataBuilderInterface;
+use Bazaarvoice\Connector\Api\StringFormatterInterface;
+use Bazaarvoice\Connector\Logger\Logger;
 use Bazaarvoice\Connector\Model\CurrentProductProvider;
 use Bazaarvoice\Connector\Model\Dcc;
 use Bazaarvoice\Connector\Model\Dcc\CatalogData;
-use Bazaarvoice\Connector\Model\Dcc\CatalogDataBuilder;
-use Bazaarvoice\Connector\Model\StringFormatter;
 use Magento\Catalog\Api\Data\ProductInterface;
-use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
+use Magento\Catalog\Api\ProductRepositoryInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Class BuilderTest
+ * Tests the product data exposed by DCC.
  */
 class DccTest extends TestCase
 {
     /**
-     * @var \Magento\Framework\TestFramework\Unit\Helper\ObjectManager
+     * Missing products produce an empty result.
      */
-    private $objectManager;
-
     public function testBuildProductDoesNotExistEmptyResult()
     {
-        /**
-         * @var \Bazaarvoice\Connector\Model\Dcc $dcc 
-         */
+        $currentProductProvider = $this->createStub(CurrentProductProvider::class);
+        $currentProductProvider->method('getProduct')->willReturn(false);
+        $dcc = new Dcc(
+            $this->createStub(CatalogDataBuilderInterface::class),
+            $this->createStub(ProductRepositoryInterface::class),
+            $currentProductProvider,
+            $this->createStub(StringFormatterInterface::class),
+            $this->createStub(Logger::class)
+        );
 
-        $className = Dcc::class;
-        $arguments = $this->objectManager->getConstructArguments($className);
-        $dcc = $this->objectManager->getObject($className, $arguments);
-        $result = $dcc->getJson();
-
-        $this->assertEmpty($result);
+        $this->assertSame('', $dcc->getJson());
     }
 
+    /**
+     * Existing products are built and encoded as catalog data.
+     */
     public function testBuildProductExistsSomeResult()
     {
-        /**
-         * @var \Bazaarvoice\Connector\Model\Dcc $dcc 
-         */
+        $product = $this->createStub(ProductInterface::class);
+        $currentProductProvider = $this->createStub(CurrentProductProvider::class);
+        $currentProductProvider->method('getProduct')->willReturn($product);
+        $catalogData = new CatalogData(['locale' => 'en_US']);
+        $catalogDataBuilder = $this->createMock(CatalogDataBuilderInterface::class);
+        $catalogDataBuilder->expects($this->once())->method('build')->with($product)->willReturn($catalogData);
+        $stringFormatter = $this->createMock(StringFormatterInterface::class);
+        $stringFormatter->expects($this->once())->method('jsonEncode')
+            ->with(['catalogData' => ['locale' => 'en_US']])
+            ->willReturn('{"catalogData":{"locale":"en_US"}}');
+        $dcc = new Dcc(
+            $catalogDataBuilder,
+            $this->createStub(ProductRepositoryInterface::class),
+            $currentProductProvider,
+            $stringFormatter,
+            $this->createStub(Logger::class)
+        );
 
-        $currentProductProviderMock = $this->createPartialMock(CurrentProductProvider::class, ['getProduct']);
-        $productMock = $this->getMockBuilder(ProductInterface::class)
-            ->disableOriginalConstructor()
-            ->getMockForAbstractClass();
-        $currentProductProviderMock->method('getProduct')->willReturn($productMock);
-
-        $dccCatalogDataMock = $this->createPartialMock(CatalogData::class, ['getData']);
-        $dccCatalogDataMock->method('getData')->willReturn('{}');
-
-        $dccCatalogDataBuilderMock = $this->createPartialMock(CatalogDataBuilder::class, ['build']);
-        $dccCatalogDataBuilderMock->method('build')->willReturn($dccCatalogDataMock);
-
-        $stringFormatterMock = $this->createPartialMock(StringFormatter::class, ['jsonEncode']);
-        $stringFormatterMock->method('jsonEncode')->willReturn('{}');
-
-        $arguments = $this->objectManager->getConstructArguments(Dcc::class);
-        $arguments['currentProductProvider'] = $currentProductProviderMock;
-        $arguments['catalogDataBuilder'] = $dccCatalogDataBuilderMock;
-        $arguments['stringFormatter'] = $stringFormatterMock;
-        $dcc = $this->objectManager->getObject(Dcc::class, $arguments);
-        $result = $dcc->getJson();
-
-        $this->assertNotEmpty($result);
-    }
-
-    protected function setUp()
-    {
-        $this->objectManager = new ObjectManager($this);
+        $this->assertSame('{"catalogData":{"locale":"en_US"}}', $dcc->getJson());
     }
 }

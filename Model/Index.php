@@ -33,11 +33,16 @@ class Index extends AbstractModel implements IndexInterface
     private $stringFormatter;
 
     /**
+     * @var IndexResourceModel
+     */
+    private $indexResource;
+
+    /**
      * @param \Magento\Framework\Model\Context                                 $context
      * @param \Magento\Framework\Registry                                      $registry
      * @param ConfigProviderInterface                                          $configProvider
      * @param StringFormatterInterface                                         $stringFormatter
-     * @param \Bazaarvoice\Connector\Model\ResourceModel\Index|null            $resource
+     * @param \Bazaarvoice\Connector\Model\ResourceModel\Index                 $resource
      * @param \Bazaarvoice\Connector\Model\ResourceModel\Index\Collection|null $resourceCollection
      */
     public function __construct(
@@ -45,9 +50,10 @@ class Index extends AbstractModel implements IndexInterface
         Registry $registry,
         ConfigProviderInterface $configProvider,
         StringFormatterInterface $stringFormatter,
-        ?ResourceModel\Index $resource = null,
+        ResourceModel\Index $resource,
         ?Collection $resourceCollection = null
     ) {
+        $this->indexResource = $resource;
         $this->_init(IndexResourceModel::class);
         $this->configProvider = $configProvider;
         $this->stringFormatter = $stringFormatter;
@@ -77,7 +83,7 @@ class Index extends AbstractModel implements IndexInterface
         /**
          * @var ResourceModel\Index $resource 
          */
-        $resource = $this->getResource();
+        $resource = $this->indexResource;
         $index = $resource->loadBy(
             [
             'product_id' => $productId,

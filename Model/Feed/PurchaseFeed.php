@@ -39,6 +39,21 @@ class PurchaseFeed extends Feed
     const ALREADY_SENT_IN_FEED_FLAG = 'sent_in_bv_postpurchase_feed';
 
     /**
+     * @var \Magento\Framework\App\Filesystem\DirectoryList
+     */
+    private $directoryList;
+
+    /**
+     * @var \Magento\Sales\Model\ResourceModel\Order
+     */
+    private $orderResource;
+
+    /**
+     * @var \Magento\Catalog\Model\ResourceModel\Product
+     */
+    private $productResource;
+
+    /**
      * @var string
      */
     protected $typeId = 'purchase';
@@ -90,9 +105,15 @@ class PurchaseFeed extends Feed
         State $state,
         CollectionFactory $orderCollectionFactory,
         ResourceConnection $resourceConnection,
+        \Magento\Catalog\Model\ResourceModel\Product $productResource,
+        \Magento\Sales\Model\ResourceModel\Order $orderResource,
+        \Magento\Framework\App\Filesystem\DirectoryList $directoryList,
         ConfigFactory $mediaConfigFactory,
         $orderStatus = []
     ) {
+        $this->directoryList = $directoryList;
+        $this->orderResource = $orderResource;
+        $this->productResource = $productResource;
         try {
             $state->getAreaCode();
         } catch (Exception $e) {
@@ -201,7 +222,7 @@ class PurchaseFeed extends Feed
                  */
                 $product->setStoreId($order->getStoreId());
                 $this->storeManager->setCurrentStore($order->getStoreId());
-                $product->load($product->getId());
+                $this->productResource->load($product, $product->getId());
 
                 $writer->writeElement('ExternalId', $this->stringFormatter->getFormattedProductSku($product));
                 $writer->writeElement('Name', $product->getName());
@@ -258,7 +279,8 @@ class PurchaseFeed extends Feed
              */
             if ($this->test == false) {
                 try {
-                    $order->setData(self::ALREADY_SENT_IN_FEED_FLAG, true)->save();
+                    $order->setData(self::ALREADY_SENT_IN_FEED_FLAG, true);
+                    $this->orderResource->save($order);
                 } catch (Exception $e) {
                     $this->logger->error($e->getMessage());
                 }
@@ -352,7 +374,7 @@ class PurchaseFeed extends Feed
         /**
          * Build local file name / path 
          */
-        $purchaseFeedFilePath = BP.'/var/export/bvfeeds';
+        $purchaseFeedFilePath = $this->directoryList->getRoot().'/var/export/bvfeeds';
         $purchaseFeedFileName = $purchaseFeedFilePath.'/purchaseFeed-store-'.$store->getId().'-'.date('U').'.xml';
         /**
          * Write orders to file 
@@ -385,7 +407,7 @@ class PurchaseFeed extends Feed
         /**
          * Build local file name / path 
          */
-        $purchaseFeedFilePath = BP.'/var/export/bvfeeds';
+        $purchaseFeedFilePath = $this->directoryList->getRoot().'/var/export/bvfeeds';
         $purchaseFeedFileName = $purchaseFeedFilePath.'/purchaseFeed-group-'.$storeGroup->getId().'-'.date('U').'.xml';
         /**
          * Using default store for now 
@@ -421,7 +443,7 @@ class PurchaseFeed extends Feed
         /**
          * Build local file name / path 
          */
-        $purchaseFeedFilePath = BP.'/var/export/bvfeeds';
+        $purchaseFeedFilePath = $this->directoryList->getRoot().'/var/export/bvfeeds';
         $purchaseFeedFileName = $purchaseFeedFilePath.'/purchaseFeed-website-'.$website->getId().'-'.date('U').'.xml';
         /**
          * Using default store for now 
@@ -447,7 +469,7 @@ class PurchaseFeed extends Feed
         /**
          \* Build local file name / path 
         */
-        $purchaseFeedFilePath = BP.'/var/export/bvfeeds';
+        $purchaseFeedFilePath = $this->directoryList->getRoot().'/var/export/bvfeeds';
         $purchaseFeedFileName = $purchaseFeedFilePath.'/purchaseFeed-'.date('U').'.xml';
 
         /**

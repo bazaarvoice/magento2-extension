@@ -11,56 +11,52 @@ namespace Bazaarvoice\Connector\Logger;
 use Bazaarvoice\Connector\Api\ConfigProviderInterface;
 use Exception;
 use Magento\Framework\App\State;
-use Monolog\JsonSerializableDateTimeImmutable;
-use Monolog\Level;
+use Psr\Log\AbstractLogger;
 
 /**
- * Class Logger
- *
- * @package Bazaarvoice\Connector\Logger
+ * Logs connector messages to the configured handlers and console.
  */
-class Logger extends \Monolog\Logger
+class Logger extends AbstractLogger
 {
-    /**
-     * @var bool
-     */
-    protected $admin = false;
     /**
      * @var ConfigProviderInterface
      */
     private $configProvider;
 
     /**
-     * Logger constructor.
-     *
-     * @param string                                    $name
-     * @param ConfigProviderInterface                   $configProvider
-     * @param State                                     $state
-     *
-     * @param array|\Monolog\Handler\HandlerInterface[] $handlers
-     *
-     * @codingStandardsIgnoreStart
+     * @var bool
+     */
+    private $admin = false;
+
+    /**
+     * @var \Monolog\Logger
+     */
+    private $logger;
+
+    /**
+     * @param ConfigProviderInterface $configProvider
+     * @param State $state
+     * @param \Monolog\Logger $logger
      */
     public function __construct(
-        $name,
         ConfigProviderInterface $configProvider,
         State $state,
-        array $handlers = array()
+        \Monolog\Logger $logger
     ) {
+        $this->configProvider = $configProvider;
         try {
             $this->admin = $state->getAreaCode() === 'adminhtml';
         } catch (Exception $e) {
+            $this->admin = false;
         }
-        parent::__construct($name, $handlers);
-        $this->configProvider = $configProvider;
-        /** @codingStandardsIgnoreEnd */
+        $this->logger = $logger;
     }
 
     /**
-     * @param string|array $message
-     * @param array        $context
+     * Log a debug message when debug logging is enabled.
      *
-     * @return bool
+     * @param string|array $message
+     * @param array $context
      */
     public function debug($message, array $context = []): void
     {
@@ -68,27 +64,37 @@ class Logger extends \Monolog\Logger
             if (is_array($message)) {
                 $message = json_encode($message);
             }
-            $this->addRecord(static::DEBUG, strval($message),$context);
+            $this->addRecord(\Monolog\Logger::DEBUG, strval($message), $context);
         }
     }
 
     /**
-     * @param int|Level $level
+     * Log a message at the given level.
+     *
+     * @param mixed $level
+     * @param string|\Stringable $message
+     * @param array $context
+     */
+    public function log($level, $message, array $context = []): void
+    {
+        $this->addRecord(\Monolog\Logger::toMonologLevel($level), (string)$message, $context);
+    }
+
+    /**
+     * Write a record and echo messages in the console and admin area.
+     *
+     * @param mixed $level
      * @param string $message
-     * @param array  $context
-     * @param JsonSerializableDateTimeImmutable|null $datetime
+     * @param array $context
+     * @param \DateTimeImmutable|null $datetime
      * @return bool
      */
-    public function addRecord(int|Level $level, string $message, array $context = [], JsonSerializableDateTimeImmutable|null $datetime = null): bool
+    public function addRecord($level, string $message, array $context = [], $datetime = null): bool
     {
-        if (is_array($message)) {
-            $message = print_r($message, $return = true);
+        if (PHP_SAPI === 'cli' || $this->admin) {
+            print_r($message . "\n");
         }
 
-        if (php_sapi_name() == "cli" || $this->admin) {
-            print_r($message."\n");
-        }
-
-        return parent::addRecord($level, $message, $context);
+        return $this->logger->addRecord($level, $message, $context);
     }
 }

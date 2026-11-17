@@ -25,12 +25,18 @@ use Magento\Framework\App\Config\Storage\WriterInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Setup;
 use Magento\Sales\Setup\SalesSetupFactory;
+use Magento\Sales\Model\Order;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
 class UpgradeBvDataAtttribute implements DataPatchInterface, PatchRevertableInterface
 {
     const MODULE_NAME = 'Bazaarvoice_Connector';
+    /**
+     * @var SalesSetupFactory
+     */
+    private $salesSetupFactory;
+
     /**
      * @var ModuleDataSetupInterface
      */
@@ -57,13 +63,15 @@ class UpgradeBvDataAtttribute implements DataPatchInterface, PatchRevertableInte
     private $runtimeConfigSource;
 
     public function __construct(
+        SalesSetupFactory $salesSetupFactory,
         ModuleDataSetupInterface $moduleDataSetup,
         CategorySetupFactory $categorySetupFactory,
         EncryptorInterface $encryptor,
         StoreManagerInterface $storeManager,
         WriterInterface $configWriter,
-        RuntimeConfigSource $runtimeConfigSource,
+        RuntimeConfigSource $runtimeConfigSource
     ) {
+        $this->salesSetupFactory = $salesSetupFactory;
 
         $this->moduleDataSetup = $moduleDataSetup;
         $this->categorySetupFactory = $categorySetupFactory;
@@ -186,6 +194,7 @@ class UpgradeBvDataAtttribute implements DataPatchInterface, PatchRevertableInte
 
 
         $this->moduleDataSetup->getConnection()->endSetup();
+        return $this;
 
     }
 
