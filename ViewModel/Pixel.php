@@ -31,6 +31,11 @@ class Pixel implements ArgumentInterface
 {
 
     /**
+     * @var \Magento\Directory\Model\ResourceModel\Region
+     */
+    private $regionResource;
+
+    /**
      * @var \Magento\Checkout\Model\Session
      */
     private $checkoutSession;
@@ -78,11 +83,13 @@ class Pixel implements ArgumentInterface
         ConfigProviderInterface $configProvider,
         StringFormatterInterface $stringFormatter,
         Session $checkoutSession,
+        \Magento\Directory\Model\ResourceModel\Region $regionResource,
         Region $region,
         ProductRepository $productRepository,
         ConfigFactory $mediaConfigFactory,
         Config $taxConfig
     ) {
+        $this->regionResource = $regionResource;
         $this->checkoutSession = $checkoutSession;
         $this->region = $region;
         $this->productRepository = $productRepository;
@@ -141,7 +148,8 @@ class Pixel implements ArgumentInterface
 
         if ($address) {
             $this->orderDetails['city'] = $address->getCity();
-            $this->orderDetails['state'] = $this->region->load($address->getRegionId())->getCode();
+            $this->regionResource->load($this->region, $address->getRegionId());
+            $this->orderDetails['state'] = $this->region->getCode();
             $this->orderDetails['country'] = $address->getCountryId();
         }
 

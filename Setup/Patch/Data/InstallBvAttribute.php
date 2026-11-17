@@ -120,6 +120,7 @@ class InstallBvAttribute implements DataPatchInterface
             $eavSetup->removeAttributeGroup($entityTypeId, $attributeSetId, 'Product Details');
         }
         $this->moduleDataSetup->getConnection()->endSetup();
+        return $this;
    }
 
    /**

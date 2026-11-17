@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace Bazaarvoice\Connector\Model\Feed\Product;
 
 use Bazaarvoice\Connector\Api\ConfigProviderInterface;
-use Bazaarvoice\Connector\Logger\Logger;
 use Bazaarvoice\Connector\Model\XMLWriter;
 use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
 use Magento\Store\Api\Data\StoreInterface;
@@ -41,13 +40,11 @@ class Brand
     /**
      * Brand constructor.
      *
-     * @param Logger                                     $logger
      * @param ConfigProviderInterface                    $configProvider
      * @param Attribute                                  $attribute
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      */
     public function __construct(
-        Logger $logger,
         ConfigProviderInterface $configProvider,
         Attribute $attribute,
         StoreManagerInterface $storeManager

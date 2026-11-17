@@ -124,7 +124,7 @@ class IndexRepository implements IndexRepositoryInterface
     public function getById($id)
     {
         $object = $this->objectFactory->create();
-        $object->load($id);
+        $this->resourceModel->load($object, $id);
         if (!$object->getId()) {
             throw new NoSuchEntityException(
                 __(
@@ -147,14 +147,6 @@ class IndexRepository implements IndexRepositoryInterface
         $searchResults = $this->searchResultsFactory->create();
         $searchResults->setSearchCriteria($criteria);
         $collection = $this->collectionFactory->create();
-
-        if ($this->getIncludeQuoteData() === true) {
-            $collection->addQuoteData();
-        }
-
-        if ($this->getIncludeCurrentVersionData() === true) {
-            $collection->addCurrentVersionData();
-        }
 
         foreach ($criteria->getFilterGroups() as $filterGroup) {
             $fields = [];

@@ -10,7 +10,6 @@ namespace Bazaarvoice\Connector\Model\Feed\Product;
 
 use Bazaarvoice\Connector\Api\ConfigProviderInterface;
 use Bazaarvoice\Connector\Api\StringFormatterInterface;
-use Bazaarvoice\Connector\Logger\Logger;
 use Bazaarvoice\Connector\Model\Source\Scope;
 use Bazaarvoice\Connector\Model\XMLWriter;
 use Magento\Catalog\Model\CategoryFactory;
@@ -28,6 +27,16 @@ use Magento\Store\Model\Website;
  */
 class Category
 {
+    /**
+     * @var \Magento\Catalog\Model\ResourceModel\Category
+     */
+    private $categoryResource;
+
+    /**
+     * @var \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory
+     */
+    private $categoryCollectionFactory;
+
     /**
      * @var \Magento\Catalog\Model\CategoryFactory
      */
@@ -60,7 +69,6 @@ class Category
     /**
      * Category constructor.
      *
-     * @param Logger                                     $logger
      * @param ConfigProviderInterface                    $configProvider
      * @param CategoryFactory                            $categoryFactory
      * @param ResourceConnection                         $resourceConnection
@@ -68,13 +76,16 @@ class Category
      * @param StringFormatterInterface                   $stringFormatter
      */
     public function __construct(
-        Logger $logger,
         ConfigProviderInterface $configProvider,
+        \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory,
+        \Magento\Catalog\Model\ResourceModel\Category $categoryResource,
         CategoryFactory $categoryFactory,
         ResourceConnection $resourceConnection,
         StoreManagerInterface $storeManager,
         StringFormatterInterface $stringFormatter
     ) {
+        $this->categoryResource = $categoryResource;
+        $this->categoryCollectionFactory = $categoryCollectionFactory;
         $this->categoryFactory = $categoryFactory;
         $this->resourceConnection = $resourceConnection;
         $this->configProvider = $configProvider;
@@ -307,7 +318,7 @@ class Category
         /**
          * @var \Magento\Catalog\Model\ResourceModel\Category\Collection $collection 
         */
-        $collection = $this->categoryFactory->create()->getCollection();
+        $collection = $this->categoryCollectionFactory->create();
 
         /**
          * Filter category collection based on Magento store
@@ -317,7 +328,8 @@ class Category
         if ($store) {
             $rootCategoryId = $store->getRootCategoryId();
             /* @var $rootCategory \Magento\Catalog\Model\Category */
-            $rootCategory = $this->categoryFactory->create()->load($rootCategoryId);
+            $rootCategory = $this->categoryFactory->create();
+            $this->categoryResource->load($rootCategory, $rootCategoryId);
             $rootCategoryPath = $rootCategory->getData('path');
             if ($this->configProvider->getFeedGenerationScope() != Scope::SCOPE_GLOBAL) {
                 $collection->addAttributeToFilter('path', ['like' => $rootCategoryPath.'/%']);

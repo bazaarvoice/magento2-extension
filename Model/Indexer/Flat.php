@@ -737,12 +737,18 @@ class Flat implements IndexerActionInterface, MviewActionInterface
                          * @var Index $productIndex
                          */
 
-                        foreach ($this->productIndexes as $productIndex) {
-                            if ($productIndex->getProductId() == $indexData['product_id']
-                                && $productIndex->getStoreId() == $storeId
+                        $productIndex = null;
+                        foreach ($this->productIndexes as $candidate) {
+                            if ($candidate->getProductId() == $indexData['product_id']
+                                && $candidate->getStoreId() == $storeId
                             ) {
+                                $productIndex = $candidate;
                                 break;
                             }
+                        }
+
+                        if ($productIndex === null) {
+                            continue;
                         }
 
                         /**

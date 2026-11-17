@@ -11,7 +11,6 @@ use Magento\Backend\App\Action\Context;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Filter\StripTags;
 use Bazaarvoice\Connector\Api\ConfigProviderInterface;
-use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Store\Model\ScopeInterface;
 use Bazaarvoice\Connector\Model\Filesystem\Io\Sftp;
@@ -54,17 +53,14 @@ class TestConnection extends Action
      * @param Context                   $context
      * @param Sftp                      $sftp
      * @param ConfigProviderInterface   $configProvider
-     * @param StoreInterface            $store
      * @param StoreManagerInterface     $storeManager
      * @param JsonFactory               $resultJsonFactory
      * @param StripTags                 $tagFilter
-     * @param PurchaseFeed $purchaseFeed
      */
     public function __construct(
         Context $context,
         \Bazaarvoice\Connector\Model\Filesystem\Io\Sftp $sftp,
         ConfigProviderInterface $configProvider,
-        StoreInterface $store,
         StoreManagerInterface $storeManager,
         JsonFactory $resultJsonFactory,
         StripTags $tagFilter

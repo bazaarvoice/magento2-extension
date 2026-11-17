@@ -112,12 +112,17 @@
     </type>
     <type name="Bazaarvoice\Connector\Logger\Logger">
         <arguments>
+            <argument name="logger" xsi:type="object">BazaarvoiceConnectorMonolog</argument>
+        </arguments>
+    </type>
+    <virtualType name="BazaarvoiceConnectorMonolog" type="Monolog\Logger">
+        <arguments>
             <argument name="name" xsi:type="string">bvLogger</argument>
             <argument name="handlers" xsi:type="array">
                 <item name="system" xsi:type="object">Bazaarvoice\Connector\Logger\Handler</item>
             </argument>
         </arguments>
-    </type>
+    </virtualType>
 
     <preference for="Bazaarvoice\Connector\Api\Data\IndexInterface" type="Bazaarvoice\Connector\Model\Index"/>
     <preference for="Bazaarvoice\Connector\Api\IndexRepositoryInterface" type="Bazaarvoice\Connector\Model\IndexRepository"/>

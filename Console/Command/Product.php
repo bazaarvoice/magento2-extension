@@ -10,6 +10,7 @@ namespace Bazaarvoice\Connector\Console\Command;
 
 use Bazaarvoice\Connector\Model\Feed\ProductFeed;
 use Exception;
+use Magento\Framework\Console\Cli;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -57,5 +58,6 @@ class Product extends Command
             print_r($e->getMessage()."\n".$e->getTraceAsString());
         }
         print_r("\n".'Memory usage: '.memory_get_usage()."\n");
+        return Cli::RETURN_SUCCESS;
     }
 }

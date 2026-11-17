@@ -79,10 +79,11 @@ class BVUtility
             $typeArray = static::$supportedContentTypes;
         }
         if (!array_key_exists(mb_strtolower($type), $typeArray)) {
+            $supportList = array();
             foreach ($typeArray as $key => $value) {
                 $supportList[] = $key.'='.$value;
             }
-            throw new Exception('Obtained not supported '.$typeName
+            throw new \Exception('Obtained not supported '.$typeName
                 .'. BV Class supports following '.$typeName.': '
                 .implode(', ', $supportList));
         }
@@ -110,26 +111,24 @@ class BVUtility
             return $params;
         }
 
-        if (!empty($bvStateHash)) {
-            if (!empty($bvStateHash['id'])) {
-                $params['subject_id'] = $bvStateHash['id'];
-            }
-            if (!empty($bvStateHash['pg'])) {
-                $params['page'] = $bvStateHash['pg'];
-            }
-            if (!empty($bvStateHash['ct'])) {
-                $cType = $bvStateHash['ct'];
-                self::checkType($cType, 'ct');
-                $params['content_type'] = mb_strtolower(self::$supportedContentTypes[$cType]);
-            }
-            if (!empty($bvStateHash['st'])) {
-                $sType = $bvStateHash['st'];
-                self::checkType($sType, 'st');
-                $params['subject_type'] = mb_strtolower(self::$supportedSubjectTypes[$sType]);
-            }
-            if (!empty($bvStateHash['reveal'])) {
-                $params['bvreveal'] = $bvStateHash['reveal'];
-            }
+        if (!empty($bvStateHash['id'])) {
+            $params['subject_id'] = $bvStateHash['id'];
+        }
+        if (!empty($bvStateHash['pg'])) {
+            $params['page'] = $bvStateHash['pg'];
+        }
+        if (!empty($bvStateHash['ct'])) {
+            $cType = $bvStateHash['ct'];
+            self::checkType($cType, 'ct');
+            $params['content_type'] = mb_strtolower(self::$supportedContentTypes[$cType]);
+        }
+        if (!empty($bvStateHash['st'])) {
+            $sType = $bvStateHash['st'];
+            self::checkType($sType, 'st');
+            $params['subject_type'] = mb_strtolower(self::$supportedSubjectTypes[$sType]);
+        }
+        if (!empty($bvStateHash['reveal'])) {
+            $params['bvreveal'] = $bvStateHash['reveal'];
         }
 
         if (!empty($params)) {

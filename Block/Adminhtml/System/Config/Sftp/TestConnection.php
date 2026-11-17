@@ -5,11 +5,14 @@ namespace Bazaarvoice\Connector\Block\Adminhtml\System\Config\Sftp;
 
 class TestConnection extends \Magento\Config\Block\System\Config\Form\Field
 {
-    protected function _prepareLayout()
-    {
-        parent::_prepareLayout();
-        $this->setTemplate('Bazaarvoice_Connector::system/config/testconnection.phtml');
-        return $this;
+    public function __construct(
+        \Magento\Backend\Block\Template\Context $context,
+        array $data = []
+    ) {
+        parent::__construct(
+            $context,
+            array_merge($data, ['template' => 'Bazaarvoice_Connector::system/config/testconnection.phtml'])
+        );
     }
 
     public function render(\Magento\Framework\Data\Form\Element\AbstractElement $element)
