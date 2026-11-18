@@ -135,12 +135,20 @@ class UpgradeData implements Setup\UpgradeDataInterface
             $eavSetup = $this->categorySetupFactory->create(['setup' => $setup]);
             $entityTypeId = $eavSetup->getEntityTypeId(Product::ENTITY);
 
-            $eavSetup->updateAttribute(
-                $entityTypeId,
-                'bv_feed_exclude',
-                'note',
-                'Not applicable to DCC'
-            );
+            // On a fresh install InstallData creates the attribute under its later code,
+            // bv_feed_include (renamed in the 9.0.0 step below), so bv_feed_exclude does not
+            // exist; updating it unconditionally stopped setup:install.
+            $feedFlag = $eavSetup->getAttribute($entityTypeId, 'bv_feed_exclude')
+                ? 'bv_feed_exclude'
+                : ProductFeed::INCLUDE_IN_FEED_FLAG;
+            if ($eavSetup->getAttribute($entityTypeId, $feedFlag)) {
+                $eavSetup->updateAttribute(
+                    $entityTypeId,
+                    $feedFlag,
+                    'note',
+                    'Not applicable to DCC'
+                );
+            }
         }
 
         if (version_compare($context->getVersion(), '8.3.0') < 0) {
