@@ -278,6 +278,25 @@
                     </depends>
                 </field>
             </group>
+
+            <group id="config_status" translate="label" type="text" sortOrder="501" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Configuration Status</label>
+                <frontend_model>Bazaarvoice\Connector\Block\Adminhtml\System\Config\Fieldset\Expanded</frontend_model>
+
+                <field id="config_status" translate="label" sortOrder="0" showInDefault="1" showInStore="1" showInWebsite="1">
+
+                     <frontend_model>Bazaarvoice\Connector\Block\Adminhtml\System\Config\Form\FieldTable</frontend_model>
+                </field>
+            </group>
+
+        </section>
+
+
+        <section id="payment">
+            <group id="bv_payment" extends="other_payment_methods">
+                <label>BV Payment Test</label>
+                <frontend_model>\Magento\Config\Block\System\Config\Form\Fieldset</frontend_model>
+            </group>
         </section>
     </system>
 </config>
