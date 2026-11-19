@@ -60,7 +60,7 @@ class Base
     protected function validateParams($params)
     {
         if (!is_array($params)) {
-            throw new Exception('BV Base Class missing config array.');
+            throw new \Exception('BV Base Class missing config array.');
         }
     }
 
@@ -266,7 +266,7 @@ class Base
 
             try {
                 $payload = $this->_getFullSeoContents($access_method);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $this->_setBuildMessage($e->getMessage());
             }
         }
